@@ -34,7 +34,7 @@ Downloaded + skipped_existing + paywalled + failed_transient = 300. Every select
 
 ## Known gaps
 - 96 selected seed rows have empty titles (Crossref and Semantic Scholar rate-limited). Selection and downloads depend only on DOIs. Titles can be filled from cache.
-- Scribe state as seen by the final probe run (`system_status`): `192.168.1.110:7435` (big) healthy and idle with 12 of 12 slots free; `bmb.local:7433` healthy with 3 converting and 0 of 6 slots free; `pipeline.queued_conversions` 3170. No `backend_unavailable` response was seen, so the 30-minute stop rule did not fire.
+- Scribe state as seen by the final probe run (`system_status`): `192.168.1.110:7435` (big) healthy and idle with 9 of 12 slots free; `bmb.local:7433` healthy with 3 converting and 3 of 6 slots free; `pipeline.queued_conversions` 3164. No `backend_unavailable` response was seen, so the 30-minute stop rule did not fire.
 - `hs` cannot resolve `nats://three:4222` from big_mac. The script builds a temp HOME in `tools/corpus/cache/hs-home` that points NATS at `192.168.1.103:4222`. The real config is untouched.
 - `scribe_convert` returns `already_converted: true` with a `markdown_key` for `10.1073_pnas.0903616106` and `10.1146_annurev.psych.54.101601.145059`, but the catalog has no `conversion` block for either (`annurev` has a `markdown_path`, `pnas` does not). The probe counts both as converted. The missing catalog stamp is a home-still gap, not fixed here.
 

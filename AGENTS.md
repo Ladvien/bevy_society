@@ -42,7 +42,7 @@ Pinned to **Bevy 0.20.0**. Read the vendored source (`~/.cargo/registry/src/inde
 - `src/interact.rs` — the `Interact` request, `SocietyBark` and its `Feeling`.
 - `src/dialogue.rs` — conversations and barks through `bevy_speech_bubbles` (feature `dialogue`): `TalkTo`, `DialoguePlugin`, speaker lifetime, node effects.
 - `src/defs.rs` — authored definitions (`DefsFile`), validation, and the compiled `SocietyDefs` with id interning and spawn helpers.
-- `src/script.rs` — Rhai limits and `ScriptCompiler` (compile-time only; the runtime `ctx`/`fx` API lands with D8).
+- `src/script.rs` — Rhai compilation, the sandbox limits and the `ctx` / `fx` runtime API.
 - `src/mind.rs` — `MindPlugin` (`SocietySystems::Mind`): emotions and the `Appraise` message, PAD mood with contagion, needs decay, personality and the `Add<Person>` baseline observer.
 - `src/model/mod.rs` — engine-free math module root; re-exports `Curve`.
 - `src/model/curves.rs` — response curves (`Curve`, `logistic`, `hour_window`).
