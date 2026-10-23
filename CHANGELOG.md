@@ -6,6 +6,8 @@ All notable changes to bevy_society. The format follows [Keep a Changelog](https
 
 ### Added
 
+- **Examples scaffolding.** `examples/common/recorder.rs` is the headless recorder the capture example drives: no window, no winit, synchronous pipeline compilation, an off-screen render target, a hand-pumped loop with a device poll per frame, and `TimeUpdateStrategy::ManualDuration(1/30 s)` so a captured frame is exactly one thirtieth of a second of game time. `tools/gif.sh` is the other half: a two-pass palette encode with the caption burned in.
+
 - **Script runtime and rules (`RulesPlugin`).** The `ctx` / `fx` Rhai API over a per-tick snapshot: `ctx` reads the society as it stood at the tick start and `fx` queues writes that one exclusive system applies after `SocietySystems::Rules`. Triggers fire on `Tick`, `Hour`, `Custom` (`FireTrigger`), `TieLabelChanged`, `NormViolated`, `NeedBelow` and `RumorReach`, honouring `once` and `cooldown_hours`; a failed condition counts as false and a failed effect applies none of its actions. Every evaluation is sandboxed (10 000 operations, bounded strings, arrays and maps).
 
 - **Beliefs, rumors and reputation (`BeliefsPlugin`).** Opinions per topic with bounded-confidence influence, Friedkin–Johnsen anchor pull and conformity to a strong group mean; a rumor book with the Daley–Kendall stifling rule and trust-scaled belief; and the witness, patient and actor reactions to a deed, including `NormViolated`. `PlantRumor` starts a rumor from the game or a script. See `docs/research/opinion-dynamics.md` and `docs/research/rumor-and-reputation.md` (Deffuant et al. 2000, DOI 10.1142/S0219525900000078; Daley & Kendall 1964, DOI 10.1038/2041118a0; Ohtsuki & Iwasa 2004, DOI 10.1016/j.jtbi.2004.06.005).

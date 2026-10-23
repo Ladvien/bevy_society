@@ -23,6 +23,10 @@ Pinned to **Bevy 0.20.0**. Read the vendored source (`~/.cargo/registry/src/inde
 ## Layout
 
 - `src/lib.rs` — crate docs and flat re-exports (no prelude).
+- `examples/assets/starter.society.ron` — the starter pack every host starts from.
+- `examples/assets/village.society.ron` — the village's additions to the starter pack.
+- `examples/common/recorder.rs` — the headless PNG recorder the capture example drives.
+- `tools/gif.sh` — frames to a caption-burned GIF.
 - `src/beliefs.rs` — opinions per topic and what a person knows of rumors.
 - `src/rumor.rs` — the rumor book, planting, gossip and its stifling rule.
 - `src/reputation.rs` — witness, patient and actor reactions to a deed, and `NormViolated`.
