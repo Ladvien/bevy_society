@@ -23,6 +23,8 @@ Pinned to **Bevy 0.20.0**. Read the vendored source (`~/.cargo/registry/src/inde
 ## Layout
 
 - `src/lib.rs` — crate docs and flat re-exports (no prelude).
+- `src/defs.rs` — authored definitions (`DefsFile`), validation, and the compiled `SocietyDefs` with id interning and spawn helpers.
+- `src/script.rs` — Rhai limits and `ScriptCompiler` (compile-time only; the runtime `ctx`/`fx` API lands with D8).
 - `src/model/mod.rs` — engine-free math module root; re-exports `Curve`.
 - `src/model/curves.rs` — response curves (`Curve`, `logistic`, `hour_window`).
 - `src/model/pad.rs` — personality-to-mood baseline (Mehrabian 1996, ALMA).
@@ -30,6 +32,8 @@ Pinned to **Bevy 0.20.0**. Read the vendored source (`~/.cargo/registry/src/inde
 - `src/model/opinion.rs` — Deffuant influence, anchor pull, similarity, conformity.
 - `src/model/rumor_dk.rs` — Daley–Kendall stifling, telling weight, belief after hearing.
 - `src/model/balance.rs` — triadic balance step and relaxation toward zero.
+- `assets/starter.society.ron` — the starter pack, parsed by `DefsFile::starter()`.
+- `tests/defs.rs` — definition parsing, merging, id interning and error messages.
 
 ## Build and test
 

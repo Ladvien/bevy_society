@@ -1,0 +1,168 @@
+(
+    needs: [
+        (id: "social", decay_per_day: 1.0),
+        (id: "rest", decay_per_day: 0.7),
+        (id: "food", decay_per_day: 0.9),
+        (id: "fun", decay_per_day: 0.8),
+    ],
+    topics: [
+        (id: "kindness"),
+        (id: "honesty"),
+    ],
+    deeds: [
+        (id: "help", topic: "kindness", harm: 0.5),
+        (id: "gift", topic: "kindness", harm: 0.6),
+        (id: "insult", topic: "kindness", harm: -0.4),
+        (id: "steal", topic: "honesty", harm: -0.7),
+    ],
+    activities: [
+        (
+            id: "sleep",
+            target: Home,
+            duration_hours: 8.0,
+            rank: 1,
+            considerations: [
+                (input: Hour, curve: Hours(22.0, 6.0)),
+                (input: Need("rest"), curve: Linear(-1.0, 1.0)),
+            ],
+            satisfies: [("rest", 0.15)],
+            interaction: None,
+            barks: [],
+        ),
+        (
+            id: "eat",
+            target: Place("food"),
+            duration_hours: 0.75,
+            considerations: [
+                (input: Need("food"), curve: Logistic(-10.0, 0.35)),
+            ],
+            satisfies: [("food", 1.2)],
+            interaction: None,
+            barks: ["Mmm, bread."],
+        ),
+        (
+            id: "work",
+            target: Place("work"),
+            duration_hours: 4.0,
+            considerations: [
+                (input: Hour, curve: Hours(8.0, 17.0)),
+            ],
+            satisfies: [],
+            interaction: None,
+            barks: ["Back to it."],
+        ),
+        (
+            id: "chat",
+            target: Person,
+            duration_hours: 0.3,
+            considerations: [
+                (input: Need("social"), curve: Linear(-1.0, 1.0)),
+                (input: Affinity, curve: Linear(0.8, 0.4)),
+                (input: Distance, curve: Linear(-1.0, 1.0)),
+            ],
+            satisfies: [],
+            interaction: Some("chat"),
+            barks: [],
+        ),
+        (
+            id: "gossip",
+            target: Person,
+            duration_hours: 0.3,
+            considerations: [
+                (input: Trait(Extraversion), curve: Linear(1.0, 0.0)),
+                (input: Familiarity, curve: Linear(1.0, 0.0)),
+            ],
+            satisfies: [],
+            interaction: Some("gossip"),
+            barks: [],
+        ),
+        (
+            id: "compliment",
+            target: Person,
+            duration_hours: 0.2,
+            considerations: [
+                (input: Affinity, curve: Logistic(8.0, 0.7)),
+            ],
+            satisfies: [],
+            interaction: Some("compliment"),
+            barks: [],
+        ),
+        (
+            id: "snub",
+            target: Person,
+            duration_hours: 0.1,
+            considerations: [
+                (input: Affinity, curve: Logistic(-8.0, 0.3)),
+            ],
+            satisfies: [],
+            interaction: Some("insult"),
+            barks: [],
+        ),
+        (
+            id: "relax",
+            target: Place("gathering"),
+            duration_hours: 1.5,
+            considerations: [
+                (input: Hour, curve: Hours(17.0, 23.0)),
+                (input: Need("fun"), curve: Linear(-1.0, 1.0)),
+            ],
+            satisfies: [("fun", 0.4), ("social", 0.2)],
+            interaction: None,
+            barks: ["Ahh."],
+        ),
+        (
+            id: "wander",
+            target: Wander(6.0),
+            duration_hours: 0.5,
+            weight: 0.3,
+            considerations: [],
+            satisfies: [],
+            interaction: None,
+            barks: [],
+        ),
+    ],
+    interactions: [
+        (
+            id: "chat",
+            on_accept: (actor_needs: [("social", 0.2)], target_needs: [("social", 0.2)]),
+            influence: ["kindness", "honesty"],
+            barks: (
+                actor: ["Morning, {target}!"],
+                accepted: ["Good to see you, {target}."],
+                rejected: ["Not now."],
+            ),
+        ),
+        (
+            id: "gossip",
+            on_accept: (actor_needs: [("social", 0.15)], target_needs: [("social", 0.15)]),
+            gossip: true,
+            barks: (
+                actor: ["Did you hear about {subject}?"],
+                accepted: ["Really? Tell me more."],
+                rejected: ["I'd rather not."],
+            ),
+        ),
+        (
+            id: "compliment",
+            on_accept: (
+                target_to_actor: (affinity: 0.1),
+                target_emotion: Some((Joy, 0.3)),
+            ),
+            barks: (
+                actor: ["You look well, {target}."],
+                accepted: ["Thank you!"],
+                rejected: ["Hmm."],
+            ),
+        ),
+        (
+            id: "insult",
+            on_accept: (target_emotion: Some((Anger, 0.5))),
+            deed: Some("insult"),
+            barks: (
+                actor: ["Keep your distance, {target}."],
+                accepted: ["How dare you!"],
+                rejected: ["Hmph."],
+            ),
+        ),
+    ],
+)
