@@ -3,41 +3,24 @@
 //! The functions here take plain numbers and return deltas or decisions, so the systems that own
 //! the world (`BeliefsPlugin`, `interact`) apply them in deterministic `PersonIndex` order.
 
+use bevy::app::{App, FixedUpdate, Plugin};
 use bevy::ecs::component::Component;
+use bevy::ecs::entity::Entity;
+use bevy::ecs::message::MessageReader;
+use bevy::ecs::query::QueryData;
+use bevy::ecs::schedule::IntoScheduleConfigs;
+use bevy::ecs::system::{Query, Res, ResMut};
+use bevy::log::error;
 use bevy::reflect::Reflect;
 
+use crate::core::{
+    PersonIndex, SocietyClock, SocietySettings, SocietySystems, Tuning, require_core,
+};
+use crate::defs::{SocietyDefs, TopicId};
 use crate::model::{opinion, rumor_dk};
-use crate::rumor::RumorId;
-
-/// Rates for opinion dynamics, one field per plan default (D5).
-#[derive(Debug, Clone, Copy, PartialEq, Reflect)]
-pub struct BeliefRates {
-    /// Base confidence bound ε (Deffuant et al. 2000, DOI 10.1142/S0219525900000078).
-    pub confidence_base: f32,
-    /// Openness contribution to the confidence bound.
-    pub confidence_openness: f32,
-    /// Convergence rate μ of the bounded-confidence update (Deffuant et al. 2000).
-    pub influence_mu: f32,
-    /// Pull toward the anchor, scaled by stubbornness (Friedkin & Johnsen 1990, DOI 10.1080/0022250X.1990.9990069).
-    pub anchor_pull: f32,
-    /// Affinity gain from similarity (Byrne 1961, DOI 10.1037/h0044721; McPherson et al. 2001, DOI 10.1146/annurev.soc.27.1.415).
-    pub similarity_gain: f32,
-    /// Conformity rate per game-day (Asch 1956, DOI 10.1037/h0093718; Nowak, Szamrej & Latané 1990, DOI 10.1037/0033-295X.97.3.362).
-    pub conformity_per_day: f32,
-}
-
-impl Default for BeliefRates {
-    fn default() -> Self {
-        Self {
-            confidence_base: 0.2,
-            confidence_openness: 0.6,
-            influence_mu: 0.3,
-            anchor_pull: 0.1,
-            similarity_gain: 0.05,
-            conformity_per_day: 0.2,
-        }
-    }
-}
+use crate::relationships::{Tie, Ties};
+use crate::reputation::NormViolated;
+use crate::rumor::{PlantRumor, RumorBook, RumorId, RumorLearned, plant_rumor};
 
 /// One opinion on one topic (plan D5). `value` is in `[-1, 1]`, `stubbornness` in `[0, 1]`.
 #[derive(Debug, Clone, Copy, PartialEq, Reflect)]
@@ -78,26 +61,20 @@ impl Opinion {
     /// pull (Friedkin & Johnsen 1990, DOI 10.1080/0022250X.1990.9990069). The similarity term
     /// `similarity_gain · (1 − |d|)` is Byrne 1961 (DOI 10.1037/h0044721) as used by McPherson et al.
     /// 2001 (DOI 10.1146/annurev.soc.27.1.415).
-    pub fn influence(
-        &mut self,
-        other: f32,
-        openness: f32,
-        weight: f32,
-        rates: &BeliefRates,
-    ) -> f32 {
+    pub fn influence(&mut self, other: f32, openness: f32, weight: f32, tuning: &Tuning) -> f32 {
         let d = other - self.value;
         let epsilon =
-            opinion::confidence_bound(rates.confidence_base, rates.confidence_openness, openness);
+            opinion::confidence_bound(tuning.confidence_base, tuning.confidence_openness, openness);
         self.value +=
-            opinion::deffuant_step(self.value, other, epsilon, rates.influence_mu, weight);
+            opinion::deffuant_step(self.value, other, epsilon, tuning.influence_mu, weight);
         self.value += opinion::anchor_step(
-            rates.anchor_pull,
+            tuning.anchor_pull,
             self.stubbornness,
             self.anchor,
             self.value,
         );
         self.value = self.value.clamp(-1.0, 1.0);
-        opinion::similarity_affinity_step(rates.similarity_gain, d)
+        opinion::similarity_affinity_step(tuning.similarity_gain, d)
     }
 
     /// Conformity toward a group mean (Asch 1956, DOI 10.1037/h0093718; Nowak, Szamrej & Latané 1990,
@@ -108,13 +85,13 @@ impl Opinion {
         n_in_contact: usize,
         agreeableness: f32,
         dt_days: f32,
-        rates: &BeliefRates,
+        tuning: &Tuning,
     ) {
         if !opinion::conformity_applies(group_mean) {
             return;
         }
         self.value += opinion::conformity_step(
-            rates.conformity_per_day,
+            tuning.conformity_per_day,
             agreeableness,
             n_in_contact,
             dt_days,
@@ -232,41 +209,266 @@ pub fn belief_after_hearing(teller_belief: f32, trust: f32) -> f32 {
     rumor_dk::belief_after_hearing(teller_belief, trust)
 }
 
+/// The weight one side of an exchange gives the other: `0.5 · trust + 0.5 · max(0, affinity)`
+/// (plan D5), read from `ties` toward `other`, defaulting to a fresh [`Tie`] when there is none.
+pub(crate) fn influence_weight(ties: &Ties, other: Entity) -> f32 {
+    let tie = ties.get(other).copied().unwrap_or_else(|| Tie::new(other));
+    0.5 * tie.trust + 0.5 * tie.affinity.max(0.0)
+}
+
+/// One side of an accepted interaction's opinion exchange (plan D5), over `topics`.
+///
+/// `other_values` holds the other side's opinions **as they were before the exchange began**, so
+/// calling this once per direction with both snapshots taken first makes the pair's result
+/// independent of which side moves first. The confidence bound uses this side's `openness` and the
+/// influence weight is [`influence_weight`] from this side's ties. The value [`Opinion::influence`]
+/// returns is added to this side's affinity toward `other`, clamped to `[-1, 1]`.
+///
+/// Deffuant et al. 2000 (DOI 10.1142/S0219525900000078); Friedkin & Johnsen 1990
+/// (DOI 10.1080/0022250X.1990.9990069); Byrne 1961 (DOI 10.1037/h0044721).
+pub(crate) fn exchange_opinions(
+    opinions: &mut Opinions,
+    ties: &mut Ties,
+    openness: f32,
+    other: Entity,
+    other_values: &[(TopicId, f32)],
+    tuning: &Tuning,
+) {
+    let weight = influence_weight(ties, other);
+    let mut delta = 0.0;
+    for &(topic, other_value) in other_values {
+        let t = usize::from(topic.0);
+        if let Some(opinion) = opinions.get_mut(t) {
+            delta += opinion.influence(other_value, openness, weight, tuning);
+        }
+    }
+    let tie = ties.entry(other);
+    tie.affinity = (tie.affinity + delta).clamp(-1.0, 1.0);
+}
+
+/// One person's values on `topics`, read before any side of the exchange moves.
+pub(crate) fn snapshot_values(opinions: &Opinions, topics: &[TopicId]) -> Vec<(TopicId, f32)> {
+    topics
+        .iter()
+        .map(|&topic| (topic, opinions.value(usize::from(topic.0))))
+        .collect()
+}
+
+/// Runs opinions, rumors and reputation: applies [`PlantRumor`] on every fixed step, then, on
+/// society ticks, pulls every person's opinions toward the group mean it is in contact with.
+/// Requires [`crate::SocietyCorePlugin`].
+pub struct BeliefsPlugin;
+
+impl Plugin for BeliefsPlugin {
+    fn build(&self, app: &mut App) {
+        app.register_type::<Opinion>()
+            .register_type::<Opinions>()
+            .register_type::<Known>()
+            .register_type::<Knowledge>()
+            .register_type::<RumorId>()
+            .register_type::<crate::rumor::Rumor>()
+            .register_type::<RumorBook>()
+            .init_resource::<RumorBook>()
+            .add_message::<PlantRumor>()
+            .add_message::<RumorLearned>()
+            .add_message::<NormViolated>()
+            // Ungated, like every game-written input message: a message written between ticks is
+            // dropped after two fixed-step buffer swaps, and society ticks are 16 steps apart.
+            .add_systems(
+                FixedUpdate,
+                apply_planted_rumors.in_set(SocietySystems::Clock),
+            )
+            .add_systems(
+                FixedUpdate,
+                conform_opinions.in_set(SocietySystems::Propagate),
+            );
+    }
+
+    fn finish(&self, app: &mut App) {
+        require_core(app, "BeliefsPlugin");
+    }
+}
+
+/// Turns every pending [`PlantRumor`] into a rumor through [`plant_rumor`], in message order.
+///
+/// An unknown deed name is an `error!` and the message is skipped; an origin that is not a person
+/// (it has no [`Knowledge`]) is an `error!` and skipped too. Runs in the ungated clock set so a
+/// message written between ticks is never dropped.
+fn apply_planted_rumors(
+    mut reader: MessageReader<PlantRumor>,
+    defs: Res<SocietyDefs>,
+    clock: Res<SocietyClock>,
+    mut book: ResMut<RumorBook>,
+    mut knowledge: Query<&mut Knowledge>,
+) {
+    for msg in reader.read() {
+        let Some(deed) = defs.deed_id(&msg.deed) else {
+            error!(
+                "bevy_society: PlantRumor names unknown deed '{}'; ignored",
+                msg.deed
+            );
+            continue;
+        };
+        let Ok(mut origin_knowledge) = knowledge.get_mut(msg.origin) else {
+            error!(
+                "bevy_society: PlantRumor origin {:?} is not a person; ignored",
+                msg.origin
+            );
+            continue;
+        };
+        let Some(spec) = defs.deeds.get(usize::from(deed.0)) else {
+            continue;
+        };
+        plant_rumor(
+            &mut book,
+            &mut origin_knowledge,
+            msg.origin,
+            msg.subject,
+            msg.patient,
+            deed,
+            spec.harm,
+            clock.now_days as f32,
+            msg.truth,
+        );
+    }
+}
+
+/// The per-person state conformity reads: opinions and the agreeableness of their owner.
+#[derive(QueryData)]
+#[query_data(mutable)]
+struct Conformer {
+    opinions: &'static mut Opinions,
+    personality: &'static crate::mind::Personality,
+}
+
+/// Each person's in-contact group mean and contact count, per topic, read from the society as it
+/// stood before any conformity step (plan D5).
+///
+/// The mean is over the people in `Perception.contact`, weighted by `max(0.1, affinity + 1)` from
+/// the person's ties (`model::opinion::weighted_mean`); the person is excluded from its own group
+/// even when `Perception.contact` lists it. `n` counts the contacts, so a person alone in the world
+/// has `n = 0` and does not conform.
+fn conformity_means(
+    index: &PersonIndex,
+    perception: &crate::Perception,
+    people: &Query<Conformer>,
+    ties: &Query<&Ties>,
+    topics: usize,
+) -> Vec<(Vec<f32>, usize)> {
+    let mut out = Vec::with_capacity(index.sorted.len());
+    for (i, &(_, entity)) in index.sorted.iter().enumerate() {
+        let mut sums = vec![(0.0f32, 0.0f32); topics];
+        let mut n = 0usize;
+        let Ok(owned) = ties.get(entity) else {
+            out.push((vec![0.0; topics], 0));
+            continue;
+        };
+        for &j in perception.contact.get(i).map_or(&[][..], Vec::as_slice) {
+            if j as usize == i {
+                continue;
+            }
+            let Some(&other) = perception.persons.get(j as usize) else {
+                continue;
+            };
+            let Ok(view) = people.get(other) else {
+                continue;
+            };
+            n += 1;
+            let affinity = owned.get(other).map_or(0.0, |t| t.affinity);
+            let weight = (affinity + 1.0).max(0.1);
+            for (t, slot) in sums.iter_mut().enumerate() {
+                slot.0 += view.opinions.value(t) * weight;
+                slot.1 += weight;
+            }
+        }
+        let means = sums
+            .into_iter()
+            .map(|(sum, weight)| if weight > 0.0 { sum / weight } else { 0.0 })
+            .collect();
+        out.push((means, n));
+    }
+    out
+}
+
+/// Pulls every person's opinions toward the group mean of the people it is in contact with (plan
+/// D5, conformity).
+///
+/// Two passes: the group means are computed from pre-step values for everyone, then each person
+/// conforms in [`PersonIndex::sorted`] order. A person conforms only with at least three contacts
+/// and only on a topic whose group mean is strong enough, as `model::opinion` decides.
+///
+/// Asch 1956 (DOI 10.1037/h0093718); Nowak, Szamrej & Latané 1990 (DOI 10.1037/0033-295X.97.3.362).
+fn conform_opinions(
+    clock: Res<SocietyClock>,
+    settings: Res<SocietySettings>,
+    defs: Res<SocietyDefs>,
+    index: Res<PersonIndex>,
+    perception: Res<crate::Perception>,
+    mut people: Query<Conformer>,
+    ties: Query<&Ties>,
+) {
+    let topics = defs.topics.len();
+    if topics == 0 {
+        return;
+    }
+    // One query, read in the first pass and written in the second: computing every mean from
+    // pre-step values makes the result independent of the order persons conform in.
+    let means = conformity_means(&index, &perception, &people, &ties, topics);
+    let dt = clock.dt_days;
+    for (i, &(_, entity)) in index.sorted.iter().enumerate() {
+        let Some(&(ref topic_means, n)) = means.get(i) else {
+            continue;
+        };
+        if n < 3 {
+            continue;
+        }
+        let Ok(mut view) = people.get_mut(entity) else {
+            continue;
+        };
+        let personality = view.personality;
+        for (t, &mean) in topic_means.iter().enumerate() {
+            if let Some(opinion) = view.opinions.get_mut(t) {
+                opinion.conform(mean, n, personality.agreeableness, dt, &settings.tuning);
+            }
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
     fn opinions_converge_when_within_the_bound() {
-        let rates = BeliefRates::default();
+        let tuning = Tuning::default();
         let mut a = Opinion::at(0.1);
         let mut b = Opinion::at(0.3);
         a.stubbornness = 0.0;
         b.stubbornness = 0.0;
         for _ in 0..50 {
             let (av, bv) = (a.value, b.value);
-            a.influence(bv, 0.5, 1.0, &rates);
-            b.influence(av, 0.5, 1.0, &rates);
+            a.influence(bv, 0.5, 1.0, &tuning);
+            b.influence(av, 0.5, 1.0, &tuning);
         }
         assert!((a.value - b.value).abs() < 0.01);
     }
 
     #[test]
     fn distant_opinions_do_not_move() {
-        let rates = BeliefRates::default();
+        let tuning = Tuning::default();
         let mut a = Opinion::at(-0.6);
         a.stubbornness = 0.0;
-        a.influence(0.6, 0.5, 1.0, &rates);
+        a.influence(0.6, 0.5, 1.0, &tuning);
         assert!((a.value + 0.6).abs() < 1e-6);
     }
 
     #[test]
     fn stubborn_anchor_holds() {
-        let rates = BeliefRates::default();
+        let tuning = Tuning::default();
         let mut a = Opinion::at(0.1);
         a.stubbornness = 1.0;
         for _ in 0..200 {
-            a.influence(0.2, 1.0, 1.0, &rates);
+            a.influence(0.2, 1.0, 1.0, &tuning);
         }
         assert!((a.value - a.anchor).abs() < 0.15);
     }

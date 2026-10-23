@@ -23,6 +23,9 @@ Pinned to **Bevy 0.20.0**. Read the vendored source (`~/.cargo/registry/src/inde
 ## Layout
 
 - `src/lib.rs` — crate docs and flat re-exports (no prelude).
+- `src/beliefs.rs` — opinions per topic and what a person knows of rumors.
+- `src/rumor.rs` — the rumor book, planting, gossip and its stifling rule.
+- `src/reputation.rs` — witness, patient and actor reactions to a deed, and `NormViolated`.
 - `src/defs.rs` — authored definitions (`DefsFile`), validation, and the compiled `SocietyDefs` with id interning and spawn helpers.
 - `src/script.rs` — Rhai limits and `ScriptCompiler` (compile-time only; the runtime `ctx`/`fx` API lands with D8).
 - `src/mind.rs` — `MindPlugin` (`SocietySystems::Mind`): emotions and the `Appraise` message, PAD mood with contagion, needs decay, personality and the `Add<Person>` baseline observer.

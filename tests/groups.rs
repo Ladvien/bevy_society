@@ -4,20 +4,13 @@ mod common;
 
 use bevy::prelude::*;
 use bevy_society::{FactionStats, SocietyClock, SocietyDefs, SocietySettings, Status, Ties};
-use common::{headless, settings, spawn_person};
+use common::{headless, run, settings, spawn_person};
 
 /// Settings where one game-day is 64 ticks.
 fn day_settings() -> SocietySettings {
     let mut s = settings();
     s.seconds_per_day = 1.0;
     s
-}
-
-/// Advances the app by `ticks` updates; with `tick_secs = 1/64` each update past the first is one tick.
-fn run(app: &mut App, ticks: usize) {
-    for _ in 0..ticks {
-        app.update();
-    }
 }
 
 /// Sets the tie `owner → target`. `last_contact_day` is the current clock, so familiarity equals the peak.

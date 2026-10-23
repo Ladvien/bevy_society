@@ -417,12 +417,17 @@ fn on_person_added(
 }
 
 /// Removes a despawned person from the index, from every other person's ties and from the rumor
-/// book.
+/// book, and drops every rumor about it from every other person's knowledge.
+///
+/// A rumor whose subject leaves the world stops circulating, so nothing can ever spread it again;
+/// leaving it in other persons' `Knowledge` would keep a dead rumor selectable by
+/// `Knowledge::best_telling`.
 fn on_person_removed(
     remove: On<Remove<Person>>,
     mut index: ResMut<PersonIndex>,
     mut ties: Query<&mut Ties>,
     rumors: Option<ResMut<RumorBook>>,
+    mut knowledge: Query<&mut Knowledge>,
 ) {
     let entity = remove.entity;
     if let Some(pos) = index.sorted.iter().position(|(_, e)| *e == entity) {
@@ -433,7 +438,11 @@ fn on_person_removed(
         own.0.retain(|tie| tie.target != entity);
     }
     if let Some(mut book) = rumors {
-        book.retire_about(entity);
+        for retired in book.retire_about(entity) {
+            for mut owned in &mut knowledge {
+                owned.forget(retired);
+            }
+        }
     }
 }
 

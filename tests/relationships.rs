@@ -5,7 +5,7 @@ mod common;
 use bevy::ecs::message::Messages;
 use bevy::prelude::*;
 use bevy_society::{SocietyClock, SocietyDefs, SocietySettings, TieLabel, TieLabelChanged, Ties};
-use common::{headless, settings, spawn_person};
+use common::{headless, run, settings, spawn_person};
 
 /// Settings where one game-day is 64 ticks, so `n` updates advance `n / 64` game-days.
 fn day_settings() -> SocietySettings {
@@ -20,12 +20,6 @@ fn now_days(app: &App) -> f32 {
 
 fn tuning(app: &App) -> bevy_society::Tuning {
     app.world().resource::<SocietySettings>().tuning.clone()
-}
-
-fn run(app: &mut App, ticks: usize) {
-    for _ in 0..ticks {
-        app.update();
-    }
 }
 
 fn set_pos(app: &mut App, entity: Entity, x: f32) {

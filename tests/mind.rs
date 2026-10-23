@@ -10,7 +10,7 @@ use bevy_society::{
     Appraise, EmotionKind, Emotions, Mood, Needs, Person, Personality, SocietyClock, SocietyDefs,
     SocietySettings,
 };
-use common::{headless, settings};
+use common::{headless, run, settings};
 
 type TestResult = Result<(), Box<dyn std::error::Error>>;
 
@@ -19,12 +19,6 @@ fn fast_settings() -> SocietySettings {
     SocietySettings {
         seconds_per_day: 16.0,
         ..settings()
-    }
-}
-
-fn run(app: &mut bevy::app::App, updates: usize) {
-    for _ in 0..updates {
-        app.update();
     }
 }
 

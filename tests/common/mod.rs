@@ -38,6 +38,14 @@ pub fn headless(defs: SocietyDefs, settings: SocietySettings) -> App {
     app
 }
 
+/// Advances the app by `updates` updates. With `tick_secs = 1/64` and `TimeUpdateStrategy` at the
+/// same step, each update past the first runs exactly one society tick.
+pub fn run(app: &mut App, updates: usize) {
+    for _ in 0..updates {
+        app.update();
+    }
+}
+
 /// Spawns a named person at `pos` on the society's plane and returns its entity.
 pub fn spawn_person(app: &mut App, name: &str, pos: Vec2) -> Entity {
     let plane = app.world().resource::<SocietySettings>().plane;

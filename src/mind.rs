@@ -238,6 +238,26 @@ pub enum EmotionKind {
 }
 
 impl EmotionKind {
+    /// Parses an emotion from its lowercase script name (`"joy"` … `"disliking"`), mirroring
+    /// [`Trait::from_name`]. Scripts and definitions name emotions in lowercase.
+    pub fn from_name(name: &str) -> Option<Self> {
+        match name {
+            "joy" => Some(Self::Joy),
+            "distress" => Some(Self::Distress),
+            "hope" => Some(Self::Hope),
+            "fear" => Some(Self::Fear),
+            "pride" => Some(Self::Pride),
+            "shame" => Some(Self::Shame),
+            "admiration" => Some(Self::Admiration),
+            "reproach" => Some(Self::Reproach),
+            "gratitude" => Some(Self::Gratitude),
+            "anger" => Some(Self::Anger),
+            "liking" => Some(Self::Liking),
+            "disliking" => Some(Self::Disliking),
+            _ => None,
+        }
+    }
+
     /// The PAD vector of this emotion (ALMA's table, Gebhard 2005, DOI 10.1145/1082473.1082478).
     pub fn pad(self) -> [f32; 3] {
         match self {

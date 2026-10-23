@@ -22,11 +22,12 @@ mod groups;
 mod mind;
 mod plugins;
 mod relationships;
+mod reputation;
 mod rumor;
 mod script;
 
 pub use behavior::{Destination, Doing, DoingTarget};
-pub use beliefs::{BeliefRates, Knowledge, Known, Opinion, Opinions, belief_after_hearing};
+pub use beliefs::{BeliefsPlugin, Knowledge, Known, Opinion, Opinions, belief_after_hearing};
 pub use core::{
     AssessmentNorm, Autonomous, Home, NextPersonId, Perception, Person, PersonId, PersonIndex,
     Place, PlaceTags, SocietyClock, SocietyCorePlugin, SocietyPlane, SocietyRng, SocietySettings,
@@ -51,7 +52,8 @@ pub use mind::{
 };
 pub use plugins::SocietyPlugins;
 pub use relationships::{RelationshipsPlugin, Tie, TieLabel, TieLabelChanged, Ties};
-pub use rumor::{Rumor, RumorBook, RumorId};
+pub use reputation::NormViolated;
+pub use rumor::{PlantRumor, Rumor, RumorBook, RumorId, RumorLearned};
 pub use script::ScriptId;
 #[cfg(feature = "steering")]
 pub use steering::{SocialMover, SocialVelocity, SteeringPlugin};
