@@ -1,0 +1,8 @@
+doi	module	error
+c2a3a0d48a47fa7a6d4fbd22ef29901bd09523af	personality-mood	error: Error: Download failed: Invalid input: "c2a3a0d48a47fa7a6d4fbd22ef29901bd09523af" is not a DOI (expected 10./). See: hs paper search --help
+146082c908eae45f8e6e8db0c94916223304a4c1	opinion-influence	error: Error: Download failed: Invalid input: "146082c908eae45f8e6e8db0c94916223304a4c1" is not a DOI (expected 10./). See: hs paper search --help
+1ecf14d63f0e5f6868b111c8cc65325161b6a003	personality-mood	error: Error: Download failed: Invalid input: "1ecf14d63f0e5f6868b111c8cc65325161b6a003" is not a DOI (expected 10./). See: hs paper search --help
+ae3860534125442c03f592a89199013326eb3bab	rumor-reputation	error: Error: Download failed: Invalid input: "ae3860534125442c03f592a89199013326eb3bab" is not a DOI (expected 10./). See: hs paper search --help
+b01487dfdd31fcaf857dc13173e787adb9918772	personality-mood	error: Error: Download failed: Invalid input: "b01487dfdd31fcaf857dc13173e787adb9918772" is not a DOI (expected 10./). See: hs paper search --help
+f6cfe53eb436df75fa2883c9cf9130621fbb28e0	personality-mood	error: Error: Download failed: Invalid input: "f6cfe53eb436df75fa2883c9cf9130621fbb28e0" is not a DOI (expected 10./). See: hs paper search --help
+bc1a535c94082142f3493a44d0fc7604ba5c3bc6	rumor-reputation	error: Error: Download failed: Invalid input: "bc1a535c94082142f3493a44d0fc7604ba5c3bc6" is not a DOI (expected 10./). See: hs paper search --help

@@ -1,0 +1,14 @@
+{
+  "queries": 42,
+  "candidates": 1480,
+  "selected": 300,
+  "downloaded": 78,
+  "skipped_existing": 9,
+  "paywalled": 206,
+  "unconvertible": 0,
+  "converted": 19,
+  "embedded": 8,
+  "awaiting_conversion": 68,
+  "failed_transient": 7,
+  "generated_at": "2026-10-23T21:29:24+00:00"
+}
