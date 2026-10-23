@@ -1,0 +1,100 @@
+module	doi	short_ref
+personality-mood	10.1111/j.1467-6494.1992.tb00970.x	McCrae & John 1992
+personality-mood	10.1037/0022-3514.59.6.1216	Goldberg 1990
+personality-mood	10.1007/BF02686918	Mehrabian 1996 PAD
+personality-mood	10.1080/00049539608259510	Mehrabian 1996 Big Five in PAD
+personality-mood	10.1145/1082473.1082478	Gebhard 2005 ALMA
+personality-mood	10.1037/h0077714	Russell 1980
+personality-mood	10.1037/0033-295X.110.1.145	Russell 2003
+personality-mood	10.1016/j.cogsys.2004.02.002	Gratch & Marsella 2004
+personality-mood	10.1016/j.cogsys.2008.03.005	Marsella & Gratch 2009 EMA
+personality-mood	10.1007/11595014_13	Dias & Paiva 2005 FAtiMA
+personality-mood	10.1111/1467-8721.ep10770953	Hatfield 1993 contagion
+personality-mood	10.1016/S0065-2601(08)60281-6	Schwartz 1992
+needs-utility	10.1037/h0054346	Maslow 1943
+needs-utility	10.1037/0033-2909.117.3.497	Baumeister & Leary 1995
+needs-utility	10.1207/S15327965PLI1104_01	Deci & Ryan 2000
+needs-utility	10.1037/0003-066X.55.1.68	Ryan & Deci 2000
+needs-utility	10.1201/b18373-5	Dill 2015 dual utility
+needs-utility	10.1145/37402.37406	Reynolds 1987
+needs-utility	10.1126/science.149.3681.269	Zajonc 1965
+needs-utility	10.1037/h0025589	Darley & Latane 1968
+relationships	10.1080/00223980.1946.9917275	Heider 1946
+relationships	10.1037/h0046049	Cartwright & Harary 1956
+relationships	10.1037/h0025848	Zajonc 1968
+relationships	10.1037/h0044721	Byrne 1961
+relationships	10.1146/annurev.soc.27.1.415	McPherson 2001
+relationships	10.1016/0047-2484(92)90081-J	Dunbar 1992
+relationships	10.1098/rspb.2004.2970	Zhou 2005
+relationships	10.1086/225469	Granovetter 1973
+relationships	10.1126/science.1116869	Kossinets & Watts 2006
+relationships	10.1103/PhysRevE.64.046132	Jin 2001
+relationships	10.1038/30918	Watts & Strogatz 1998
+relationships	10.1126/science.286.5439.509	Barabasi & Albert 1999
+relationships	10.1146/annurev.psych.54.101601.145059	Rusbult & Van Lange 2003
+relationships	10.1037/0022-3514.37.1.12	Clark & Mills 1979
+relationships	10.1086/222355	Homans 1958
+relationships	10.1146/annurev.so.02.080176.002003	Emerson 1976
+relationships	10.1016/S0065-2601(08)60108-2	Adams 1965
+relationships	10.2307/2092623	Gouldner 1960
+relationships	10.1037/0033-295X.93.2.119	Sternberg 1986
+relationships	10.1037/0022-3514.52.3.511	Hazan & Shaver 1987
+relationships	10.1037/0033-2909.116.3.457	Collins & Miller 1994
+relationships	10.1037/0022-3514.73.2.321	McCullough 1997
+relationships	10.1177/001872675400700202	Festinger 1954
+relationships	10.1111/j.1467-9280.1991.tb00174.x	Anderson & Schooler 1991
+relationships	10.1371/journal.pone.0120644	Murre & Dros 2015
+relationships	10.2307/258792	Mayer 1995
+relationships	10.1037/0022-3514.82.6.878	Fiske 2002
+opinion-influence	10.1080/01621459.1974.10480137	DeGroot 1974
+opinion-influence	10.1142/S0219525900000078	Deffuant 2000
+opinion-influence	10.1080/0022250X.1990.9990069	Friedkin & Johnsen 1990
+opinion-influence	10.1177/0022002797041002001	Axelrod 1997
+opinion-influence	10.1037/0003-066X.36.4.343	Latane 1981
+opinion-influence	10.1037/0033-295X.97.3.362	Nowak, Szamrej & Latane 1990
+opinion-influence	10.1103/RevModPhys.81.591	Castellano 2009
+opinion-influence	10.18564/jasss.3521	Flache 2017
+opinion-influence	10.1037/h0093718	Asch 1956
+opinion-influence	10.1086/226707	Granovetter 1978
+opinion-influence	10.1086/521848	Centola & Macy 2007
+opinion-influence	10.1126/science.aas8827	Centola 2018
+opinion-influence	10.1037/h0041593	Festinger & Carlsmith 1959
+opinion-influence	10.1037/h0034225	Kelley 1973
+rumor-reputation	10.1038/2041118a0	Daley & Kendall 1964
+rumor-reputation	10.1103/PhysRevE.69.066130	Moreno 2004
+rumor-reputation	10.1098/rspa.1927.0118	Kermack & McKendrick 1927
+rumor-reputation	10.1037/1089-2680.8.2.100	Dunbar 2004
+rumor-reputation	10.1073/pnas.0704598104	Sommerfeld 2007
+rumor-reputation	10.1038/31225	Nowak & Sigmund 1998 Nature
+rumor-reputation	10.1006/jtbi.1998.0775	Nowak & Sigmund 1998 JTB
+rumor-reputation	10.1038/nature04131	Nowak & Sigmund 2005
+rumor-reputation	10.1016/j.jtbi.2004.06.005	Ohtsuki & Iwasa 2004
+rumor-reputation	10.1126/science.7466396	Axelrod & Hamilton 1981
+rumor-reputation	10.1126/science.1133755	Nowak 2006
+rumor-reputation	10.1038/415137a	Fehr & Gachter 2002
+rumor-reputation	10.1007/s10462-004-0041-5	Sabater & Sierra 2005
+groups-status	10.1002/ejsp.2420010202	Tajfel 1971
+groups-status	10.1037/0022-3514.90.5.751	Pettigrew & Tropp 2006
+groups-status	10.2307/1960858	Axelrod 1986
+groups-status	10.1037/0022-3514.58.6.1015	Cialdini 1990
+groups-status	10.2307/2951778	Young 1993
+groups-status	10.1073/pnas.1418838112	Centola & Baronchelli 2015
+groups-status	10.1080/0022250X.1971.9989794	Schelling 1971
+groups-status	10.2307/2093465	Berger 1972
+groups-status	10.5465/19416520802211628	Magee & Galinsky 2008
+groups-status	10.1016/0378-4371(95)00064-e	Bonabeau 1995
+groups-status	10.1098/rspb.1999.0646	Hemelrijk 1999
+groups-status	10.1037/h0040525	Milgram 1963
+groups-status	10.1103/PhysRevE.51.4282	Helbing & Molnar 1995
+groups-status	10.1371/journal.pone.0010047	Moussaid 2010
+groups-status	10.1037/0033-295X.98.2.224	Markus & Kitayama 1991
+game-social-ai	10.1109/tciaig.2014.2304692	McCoy 2014 Comme il Faut
+game-social-ai	10.1609/aiide.v7i1.12454	McCoy 2011 CiF
+game-social-ai	10.1145/2282338.2282384	McCoy 2012 Prom Week
+game-social-ai	10.1109/TCIAIG.2013.2287297	Evans & Short 2014 Versu
+game-social-ai	10.1609/aiide.v11i3.12825	Ryan 2015 Talk of the Town
+game-social-ai	10.1145/3649921.3659841	Kelly 2024 Ensemble
+game-social-ai	10.1145/3337722.3341859	Jurado 2019
+game-social-ai	10.1145/3337722.3337729	Oliveira 2019
+game-social-ai	10.48550/arXiv.2304.03442	Park 2023 generative agents
+game-social-ai	10.1073/pnas.0903616106	Stivers 2009
