@@ -13,7 +13,10 @@ pub struct SocietyPlugins;
 
 impl PluginGroup for SocietyPlugins {
     fn build(self) -> PluginGroupBuilder {
-        let group = PluginGroupBuilder::start::<Self>().add(SocietyCorePlugin);
+        let group = PluginGroupBuilder::start::<Self>()
+            .add(SocietyCorePlugin)
+            .add(crate::relationships::RelationshipsPlugin)
+            .add(crate::groups::GroupsPlugin);
         #[cfg(feature = "fields")]
         let group = group.add(crate::fields::SocialFieldPlugin);
         #[cfg(feature = "steering")]

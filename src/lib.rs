@@ -42,7 +42,7 @@ pub use defs::{
 #[cfg(feature = "fields")]
 pub use fields::{FieldChannel, SocialFieldPlugin, SocialFieldSettings, SocialFields};
 pub use groups::{
-    CONTEST_STEEPNESS, FactionStat, FactionStats, Memberships, STANDING_FAMILIARITY, Status,
+    FactionStat, FactionStats, GroupsPlugin, Memberships, STANDING_FAMILIARITY, Status,
     contest_win_chance, standing_from,
 };
 pub use mind::{
@@ -50,7 +50,7 @@ pub use mind::{
     Needs, Personality, Trait,
 };
 pub use plugins::SocietyPlugins;
-pub use relationships::{Tie, TieLabel, TieRates, Ties};
+pub use relationships::{RelationshipsPlugin, Tie, TieLabel, TieLabelChanged, Ties};
 pub use rumor::{Rumor, RumorBook, RumorId};
 pub use script::ScriptId;
 #[cfg(feature = "steering")]

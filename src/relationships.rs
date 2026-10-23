@@ -4,49 +4,17 @@
 //! and many-to-many. Entries stay sorted by the target's bits so lookups are binary searches and
 //! every iteration is deterministic.
 
-use bevy::ecs::component::Component;
-use bevy::ecs::entity::Entity;
-use bevy::reflect::Reflect;
+use bevy::prelude::*;
+use bevy_emerge_rng::DetRng;
 use serde::Deserialize;
 
+use crate::core::require_core;
+use crate::defs::SocietyDefs;
+use crate::groups::{Memberships, shared_faction_bias};
 use crate::model::{balance, recall};
-
-/// Rates and capacities for ties, one field per plan default (D4).
-#[derive(Debug, Clone, Copy, PartialEq, Reflect)]
-pub struct TieRates {
-    /// Familiarity power-law time constant in game-days (Anderson & Schooler 1991, DOI 10.1111/j.1467-9280.1991.tb00174.x).
-    pub familiarity_tau_days: f32,
-    /// Familiarity power-law decay exponent (Murre & Dros 2015, DOI 10.1371/journal.pone.0120644).
-    pub familiarity_decay_exp: f32,
-    /// Mere-exposure rate on the familiarity peak per game-day (Zajonc 1968, DOI 10.1037/h0025848).
-    pub exposure_per_day: f32,
-    /// Mere-exposure rate on affinity per game-day (Zajonc 1968, DOI 10.1037/h0025848).
-    pub mere_exposure_per_day: f32,
-    /// Affinity relaxation toward zero per game-day, never crossing zero.
-    pub affinity_relax_per_day: f32,
-    /// Structural-balance rate per game-day (Heider 1946, DOI 10.1080/00223980.1946.9917275;
-    /// Cartwright & Harary 1956, DOI 10.1037/h0046049).
-    pub balance_rate_per_day: f32,
-    /// Maximum ties kept per person (Dunbar 1992, DOI 10.1016/0047-2484(92)90081-J).
-    pub max_ties: usize,
-    /// Number of close ties kept as the sympathy layer (Zhou et al. 2005, DOI 10.1098/rspb.2004.2970).
-    pub close_ties: usize,
-}
-
-impl Default for TieRates {
-    fn default() -> Self {
-        Self {
-            familiarity_tau_days: 1.0,
-            familiarity_decay_exp: 0.5,
-            exposure_per_day: 2.0,
-            mere_exposure_per_day: 0.05,
-            affinity_relax_per_day: 0.01,
-            balance_rate_per_day: 0.5,
-            max_ties: 150,
-            close_ties: 15,
-        }
-    }
-}
+use crate::{
+    Perception, PersonIndex, SocietyClock, SocietyRng, SocietySettings, SocietySystems, Tuning,
+};
 
 /// The label a tie carries, recomputed each tick from affinity and familiarity (plan D4).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Reflect, Deserialize)]
@@ -123,31 +91,33 @@ impl Tie {
         }
     }
 
-    /// Familiarity at `now_days`, decayed from the peak by power-law forgetting (D4).
-    pub fn familiarity(&self, now_days: f32, rates: &TieRates) -> f32 {
+    /// Familiarity at `now_days`, decayed from the peak by power-law forgetting (Anderson &
+    /// Schooler 1991, DOI 10.1111/j.1467-9280.1991.tb00174.x; Murre & Dros 2015, DOI
+    /// 10.1371/journal.pone.0120644).
+    pub fn familiarity(&self, now_days: f32, tuning: &Tuning) -> f32 {
         recall::familiarity(
             self.familiarity_peak,
             now_days - self.last_contact_day,
-            rates.familiarity_tau_days,
-            rates.familiarity_decay_exp,
+            tuning.familiarity_tau_days,
+            tuning.familiarity_decay_exp,
         )
     }
 
     /// Records one contact over `dt_days`. Familiarity is first read at `now_days`, then raised by
     /// mere exposure; affinity is nudged toward the target (Zajonc 1968, DOI 10.1037/h0025848).
-    pub fn expose(&mut self, now_days: f32, dt_days: f32, rates: &TieRates) {
-        let f = self.familiarity(now_days, rates);
-        self.familiarity_peak = recall::exposed_peak(f, rates.exposure_per_day, dt_days);
+    pub fn expose(&mut self, now_days: f32, dt_days: f32, tuning: &Tuning) {
+        let f = self.familiarity(now_days, tuning);
+        self.familiarity_peak = recall::exposed_peak(f, tuning.exposure_per_day, dt_days);
         self.last_contact_day = now_days;
         self.affinity = (self.affinity
-            + rates.mere_exposure_per_day * dt_days * (1.0 - self.affinity.abs()))
+            + tuning.mere_exposure_per_day * dt_days * (1.0 - self.affinity.abs()))
         .clamp(-1.0, 1.0);
     }
 
     /// Relaxes affinity toward zero by `affinity_relax_per_day · dt_days`, never crossing zero.
-    pub fn relax(&mut self, dt_days: f32, rates: &TieRates) {
+    pub fn relax(&mut self, dt_days: f32, tuning: &Tuning) {
         self.affinity =
-            balance::relax_toward_zero(self.affinity, rates.affinity_relax_per_day * dt_days);
+            balance::relax_toward_zero(self.affinity, tuning.affinity_relax_per_day * dt_days);
     }
 
     /// Recomputes the label from the current affinity and familiarity. Returns `Some((old, new))`
@@ -155,9 +125,9 @@ impl Tie {
     pub fn refresh_label(
         &mut self,
         now_days: f32,
-        rates: &TieRates,
+        tuning: &Tuning,
     ) -> Option<(TieLabel, TieLabel)> {
-        let next = TieLabel::classify(self.affinity, self.familiarity(now_days, rates));
+        let next = TieLabel::classify(self.affinity, self.familiarity(now_days, tuning));
         if next == self.label {
             None
         } else {
@@ -194,10 +164,19 @@ impl Ties {
 
     /// The tie to `target`, inserted with [`Tie::new`] in sorted position when absent.
     pub fn entry(&mut self, target: Entity) -> &mut Tie {
+        self.entry_with(target, 0.0)
+    }
+
+    /// The tie to `target`. When absent it is inserted with [`Tie::new`] and the given affinity,
+    /// in sorted position; an existing tie keeps its affinity. D7 uses this to start co-members at
+    /// their faction's `ingroup_bias`.
+    pub fn entry_with(&mut self, target: Entity, affinity: f32) -> &mut Tie {
         let index = match self.search(target) {
             Ok(i) => i,
             Err(i) => {
-                self.0.insert(i, Tie::new(target));
+                let mut tie = Tie::new(target);
+                tie.affinity = affinity;
+                self.0.insert(i, tie);
                 i
             }
         };
@@ -222,41 +201,252 @@ impl Ties {
         self.0.is_empty()
     }
 
-    /// Drops the least-familiar ties until at most `rates.max_ties` remain (Dunbar 1992, DOI
-    /// 10.1016/0047-2484(92)90081-J). Ties of equal familiarity go first by lower target bits, so the
-    /// result is deterministic.
-    pub fn trim(&mut self, now_days: f32, rates: &TieRates) {
-        if self.0.len() <= rates.max_ties {
+    /// Drops the least-familiar ties until at most `max_ties` remain (Dunbar 1992, DOI
+    /// 10.1016/0047-2484(92)90081-J). Ties of equal familiarity go first by lower target bits, so
+    /// the result is deterministic.
+    pub fn trim(&mut self, now_days: f32, tuning: &Tuning, max_ties: usize) {
+        if self.0.len() <= max_ties {
             return;
         }
-        let excess = self.0.len() - rates.max_ties;
+        let excess = self.0.len() - max_ties;
         let mut ranked: Vec<(f32, u64)> = self
             .0
             .iter()
-            .map(|t| (t.familiarity(now_days, rates), t.target.to_bits()))
+            .map(|t| (t.familiarity(now_days, tuning), t.target.to_bits()))
             .collect();
         ranked.sort_by(|a, b| a.0.total_cmp(&b.0).then(a.1.cmp(&b.1)));
         let doomed: Vec<u64> = ranked.iter().take(excess).map(|&(_, bits)| bits).collect();
         self.0.retain(|t| !doomed.contains(&t.target.to_bits()));
     }
 
-    /// The `rates.close_ties` targets with the highest `max(0, affinity) · familiarity`, best first.
-    /// Ties of equal score go by lower target bits (Zhou et al. 2005, DOI 10.1098/rspb.2004.2970).
-    pub fn close_targets(&self, now_days: f32, rates: &TieRates) -> Vec<Entity> {
+    /// The `close_ties` targets with the highest `max(0, affinity) · familiarity`, best first.
+    /// Ties of equal score go by lower target bits (Zhou et al. 2005, DOI
+    /// 10.1098/rspb.2004.2970).
+    pub fn close_targets(&self, now_days: f32, tuning: &Tuning, close_ties: usize) -> Vec<Entity> {
         let mut scored: Vec<(f32, u64, Entity)> = self
             .0
             .iter()
             .map(|t| {
-                let score = t.affinity.max(0.0) * t.familiarity(now_days, rates);
+                let score = t.affinity.max(0.0) * t.familiarity(now_days, tuning);
                 (score, t.target.to_bits(), t.target)
             })
             .collect();
         scored.sort_by(|a, b| b.0.total_cmp(&a.0).then(a.1.cmp(&b.1)));
         scored
             .into_iter()
-            .take(rates.close_ties)
+            .take(close_ties)
             .map(|(_, _, e)| e)
             .collect()
+    }
+}
+
+/// Written once per tie whose label changed (plan D4). `from` owns the tie, `to` is its target.
+#[derive(Message, Debug, Clone, Copy, PartialEq, Eq)]
+pub struct TieLabelChanged {
+    /// The person who owns the tie.
+    pub from: Entity,
+    /// The person the tie points at.
+    pub to: Entity,
+    /// The label before the change.
+    pub old: TieLabel,
+    /// The label after the change.
+    pub new: TieLabel,
+}
+
+/// Records one contact from `ties`' owner toward `target`. `shared_bias` is the faction
+/// `ingroup_bias` for co-members, used only when the tie is new (plan D4/D6).
+pub(crate) fn expose_toward(
+    ties: &mut Ties,
+    target: Entity,
+    shared_bias: Option<f32>,
+    now_days: f32,
+    dt_days: f32,
+    tuning: &Tuning,
+) {
+    let tie = match shared_bias {
+        Some(bias) => ties.entry_with(target, bias),
+        None => ties.entry(target),
+    };
+    tie.expose(now_days, dt_days, tuning);
+}
+
+/// Triadic closure for one direction (Kossinets & Watts 2006, DOI 10.1126/science.1116869): when
+/// the owner meets someone who knows `target`, familiarity toward `target` rises to
+/// `f + introduction_familiarity · (1 − f)`, where `f` is the current familiarity.
+// Unused until D7 (interaction step 4) calls it; the allow keeps the clippy gate clean until then.
+#[allow(dead_code)]
+pub(crate) fn introduce_toward(ties: &mut Ties, target: Entity, now_days: f32, tuning: &Tuning) {
+    let tie = ties.entry(target);
+    let f = tie.familiarity(now_days, tuning);
+    tie.familiarity_peak = (f + tuning.introduction_familiarity * (1.0 - f)).clamp(0.0, 1.0);
+    tie.last_contact_day = now_days;
+}
+
+/// Records every contact pair in `perception.contact` once per direction (plan D4). Mere exposure
+/// (Zajonc 1968, DOI 10.1037/h0025848) applies to both sides of each pair.
+fn expose_contacts(
+    clock: Res<SocietyClock>,
+    settings: Res<SocietySettings>,
+    perception: Res<Perception>,
+    defs: Res<SocietyDefs>,
+    memberships: Query<&Memberships>,
+    mut ties: Query<&mut Ties>,
+) {
+    let tuning = &settings.tuning;
+    let now = clock.now_days as f32;
+    let dt = clock.dt_days;
+    for (i, &entity) in perception.persons.iter().enumerate() {
+        let Ok(mine) = memberships.get(entity) else {
+            continue;
+        };
+        for &j in &perception.contact[i] {
+            let Some(&other) = perception.persons.get(j as usize) else {
+                continue;
+            };
+            let bias = match memberships.get(other) {
+                Ok(theirs) => shared_faction_bias(mine, theirs, &defs),
+                Err(_) => None,
+            };
+            if let Ok(mut owned) = ties.get_mut(entity) {
+                expose_toward(&mut owned, other, bias, now, dt, tuning);
+            }
+        }
+    }
+}
+
+/// Relaxes every affinity toward zero (plan D4), in sorted person order.
+fn relax_affinity(
+    clock: Res<SocietyClock>,
+    settings: Res<SocietySettings>,
+    index: Res<PersonIndex>,
+    mut ties: Query<&mut Ties>,
+) {
+    let tuning = &settings.tuning;
+    for &(_, entity) in &index.sorted {
+        if let Ok(mut owned) = ties.get_mut(entity) {
+            for tie in owned.0.iter_mut() {
+                tie.relax(clock.dt_days, tuning);
+            }
+        }
+    }
+}
+
+/// Structural balance (Heider 1946, DOI 10.1080/00223980.1946.9917275; Cartwright & Harary 1956,
+/// DOI 10.1037/h0046049). Each sample draws a person A and two of A's ties B and C; when B→C
+/// exists, `aff(A→C) += balance_rate · dt · aff(A→B) · aff(B→C)`. Failed draws are skipped.
+fn balance_triads(
+    clock: Res<SocietyClock>,
+    settings: Res<SocietySettings>,
+    index: Res<PersonIndex>,
+    mut rng: ResMut<SocietyRng>,
+    mut ties: Query<&mut Ties>,
+) {
+    let n = index.sorted.len();
+    if n == 0 {
+        return;
+    }
+    let tuning = &settings.tuning;
+    let dt = clock.dt_days;
+    for _ in 0..tuning.balance_samples_per_tick {
+        let a = index.sorted[rng.0.below(n)].1;
+        let picked = {
+            let Ok(a_ties) = ties.get(a) else {
+                continue;
+            };
+            let len = a_ties.len();
+            if len < 2 {
+                continue;
+            }
+            let b = a_ties.0[rng.0.below(len)];
+            let c = a_ties.0[rng.0.below(len)];
+            if b.target == c.target {
+                continue;
+            }
+            let Ok(b_ties) = ties.get(b.target) else {
+                continue;
+            };
+            let Some(bc) = b_ties.get(c.target) else {
+                continue;
+            };
+            (b.affinity, c.target, bc.affinity)
+        };
+        let (ab, c_target, bc) = picked;
+        let delta = balance::triad_delta(tuning.balance_rate_per_day, dt, ab, bc);
+        if let Ok(mut owned) = ties.get_mut(a)
+            && let Some(ac) = owned.get_mut(c_target)
+        {
+            ac.affinity = (ac.affinity + delta).clamp(-1.0, 1.0);
+        }
+    }
+}
+
+/// Drops each person's least-familiar ties beyond `max_ties` (plan D4, Dunbar 1992).
+fn trim_ties(
+    clock: Res<SocietyClock>,
+    settings: Res<SocietySettings>,
+    index: Res<PersonIndex>,
+    mut ties: Query<&mut Ties>,
+) {
+    let now = clock.now_days as f32;
+    for &(_, entity) in &index.sorted {
+        if let Ok(mut owned) = ties.get_mut(entity) {
+            owned.trim(now, &settings.tuning, settings.max_ties);
+        }
+    }
+}
+
+/// Recomputes every tie's label and writes one [`TieLabelChanged`] per transition (plan D4).
+pub(crate) fn refresh_labels(
+    clock: Res<SocietyClock>,
+    settings: Res<SocietySettings>,
+    index: Res<PersonIndex>,
+    mut ties: Query<&mut Ties>,
+    mut changed: MessageWriter<TieLabelChanged>,
+) {
+    let now = clock.now_days as f32;
+    for &(_, entity) in &index.sorted {
+        let Ok(mut owned) = ties.get_mut(entity) else {
+            continue;
+        };
+        for tie in owned.0.iter_mut() {
+            if let Some((old, new)) = tie.refresh_label(now, &settings.tuning) {
+                changed.write(TieLabelChanged {
+                    from: entity,
+                    to: tie.target,
+                    old,
+                    new,
+                });
+            }
+        }
+    }
+}
+
+/// Plugin for the directed-tie model (plan D4). Runs in `SocietySystems::Relate`, after
+/// `SocietyCorePlugin`.
+pub struct RelationshipsPlugin;
+
+impl Plugin for RelationshipsPlugin {
+    fn build(&self, app: &mut App) {
+        app.register_type::<TieLabel>()
+            .register_type::<Tie>()
+            .register_type::<Ties>()
+            .add_message::<TieLabelChanged>()
+            .add_systems(
+                FixedUpdate,
+                (
+                    expose_contacts,
+                    relax_affinity,
+                    balance_triads,
+                    trim_ties,
+                    refresh_labels,
+                )
+                    .chain()
+                    .in_set(SocietySystems::Relate),
+            );
+    }
+
+    fn finish(&self, app: &mut App) {
+        require_core(app, "RelationshipsPlugin");
     }
 }
 
@@ -270,55 +460,45 @@ mod tests {
 
     #[test]
     fn labels_follow_the_d4_thresholds() {
-        assert_eq!(TieLabel::classify(0.4, 0.3), TieLabel::Friend);
-        assert_eq!(TieLabel::classify(0.39, 0.3), TieLabel::Acquaintance);
-        assert_eq!(TieLabel::classify(0.5, 0.29), TieLabel::Acquaintance);
-        assert_eq!(TieLabel::classify(-0.4, 0.2), TieLabel::Rival);
-        assert_eq!(TieLabel::classify(-0.4, 0.19), TieLabel::Acquaintance);
-        assert_eq!(TieLabel::classify(0.9, 0.05), TieLabel::Stranger);
-        assert_eq!(TieLabel::classify(0.0, 0.5), TieLabel::Acquaintance);
+        assert_eq!(TieLabel::classify(0.5, 0.5), TieLabel::Friend);
+        assert_eq!(TieLabel::classify(-0.5, 0.5), TieLabel::Rival);
+        assert_eq!(TieLabel::classify(0.0, 0.05), TieLabel::Stranger);
+        assert_eq!(TieLabel::classify(0.2, 0.5), TieLabel::Acquaintance);
+        assert_eq!(TieLabel::classify(0.5, 0.2), TieLabel::Acquaintance);
     }
 
     #[test]
     fn entries_stay_sorted_by_target_bits() {
         let mut ties = Ties::default();
-        for bits in [30u64, 10, 20, 10] {
+        for bits in [30_u64, 10, 20] {
             ties.entry(e(bits));
         }
-        let bits: Vec<u64> = ties.0.iter().map(|t| t.target.to_bits()).collect();
-        assert_eq!(bits, vec![10, 20, 30]);
-        assert!(ties.get(e(20)).is_some());
-        assert!(ties.remove(e(20)).is_some());
-        assert!(ties.get(e(20)).is_none());
+        let order: Vec<u64> = ties.0.iter().map(|t| t.target.to_bits()).collect();
+        assert_eq!(order, vec![10, 20, 30]);
     }
 
     #[test]
     fn trim_drops_least_familiar_first() {
-        let rates = TieRates {
-            max_ties: 2,
-            ..TieRates::default()
-        };
+        let tuning = Tuning::default();
         let mut ties = Ties::default();
-        for (bits, peak) in [(1u64, 0.9f32), (2, 0.1), (3, 0.5)] {
-            let t = ties.entry(e(bits));
-            t.familiarity_peak = peak;
-            t.last_contact_day = 0.0;
-        }
-        ties.trim(0.0, &rates);
+        ties.entry(e(1)).familiarity_peak = 0.9;
+        ties.entry(e(2)).familiarity_peak = 0.1;
+        ties.entry(e(3)).familiarity_peak = 0.5;
+        ties.trim(0.0, &tuning, 2);
         let kept: Vec<u64> = ties.0.iter().map(|t| t.target.to_bits()).collect();
         assert_eq!(kept, vec![1, 3]);
     }
 
     #[test]
     fn label_change_is_reported_once() {
-        let rates = TieRates::default();
-        let mut tie = Tie::new(e(7));
+        let tuning = Tuning::default();
+        let mut tie = Tie::new(e(1));
         tie.affinity = 0.5;
-        tie.familiarity_peak = 0.9;
+        tie.familiarity_peak = 0.5;
         assert_eq!(
-            tie.refresh_label(0.0, &rates),
+            tie.refresh_label(0.0, &tuning),
             Some((TieLabel::Stranger, TieLabel::Friend))
         );
-        assert_eq!(tie.refresh_label(0.0, &rates), None);
+        assert_eq!(tie.refresh_label(0.0, &tuning), None);
     }
 }

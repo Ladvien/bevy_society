@@ -1,15 +1,19 @@
 //! Factions, status and contests (plan D6, engine-free rules in `model::curves`).
 
 use bevy::ecs::component::Component;
+use bevy::ecs::entity::Entity;
 use bevy::ecs::resource::Resource;
+use bevy::ecs::schedule::IntoScheduleConfigs;
+use bevy::prelude::{App, FixedUpdate, Plugin, Query, Res, ResMut};
 use bevy::reflect::Reflect;
+use bevy_emerge_rng::DetRng;
 
-use crate::defs::FactionId;
+use crate::core::require_core;
+use crate::defs::{FactionId, SocietyDefs};
+use crate::mind::{EmotionKind, Emotions};
 use crate::model::curves;
-
-/// Steepness of the contest win probability (plan D6). Bonabeau et al. 1995, DOI 10.1016/0378-4371(95)00064-e;
-/// Hemelrijk 1999, DOI 10.1098/rspb.1999.0646.
-pub const CONTEST_STEEPNESS: f32 = 4.0;
+use crate::relationships::{Tie, Ties};
+use crate::{PersonIndex, SocietyClock, SocietySettings, SocietySystems, Tuning};
 
 /// Familiarity needed before a respect value counts toward standing (plan D6).
 pub const STANDING_FAMILIARITY: f32 = 0.2;
@@ -50,10 +54,24 @@ impl Memberships {
         }
     }
 
-    /// Whether this person and `other` share at least one faction; the in-group test of plan D6.
+    /// Whether the two people share at least one faction.
     pub fn shares_with(&self, other: &Memberships) -> bool {
         self.0.iter().any(|f| other.contains(*f))
     }
+}
+
+/// The in-group bias a new tie between co-members starts with (plan D6): the `ingroup_bias` of the
+/// lowest faction both people belong to, from `SocietyDefs`. `None` when they share no faction.
+pub(crate) fn shared_faction_bias(
+    mine: &Memberships,
+    theirs: &Memberships,
+    defs: &SocietyDefs,
+) -> Option<f32> {
+    mine.0
+        .iter()
+        .find(|f| theirs.contains(**f))
+        .and_then(|f| defs.factions.get(f.0 as usize))
+        .map(|spec| spec.ingroup_bias)
 }
 
 /// A person's standing: the mean respect others hold for them (plan D6). Magee & Galinsky 2008,
@@ -78,15 +96,85 @@ pub fn standing_from(pairs: impl IntoIterator<Item = (f32, f32)>) -> f32 {
 }
 
 /// Probability that the actor wins a contest (plan D6): logistic of the difference in
-/// `(dominance + standing)` between actor and target, with steepness [`CONTEST_STEEPNESS`].
+/// `(dominance + standing)` between actor and target, with `steepness` from
+/// `Tuning::contest_steepness` (Bonabeau et al. 1995, DOI 10.1016/0378-4371(95)00064-e;
+/// Hemelrijk 1999, DOI 10.1098/rspb.1999.0646).
 pub fn contest_win_chance(
+    steepness: f32,
     actor_dominance: f32,
     actor_standing: f32,
     target_dominance: f32,
     target_standing: f32,
 ) -> f32 {
     let diff = (actor_dominance + actor_standing) - (target_dominance + target_standing);
-    curves::logistic(CONTEST_STEEPNESS, 0.0, diff)
+    curves::logistic(steepness, 0.0, diff)
+}
+
+/// One side of a contest: everything the win chance reads and the outcome writes (plan D6).
+pub(crate) struct Contestant<'a> {
+    /// The person's entity, used as the target of the ties and emotions written.
+    pub entity: Entity,
+    /// Mood dominance at the start of the contest.
+    pub dominance: f32,
+    /// Standing at the start of the contest.
+    pub standing: f32,
+    /// This person's ties.
+    pub ties: &'a mut Ties,
+    /// This person's active emotions.
+    pub emotions: &'a mut Emotions,
+}
+
+/// Resolves a contest between `actor` and `target` (plan D6). One draw from `rng` decides it. The
+/// loser defers to the winner (`respect` +0.1 and `Shame`); the winner gains `Pride` and loses 0.05
+/// respect toward the loser; every witness raises its respect for the winner by 0.05. Returns the
+/// winner's entity.
+#[allow(dead_code)] // consumed by the D7 interaction system
+pub(crate) fn resolve_contest<R: DetRng>(
+    rng: &mut R,
+    steepness: f32,
+    actor: Contestant<'_>,
+    target: Contestant<'_>,
+    witnesses: &mut [&mut Ties],
+) -> Entity {
+    let p = contest_win_chance(
+        steepness,
+        actor.dominance,
+        actor.standing,
+        target.dominance,
+        target.standing,
+    );
+    let (winner, loser) = if rng.unit() < f64::from(p) {
+        (actor, target)
+    } else {
+        (target, actor)
+    };
+    let (winner_entity, loser_entity) = (winner.entity, loser.entity);
+
+    let deference = loser.ties.entry(winner_entity);
+    deference.respect = (deference.respect + 0.1).clamp(-1.0, 1.0);
+    loser
+        .emotions
+        .appraise(EmotionKind::Shame, 0.4, Some(winner_entity));
+
+    let dominance = winner.ties.entry(loser_entity);
+    dominance.respect = (dominance.respect - 0.05).clamp(-1.0, 1.0);
+    winner
+        .emotions
+        .appraise(EmotionKind::Pride, 0.4, Some(loser_entity));
+
+    for witness in witnesses.iter_mut() {
+        let regard = witness.entry(winner_entity);
+        regard.respect = (regard.respect + 0.05).clamp(-1.0, 1.0);
+    }
+    winner_entity
+}
+
+/// Intergroup contact (plan D6; Pettigrew & Tropp 2006, DOI 10.1037/0022-3514.90.5.751): an accepted
+/// interaction between people who share no faction adds `contact_gain` affinity in both directions.
+#[allow(dead_code)] // consumed by the D7 interaction system
+pub(crate) fn intergroup_contact(a_to_b: &mut Tie, b_to_a: &mut Tie, tuning: &Tuning) {
+    a_to_b.affinity = (a_to_b.affinity + tuning.contact_gain).clamp(-1.0, 1.0);
+    b_to_a.affinity = (b_to_a.affinity + tuning.contact_gain).clamp(-1.0, 1.0);
 }
 
 /// Per-faction aggregates, indexed by `FactionId` (plan D6). Recomputed each tick by the groups system.
@@ -110,6 +198,134 @@ impl FactionStats {
     /// The aggregate for `faction`, if present.
     pub fn get(&self, faction: FactionId) -> Option<&FactionStat> {
         self.0.get(faction.0 as usize)
+    }
+}
+
+/// Recomputes every person's [`Status`] from the respect held toward them (plan D6), in sorted
+/// person order. Each tie contributes `(respect, familiarity)` to its target's list.
+fn update_standing(
+    clock: Res<SocietyClock>,
+    settings: Res<SocietySettings>,
+    index: Res<PersonIndex>,
+    ties: Query<&Ties>,
+    mut status: Query<&mut Status>,
+) {
+    let now = clock.now_days as f32;
+    let tuning = &settings.tuning;
+    // Slot of each person by entity bits, so a tie's target finds its list without a HashMap.
+    let mut slots: Vec<(u64, usize)> = index
+        .sorted
+        .iter()
+        .enumerate()
+        .map(|(i, &(_, entity))| (entity.to_bits(), i))
+        .collect();
+    slots.sort_unstable();
+    let mut received: Vec<Vec<(f32, f32)>> = vec![Vec::new(); index.sorted.len()];
+    for &(_, entity) in &index.sorted {
+        let Ok(owned) = ties.get(entity) else {
+            continue;
+        };
+        for tie in &owned.0 {
+            let Ok(pos) = slots.binary_search_by_key(&tie.target.to_bits(), |&(bits, _)| bits)
+            else {
+                continue;
+            };
+            let slot = slots[pos].1;
+            received[slot].push((tie.respect, tie.familiarity(now, tuning)));
+        }
+    }
+    for (i, &(_, entity)) in index.sorted.iter().enumerate() {
+        if let Ok(mut owned) = status.get_mut(entity) {
+            owned.standing = standing_from(received[i].iter().copied());
+        }
+    }
+}
+
+/// Recomputes [`FactionStats`] (plan D6), in sorted person order. `regard[g]` is the mean affinity
+/// of members of a faction toward the members of faction `g`; `cohesion` is `regard` of the faction
+/// itself.
+fn update_faction_stats(
+    index: Res<PersonIndex>,
+    defs: Res<SocietyDefs>,
+    memberships: Query<&Memberships>,
+    status: Query<&Status>,
+    ties: Query<&Ties>,
+    mut stats: ResMut<FactionStats>,
+) {
+    let count = defs.factions.len();
+    let mut out = Vec::with_capacity(count);
+    for f in 0..count {
+        let faction = FactionId(f as u16);
+        let mut stat = FactionStat {
+            regard: vec![0.0; count],
+            ..FactionStat::default()
+        };
+        let mut sums = vec![0.0f32; count];
+        let mut counts = vec![0u32; count];
+        let mut standing_sum = 0.0f32;
+        for &(_, entity) in &index.sorted {
+            let Ok(mine) = memberships.get(entity) else {
+                continue;
+            };
+            if !mine.contains(faction) {
+                continue;
+            }
+            stat.members += 1;
+            if let Ok(owned_status) = status.get(entity) {
+                standing_sum += owned_status.standing;
+            }
+            let Ok(owned) = ties.get(entity) else {
+                continue;
+            };
+            for tie in &owned.0 {
+                let Ok(theirs) = memberships.get(tie.target) else {
+                    continue;
+                };
+                for group in &theirs.0 {
+                    let g = group.0 as usize;
+                    if g < count {
+                        sums[g] += tie.affinity;
+                        counts[g] += 1;
+                    }
+                }
+            }
+        }
+        if stat.members > 0 {
+            stat.mean_standing = standing_sum / stat.members as f32;
+        }
+        for g in 0..count {
+            if counts[g] > 0 {
+                stat.regard[g] = sums[g] / counts[g] as f32;
+            }
+        }
+        stat.cohesion = stat.regard[f];
+        out.push(stat);
+    }
+    stats.0 = out;
+}
+
+/// Plugin for factions, standing and faction aggregates (plan D6). Runs in `SocietySystems::Relate`
+/// after the tie labels are refreshed, so standing reads settled ties. Requires `SocietyCorePlugin`.
+pub struct GroupsPlugin;
+
+impl Plugin for GroupsPlugin {
+    fn build(&self, app: &mut App) {
+        app.register_type::<Memberships>()
+            .register_type::<Status>()
+            .register_type::<FactionStat>()
+            .register_type::<FactionStats>()
+            .init_resource::<FactionStats>()
+            .add_systems(
+                FixedUpdate,
+                (update_standing, update_faction_stats)
+                    .chain()
+                    .after(crate::relationships::refresh_labels)
+                    .in_set(SocietySystems::Relate),
+            );
+    }
+
+    fn finish(&self, app: &mut App) {
+        require_core(app, "GroupsPlugin");
     }
 }
 
@@ -138,7 +354,7 @@ mod tests {
 
     #[test]
     fn contest_is_even_when_matched_and_favours_the_stronger() {
-        assert!((contest_win_chance(0.2, 0.1, 0.2, 0.1) - 0.5).abs() < 1e-6);
-        assert!(contest_win_chance(0.9, 0.3, 0.1, 0.0) > 0.9);
+        assert!((contest_win_chance(4.0, 0.2, 0.1, 0.2, 0.1) - 0.5).abs() < 1e-6);
+        assert!(contest_win_chance(4.0, 0.9, 0.3, 0.1, 0.0) > 0.9);
     }
 }
