@@ -25,6 +25,7 @@ Pinned to **Bevy 0.20.0**. Read the vendored source (`~/.cargo/registry/src/inde
 - `src/lib.rs` — crate docs and flat re-exports (no prelude).
 - `src/defs.rs` — authored definitions (`DefsFile`), validation, and the compiled `SocietyDefs` with id interning and spawn helpers.
 - `src/script.rs` — Rhai limits and `ScriptCompiler` (compile-time only; the runtime `ctx`/`fx` API lands with D8).
+- `src/mind.rs` — `MindPlugin` (`SocietySystems::Mind`): emotions and the `Appraise` message, PAD mood with contagion, needs decay, personality and the `Add<Person>` baseline observer.
 - `src/model/mod.rs` — engine-free math module root; re-exports `Curve`.
 - `src/model/curves.rs` — response curves (`Curve`, `logistic`, `hour_window`).
 - `src/model/pad.rs` — personality-to-mood baseline (Mehrabian 1996, ALMA).
@@ -38,6 +39,8 @@ Pinned to **Bevy 0.20.0**. Read the vendored source (`~/.cargo/registry/src/inde
 - `assets/starter.society.ron` — the starter pack, parsed by `DefsFile::starter()`.
 - `tests/defs.rs` — definition parsing, merging, id interning and error messages.
 - `tests/fields.rs` — millers' presence field points toward their cluster (feature `fields`).
+- `tests/leaf.rs` — the crate boundary: dependency list, forbidden names, engine-free `src/model/`, lookup-only hash collections.
+- `tests/mind.rs` — emotion half-life, mood lift toward Joy and return to baseline, needs decay at `decay_per_day`.
 
 ## Build and test
 

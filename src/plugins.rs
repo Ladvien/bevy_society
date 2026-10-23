@@ -15,6 +15,7 @@ impl PluginGroup for SocietyPlugins {
     fn build(self) -> PluginGroupBuilder {
         let group = PluginGroupBuilder::start::<Self>()
             .add(SocietyCorePlugin)
+            .add(crate::mind::MindPlugin)
             .add(crate::relationships::RelationshipsPlugin)
             .add(crate::groups::GroupsPlugin);
         #[cfg(feature = "fields")]

@@ -6,12 +6,23 @@ use bevy::reflect::Reflect;
 use bevy_emerge_rng::DetRng;
 use serde::Deserialize;
 
+use crate::core::{
+    Perception, Person, PersonIndex, SocietyClock, SocietySettings, SocietySystems, require_core,
+};
+use crate::defs::SocietyDefs;
 use crate::defs::{DeedId, InteractionId};
 use crate::model::pad;
 use crate::model::recall;
+use crate::relationships::Ties;
 use crate::rumor::RumorId;
+use bevy::app::{App, FixedUpdate, Plugin};
 use bevy::ecs::entity::Entity;
+use bevy::ecs::lifecycle::Add;
 use bevy::ecs::message::Message;
+use bevy::ecs::message::MessageReader;
+use bevy::ecs::observer::On;
+use bevy::ecs::schedule::IntoScheduleConfigs;
+use bevy::ecs::system::{Query, Res};
 
 /// One of the five personality traits (McCrae & John 1992, DOI 10.1111/j.1467-6494.1992.tb00970.x).
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Deserialize, Reflect)]
@@ -484,6 +495,133 @@ pub struct Appraise {
     pub intensity: f32,
     /// The person or thing the emotion is about, if any.
     pub toward: Option<Entity>,
+}
+
+/// Runs the mind: applies [`Appraise`] messages on every fixed step, then, on society ticks, decays
+/// emotions, moves moods (with emotional contagion) and decays needs. Requires [`crate::SocietyCorePlugin`].
+pub struct MindPlugin;
+
+impl Plugin for MindPlugin {
+    fn build(&self, app: &mut App) {
+        app.register_type::<Personality>()
+            .register_type::<Mood>()
+            .register_type::<MoodRates>()
+            .register_type::<EmotionKind>()
+            .register_type::<ActiveEmotion>()
+            .register_type::<Emotions>()
+            .register_type::<Needs>()
+            .register_type::<Memory>()
+            .register_type::<MemoryKind>()
+            .register_type::<Memories>()
+            .add_message::<Appraise>()
+            .add_observer(set_baseline_mood)
+            .add_systems(FixedUpdate, apply_appraisals.in_set(SocietySystems::Clock))
+            .add_systems(
+                FixedUpdate,
+                (update_minds, decay_needs).in_set(SocietySystems::Mind),
+            );
+    }
+
+    fn finish(&self, app: &mut App) {
+        require_core(app, "MindPlugin");
+    }
+}
+
+/// Starts each new person at the mood its personality implies (Mehrabian 1996, DOI
+/// 10.1080/00049539608259510).
+fn set_baseline_mood(add: On<Add<Person>>, mut people: Query<(&Personality, &mut Mood)>) {
+    if let Ok((personality, mut mood)) = people.get_mut(add.entity) {
+        *mood = personality.baseline_mood();
+    }
+}
+
+/// Merges every pending [`Appraise`] into its person's [`Emotions`]. Runs in the ungated clock set,
+/// so a message written between ticks is not lost.
+fn apply_appraisals(mut reader: MessageReader<Appraise>, mut emotions: Query<&mut Emotions>) {
+    for msg in reader.read() {
+        if let Ok(mut e) = emotions.get_mut(msg.person) {
+            e.appraise(msg.kind, msg.intensity, msg.toward);
+        }
+    }
+}
+
+/// Decays emotions and moves each person's mood toward its virtual emotion centre, its personality
+/// baseline, and (Hatfield et al. 1993, DOI 10.1111/1467-8721.ep10770953) the pleasure of its close
+/// contacts, weighted by affinity and extraversion. Contacts are read from a snapshot taken before
+/// any update, so the result does not depend on iteration order.
+fn update_minds(
+    settings: Res<SocietySettings>,
+    clock: Res<SocietyClock>,
+    index: Res<PersonIndex>,
+    perception: Res<Perception>,
+    mut people: Query<(&Personality, &mut Emotions, &mut Mood, &Ties)>,
+) {
+    let tuning = &settings.tuning;
+    let rates = MoodRates {
+        pull_per_day: tuning.mood_pull_per_day,
+        return_per_day: tuning.mood_return_per_day,
+        contagion_per_day: tuning.contagion_per_day,
+    };
+    let pleasure: Vec<f32> = index
+        .sorted
+        .iter()
+        .map(|(_, e)| people.get(*e).map_or(0.0, |(_, _, m, _)| m.pleasure))
+        .collect();
+    for (i, (_, entity)) in index.sorted.iter().enumerate() {
+        let Ok((personality, mut emotions, mut mood, ties)) = people.get_mut(*entity) else {
+            continue;
+        };
+        emotions.decay(clock.dt_days, tuning.emotion_half_life_days);
+        let (centre, intensity) = emotions.virtual_centre();
+        let contacts: &[u32] = match perception.contact.get(i) {
+            Some(list) => list,
+            None => &[],
+        };
+        let mut sum_w = 0.0_f32;
+        let mut sum_wp = 0.0_f32;
+        for &j in contacts {
+            let Some((_, other)) = index.sorted.get(j as usize) else {
+                continue;
+            };
+            let Some(tie) = ties.get(*other) else {
+                continue;
+            };
+            let w = tie.affinity.max(0.0);
+            if w > 0.0 {
+                sum_w += w;
+                sum_wp += w * pleasure.get(j as usize).copied().unwrap_or(0.0);
+            }
+        }
+        let contagion = if sum_w > 0.0 {
+            Some((sum_wp / sum_w, personality.extraversion))
+        } else {
+            None
+        };
+        mood.step(
+            personality.baseline_mood(),
+            centre,
+            intensity,
+            contagion,
+            clock.dt_days,
+            &rates,
+        );
+    }
+}
+
+/// Decays every person's needs at the rates their definitions declare (Maslow 1943; Baumeister &
+/// Leary 1995, DOI 10.1037/0033-2909.117.3.497).
+fn decay_needs(
+    clock: Res<SocietyClock>,
+    index: Res<PersonIndex>,
+    defs: Res<SocietyDefs>,
+    mut needs: Query<&mut Needs>,
+) {
+    let rates: Vec<f32> = defs.needs.iter().map(|n| n.decay_per_day).collect();
+    for (_, entity) in &index.sorted {
+        if let Ok(mut n) = needs.get_mut(*entity) {
+            n.decay(&rates, clock.dt_days);
+        }
+    }
 }
 
 #[cfg(test)]
