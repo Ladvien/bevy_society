@@ -1,0 +1,66 @@
+//! Recall, forgetting and familiarity. Engine-free.
+
+/// Recency of a memory `hours` old: `0.995^hours`, a power-law-like decay with a half-life of about
+/// 138 hours. Park et al. 2023 (DOI 10.48550/arXiv.2304.03442) use this exponential form for
+/// recency in their generative agents' memory retrieval.
+pub fn recency(hours_since: f32) -> f32 {
+    0.995_f32.powf(hours_since.max(0.0))
+}
+
+/// Familiarity after power-law forgetting: `peak · (1 + elapsed/τ)^(−d)`, with `elapsed` in game-days
+/// since the last contact. Power-law forgetting: Anderson & Schooler 1991 (DOI 10.1111/j.1467-9280.1991.tb00174.x);
+/// Murre & Dros 2015 (DOI 10.1371/journal.pone.0120644) fit this form to recall data. The exponent 0.5
+/// is this crate's default, to be confirmed against `docs/research/memory.md`.
+pub fn familiarity(peak: f32, elapsed_days: f32, tau_days: f32, decay_exp: f32) -> f32 {
+    peak * (1.0 + elapsed_days.max(0.0) / tau_days).powf(-decay_exp)
+}
+
+/// Mere exposure: each contact raises the familiarity peak toward 1 by `rate · dt · (1 − f)`, where
+/// `f` is the familiarity just before the contact (Zajonc 1968, DOI 10.1037/h0025848).
+pub fn exposed_peak(familiarity_now: f32, rate_per_day: f32, dt_days: f32) -> f32 {
+    (familiarity_now + rate_per_day * dt_days * (1.0 - familiarity_now)).clamp(0.0, 1.0)
+}
+
+/// Grudge: `Σ max(0, −valence) · recency` over the memories about one person, clamped to `[0, 1]`.
+/// Each item is `(valence, recency)`. Park et al. 2023 (DOI 10.48550/arXiv.2304.03442) weight
+/// retrieved memories by recency; the sum over negative valence is this crate's reading of it.
+pub fn grudge(memories: impl IntoIterator<Item = (f32, f32)>) -> f32 {
+    memories
+        .into_iter()
+        .map(|(valence, r)| (-valence).max(0.0) * r)
+        .sum::<f32>()
+        .clamp(0.0, 1.0)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn recency_halves_in_about_138_hours() {
+        assert!((recency(0.0) - 1.0).abs() < 1e-6);
+        assert!((recency(138.0) - 0.5).abs() < 0.01);
+        assert_eq!(recency(-5.0), 1.0);
+    }
+
+    #[test]
+    fn familiarity_follows_the_power_law() {
+        // peak · (1 + 3)^(−0.5) = peak / 2
+        assert!((familiarity(0.8, 3.0, 1.0, 0.5) - 0.4).abs() < 1e-6);
+        assert_eq!(familiarity(0.8, 0.0, 1.0, 0.5), 0.8);
+    }
+
+    #[test]
+    fn exposure_approaches_one_and_never_exceeds_it() {
+        let f = exposed_peak(0.0, 2.0, 1.0);
+        assert!((f - 1.0).abs() < 1e-6);
+        assert!(exposed_peak(0.9, 2.0, 1.0) <= 1.0);
+    }
+
+    #[test]
+    fn grudge_counts_only_negative_memories_and_clamps() {
+        assert_eq!(grudge([(0.5, 1.0), (0.3, 1.0)]), 0.0);
+        assert!((grudge([(-0.3, 1.0)]) - 0.3).abs() < 1e-6);
+        assert_eq!(grudge([(-0.9, 1.0), (-0.9, 1.0)]), 1.0);
+    }
+}

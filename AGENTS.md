@@ -23,6 +23,13 @@ Pinned to **Bevy 0.20.0**. Read the vendored source (`~/.cargo/registry/src/inde
 ## Layout
 
 - `src/lib.rs` — crate docs and flat re-exports (no prelude).
+- `src/model/mod.rs` — engine-free math module root; re-exports `Curve`.
+- `src/model/curves.rs` — response curves (`Curve`, `logistic`, `hour_window`).
+- `src/model/pad.rs` — personality-to-mood baseline (Mehrabian 1996, ALMA).
+- `src/model/recall.rs` — recency, power-law familiarity, exposure, grudge.
+- `src/model/opinion.rs` — Deffuant influence, anchor pull, similarity, conformity.
+- `src/model/rumor_dk.rs` — Daley–Kendall stifling, telling weight, belief after hearing.
+- `src/model/balance.rs` — triadic balance step and relaxation toward zero.
 
 ## Build and test
 

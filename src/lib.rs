@@ -6,3 +6,5 @@
 //!
 //! Every model is distilled from social-psychology and game-AI literature (see `docs/research/`)
 //! and every behaviour is deterministic for a given seed.
+
+pub mod model;
