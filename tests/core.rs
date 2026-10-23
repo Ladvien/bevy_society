@@ -56,15 +56,15 @@ fn removing_a_person_drops_it_from_the_index_and_from_others_ties() {
     app.update();
 
     let b_id = id_of(&app, b);
-    app.world_mut()
-        .get_mut::<Ties>(a)
-        .map(|mut t| t.entry(b).affinity = 0.5);
-    app.world_mut()
-        .get_mut::<Ties>(c)
-        .map(|mut t| t.entry(b).affinity = -0.5);
-    app.world_mut()
-        .get_mut::<Ties>(c)
-        .map(|mut t| t.entry(a).affinity = 0.1);
+    if let Some(mut ties) = app.world_mut().get_mut::<Ties>(a) {
+        ties.entry(b).affinity = 0.5;
+    }
+    if let Some(mut ties) = app.world_mut().get_mut::<Ties>(c) {
+        ties.entry(b).affinity = -0.5;
+    }
+    if let Some(mut ties) = app.world_mut().get_mut::<Ties>(c) {
+        ties.entry(a).affinity = 0.1;
+    }
 
     app.world_mut().despawn(b);
     app.update();

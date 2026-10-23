@@ -430,8 +430,12 @@ pub struct Memory {
     pub importance: f32,
 }
 
-/// A bounded list of memories (`memory_capacity`, default 64; Park et al. 2023, DOI
-/// 10.48550/arXiv.2304.03442).
+/// A bounded list of memories, at most `memory_capacity` (default 64).
+///
+/// Bounded retention follows Park et al. 2023 (DOI 10.48550/arXiv.2304.03442) in keeping a finite
+/// store and evicting the least useful entry; the number 64 is a design default, not theirs.
+/// Recency here is measured from **creation**, where Park et al. measure from the last retrieval —
+/// a documented departure, because a society's memories are not replayed.
 #[derive(Component, Clone, Debug, Default, PartialEq, Reflect)]
 pub struct Memories {
     /// The memories, in the order recorded.
@@ -440,7 +444,9 @@ pub struct Memories {
 
 impl Memories {
     /// The retention score `r + importance (+ 1 when about the given person)`, where `r` is the
-    /// recency of the memory (Park et al. 2023, DOI 10.48550/arXiv.2304.03442).
+    /// recency of the memory measured **from its creation**. Park et al. 2023 (DOI
+    /// 10.48550/arXiv.2304.03442) measure from the last retrieval; this crate does not, and the
+    /// departure is deliberate.
     fn score(memory: &Memory, now_days: f64, about: Option<Entity>) -> f32 {
         let hours = ((now_days - memory.day as f64) * 24.0).max(0.0) as f32;
         let about_bonus = match (about, memory.other) {

@@ -30,9 +30,11 @@ pub fn telling_weight(valence: f32, belief: f32, hours_since_heard: f32) -> f32 
 }
 
 /// Belief a listener forms from a teller: `teller_belief · (0.5 + 0.5 · trust(listener → teller))`.
-/// Trust is clamped to `[0, 1]` first. The trust scaling is this crate's modelling choice; Sommerfeld
-/// et al. 2007 (DOI 10.1073/pnas.0704598104) study gossip as a reputation tool, and
-/// `docs/research/rumor-and-reputation.md` records what the rule rests on.
+/// Trust is clamped to `[0, 1]` first.
+///
+/// Design default (no source paper gives this formula); mechanisms: Sommerfeld et al. 2007 (DOI
+/// 10.1073/pnas.0704598104) on gossip as a reputation tool, and trust as the weight a listener gives
+/// a teller. `docs/research/rumor-and-reputation.md` records what the rule rests on.
 pub fn belief_after_hearing(teller_belief: f32, trust_listener_to_teller: f32) -> f32 {
     teller_belief * (0.5 + 0.5 * trust_listener_to_teller.clamp(0.0, 1.0))
 }

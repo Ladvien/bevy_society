@@ -69,7 +69,11 @@ pub enum AssessmentNorm {
 }
 
 /// Every model rate of the crate, one named field each. Rates are per game-day unless the name says
-/// otherwise; the defaults are the numbers the research notes cite.
+/// otherwise.
+///
+/// A default either comes from a paper, in which case the field's doc says so, or is a design
+/// default chosen so a society of a few dozen people visibly moves within a game-day. The research
+/// notes record which is which.
 #[derive(Reflect, Debug, Clone, PartialEq)]
 pub struct Tuning {
     /// Half-life of an emotion's intensity, in game-days (ALMA-style decay; Gebhard 2005,
@@ -87,8 +91,8 @@ pub struct Tuning {
     /// Power-law forgetting time scale of familiarity, in game-days (Anderson & Schooler 1991,
     /// DOI 10.1111/j.1467-9280.1991.tb00174.x; Murre & Dros 2015, DOI 10.1371/journal.pone.0120644).
     pub familiarity_tau_days: f32,
-    /// Power-law forgetting exponent of familiarity (Murre & Dros 2015,
-    /// DOI 10.1371/journal.pone.0120644).
+    /// Power-law forgetting exponent of familiarity. Design default (no source paper gives this
+    /// number); mechanism: Murre & Dros 2015, DOI 10.1371/journal.pone.0120644.
     pub familiarity_decay_exp: f32,
     /// Familiarity gained by contact, per game-day (mere exposure; Zajonc 1968,
     /// DOI 10.1037/h0025848).
@@ -96,55 +100,60 @@ pub struct Tuning {
     /// Affinity gained by contact, per game-day, scaled by `1 - |affinity|` (Zajonc 1968,
     /// DOI 10.1037/h0025848).
     pub mere_exposure_per_day: f32,
-    /// Relaxation of affinity toward zero, per game-day, never crossing zero.
+    /// Relaxation of affinity toward zero, per game-day, never crossing zero. Design default (no
+    /// source paper gives this number).
     pub affinity_relax_per_day: f32,
     /// Triads sampled per tick for structural balance (Heider 1946, DOI 10.1080/00223980.1946.9917275).
     pub balance_samples_per_tick: usize,
     /// Rate at which a balanced triad pulls the third edge (Cartwright & Harary 1956,
     /// DOI 10.1037/h0046049).
     pub balance_rate_per_day: f32,
-    /// Familiarity added to two people by a mutual close friend's introduction (triadic closure;
-    /// Kossinets & Watts 2006, DOI 10.1126/science.1116869).
+    /// Familiarity added to two people by a mutual close friend's introduction. Design default (no
+    /// source paper gives this number); mechanism: triadic closure, Kossinets & Watts 2006,
+    /// DOI 10.1126/science.1116869.
     pub introduction_familiarity: f32,
-    /// Base bounded-confidence threshold (Deffuant et al. 2000, DOI 10.1142/S0219525900000078).
+    /// Base bounded-confidence threshold. Design default (no source paper gives this number);
+    /// mechanism: Deffuant et al. 2000, DOI 10.1142/S0219525900000078.
     pub confidence_base: f32,
-    /// Extra confidence per unit of openness (Deffuant et al. 2000, DOI 10.1142/S0219525900000078).
+    /// Extra confidence per unit of openness. Design default (no source paper gives this number);
+    /// mechanism: Deffuant et al. 2000, DOI 10.1142/S0219525900000078.
     pub confidence_openness: f32,
-    /// Convergence rate of opinions inside the confidence bound (Deffuant et al. 2000,
-    /// DOI 10.1142/S0219525900000078).
+    /// Convergence rate of opinions inside the confidence bound. Design default (no source paper
+    /// gives this number); mechanism: Deffuant et al. 2000, DOI 10.1142/S0219525900000078.
     pub influence_mu: f32,
     /// Affinity gained from similar opinions (similarity attraction; Byrne 1961,
     /// DOI 10.1037/h0044721).
     pub similarity_gain: f32,
     /// Pull toward an anchored opinion (Friedkin & Johnsen 1990, DOI 10.1080/0022250X.1990.9990069).
     pub anchor_pull: f32,
-    /// Conformity rate toward a strong group majority (Nowak, Szamrej & Latané 1990,
-    /// DOI 10.1037/0033-295X.97.3.362; Asch 1956, DOI 10.1037/h0093718).
+    /// Conformity rate toward a strong group majority. Design default (no source paper gives this
+    /// number); mechanism: Nowak, Szamrej & Latané 1990, DOI 10.1037/0033-295X.97.3.362; Asch 1956,
+    /// DOI 10.1037/h0093718.
     pub conformity_per_day: f32,
-    /// Trust gain per unit of deed harm from a witness (Nowak & Sigmund 1998, DOI 10.1038/31225).
+    /// Trust gain per unit of deed harm from a witness. Design default (no source paper gives this
+    /// number); mechanism: image scoring, Nowak & Sigmund 1998, DOI 10.1038/31225.
     pub witness_gain: f32,
-    /// Absolute harm above which a deed becomes a rumor (Sommerfeld et al. 2007,
-    /// DOI 10.1073/pnas.0704598104).
+    /// Absolute harm above which a deed becomes a rumor. Design default (no source paper gives this
+    /// number); mechanism: gossip as reputation, Sommerfeld et al. 2007, DOI 10.1073/pnas.0704598104.
     pub rumor_threshold: f32,
-    /// Trust gained from gossip, per unit of valence times belief (Dunbar 2004,
-    /// DOI 10.1037/1089-2680.8.2.100).
+    /// Trust gained from gossip, per unit of valence times belief. Design default (no source paper
+    /// gives this number); mechanism: Dunbar 2004, DOI 10.1037/1089-2680.8.2.100.
     pub gossip_trust_gain: f32,
-    /// Affinity gained from gossip, per unit of valence times belief (Dunbar 2004,
-    /// DOI 10.1037/1089-2680.8.2.100).
+    /// Affinity gained from gossip, per unit of valence times belief. Design default (no source
+    /// paper gives this number); mechanism: Dunbar 2004, DOI 10.1037/1089-2680.8.2.100.
     pub gossip_affinity_gain: f32,
-    /// Affinity gained between persons with no shared faction (intergroup contact; Pettigrew &
-    /// Tropp 2006, DOI 10.1037/0022-3514.90.5.751).
+    /// Affinity gained between persons with no shared faction. Design default (no source paper gives
+    /// this number); mechanism: intergroup contact, Pettigrew & Tropp 2006,
+    /// DOI 10.1037/0022-3514.90.5.751.
     pub contact_gain: f32,
-    /// Steepness of the contest logistic (Bonabeau et al. 1995, DOI 10.1016/0378-4371(95)00064-e).
+    /// Steepness of the contest logistic. Design default (no source paper gives this number);
+    /// mechanism: Bonabeau et al. 1995, DOI 10.1016/0378-4371(95)00064-e.
     pub contest_steepness: f32,
-    /// Options below this fraction of the best score are dropped (Dill 2015,
-    /// DOI 10.1201/b18373-5).
+    /// Options below this fraction of the best score are dropped. Design default (no source paper
+    /// gives this number); mechanism: dual-utility selection, Dill 2015, DOI 10.1201/b18373-5.
     pub tier_cutoff: f32,
     /// Hours a person may travel toward an activity before giving up.
     pub travel_timeout_hours: f32,
-    /// Affinity a member starts with toward a co-member (in-group bias; Tajfel et al. 1971,
-    /// DOI 10.1002/ejsp.2420010202).
-    pub ingroup_bias: f32,
 }
 
 impl Default for Tuning {
@@ -176,7 +185,6 @@ impl Default for Tuning {
             contest_steepness: 4.0,
             tier_cutoff: 0.25,
             travel_timeout_hours: 2.0,
-            ingroup_bias: 0.2,
         }
     }
 }
@@ -204,7 +212,8 @@ pub struct SocietySettings {
     pub max_ties: usize,
     /// Size of the close-tie layer (Zhou et al. 2005, DOI 10.1098/rspb.2004.2970).
     pub close_ties: usize,
-    /// Memories kept per person before eviction.
+    /// Memories kept per person before eviction. Design default (no source paper gives this
+    /// number).
     pub memory_capacity: usize,
     /// Assessment norm used when a witness judges a deed.
     pub assessment: AssessmentNorm,

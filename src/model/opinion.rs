@@ -33,8 +33,12 @@ pub fn similarity_affinity_step(gain: f32, d: f32) -> f32 {
 }
 
 /// Conformity pull `rate · A_i · (n / (n + 3)) · dt · (m − x)` toward the in-contact group mean `m`,
-/// with `n` persons in contact and `A_i` the person's agreeableness in `[0, 1]` (Asch 1956, DOI
-/// 10.1037/h0093718; Nowak, Szamrej & Latané 1990, DOI 10.1037/0033-295X.97.3.362).
+/// with `n` persons in contact and `A_i` the person's agreeableness in `[0, 1]`.
+///
+/// The saturating factor `n / (n + 3)` is a design default (no source paper gives it); the
+/// mechanism — a person pulled toward a group mean, more strongly with more people and with higher
+/// agreeableness — is Asch 1956 (DOI 10.1037/h0093718) and Nowak, Szamrej & Latané 1990
+/// (DOI 10.1037/0033-295X.97.3.362).
 pub fn conformity_step(
     rate_per_day: f32,
     agreeableness: f32,
@@ -48,6 +52,9 @@ pub fn conformity_step(
 }
 
 /// Whether the group mean is strong enough to conform to: `|m| > 0.3`.
+///
+/// The gate and its 0.3 are design defaults (no source paper gives the number); the mechanism is
+/// conformity to a clear majority (Asch 1956, DOI 10.1037/h0093718).
 pub fn conformity_applies(group_mean: f32) -> bool {
     group_mean.abs() > 0.3
 }

@@ -32,9 +32,11 @@ pub enum TieLabel {
 
 impl TieLabel {
     /// Classifies a tie. Friend is checked first, then Rival, then Stranger; anything else is an
-    /// Acquaintance. Thresholds are the plan's D4 values, grounded in the familiarity and
-    /// similarity-attraction literature (Zajonc 1968, DOI 10.1037/h0025848; Byrne 1961,
-    /// DOI 10.1037/h0044721).
+    /// Acquaintance.
+    ///
+    /// The four thresholds are design defaults (no source paper gives them); they sit on two
+    /// mechanisms the literature does supply: familiarity from mere exposure (Zajonc 1968,
+    /// DOI 10.1037/h0025848) and affinity from similarity (Byrne 1961, DOI 10.1037/h0044721).
     pub fn classify(affinity: f32, familiarity: f32) -> Self {
         if affinity >= 0.4 && familiarity >= 0.3 {
             Self::Friend

@@ -1,3 +1,4 @@
+//! Steering (plan D10): ORCA-driven movement toward a `Destination`.
 #![cfg(feature = "steering")]
 
 mod common;

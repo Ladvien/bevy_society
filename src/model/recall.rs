@@ -1,8 +1,12 @@
 //! Recall, forgetting and familiarity. Engine-free.
 
-/// Recency of a memory `hours` old: `0.995^hours`, a power-law-like decay with a half-life of about
-/// 138 hours. Park et al. 2023 (DOI 10.48550/arXiv.2304.03442) use this exponential form for
-/// recency in their generative agents' memory retrieval.
+/// Recency of a memory `hours` old: `0.995^hours`, an exponential decay with a half-life of about
+/// 138 hours. Park et al. 2023 (DOI 10.48550/arXiv.2304.03442) use this form for recency in their
+/// generative agents' memory retrieval.
+///
+/// One departure: `hours` is measured **from the memory's creation**, not from its last retrieval.
+/// Park et al. re-stamp a memory each time it is recalled; a society's memories are never replayed,
+/// so creation time is the only stamp that exists.
 pub fn recency(hours_since: f32) -> f32 {
     0.995_f32.powf(hours_since.max(0.0))
 }

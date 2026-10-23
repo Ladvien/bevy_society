@@ -1422,10 +1422,10 @@ fn register(
 }
 
 fn check_target(owner: &str, target: &ActivityTarget) -> Result<(), DefsError> {
-    if let ActivityTarget::Wander(radius) = target {
-        if radius.is_nan() || *radius < 0.0 {
-            return Err(invalid(owner, "Wander radius must be 0 or more"));
-        }
+    if let ActivityTarget::Wander(radius) = target
+        && (radius.is_nan() || *radius < 0.0)
+    {
+        return Err(invalid(owner, "Wander radius must be 0 or more"));
     }
     if matches!(target, ActivityTarget::Gradient(..)) && !FIELDS_ENABLED {
         return Err(invalid(

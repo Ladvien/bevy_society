@@ -13,7 +13,8 @@ use bevy::prelude::*;
 use bevy_orca::{Agent, new_velocity};
 
 use crate::behavior::Destination;
-use crate::{PersonIndex, SocietyCorePlugin, SocietyPlane, SocietySettings, SocietySystems};
+use crate::core::require_core;
+use crate::{PersonIndex, SocietyPlane, SocietySettings, SocietySystems};
 
 /// Movers closer than this (metres on the plane) are ORCA neighbours.
 const NEIGHBOUR_RANGE: f32 = 3.0;
@@ -65,10 +66,7 @@ impl Plugin for SteeringPlugin {
     }
 
     fn finish(&self, app: &mut App) {
-        assert!(
-            app.is_plugin_added::<SocietyCorePlugin>(),
-            "bevy_society: add SocietyCorePlugin (or SocietyPlugins) before SteeringPlugin"
-        );
+        require_core(app, "SteeringPlugin");
     }
 }
 

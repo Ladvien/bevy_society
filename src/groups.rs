@@ -128,6 +128,10 @@ pub(crate) struct Contestant<'a> {
 /// loser defers to the winner (`respect` +0.1 and `Shame`); the winner gains `Pride` and loses 0.05
 /// respect toward the loser; every witness raises its respect for the winner by 0.05. Returns the
 /// winner's entity.
+///
+/// The three deltas (0.1, 0.05, 0.05) and the two emotion intensities are design defaults; the
+/// mechanism — a winner's status rising and a loser's deference — is Bonabeau et al. 1995 (DOI
+/// 10.1016/0378-4371(95)00064-e) and Hemelrijk 1999 (DOI 10.1098/rspb.1999.0646).
 #[allow(dead_code)] // consumed by the D7 interaction system
 pub(crate) fn resolve_contest<R: DetRng>(
     rng: &mut R,
