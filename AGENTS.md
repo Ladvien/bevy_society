@@ -27,6 +27,11 @@ Pinned to **Bevy 0.20.0**. Read the vendored source (`~/.cargo/registry/src/inde
 - `examples/assets/village.society.ron` — the village's additions to the starter pack.
 - `examples/common/recorder.rs` — the headless PNG recorder the capture example drives.
 - `tools/gif.sh` — frames to a caption-burned GIF.
+- `docs/README.md` — the documentation index.
+- `docs/guide/{getting-started,concepts,authoring,scripting,dialogue}.md` — the guides.
+- `docs/DEMOS.md` — the capture and encode recipe.
+- `docs/research/*.md` — one note per model, with DOIs.
+- `docs/research/corpus/` — the corpus pipeline and its snapshot tables.
 - `src/beliefs.rs` — opinions per topic and what a person knows of rumors.
 - `src/rumor.rs` — the rumor book, planting, gossip and its stifling rule.
 - `src/reputation.rs` — witness, patient and actor reactions to a deed, and `NormViolated`.
