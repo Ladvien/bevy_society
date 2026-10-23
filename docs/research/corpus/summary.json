@@ -5,10 +5,10 @@
   "downloaded": 78,
   "skipped_existing": 9,
   "paywalled": 206,
-  "unconvertible": 0,
-  "converted": 19,
-  "embedded": 8,
-  "awaiting_conversion": 68,
+  "unconvertible": 1,
+  "converted": 23,
+  "embedded": 22,
+  "awaiting_conversion": 63,
   "failed_transient": 7,
-  "generated_at": "2026-10-23T21:29:24+00:00"
+  "generated_at": "2026-10-23T22:58:11+00:00"
 }

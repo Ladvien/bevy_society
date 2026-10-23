@@ -1,24 +1,23 @@
 doi	module	stem	download	converted	embedded
-10.1037/0033-295X.110.1.145	personality-mood	10.1037_0033-295x.110.1.145	downloaded		
-10.1037/h0054346	needs-utility	10.1037_h0054346	downloaded		
+10.1037/0033-295X.110.1.145	personality-mood	10.1037_0033-295x.110.1.145	downloaded	1	1
+10.1037/h0054346	needs-utility	10.1037_h0054346	downloaded	1	1
 10.1207/S15327965PLI1104_01	needs-utility	10.1207_s15327965pli1104_01	skipped_existing	1	1
-10.1098/rspb.2004.2970	relationships	10.1098_rspb.2004.2970	downloaded	1	
-10.1126/science.286.5439.509	relationships	10.1126_science.286.5439.509	downloaded	1	
+10.1098/rspb.2004.2970	relationships	10.1098_rspb.2004.2970	downloaded	1	1
+10.1126/science.286.5439.509	relationships	10.1126_science.286.5439.509	downloaded	1	1
 10.1146/annurev.psych.54.101601.145059	relationships	10.1146_annurev.psych.54.101601.145059	skipped_existing	1	1
 10.1037/0022-3514.52.3.511	relationships	10.1037_0022-3514.52.3.511	skipped_existing	1	1
-10.1371/journal.pone.0120644	relationships	10.1371_journal.pone.0120644	downloaded	1	
-10.1103/RevModPhys.81.591	opinion-influence	10.1103_revmodphys.81.591	downloaded	1	
-10.18564/jasss.3521	opinion-influence	10.18564_jasss.3521	downloaded	1	
-10.1103/PhysRevE.69.066130	rumor-reputation	10.1103_physreve.69.066130	downloaded	1	
-10.1073/pnas.0704598104	rumor-reputation	10.1073_pnas.0704598104	downloaded		
-10.1038/nature04131	rumor-reputation	10.1038_nature04131	downloaded		
-10.1038/415137a	rumor-reputation	10.1038_415137a	downloaded		
-10.1073/pnas.1418838112	groups-status	10.1073_pnas.1418838112	downloaded	1	
-10.1098/rspb.1999.0646	groups-status	10.1098_rspb.1999.0646	downloaded	1	
+10.1371/journal.pone.0120644	relationships	10.1371_journal.pone.0120644	downloaded	1	1
+10.1103/RevModPhys.81.591	opinion-influence	10.1103_revmodphys.81.591	downloaded	1	1
+10.18564/jasss.3521	opinion-influence	10.18564_jasss.3521	downloaded	1	1
+10.1103/PhysRevE.69.066130	rumor-reputation	10.1103_physreve.69.066130	downloaded	1	1
+10.1073/pnas.0704598104	rumor-reputation	10.1073_pnas.0704598104	downloaded	1	1
+10.1038/415137a	rumor-reputation	10.1038_415137a	downloaded	1	1
+10.1073/pnas.1418838112	groups-status	10.1073_pnas.1418838112	downloaded	1	1
+10.1098/rspb.1999.0646	groups-status	10.1098_rspb.1999.0646	downloaded	1	1
 10.1103/PhysRevE.51.4282	groups-status	10.1103_physreve.51.4282	skipped_existing	1	1
 10.1371/journal.pone.0010047	groups-status	10.1371_journal.pone.0010047	skipped_existing	1	1
-10.1609/aiide.v7i1.12454	game-social-ai	10.1609_aiide.v7i1.12454	downloaded	1	
-10.1609/aiide.v11i3.12825	game-social-ai	10.1609_aiide.v11i3.12825	downloaded	1	
+10.1609/aiide.v7i1.12454	game-social-ai	10.1609_aiide.v7i1.12454	downloaded	1	1
+10.1609/aiide.v11i3.12825	game-social-ai	10.1609_aiide.v11i3.12825	downloaded	1	1
 10.1145/3337722.3341859	game-social-ai	10.1145_3337722.3341859	skipped_existing	1	1
 10.1145/3337722.3337729	game-social-ai	10.1145_3337722.3337729	skipped_existing	1	1
 10.48550/arXiv.2304.03442	game-social-ai	10.48550_arxiv.2304.03442	skipped_existing	1	1
