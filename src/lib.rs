@@ -46,8 +46,8 @@ pub use groups::{
     contest_win_chance, standing_from,
 };
 pub use mind::{
-    ActiveEmotion, EmotionKind, Emotions, Memories, Memory, MemoryKind, Mood, MoodRates, Needs,
-    Personality, Trait,
+    ActiveEmotion, Appraise, EmotionKind, Emotions, Memories, Memory, MemoryKind, Mood, MoodRates,
+    Needs, Personality, Trait,
 };
 pub use plugins::SocietyPlugins;
 pub use relationships::{Tie, TieLabel, TieRates, Ties};

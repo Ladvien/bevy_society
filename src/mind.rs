@@ -11,6 +11,7 @@ use crate::model::pad;
 use crate::model::recall;
 use crate::rumor::RumorId;
 use bevy::ecs::entity::Entity;
+use bevy::ecs::message::Message;
 
 /// One of the five personality traits (McCrae & John 1992, DOI 10.1111/j.1467-6494.1992.tb00970.x).
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Deserialize, Reflect)]
@@ -162,9 +163,9 @@ impl Mood {
     }
 
     /// One mood step over `dt_days` (plan D3). `centre` is the intensity-weighted PAD of the active
-    /// emotions and `intensity` their capped total `I`. `contact_pleasure` is the affinity-weighted
-    /// mean pleasure of the person's contacts (`None` when no contact has positive weight).
-    /// `contagion_weight` scales the contagion term (the plan's `E`; the caller chooses it).
+    /// emotions and `intensity` their capped total `I`. `contagion` is `(contacts, weight)`: the
+    /// affinity-weighted mean pleasure of the person's contacts and the contagion weight `E` (the
+    /// caller passes extraversion); `None` when no contact has positive weight.
     ///
     /// Pull: Gebhard 2005 (DOI 10.1145/1082473.1082478); return to baseline: Mehrabian 1996 (DOI
     /// 10.1080/00049539608259510); contagion: Hatfield et al. 1993 (DOI 10.1111/1467-8721.ep10770953).
@@ -173,8 +174,7 @@ impl Mood {
         baseline: Mood,
         centre: [f32; 3],
         intensity: f32,
-        contact_pleasure: Option<f32>,
-        contagion_weight: f32,
+        contagion: Option<(f32, f32)>,
         dt_days: f32,
         rates: &MoodRates,
     ) {
@@ -188,9 +188,9 @@ impl Mood {
         self.arousal += (baseline.arousal - self.arousal) * back;
         self.dominance += (baseline.dominance - self.dominance) * back;
 
-        if let Some(contacts) = contact_pleasure {
+        if let Some((contacts, weight)) = contagion {
             self.pleasure +=
-                rates.contagion_per_day * contagion_weight * dt_days * (contacts - self.pleasure);
+                rates.contagion_per_day * weight * dt_days * (contacts - self.pleasure);
         }
         *self = Self::from_pad(self.as_array());
     }
@@ -459,13 +459,31 @@ impl Memories {
     /// Grudge against `other`: the sum of `max(0, −valence) · r` over memories about them, clamped to
     /// `[0, 1]` (power-law forgetting, Anderson & Schooler 1991, DOI 10.1111/j.1467-9280.1991.tb00174.x).
     pub fn grudge(&self, other: Entity, now_days: f64) -> f32 {
-        recall::grudge(self.entries.iter().filter_map(|m| {
-            (m.other == Some(other)).then(|| {
-                let hours = ((now_days - m.day as f64) * 24.0).max(0.0) as f32;
-                (m.valence, recall::recency(hours))
-            })
-        }))
+        recall::grudge(
+            self.entries
+                .iter()
+                .filter(|m| m.other == Some(other))
+                .map(|m| {
+                    let hours = ((now_days - m.day as f64) * 24.0).max(0.0) as f32;
+                    (m.valence, recall::recency(hours))
+                }),
+        )
     }
+}
+
+/// Asks for an emotion to be felt by `person`: the game, a deed, an interaction or a rumor writes
+/// it and [`MindPlugin`] merges it into the person's [`Emotions`]. Appraisals are applied on every
+/// fixed step, not only on society ticks, so a message is never dropped between ticks.
+#[derive(Message, Clone, Copy, Debug, PartialEq)]
+pub struct Appraise {
+    /// The person who feels the emotion.
+    pub person: Entity,
+    /// The emotion kind (OCC subset).
+    pub kind: EmotionKind,
+    /// Intensity added to the emotion, in [0, 1].
+    pub intensity: f32,
+    /// The person or thing the emotion is about, if any.
+    pub toward: Option<Entity>,
 }
 
 #[cfg(test)]
@@ -535,7 +553,7 @@ mod tests {
         let base = Mood::from_pad([0.3, -0.2, 0.1]);
         let mut m = Mood::from_pad([-0.9, 0.9, -0.9]);
         for _ in 0..200 {
-            m.step(base, [0.0; 3], 0.0, None, 0.0, 0.05, &MoodRates::default());
+            m.step(base, [0.0; 3], 0.0, None, 0.05, &MoodRates::default());
         }
         assert!((m.pleasure - base.pleasure).abs() < 1e-3);
         assert!((m.arousal - base.arousal).abs() < 1e-3);
