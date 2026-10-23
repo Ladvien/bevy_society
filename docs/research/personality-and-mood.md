@@ -54,8 +54,8 @@ The decision that E, extraversion, is the contagion factor is a design choice re
 
 ## What the model leaves out
 
-- Non-verbal and automatic contagion in a single contact. Contagion here is a pleasure drift, not a per-channel transfer. The review above treats non-automatic sharing as the important part.
-- Social appraisal and complementary reactions (Manstead & Fischer 2001; Van Kleef et al. 2008, both discussed in the annurev review). An agent does not react to how another person expects it to feel.
+- Non-verbal and automatic contagion in a single contact. Contagion here is a pleasure drift, not a per-channel transfer. The annurev review (`10.1146_annurev-psych-020821-010855`) is the corpus source for affiliation-motivated contagion, which is why contacts are weighted by affinity.
+- Social appraisal and complementary reactions (Manstead & Fischer 2001; Van Kleef et al. 2008; not checked against the corpus). An agent does not react to how another person expects it to feel.
 - Appraisal beyond the OCC subset in `EmotionKind`. There are no hope-of-relief or sadness-for-others kinds, and no blended emotions beyond intensity sums.
 - Mood-congruent appraisal and memory. A negative mood does not make negative events more likely to be appraised.
 - Individual differences in emotion decay. The half-life is shared by every person.

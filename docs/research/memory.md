@@ -63,11 +63,11 @@ The power law and the exponent 0.5 are the design. The corpus contains no paper 
 
 ## Sources
 
-Corpus papers (full text read in home-still):
+Corpus papers (text checked in home-still; Zandstra and the textbook were checked by excerpt, not in full):
 
 - `10.48550_arxiv.2304.03442` — Park et al. 2023, generative agents; recency decay 0.995 per game-hour since last retrieval, equal-weight recall score. <https://doi.org/10.48550/arXiv.2304.03442>
 - `10.1609_aaai.v38i17.29946` — Zhong et al. 2024, MemoryBank; forgetting-curve framing. <https://doi.org/10.1609/aaai.v38i17.29946>
-- `10.18174_197257` — Zandstra 2000, PhD thesis on food liking; mere exposure (Zajonc 1968) and its decrease with extended exposure. <https://doi.org/10.18174/197257>
+- `10.18174_197257` — Zandstra 2000, thesis on food liking; mere exposure (Zajonc 1968) and its decrease with extended exposure. <https://doi.org/10.18174/197257>
 - `W1493777802` — Research Methods in Psychology (2016), textbook; mere-exposure definition (page 68).
 
 Metadata-only seeds (not in the corpus; cited from catalog metadata, full text not verified):
