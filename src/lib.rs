@@ -10,9 +10,10 @@
 //! ## Quick start
 //!
 //! Spawn people with [`Person`], give them somewhere to go with [`Place`], hand in the definitions
-//! and read what happens. This example runs headlessly and never needs a renderer:
+//! and read what happens. The example needs no renderer; with the default `dialogue` feature it
+//! also needs `SpeechBubblesPlugin` (see the note at the end of the example):
 //!
-//! ```
+//! ```no_run
 //! use bevy::prelude::*;
 //! use bevy_society::{
 //!     Autonomous, Home, Person, Place, PlaceTags, SocietyDefs, SocietyPlugins, SocietySettings,
@@ -43,8 +44,9 @@
 //!     for _ in 0..600 {
 //!         app.update();
 //!     }
-//!     // A host with the `dialogue` feature also adds
-//!     // `bevy_speech_bubbles::SpeechBubblesPlugin::<YourCamera>` and gets barks as balloons.
+//!     // With the default `dialogue` feature the host must also add
+//!     // `bevy_speech_bubbles::SpeechBubblesPlugin::<YourCamera>`, or `finish()` panics.
+//!     // `no_run`: a headless `App::update` never calls `finish()`, so this only compiles.
 //! }
 //! ```
 //!
