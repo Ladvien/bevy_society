@@ -1,0 +1,38 @@
+# CI for bevy_society (canonical repository).
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+env:
+  CARGO_TERM_COLOR: always
+jobs:
+  lint:
+    name: fmt + clippy + doc
+    runs-on: [self-hosted, big]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with: { components: "rustfmt, clippy" }
+      - run: cargo fmt --check
+      - run: cargo clippy --all-targets --all-features -- -D warnings
+      - run: cargo doc --no-deps --all-features
+        env: { RUSTDOCFLAGS: "-D warnings" }
+  build:
+    name: build (standalone) + test
+    needs: lint
+    runs-on: [self-hosted, big]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      # Plain `cargo build` takes no dev-dependencies, so it compiles exactly the bevy features a
+      # consumer gets; the full-umbrella dev-dependency would hide a hole in the trimmed list.
+      - run: cargo build
+      - run: cargo build --no-default-features
+      - run: cargo test
+      - run: cargo test --no-default-features
+      # Examples need a font at run time, so building them is the check that fits in CI.
+      - run: cargo build --examples

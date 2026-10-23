@@ -1,0 +1,46 @@
+[package]
+name = "bevy_society"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.97.1"
+description = "Living societies for Bevy: personalities, moods, needs, memories, relationships, opinions, rumors, reputation and factions; utility-AI daily lives; Rhai triggers; dialogue through bevy_speech_bubbles."
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/Ladvien/bevy_society"
+keywords = ["bevy", "gamedev", "ai", "simulation", "npc"]
+categories = ["game-development", "simulation"]
+publish = false   # its ladvien dependencies are publish = false git dependencies
+
+# The `dialogue`, `steering` and `fields` features arrive with their dependencies once the upstream
+# changes they need are merged (bevy_speech_bubbles' DialogueNodeEntered; bevy_orca and
+# bevy_stigmergy on Bevy 0.20).
+[features]
+default = []
+
+[dependencies]
+bevy = { version = "0.20.0", default-features = false, features = ["bevy_log", "std"] }  # https://github.com/bevyengine/bevy — the engine
+rhai = { version = "1.27", features = ["sync", "f32_float"] }                            # https://github.com/rhaiscript/rhai — the trigger and effect scripts
+serde = { version = "1", features = ["derive"] }                                         # https://github.com/serde-rs/serde — authored definitions
+ron = "0.12"                                                                             # https://github.com/ron-rs/ron — the definitions' file format
+rand_chacha = "0.10"   # https://github.com/rust-random/rand — names ChaCha8Rng; the stream comes from bevy_emerge_rng
+bevy_emerge_rng = { git = "https://github.com/Ladvien/bevy_emerge", rev = "a5dcbb08b228dae8678b886dd3e54c5e2d098e3b" }  # https://github.com/Ladvien/bevy_emerge — the seeded ChaCha8 stream and DetRng draws
+
+[dev-dependencies]
+bevy = { version = "0.20.0" }                                                            # full umbrella, examples/tests only
+bevy_fairy = { git = "https://github.com/Ladvien/bevy_fairy", rev = "04d120e729affdac4cf592b8894c71ff1b8e031e", default-features = false, features = ["plugin"] }  # https://github.com/Ladvien/bevy_fairy — the agentic debugger in the village example
+serde_json = "1"                                                                         # https://github.com/serde-rs/json — the example's debug-command payloads
+
+[lints.rust]
+missing_docs = "warn"
+unsafe_code = "forbid"
+
+[lints.clippy]
+all = { level = "warn", priority = -1 }
+todo = "deny"
+unimplemented = "deny"
+dbg_macro = "deny"
+
+[package.metadata.docs.rs]
+all-features = true
+
+[profile.dev.package."*"]
+opt-level = 3
