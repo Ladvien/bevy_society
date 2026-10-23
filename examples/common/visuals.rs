@@ -4,7 +4,6 @@
 //! None of this is part of the crate. It reads the crate's components and draws them, which is the
 //! point: a game keeps its own presentation and `bevy_society` keeps the society.
 
-use bevy::ecs::message::MessageReader;
 use bevy::prelude::*;
 use bevy_society::{
     Knowledge, PersonIndex, RumorBook, RumorId, SocietyClock, SocietySettings, TieLabel, Ties,
@@ -122,8 +121,8 @@ pub fn spawn_hud(commands: &mut Commands, font: Handle<Font>) -> Entity {
             Hud,
             Text::new("Day 0 · 00:00"),
             TextFont {
-                font,
-                font_size: 16.0,
+                font: bevy::text::FontSource::Handle(font),
+                font_size: bevy::text::FontSize::Px(16.0),
                 ..default()
             },
             TextColor(Color::WHITE),
@@ -204,7 +203,7 @@ pub fn spawn_sun(commands: &mut Commands) -> Entity {
             VillageSun,
             DirectionalLight {
                 illuminance: 9_000.0,
-                shadows_enabled: true,
+                shadow_maps_enabled: true,
                 ..default()
             },
             Transform::from_rotation(Quat::from_euler(EulerRot::XYZ, -0.9, 0.6, 0.0)),
@@ -243,40 +242,5 @@ pub fn move_sun(
         // pitch black.
         let pitch = -0.25 - 1.1 * elevation;
         *transform = Transform::from_rotation(Quat::from_euler(EulerRot::XYZ, pitch, 0.6, 0.0));
-    }
-}
-
-/// Prints every message the crate writes, when the `--verbose` flag is passed. Diagnostics for a host
-/// debugging its own scene; off by default.
-#[derive(Resource, Debug, Clone, Copy, Default)]
-pub struct TraceMessages(pub bool);
-
-/// Logs each social exchange, activity and bark that happened this frame.
-pub fn trace_messages(
-    trace: Res<TraceMessages>,
-    mut exchanges: MessageReader<bevy_society::InteractionResolved>,
-    mut activities: MessageReader<bevy_society::ActivityStarted>,
-    mut barks: MessageReader<bevy_society::SocietyBark>,
-) {
-    if !trace.0 {
-        for _ in exchanges.read() {}
-        for _ in activities.read() {}
-        for _ in barks.read() {}
-        return;
-    }
-    for exchange in exchanges.read() {
-        info!(
-            "exchange: {} -> {} ({}{})",
-            exchange.actor,
-            exchange.target,
-            exchange.interaction,
-            if exchange.accepted { "" } else { ", refused" }
-        );
-    }
-    for activity in activities.read() {
-        info!("activity: {} starts {}", activity.person, activity.activity);
-    }
-    for bark in barks.read() {
-        info!("bark: {} says {:?}", bark.speaker, bark.text);
     }
 }

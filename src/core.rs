@@ -79,11 +79,12 @@ pub struct Tuning {
     /// Half-life of an emotion's intensity, in game-days (ALMA-style decay; Gebhard 2005,
     /// DOI 10.1145/1082473.1082478).
     pub emotion_half_life_days: f32,
-    /// How fast mood is pulled toward the emotion centre, per game-day, scaled by emotion intensity
-    /// (Mehrabian 1996, DOI 10.1080/00049539608259510).
+    /// How fast mood is pulled toward the emotion centre, per game-day, scaled by emotion intensity.
+    /// Mechanism: ALMA's mood update (Gebhard 2005, DOI 10.1145/1082473.1082478); the baseline it
+    /// returns to is the Mehrabian 1996 personality mapping (DOI 10.1080/00049539608259510).
     pub mood_pull_per_day: f32,
-    /// How fast mood returns to its personality baseline, per game-day (Gebhard 2005,
-    /// DOI 10.1145/1082473.1082478).
+    /// How fast mood returns to its personality baseline, per game-day. Mechanism: ALMA's mood
+    /// update (Gebhard 2005, DOI 10.1145/1082473.1082478).
     pub mood_return_per_day: f32,
     /// Strength of pleasure contagion from contacts, per game-day (Hatfield 1993,
     /// DOI 10.1111/1467-8721.ep10770953).

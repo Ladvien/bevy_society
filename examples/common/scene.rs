@@ -7,9 +7,7 @@
 use bevy::ecs::name::Name;
 use bevy::prelude::*;
 use bevy_emerge_rng::{DetRng, seeded};
-use bevy_society::{
-    Autonomous, Home, Person, Personality, Place, PlaceTags, SocietyDefs, Tuning,
-};
+use bevy_society::{Autonomous, Home, Person, Personality, Place, PlaceTags, SocietyDefs, Tuning};
 
 /// Half the ground's side, in metres.
 pub const GROUND_HALF: f32 = 20.0;
@@ -78,10 +76,13 @@ pub fn spawn_ground(
     commands
         .spawn((
             Name::new("ground"),
-            Mesh3d(meshes.add(Plane3d::default().mesh().size(
-                GROUND_HALF * 2.0,
-                GROUND_HALF * 2.0,
-            ))),
+            Mesh3d(
+                meshes.add(
+                    Plane3d::default()
+                        .mesh()
+                        .size(GROUND_HALF * 2.0, GROUND_HALF * 2.0),
+                ),
+            ),
             MeshMaterial3d(material),
             Transform::default(),
         ))
@@ -160,7 +161,9 @@ pub fn spawn_villagers(
             ))
             .id();
         #[cfg(feature = "steering")]
-        commands.entity(entity).insert(bevy_society::SocialMover::default());
+        commands
+            .entity(entity)
+            .insert(bevy_society::SocialMover::default());
         out.push(entity);
     }
     out

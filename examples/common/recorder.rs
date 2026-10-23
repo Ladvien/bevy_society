@@ -108,9 +108,11 @@ impl Recorder {
             .resource_mut::<Assets<Image>>()
             .add(image);
 
-        app.main
-            .world_mut()
-            .spawn((Camera3d::default(), RenderTarget::from(target.clone()), camera));
+        app.main.world_mut().spawn((
+            Camera3d::default(),
+            RenderTarget::from(target.clone()),
+            camera,
+        ));
 
         Some(Recorder {
             app,

@@ -1,0 +1,103 @@
+// The village's conversations, for bevy_speech_bubbles' DialogueScript.
+//
+// Three rule ids in village.society.ron each name one of these: greet_friend, greet_rival and greet.
+// The speakers are "npc" and "player", which the dialogue plugin binds to the two people in the talk.
+//
+// `Node` is an externally tagged enum, so a node is `Line(..)` or `Choice(..)`, not a struct.
+(
+    conversations: {
+        "greet": (
+            start: "hello",
+            nodes: {
+                "hello": Line(
+                    speaker: "npc",
+                    emotion: Joy,
+                    text: "Morning, player.",
+                    next: Some("gossip"),
+                ),
+                "gossip": Choice(
+                    speaker: "npc",
+                    prompt: "Did you hear about Bram?",
+                    options: [
+                        (text: "He is a good man.", next: "compliment"),
+                        (text: "I never trusted him.", next: "insult"),
+                    ],
+                ),
+                "compliment": Line(
+                    speaker: "player",
+                    emotion: Joy,
+                    text: "He is a good man.",
+                    next: None,
+                ),
+                "insult": Line(
+                    speaker: "player",
+                    emotion: Anger,
+                    text: "I never trusted him.",
+                    next: None,
+                ),
+            },
+        ),
+        "greet_friend": (
+            start: "hello",
+            nodes: {
+                "hello": Line(
+                    speaker: "npc",
+                    emotion: Joy,
+                    text: "There you are. Walk with me?",
+                    next: Some("gossip"),
+                ),
+                "gossip": Choice(
+                    speaker: "npc",
+                    prompt: "Did you hear about Bram?",
+                    options: [
+                        (text: "He is a good man.", next: "compliment"),
+                        (text: "I never trusted him.", next: "insult"),
+                    ],
+                ),
+                "compliment": Line(
+                    speaker: "player",
+                    emotion: Joy,
+                    text: "He is a good man.",
+                    next: None,
+                ),
+                "insult": Line(
+                    speaker: "player",
+                    emotion: Anger,
+                    text: "I never trusted him.",
+                    next: None,
+                ),
+            },
+        ),
+        "greet_rival": (
+            start: "hello",
+            nodes: {
+                "hello": Line(
+                    speaker: "npc",
+                    emotion: Anger,
+                    text: "You. What do you want?",
+                    next: Some("gossip"),
+                ),
+                "gossip": Choice(
+                    speaker: "npc",
+                    prompt: "Did you hear about Bram?",
+                    options: [
+                        (text: "He is a good man.", next: "compliment"),
+                        (text: "I never trusted him.", next: "insult"),
+                    ],
+                ),
+                "compliment": Line(
+                    speaker: "player",
+                    emotion: Joy,
+                    text: "He is a good man.",
+                    next: None,
+                ),
+                "insult": Line(
+                    speaker: "player",
+                    emotion: Anger,
+                    text: "I never trusted him.",
+                    next: None,
+                ),
+            },
+        ),
+    },
+)

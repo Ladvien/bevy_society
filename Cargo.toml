@@ -27,6 +27,11 @@ bevy_orca = { git = "https://github.com/Ladvien/bevy_orca", rev = "88168eb19c157
 bevy_stigmergy = { git = "https://github.com/Ladvien/bevy_stigmergy", rev = "9d17e8607ec8ecf8b0b9b2b7e6361217efdf637a", optional = true }  # https://github.com/Ladvien/bevy_stigmergy — per-cell presence and commotion fields (fields feature)
 bevy_speech_bubbles = { git = "https://github.com/Ladvien/bevy_speech_bubbles", rev = "7cdd67b830bf35238cd22e0a88154b8063df61f0", optional = true }  # https://github.com/Ladvien/bevy_speech_bubbles — barks and conversations (dialogue feature)
 
+[[example]]
+name = "village"
+path = "examples/village.rs"
+required-features = ["dialogue"]
+
 [dev-dependencies]
 bevy = { version = "0.20.0" }                                                            # full umbrella, examples/tests only
 bevy_fairy = { git = "https://github.com/Ladvien/bevy_fairy", rev = "04d120e729affdac4cf592b8894c71ff1b8e031e", default-features = false, features = ["plugin"] }  # https://github.com/Ladvien/bevy_fairy — the agentic debugger in the village example

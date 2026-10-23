@@ -124,8 +124,9 @@ impl Personality {
     }
 }
 
-/// Pleasure, arousal and dominance, each in `[-1, 1]` (Russell 1980, DOI 10.1037/h0077714;
-/// Mehrabian 1996, DOI 10.1007/BF02686918).
+/// Pleasure, arousal and dominance, each in `[-1, 1]` (Russell 1980, DOI 10.1037/h0077714; the
+/// Mehrabian 1996 mapping this crate uses is DOI 10.1080/00049539608259510, the one `model::pad`
+/// implements).
 #[derive(Component, Clone, Copy, Debug, Default, PartialEq, Reflect)]
 pub struct Mood {
     /// Pleasure (valence).
@@ -178,8 +179,10 @@ impl Mood {
     /// affinity-weighted mean pleasure of the person's contacts and the contagion weight `E` (the
     /// caller passes extraversion); `None` when no contact has positive weight.
     ///
-    /// Pull: Gebhard 2005 (DOI 10.1145/1082473.1082478); return to baseline: Mehrabian 1996 (DOI
-    /// 10.1080/00049539608259510); contagion: Hatfield et al. 1993 (DOI 10.1111/1467-8721.ep10770953).
+    /// Pull and return are both ALMA's mood update (Gebhard 2005, DOI 10.1145/1082473.1082478); the
+    /// baseline returned to is the Mehrabian 1996 personality mapping (DOI
+    /// 10.1080/00049539608259510); contagion is Hatfield et al. 1993 (DOI
+    /// 10.1111/1467-8721.ep10770953).
     pub fn step(
         &mut self,
         baseline: Mood,
