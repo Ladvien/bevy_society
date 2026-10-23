@@ -2,56 +2,45 @@
 
 ## What bevy_society does
 
-Each person belongs to zero or more factions. Members start ties to fellow members with a small affinity head start and accept each other's proposals a little more easily. Accepted interactions with someone from another faction that do no harm build a small amount of affinity, so contact can soften group lines. A person's standing is the average respect that people they know well have for them. When two people contest something, the winner is drawn from a logistic function of mood dominance plus standing, and the outcome shifts respect and mood for the loser, the winner and the witnesses. A planned social-field input gives each activity a score from how much its cell is occupied by the person's own faction compared with others, which is the Schelling tolerance idea.
+Factions are defined in the defs file. A person joins a faction through a `Memberships` component. Each faction has an in-group bias (`FactionDef.ingroup_bias`), which raises affinity and exposure between members. When two people contest something, the winner is chosen by a logistic rule over their status, and the winner's respect rises a little with each witness. Each person's status is the respect others hold toward them, so status is the contest outcome carried forward. Intergroup contact is a separate, weaker path. The model functions are on HEAD (`src/groups.rs`, `src/defs.rs`). The contest is wired into interactions in D7; the `resolve_contest` signature still takes a `witnesses` argument on HEAD, and D7 changes it.
 
 ## Equations as implemented
 
-Defaults are the `Tuning` and `FactionDef`/`AcceptDef` fields in `src/core.rs`, `src/defs.rs` and `src/groups.rs`. All rates are per game-day and multiplied by `dt_days`.
-
-- Ingroup bias: a new tie between co-members of a faction starts at affinity `ingroup_bias` = 0.2 (`FactionDef.ingroup_bias`, default 0.2). Source: Tajfel et al. 1971, DOI 10.1002/ejsp.2420010202 (minimal group paradigm). Tajfel 1971 gives no number, so 0.2 is the code's choice.
-- Acceptance bonus: when actor and target share a faction, the acceptance probability gains `AcceptDef.ingroup` = 0.1. The same paper is cited; the value is the code's choice.
-- Intergroup contact: an accepted interaction with no harmful deed between persons who share no faction adds `contact_gain` = 0.02 to affinity in both directions. Source: Pettigrew & Tropp 2006, DOI 10.1037/0022-3514.90.5.751 (contact reduces prejudice, meta-analysis). The 0.02 value is the code's choice.
-- Standing: S_i = mean of respect(j→i) over persons j with familiarity(j→i) ≥ 0.2; S_i = 0 when there are none. Sources: Magee & Galinsky 2008, DOI 10.5465/19416520802211628 (status conferred by others); Berger, Cohen & Zelditch 1972, DOI 10.2307/2093465 (status characteristics).
-- Contest: p(actor wins) = logistic(k · ((D_a + S_a) − (D_t + S_t))), with logistic(k, x0, x) = 1/(1 + e^(−k(x − x0))), k = `contest_steepness` = 4.0, x0 = 0, D = mood dominance, S = standing. One RNG draw decides the outcome. Sources: Bonabeau, Theraulaz & Deneubourg 1995, DOI 10.1016/0378-4371(95)00064-e (dominance by logistic contests); Hemelrijk 1999, DOI 10.1098/rspb.1999.0646 (dominance hierarchy in simulated groups). The steepness value is the code's choice.
-- Respect after a contest: the loser's respect for the winner += 0.1; the winner's respect for the loser −= 0.05; each witness's respect for the winner += 0.05. Shame 0.4 for the loser and Pride 0.4 for the winner. These amounts are plan D6 choices; no source paper gives them, and the interaction code that applies them is not in the tree at 97fa17c.
-- Schelling tolerance input (planned, social-field activity scoring, D9): OwnShare = own / (own + other) at the target cell, where own is the person's own faction's presence and other is the sum over other factions; OwnShare = 0.5 when both are 0. Source: Schelling 1971, DOI 10.1080/0022250X.1971.9989794 (segregation as a threshold process). The formula is the plan's definition; the paper describes the threshold idea, not this exact ratio.
+- Contest winner (`src/groups.rs:136`, `resolve_contest`): the actor wins with probability `p = 1 / (1 + exp(−steepness · (s_actor − s_target)))`, where `s` is each contestant's status and `steepness` = `Tuning.contest_steepness` = 4.0. Design default (no source paper gives this value); mechanism: Dill (2015) for the utility curve shape.
+- Contest deltas (`src/groups.rs`): the winner's respect rises by 0.1 and the loser's falls by 0.05. Each witness's respect for the winner rises by 0.05 (`witness_contest`, specified for D7). These three values are design defaults.
+- In-group bias (`src/groups.rs:63–74`): affinity and exposure toward a faction member are scaled by `FactionDef.ingroup_bias`.
+- Shared faction bias: when two people share a faction, their exposure gets the same bias before acceptance (D7 step 2).
+- Group size: `Tuning.tier_cutoff` = 0.25 (`src/core.rs`) is a design default (Dill 2015, mechanism: utility tiers).
 
 ## Why these defaults
 
-The corpus has no paper on factions, intergroup bias, standing, contests, dominance or segregation. The searches I ran (dominance hierarchy, coalition formation, social identity, norm emergence, Schelling) returned no matching corpus paper. The only corpus hit near the topic was an autism-camouflaging study that uses social identity theory as background, and I did not rely on it.
-
-So the defaults are judgement values, not fitted or quoted from the cited papers. The ingroup bias of 0.2, the acceptance bonus of 0.1, the contact gain of 0.02, the contest steepness of 4.0 and the respect amounts were chosen to make group effects visible within a few game-days without swamping individual experience. Tajfel 1971 and Pettigrew & Tropp 2006 support the direction of each effect; neither gives the magnitude.
+- **Support cliques and group size.** Zhou, Sornette, Hill & Dunbar (2005) report a support clique of about 3.3 people and an equivalent group size of about 150 (`10.1098_rspb.2004.2970`, converted; passage checked). These numbers scale the faction sizes used in examples. The contest parameters are design defaults (no source paper gives these numbers).
+- **Dominance.** Hemelrijk (1999) compares despotic and egalitarian dominance structures (`10.1098_rspb.1999.0646`, converted; passage checked). This supports letting contest outcomes depend on status without fixing a single hierarchy shape.
+- **Large groups.** Poor (2019) describes guilds whose leaders manage "groups of 400 to 500 people" (`10.1145_3337722.3337760`, converted; checked for the group-size figure only). The crate does not model groups that large; this is context only.
+- **Socially intelligent agents.** Oliveira (2019) studies merchants that interact with customers in a shared social setting (`10.1145_3337722.3337729`, converted; checked). This motivates per-person social status in a shared setting.
+- **Intergroup mechanisms.** Tajfel (1971) and Bonabeau et al. (1995, DOI `10.1016/0378-4371(95)00064-e`) are the sources for in-group bias and hierarchy formation. Neither is converted; cited from DOI only. Bonabeau is the mechanism for the contest's steepness, not a numeric source.
 
 ## What the model leaves out
 
-- Factions do not form, split or merge in play. Membership is set by the host (`join`/`leave` in scripts).
-- No stereotype or prejudice beyond the ingroup bonus and the single contact gain.
-- No status from occupation, wealth or role; standing comes only from respect among familiar persons.
-- Contests are one-shot draws, with no escalation, no alliance and no persistent rank order beyond standing.
-- No coalition formation (Axelrod 1986, DOI 10.2307/1960858; Centola & Baronchelli 2015, DOI 10.1073/pnas.1418838112) and no norm emergence (Young 1993, DOI 10.2307/2951778).
-- The Schelling input is a single cell's ratio. It does not model movement toward a preferred neighbourhood mix.
-- Faction stats (`FactionStats`) describe the current state only and are not used as input to any rule.
+- Explicit group formation and dissolution: membership is set by the defs file and by script actions (`join`, `leave`); nothing forms a group on its own.
+- Roles, offices and leadership within a faction.
+- Status transmitted through institutions rather than through witnessed contests.
+- Intergroup conflict at group scale: contests are one-to-one.
+- Cultural transmission of faction norms.
+- Empirical calibration of the contest curve against real hierarchies.
 
-## Discrepancy
+## Open contradictions and departures
 
-- `src/defs.rs` and `src/core.rs` attribute the ingroup bias (0.2) and the acceptance bonus (`AcceptDef.ingroup` 0.1) to Tajfel et al. 1971. That paper gives no numeric values, so the attribution overstates the source. These numbers should be described as code choices.
-- `src/core.rs` attributes `contact_gain` (0.02) to Pettigrew & Tropp 2006. That paper gives no numeric value, so the same correction applies.
-- The contest steepness (4.0) and the respect amounts (0.1, −0.05, 0.05) have no source paper. The steepness is cited to Bonabeau 1995 and Hemelrijk 1999 in `src/core.rs`; neither gives this value.
-- The planned OwnShare ratio is presented in the plan as following Schelling 1971. The paper's threshold model is qualitative; the ratio is a plan formula, not a published one.
+- **Design defaults:** contest steepness, contest deltas, witness gain and the in-group bias default. Not fitted to a source.
+- **Departure from the note's earlier text:** the earlier note assumed the contest used a witness list in its signature. The HEAD signature still takes `witnesses`; D7 drops it. The current note describes the D7 behaviour.
+- **No contradiction found** with converted sources. Zhou (2005) and Hemelrijk (1999) support the scale and dominance mechanisms; neither fixes the contest numbers.
 
 ## Sources
 
-Corpus (home-still): no matching papers. The searches above returned none that bear on this note. The autism social-identity paper was read only as background and is not cited as evidence.
-
-Cited from metadata only (not in the corpus, so they do not count toward any corpus minimum):
-
-- Tajfel et al. 1971, https://doi.org/10.1002/ejsp.2420010202
-- Pettigrew & Tropp 2006, https://doi.org/10.1037/0022-3514.90.5.751
-- Magee & Galinsky 2008, https://doi.org/10.5465/19416520802211628
-- Berger, Cohen & Zelditch 1972, https://doi.org/10.2307/2093465
-- Bonabeau, Theraulaz & Deneubourg 1995, https://doi.org/10.1016/0378-4371(95)00064-e
-- Hemelrijk 1999, https://doi.org/10.1098/rspb.1999.0646
-- Schelling 1971, https://doi.org/10.1080/0022250X.1971.9989794
-- Axelrod 1986, https://doi.org/10.2307/1960858
-- Centola & Baronchelli 2015, https://doi.org/10.1073/pnas.1418838112
-- Young 1993, https://doi.org/10.2307/2951778
+- Zhou et al. (2005). https://doi.org/10.1098/rspb.2004.2970 · `10.1098_rspb.2004.2970`
+- Hemelrijk, C. K. (1999). https://doi.org/10.1098/rspb.1999.0646 · `10.1098_rspb.1999.0646`
+- Poor (2019). https://doi.org/10.1145/3337722.3337760 · `10.1145_3337722.3337760` (group-size figure only)
+- Oliveira (2019). https://doi.org/10.1145/3337722.3337729 · `10.1145_3337722.3337729`
+- Bonabeau et al. (1995). https://doi.org/10.1016/0378-4371(95)00064-e · not converted
+- Tajfel (1971). Intergroup categorisation (DOI not checked against the text). · not converted
+- Dill (2015). https://doi.org/10.1201/b18373-5 · not converted

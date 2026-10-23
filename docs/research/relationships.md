@@ -2,64 +2,56 @@
 
 ## What bevy_society does
 
-Every person keeps a sorted list of directed ties, one per person it has met. A tie stores affinity (from -1 to 1), trust (0 to 1), respect (-1 to 1), and a familiarity peak that fades as time passes without contact. Ties grow through repeated contact (mere exposure), drift back toward neutral when unused, and are nudged by structural balance (friends of friends tend to agree about third parties). Each person keeps at most 150 ties, and drops the least familiar ones first. A tie is labelled Friend, Rival, Acquaintance or Stranger from its affinity and familiarity, and a label change is written as a message.
+Each person keeps a `Ties` component: one `Tie` per person they know. A tie holds an affinity in `[-1, 1]`, trust in `[0, 1]` (default 0.5), respect in `[-1, 1]`, a familiarity peak with the day of last contact, and a label (Friend, Acquaintance, Stranger, Rival). Familiarity decays on a power law from the last contact. Contact (exposure) raises familiarity and nudges affinity toward the other person. Affinity relaxes slowly toward zero when no one reinforces it. When two people share a friend, a triadic balance step nudges the pair's affinity. A label changes only when a threshold is crossed, and the change is emitted as a message. The model functions are on HEAD (`src/relationships.rs`, `src/model/recall.rs`, `src/model/balance.rs`).
 
 ## Equations as implemented
 
-All rates are per game-day and are multiplied by `dt_days`, the length of one tick in game-days. Defaults are the `TieRates` fields in `src/relationships.rs`.
-
-- Familiarity, power-law forgetting: f(t) = peak · (1 + (t − t_last) / τ)^(−d). Defaults τ = `familiarity_tau_days` = 1.0 and d = `familiarity_decay_exp` = 0.5. Sources: Anderson & Schooler 1991, DOI 10.1111/j.1467-9280.1991.tb00174.x (power-law forgetting); Murre & Dros 2015, DOI 10.1371/journal.pone.0120644 (power-law retention model). The exponent 0.5 is the code's choice; see the discrepancy below.
-- Mere exposure on each contact, both directions: f = f(t); peak' = clamp(f + `exposure_per_day` · dt · (1 − f), 0, 1) with `exposure_per_day` = 2.0; affinity' = clamp(affinity + `mere_exposure_per_day` · dt · (1 − |affinity|), −1, 1) with `mere_exposure_per_day` = 0.05. Source: Zajonc 1968, DOI 10.1037/h0025848 (repeated exposure raises liking). The numeric rates are the code's choice.
-- Affinity relaxes toward zero when there is no contact: affinity' = relax_toward_zero(affinity, `affinity_relax_per_day` · dt), with `affinity_relax_per_day` = 0.01. It never crosses zero. No source paper gives this rate.
-- Structural balance: each tick, `balance_samples_per_tick` = 8 triads are sampled. A is uniform over the sorted persons. B and C are uniform over A's ties, and the tie B→C must exist. Then affinity(A→C) += `balance_rate_per_day` · dt · affinity(A→B) · affinity(B→C), with `balance_rate_per_day` = 0.5. Sources: Heider 1946, DOI 10.1080/00223980.1946.9917275 (balance theory); Cartwright & Harary 1956, DOI 10.1037/h0046049 (balance in signed graphs). The sampling rate is the code's choice.
-- Capacity: when a person has more than `max_ties` = 150 ties, the ties with the lowest familiarity are removed until the count is 150. Source: Dunbar 1992, DOI 10.1016/0047-2484(92)90081-J (about 150 stable relationships). The "close" set is the top `close_ties` = 15 ties by max(0, affinity) · familiarity. Source: Zhou, Sornette, Hill & Dunbar 2005, DOI 10.1098/rspb.2004.2970 (layered sympathy groups).
-- Labels, thresholds set in code (no source paper): Friend if affinity ≥ 0.4 and familiarity ≥ 0.3; Rival if affinity ≤ −0.4 and familiarity ≥ 0.2; Stranger if familiarity < 0.1; otherwise Acquaintance.
-- Triadic closure: when A and B interact while C, a close tie of A, is in contact range, the familiarity between B and C is raised by `introduction_familiarity` = 0.1. Source: Kossinets & Watts 2006, DOI 10.1126/science.1116869 (triadic closure in an email network). The value 0.1 is the code's choice; the paper gives no such number.
+- Familiarity (`src/model/recall.rs:18–20`, used by `Tie::familiarity`, `src/relationships.rs:99–106`): `f = peak · (1 + elapsed/τ)^(−d)`, with `τ = Tuning.familiarity_tau_days` = 1.0, `d = Tuning.familiarity_decay_exp` = 0.5, and `elapsed` in game days since `last_contact_day`.
+- Exposure (`src/relationships.rs:110–117`):
+  - `familiarity_peak ← clamp(f + rate · dt · (1 − f), 0, 1)`, with `rate = Tuning.exposure_per_day` = 2.0;
+  - `affinity ← clamp(affinity + mere_exposure_per_day · dt · (1 − |affinity|), −1, 1)`, with `mere_exposure_per_day` = 0.05.
+- Relaxation (`src/relationships.rs:120–123`): affinity moves toward zero by `affinity_relax_per_day · dt`, with `affinity_relax_per_day` = 0.01 (`src/model/balance.rs`, `relax_toward_zero`).
+- Triadic balance (`src/model/balance.rs:7–9`): `Δaff(A→B) = balance_rate_per_day · dt · aff(A→B) · aff(B→C)`, with `balance_rate_per_day` = 0.5 and `balance_samples_per_tick` = 8 (`src/core.rs`).
+- Introduction (`introduction_familiarity` = 0.1 starting peak, design default): a new tie starts at this familiarity.
+- Labels (`src/relationships.rs:40–50`, `TieLabel::classify`):
+  - Friend if affinity ≥ 0.4 and familiarity ≥ 0.3;
+  - Rival if affinity ≤ −0.4 and familiarity ≥ 0.2;
+  - Stranger if familiarity < 0.1;
+  - otherwise Acquaintance.
+  `refresh_label` (`:127–140`) returns the old and new label only when the label changes.
 
 ## Why these defaults
 
-The corpus gives qualitative support for the mechanisms and no numeric support for the rates. Gillespie et al. 2015 (doc_id `10.1371_journal.pone.0128900`) reports from 25,185 online respondents that "Homophily is the notion that people affiliate with others who are similar to themselves", and describes gender homophily as "a well-established phenomenon in heterosexual friendships". That supports the idea that similarity drives tie formation, which is the basis for the affinity gain from contact and for the similarity term in the opinion notes. The paper reports self-reported friend counts, so it does not inform any rate in the model. Note that the Gillespie et al. data is self-report from one website, so it is weak evidence for the general case.
-
-The mere-exposure and balance rates, the affinity relaxation rate, the familiarity exponent, the label thresholds and the introduction familiarity were chosen to keep ties moving at a visible pace over game-days. They are not fitted to data.
+- **Familiarity decay.** Murre & Dros (2015) fit a power function to forgetting (`10.1371_journal.pone.0120644`, converted; power-function passage checked). Anderson & Schooler (1991) show the same shape for memory (DOI `10.1111/j.1467-9280.1991.tb00174.x`, not converted; cited from DOI only).
+- **Support cliques and group size.** Zhou, Sornette, Hill & Dunbar (2005) give a support clique of about 3.3 people and an equivalent group size of about 150 (`10.1098_rspb.2004.2970`, converted; passage checked). Those numbers set the scale of `close_ties` = 15 in `SocietySettings`; the figure 15 itself is a design default (no source paper gives this number).
+- **Network dynamics.** Sekara, Stopczynski & Lehmann (2016) show how close-tie networks change over time (`10.1073_pnas.1602803113`, converted; passage checked). This supports letting ties change rather than fixing them.
+- **Homophily.** Gillespie et al. (2015) report that "friendship patterns demonstrated gender-based homophily" (`10.1371_journal.pone.0128900`, converted; passage checked). The affinity similarity step in `src/model/opinion.rs` is a design default in the same spirit; the study does not give its size.
+- **Mere exposure.** Zajonc (1968, DOI `10.1037/h0025848`, not converted) is the mechanism for the exposure step. Zandstra (2000, `10.18174_197257`, converted) quotes it, which is secondary support only.
+- **Balance.** Heider (1946) and Cartwright & Harary (1956) describe triadic balance (DOIs `10.1080/00223980.1946.9917275` and `10.1037/h0046049`, not converted). The rate `0.5` is a design default.
+- **Label thresholds.** `0.4`, `0.3`, `0.2` and `0.1` are design defaults (no source paper gives these numbers). The code's doc comment says the thresholds follow the mechanisms of Zajonc (1968) and Byrne (1961, DOI `10.1037/h0044721`, not converted).
 
 ## What the model leaves out
 
-- Tie dissolution beyond the capacity rule: ties are never deleted on a bad experience; they only lose familiarity and drift toward zero.
-- Homophily on attributes such as age, gender, income or occupation. Only faction membership and affinity drive similarity.
-- Strength of weak ties (Granovetter 1973, DOI 10.1086/225469): the model does not separate weak from strong bridges.
-- Reciprocity asymmetry beyond the directed edges: there is no explicit exchange-based rule (Homans 1958; Emerson 1976).
-- Balance over all triads: only 8 random triads per tick are sampled, so balance converges slowly on large villages.
-- Trust decay: trust changes only through deeds, gossip and witnessing, not with time.
-- Attachment styles, power-law degree growth and preferential attachment (Barabási & Albert 1999, DOI 10.1126/science.286.5439.509; Watts & Strogatz 1998, DOI 10.1038/30918). The network is built by contact, not by a growth rule.
+- Reciprocity and mutual perception: each person's tie is held separately, so asymmetric views are allowed but not explained.
+- Strength of ties from shared activities or time spent together, beyond exposure.
+- Dissolution of ties through conflict, except through the rival label.
+- Group-based tie formation beyond the faction bias applied in D7.
+- Kin, role or structural ties (family, employer); only interaction history counts.
 
-## Discrepancy
+## Open contradictions and departures
 
-- `src/model/recall.rs` cites `docs/research/memory.md` to confirm the familiarity exponent 0.5. That note does not exist yet (`docs/research/` contains only `corpus/`), and no corpus paper I searched gives the exponent. The value stays unconfirmed.
-- `src/relationships.rs` `introduction_familiarity` (0.1) is attributed to Kossinets & Watts 2006 in `src/core.rs`. That paper gives no such value. The number is a plan choice and should be described that way.
-- `affinity_relax_per_day` (0.01) has no source paper. `src/model/balance.rs` says so and points to this note; this note cannot supply one.
-- The label thresholds (0.4, 0.3, 0.2, 0.1) have no source paper.
+- **Design defaults:** the label thresholds, exposure rates and balance rate are design defaults, not fitted to a source.
+- **No contradiction** found with converted sources. Gillespie and Zhou support the scale and homophily mechanisms; neither fixes the numeric thresholds.
 
 ## Sources
 
-Corpus (home-still):
-
-- `10.1371_journal.pone.0128900`: Gillespie, Frederick, Harari & Grov 2015, "Homophily, Close Friendship, and Life Satisfaction among Gay, Lesbian, Heterosexual, and Bisexual Men and Women", https://doi.org/10.1371/journal.pone.0128900. Read in full (region 1). Used for the homophily claim only.
-
-Cited from metadata only (not in the corpus, so they do not count toward the corpus minimum):
-
-- Heider 1946, https://doi.org/10.1080/00223980.1946.9917275
-- Cartwright & Harary 1956, https://doi.org/10.1037/h0046049
-- Zajonc 1968, https://doi.org/10.1037/h0025848
-- Byrne 1961, https://doi.org/10.1037/h0044721
-- McPherson, Smith-Lovin & Cook 2001, https://doi.org/10.1146/annurev.soc.27.1.415
-- Dunbar 1992, https://doi.org/10.1016/0047-2484(92)90081-J
-- Zhou et al. 2005, https://doi.org/10.1098/rspb.2004.2970
-- Granovetter 1973, https://doi.org/10.1086/225469
-- Kossinets & Watts 2006, https://doi.org/10.1126/science.1116869
-- Barabási & Albert 1999, https://doi.org/10.1126/science.286.5439.509
-- Watts & Strogatz 1998, https://doi.org/10.1038/30918
-- Anderson & Schooler 1991, https://doi.org/10.1111/j.1467-9280.1991.tb00174.x
-- Murre & Dros 2015, https://doi.org/10.1371/journal.pone.0120644
-- Homans 1958, https://doi.org/10.1086/222355; Emerson 1976, https://doi.org/10.1146/annurev.so.02.080176.002003
-
-Corpus gaps: searches for balance theory, triadic closure, mere exposure, and friendship-formation models returned no matching corpus papers. Those topics need papers added through the Phase A pipeline.
+- Zhou, W.-X., Sornette, D., Hill, R. A. & Dunbar, R. I. M. (2005). Discrete hierarchical organization of social group sizes. https://doi.org/10.1098/rspb.2004.2970 · `10.1098_rspb.2004.2970`
+- Sekara, V., Stopczynski, A. & Lehmann, S. (2016). Fundamental structures of dynamic social networks. https://doi.org/10.1073/pnas.1602803113 · `10.1073_pnas.1602803113`
+- Gillespie, C. et al. (2015). https://doi.org/10.1371/journal.pone.0128900 · `10.1371_journal.pone.0128900`
+- Murre, J. M. J. & Dros, J. (2015). Replication and analysis of Ebbinghaus' forgetting curve. https://doi.org/10.1371/journal.pone.0120644 · `10.1371_journal.pone.0120644`
+- Zandstra, E. (2000). Mere exposure, thesis. · `10.18174_197257` (secondary; quotes Zajonc)
+- Anderson, J. R. & Schooler, L. J. (1991). https://doi.org/10.1111/j.1467-9280.1991.tb00174.x · not converted
+- Zajonc, R. B. (1968). https://doi.org/10.1037/h0025848 · not converted
+- Heider, F. (1946). https://doi.org/10.1080/00223980.1946.9917275 · not converted
+- Cartwright, D. & Harary, F. (1956). https://doi.org/10.1037/h0046049 · not converted
+- Byrne, D. (1961). https://doi.org/10.1037/h0044721 · not converted

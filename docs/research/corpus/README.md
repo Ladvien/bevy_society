@@ -1,6 +1,6 @@
 # Social-psychology corpus (home-still)
 
-Snapshot: 2026-10-23 22:58 UTC (`summary.json`, `generated_at`). Partial: 63 of the 86 acquired papers still await conversion, and 22 of them are embedded.
+Snapshot: 2026-10-23 23:44 UTC (`summary.json`, `generated_at`). Partial: 63 of the 86 acquired papers still await conversion, and 22 of them are embedded.
 
 ## Scope
 - 300 papers selected from 1480 candidates: 99 seeds from `tools/corpus/seeds.tsv` (the plan's DOI list) plus 201 sweep papers from 42 queries in `tools/corpus/queries.tsv` (six per module).
