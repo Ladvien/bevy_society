@@ -40,6 +40,7 @@ Pinned to **Bevy 0.20.0**. Read the vendored source (`~/.cargo/registry/src/inde
 - `src/script_apply.rs` — the one place a queued `fx` write reaches the world.
 - `src/rules.rs` — the trigger queue and its evaluation, `RulesPlugin`.
 - `src/interact.rs` — the `Interact` request, `SocietyBark` and its `Feeling`.
+- `src/dialogue.rs` — conversations and barks through `bevy_speech_bubbles` (feature `dialogue`): `TalkTo`, `DialoguePlugin`, speaker lifetime, node effects.
 - `src/defs.rs` — authored definitions (`DefsFile`), validation, and the compiled `SocietyDefs` with id interning and spawn helpers.
 - `src/script.rs` — Rhai limits and `ScriptCompiler` (compile-time only; the runtime `ctx`/`fx` API lands with D8).
 - `src/mind.rs` — `MindPlugin` (`SocietySystems::Mind`): emotions and the `Appraise` message, PAD mood with contagion, needs decay, personality and the `Add<Person>` baseline observer.
@@ -58,6 +59,7 @@ Pinned to **Bevy 0.20.0**. Read the vendored source (`~/.cargo/registry/src/inde
 - `tests/fields.rs` — millers' presence field points toward their cluster (feature `fields`).
 - `tests/leaf.rs` — the crate boundary: dependency list, forbidden names, engine-free `src/model/`, lookup-only hash collections.
 - `tests/mind.rs` — emotion half-life, mood lift toward Joy and return to baseline, needs decay at `decay_per_day`.
+- `tests/dialogue.rs` — conversation choice and `if` conditions, node effects, barks, speaker lifetime and the missing-plugin panic (feature `dialogue`).
 
 ## Build and test
 
@@ -79,6 +81,7 @@ Every model comes from a paper in the home-still corpus. Search it with the home
 - **No `unwrap()`, `expect()` or `panic!` outside tests,** except the documented plugin-order checks in each plugin's `finish()`. Misconfiguration gets a loud `error!`/`warn!`, never a panic.
 - **Determinism.** Iterate persons sorted by `PersonId` (`PersonIndex.sorted`), draw only from `SocietyRng`, and never iterate a `HashMap`/`HashSet` (lookup only; `tests/leaf.rs` allow-lists the files that may name them). Same seed and same inputs give the same society, bit for bit.
 - **Scripts see the tick-start snapshot and act through `fx`,** never the world.
+- **Script actions apply once per tick,** in queue order, in one exclusive system after `SocietySystems::Rules`. Actions queued in `Update` (dialogue node effects) apply at the end of the next tick.
 - **Every rate is per game-day** and every dt is `SocietyClock::dt_days`.
 - **`src/model/` is engine-free math**: no `bevy` in it.
 

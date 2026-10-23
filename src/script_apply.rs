@@ -169,14 +169,8 @@ pub(crate) fn apply(world: &mut World, action: ScriptAction, now_days: f64) {
                 capacity,
             );
         }
-        // `fx.converse` raises its own runtime error until `DialoguePlugin` exists, so this arm is
-        // unreachable today; it stays so the action type is exhaustive when the plugin lands.
-        ScriptAction::Converse { npc, player } => {
-            warn!(
-                "bevy_society: a script asked for a conversation between {npc} and {player}, but the \
-                 dialogue plugin is not built in"
-            );
-        }
+        // `fx.converse` queues this action; `dialogue` turns it into a `TalkTo` for next frame.
+        ScriptAction::Converse { npc, player } => converse(world, npc, player),
         ScriptAction::Emit {
             name,
             actor,
@@ -238,6 +232,29 @@ fn entity(world: &World, id: i64) -> Option<Entity> {
             None
         }
     }
+}
+
+/// A script's `fx.converse`: the conversation is started by `DialoguePlugin` on the next frame.
+#[cfg(feature = "dialogue")]
+fn converse(world: &mut World, npc: i64, player: i64) {
+    match (entity(world, npc), entity(world, player)) {
+        (Some(npc), Some(player)) => {
+            world.write_message(crate::dialogue::TalkTo { npc, player });
+        }
+        _ => {
+            warn!(
+                "bevy_society: a script asked for a conversation with an unknown person ({npc}, {player}); ignored"
+            );
+        }
+    }
+}
+
+/// Without the `dialogue` feature there is no conversation to start, so the action is dropped.
+#[cfg(not(feature = "dialogue"))]
+fn converse(_world: &mut World, npc: i64, player: i64) {
+    warn!(
+        "bevy_society: a script asked for a conversation between {npc} and {player}, but the dialogue feature is not built in"
+    );
 }
 
 /// Starts a rumor through the same function [`crate::PlantRumor`] uses, with the deed's own harm.

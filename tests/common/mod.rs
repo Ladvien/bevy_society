@@ -5,6 +5,8 @@ use std::time::Duration;
 
 use bevy::MinimalPlugins;
 use bevy::app::App;
+#[cfg(feature = "dialogue")]
+use bevy::app::PluginGroup;
 use bevy::ecs::entity::Entity;
 use bevy::ecs::name::Name;
 use bevy::math::{Vec2, Vec3};
@@ -31,8 +33,15 @@ pub fn headless(defs: SocietyDefs, settings: SocietySettings) -> App {
             1.0 / 64.0,
         )))
         .insert_resource(settings)
-        .insert_resource(defs)
-        .add_plugins(SocietyPlugins);
+        .insert_resource(defs);
+    #[cfg(feature = "dialogue")]
+    app.add_plugins(
+        SocietyPlugins
+            .build()
+            .disable::<bevy_society::DialoguePlugin>(),
+    );
+    #[cfg(not(feature = "dialogue"))]
+    app.add_plugins(SocietyPlugins);
     app.finish();
     app.cleanup();
     app

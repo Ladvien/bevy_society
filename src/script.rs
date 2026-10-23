@@ -699,15 +699,7 @@ fn register_fx(engine: &mut Engine) {
         }
     );
 
-    // `fx.converse` needs `DialoguePlugin` to have anything to start a conversation, so until the
-    // plugin exists (plan D11) it raises the runtime error rather than queueing an action that would
-    // be dropped: a script must not look like it worked.
-    engine.register_fn(
-        "converse",
-        |_fx: &mut Fx, _npc: i64, _player: i64| -> Result<(), Box<EvalAltResult>> {
-            Err(boxed("fx.converse needs the `dialogue` feature".to_owned()))
-        },
-    );
+    register_converse(engine);
 
     // `emit` is separate: its actor and target come from the evaluation's bindings, and its payload
     // has to be converted from a Rhai map, which can fail.
@@ -743,6 +735,25 @@ fn register_fx(engine: &mut Engine) {
                 data: values,
             });
             Ok(())
+        },
+    );
+}
+
+/// `fx.converse` queues a conversation. The plugin that runs conversations is `dialogue`; without
+/// it the call is a runtime error, so a script never looks like it worked.
+#[cfg(feature = "dialogue")]
+fn register_converse(engine: &mut Engine) {
+    fx_push!(engine, "converse", |fx, npc: i64, player: i64| {
+        ScriptAction::Converse { npc, player }
+    });
+}
+
+#[cfg(not(feature = "dialogue"))]
+fn register_converse(engine: &mut Engine) {
+    engine.register_fn(
+        "converse",
+        |_fx: &mut Fx, _npc: i64, _player: i64| -> Result<(), Box<EvalAltResult>> {
+            Err(boxed("fx.converse needs the `dialogue` feature".to_owned()))
         },
     );
 }

@@ -504,7 +504,7 @@ fn condition_holds(
 }
 
 /// Logs a script failure and writes its `ScriptError`, naming the authored path that failed.
-fn report(
+pub(crate) fn report(
     defs: &SocietyDefs,
     which: crate::script::ScriptId,
     err: String,

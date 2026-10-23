@@ -24,6 +24,8 @@ impl PluginGroup for SocietyPlugins {
         let group = group.add(crate::fields::SocialFieldPlugin);
         #[cfg(feature = "steering")]
         let group = group.add(crate::steering::SteeringPlugin);
+        #[cfg(feature = "dialogue")]
+        let group = group.add(crate::dialogue::DialoguePlugin);
         group
     }
 }

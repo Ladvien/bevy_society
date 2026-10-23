@@ -78,6 +78,8 @@
 pub mod model;
 
 mod behavior;
+#[cfg(feature = "dialogue")]
+mod dialogue;
 #[cfg(feature = "steering")]
 mod steering;
 
@@ -112,6 +114,8 @@ pub use defs::{
     NodeEffectDef, SocietyDefs, TieDelta, TopicDef, TopicId, TriggerDef, TriggerOn,
     size_person_state,
 };
+#[cfg(feature = "dialogue")]
+pub use dialogue::{DialoguePlugin, TalkTo};
 #[cfg(feature = "fields")]
 pub use fields::{FieldChannel, SocialFieldPlugin, SocialFieldSettings, SocialFields};
 pub use groups::{

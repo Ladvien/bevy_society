@@ -10,13 +10,11 @@ keywords = ["bevy", "gamedev", "ai", "simulation", "npc"]
 categories = ["game-development", "simulation"]
 publish = false   # its ladvien dependencies are publish = false git dependencies
 
-# `dialogue` arrives with its plugin (plan D11), which adds bevy_speech_bubbles and flips
-# `fx.converse` from a runtime error to a real conversation. Declaring the feature before the plugin
-# would advertise a capability the crate does not have.
 [features]
-default = ["steering", "fields"]
+default = ["dialogue", "steering", "fields"]
 steering = ["dep:bevy_orca"]
 fields = ["dep:bevy_stigmergy"]
+dialogue = ["dep:bevy_speech_bubbles"]
 
 [dependencies]
 bevy = { version = "0.20.0", default-features = false, features = ["bevy_log", "std"] }  # https://github.com/bevyengine/bevy — the engine
@@ -27,6 +25,7 @@ rand_chacha = "0.10"   # https://github.com/rust-random/rand — names ChaCha8Rn
 bevy_emerge_rng = { git = "https://github.com/Ladvien/bevy_emerge", rev = "a5dcbb08b228dae8678b886dd3e54c5e2d098e3b" }  # https://github.com/Ladvien/bevy_emerge — the seeded ChaCha8 stream and DetRng draws
 bevy_orca = { git = "https://github.com/Ladvien/bevy_orca", rev = "88168eb19c15712c6b6f97ba024635804c346cbe", optional = true }  # https://github.com/Ladvien/bevy_orca — ORCA reciprocal collision avoidance for walking persons (steering feature)
 bevy_stigmergy = { git = "https://github.com/Ladvien/bevy_stigmergy", rev = "9d17e8607ec8ecf8b0b9b2b7e6361217efdf637a", optional = true }  # https://github.com/Ladvien/bevy_stigmergy — per-cell presence and commotion fields (fields feature)
+bevy_speech_bubbles = { git = "https://github.com/Ladvien/bevy_speech_bubbles", rev = "7cdd67b830bf35238cd22e0a88154b8063df61f0", optional = true }  # https://github.com/Ladvien/bevy_speech_bubbles — barks and conversations (dialogue feature)
 
 [dev-dependencies]
 bevy = { version = "0.20.0" }                                                            # full umbrella, examples/tests only
