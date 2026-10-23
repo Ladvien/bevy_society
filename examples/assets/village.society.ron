@@ -1,0 +1,38 @@
+// The village's additions to the starter pack.
+//
+// This file holds nothing the starter pack already defines: merge it with `DefsFile::starter()`
+// and compile the result.
+//
+//     let mut file = DefsFile::starter()?;
+//     file.merge(DefsFile::from_ron(include_str!("assets/village.society.ron"))?)?;
+//     let defs = SocietyDefs::compile(file)?;
+(
+    factions: [
+        (id: "millers"),
+        (id: "weavers"),
+        (id: "watch"),
+    ],
+    triggers: [
+        (
+            id: "watch_stops_theft",
+            on: NormViolated("steal"),
+            if: Some("ctx.member(actor, \"watch\")"),
+            then: "fx.bark(actor, \"Stop, thief!\")",
+        ),
+        (
+            id: "village_turns",
+            on: RumorReach(deed: "steal", fraction: 0.5),
+            then: "fx.emit(\"village_turns\", #{})",
+            once: true,
+        ),
+    ],
+    conversations: [
+        (conversation: "greet_friend", priority: 2, if: Some("ctx.label(actor, target) == \"friend\"")),
+        (conversation: "greet_rival", priority: 2, if: Some("ctx.label(actor, target) == \"rival\"")),
+        (conversation: "greet", priority: 0),
+    ],
+    node_effects: [
+        (conversation: "greet", node: "compliment", then: "fx.adjust(actor, target, \"affinity\", 0.1)"),
+        (conversation: "greet", node: "insult", then: "fx.adjust(actor, target, \"affinity\", -0.3)"),
+    ],
+)

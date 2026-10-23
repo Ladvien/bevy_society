@@ -158,8 +158,8 @@ pub(crate) struct NeedArmed(pub(crate) Vec<Vec<bool>>);
 #[derive(Resource, Debug, Clone, Default)]
 pub(crate) struct RumorReported(pub(crate) BTreeSet<(u16, u32)>);
 
-/// Runs triggers (plan D8). Every other plugin that observes an event pushes a [`TriggerEvent`] onto
-/// the [`TriggerQueue`], and the game fires custom events with [`FireTrigger`]. Requires
+/// Runs triggers (plan D8). Every other plugin that observes an event pushes a trigger event onto
+/// the trigger queue, and the game fires custom events with [`FireTrigger`]. Requires
 /// [`crate::SocietyCorePlugin`].
 pub struct RulesPlugin;
 

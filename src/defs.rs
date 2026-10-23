@@ -767,12 +767,6 @@ impl SocietyDefs {
             .map_or("", |spec| spec.name.as_str())
     }
 
-    /// How many triggers are compiled.
-    #[doc(hidden)]
-    pub fn trigger_count(&self) -> usize {
-        self.triggers.len()
-    }
-
     /// Needs for a new person: each need starts at its `initial` level, then the named values
     /// replace theirs.
     pub fn needs<'a>(

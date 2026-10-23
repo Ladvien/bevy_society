@@ -70,7 +70,7 @@ pub struct RumorBook {
 }
 
 impl RumorBook {
-    /// Adds `rumor` and returns its id. `known_by` is stored exactly as given: [`plant_rumor`] is
+    /// Adds `rumor` and returns its id. `known_by` is stored exactly as given: `plant_rumor` is
     /// what sets it to 1 and gives the origin a spreader entry, so a rumor added by hand must count
     /// its own knowers.
     pub fn add(&mut self, rumor: Rumor) -> RumorId {

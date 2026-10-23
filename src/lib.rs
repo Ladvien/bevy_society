@@ -6,6 +6,74 @@
 //!
 //! Every model is distilled from social-psychology and game-AI literature (see `docs/research/`)
 //! and every behaviour is deterministic for a given seed.
+//!
+//! ## Quick start
+//!
+//! Spawn people with [`Person`], give them somewhere to go with [`Place`], hand in the definitions
+//! and read what happens. This example runs headlessly and never needs a renderer:
+//!
+//! ```
+//! use bevy::prelude::*;
+//! use bevy_society::{
+//!     Autonomous, Home, Person, Place, PlaceTags, SocietyDefs, SocietyPlugins, SocietySettings,
+//! };
+//!
+//! fn main() {
+//!     let defs = SocietyDefs::starter().expect("the starter pack is valid");
+//!     let mut app = App::new();
+//!     app.add_plugins(MinimalPlugins)
+//!         .insert_resource(SocietySettings::default())
+//!         .insert_resource(defs)
+//!         .add_plugins(SocietyPlugins);
+//!
+//!     let well = app
+//!         .world_mut()
+//!         .spawn((Name::new("well"), Place { capacity: 4 }, PlaceTags(vec!["gathering".into()])))
+//!         .id();
+//!     for name in ["Bram", "Alys"] {
+//!         app.world_mut().spawn((
+//!             Person,
+//!             Autonomous,
+//!             Name::new(name),
+//!             Home(well),
+//!             Transform::default(),
+//!         ));
+//!     }
+//!
+//!     for _ in 0..600 {
+//!         app.update();
+//!     }
+//!     // A host with the `dialogue` feature also adds
+//!     // `bevy_speech_bubbles::SpeechBubblesPlugin::<YourCamera>` and gets barks as balloons.
+//! }
+//! ```
+//!
+//! ## Plugins
+//!
+//! [`SocietyPlugins`] installs the whole society. Each member also works alone after
+//! [`SocietyCorePlugin`]: the mind plugin for emotions, mood, needs and memories, the relationships
+//! plugin for ties, [`BeliefsPlugin`] for opinions and rumors, [`GroupsPlugin`] for factions and
+//! status, the behaviour plugin for daily life and social exchanges, [`RulesPlugin`] for Rhai
+//! triggers, then the feature-gated social-field, steering and dialogue plugins.
+//!
+//! ## Ticks, snapshots and scripts
+//!
+//! The society advances on society ticks: one every [`SocietySettings::tick_secs`] of fixed-step
+//! time, with every rate expressed per game-day. The systems run in the order of [`SocietySystems`]
+//! — `Clock`, `Perceive`, `Mind`, `Decide`, `Interact`, `Propagate`, `Relate`, `Rules` — and only
+//! `Clock` runs on every fixed step.
+//!
+//! Scripts see the society as it stood at the start of the tick, through a snapshot built in
+//! `Perceive`; a script's own writes go to a queue. Those writes are applied once per tick, after
+//! `Rules`, by one exclusive system, so no script can change what another script in the same tick
+//! reads. Game-written input messages ([`PlantRumor`], [`Interact`], [`FireTrigger`]) are drained
+//! on every fixed step, not only on society ticks, so a message written between ticks is never
+//! dropped.
+//!
+//! ## Guides
+//!
+//! `docs/guide/getting-started.md`, `concepts.md`, `authoring.md`, `scripting.md` and `dialogue.md`;
+//! `docs/research/` for the papers behind every formula; `docs/DEMOS.md` for the capture and GIF.
 
 pub mod model;
 

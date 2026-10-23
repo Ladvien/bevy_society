@@ -503,7 +503,7 @@ impl Memories {
 }
 
 /// Asks for an emotion to be felt by `person`: the game, a deed, an interaction or a rumor writes
-/// it and [`MindPlugin`] merges it into the person's [`Emotions`]. Appraisals are applied on every
+/// it and the mind plugin merges it into the person's [`Emotions`]. Appraisals are applied on every
 /// fixed step, not only on society ticks, so a message is never dropped between ticks.
 #[derive(Message, Clone, Copy, Debug, PartialEq)]
 pub struct Appraise {

@@ -46,7 +46,7 @@ pub struct SocietyBark {
 /// The feeling a bark carries, mapped from the speaker's strongest emotion.
 #[derive(Reflect, Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum Feeling {
-    /// No emotion reaches [`FEELING_THRESHOLD`].
+    /// No emotion reaches `FEELING_THRESHOLD`.
     #[default]
     Neutral,
     /// Joy, pride, gratitude, liking or admiration.
@@ -62,7 +62,7 @@ pub enum Feeling {
 }
 
 impl Feeling {
-    /// The feeling a person shows: its strongest emotion, when at least [`FEELING_THRESHOLD`], mapped
+    /// The feeling a person shows: its strongest emotion, when at least `FEELING_THRESHOLD`, mapped
     /// to a bark feeling (Joy/Pride/Gratitude/Liking/Admiration → Joy; Anger/Reproach/Disliking →
     /// Anger; Distress/Shame → Sadness; Fear → Fear; Hope → Calm).
     pub fn from_emotions(emotions: &Emotions) -> Self {
