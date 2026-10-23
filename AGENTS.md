@@ -26,6 +26,11 @@ Pinned to **Bevy 0.20.0**. Read the vendored source (`~/.cargo/registry/src/inde
 - `src/beliefs.rs` — opinions per topic and what a person knows of rumors.
 - `src/rumor.rs` — the rumor book, planting, gossip and its stifling rule.
 - `src/reputation.rs` — witness, patient and actor reactions to a deed, and `NormViolated`.
+- `src/snapshot.rs` — the per-tick frozen society that `ctx` reads.
+- `src/script.rs` — Rhai compilation, the sandbox limits and the `ctx` / `fx` API.
+- `src/script_apply.rs` — the one place a queued `fx` write reaches the world.
+- `src/rules.rs` — the trigger queue and its evaluation, `RulesPlugin`.
+- `src/interact.rs` — the `Interact` request, `SocietyBark` and its `Feeling`.
 - `src/defs.rs` — authored definitions (`DefsFile`), validation, and the compiled `SocietyDefs` with id interning and spawn helpers.
 - `src/script.rs` — Rhai limits and `ScriptCompiler` (compile-time only; the runtime `ctx`/`fx` API lands with D8).
 - `src/mind.rs` — `MindPlugin` (`SocietySystems::Mind`): emotions and the `Appraise` message, PAD mood with contagion, needs decay, personality and the `Add<Person>` baseline observer.

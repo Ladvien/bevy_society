@@ -19,12 +19,16 @@ mod defs;
 #[cfg(feature = "fields")]
 mod fields;
 mod groups;
+mod interact;
 mod mind;
 mod plugins;
 mod relationships;
 mod reputation;
+mod rules;
 mod rumor;
 mod script;
+mod script_apply;
+mod snapshot;
 
 pub use behavior::{Destination, Doing, DoingTarget};
 pub use beliefs::{BeliefsPlugin, Knowledge, Known, Opinion, Opinions, belief_after_hearing};
@@ -46,6 +50,7 @@ pub use groups::{
     FactionStat, FactionStats, GroupsPlugin, Memberships, STANDING_FAMILIARITY, Status,
     contest_win_chance, standing_from,
 };
+pub use interact::{Feeling, Interact, SocietyBark};
 pub use mind::{
     ActiveEmotion, Appraise, EmotionKind, Emotions, Memories, Memory, MemoryKind, Mood, MoodRates,
     Needs, Personality, Trait,
@@ -53,7 +58,8 @@ pub use mind::{
 pub use plugins::SocietyPlugins;
 pub use relationships::{RelationshipsPlugin, Tie, TieLabel, TieLabelChanged, Ties};
 pub use reputation::NormViolated;
+pub use rules::{FireTrigger, RulesPlugin};
 pub use rumor::{PlantRumor, Rumor, RumorBook, RumorId, RumorLearned};
-pub use script::ScriptId;
+pub use script::{ScriptEngine, ScriptError, ScriptEvent, ScriptId, ScriptValue};
 #[cfg(feature = "steering")]
 pub use steering::{SocialMover, SocialVelocity, SteeringPlugin};

@@ -14,6 +14,7 @@ use bevy::ecs::observer::On;
 use bevy::ecs::resource::Resource;
 use bevy::ecs::schedule::{IntoScheduleConfigs, SystemSet};
 use bevy::ecs::system::{Commands, Query, Res, ResMut};
+use bevy::ecs::world::World;
 use bevy::log::error;
 use bevy::math::{Vec2, Vec3};
 use bevy::reflect::Reflect;
@@ -506,6 +507,49 @@ pub(crate) fn require_core(app: &App, plugin: &str) {
     }
 }
 
+/// Script writes waiting to be applied (plan D8).
+///
+/// Every evaluation queues its actions here and one exclusive system drains the queue once per
+/// tick, after [`SocietySystems::Rules`]. One application point is what keeps a script from
+/// changing the world another trigger in the same tick reads, and what makes the order of
+/// application independent of which system ran first.
+#[derive(Resource, Debug, Clone, Default)]
+pub(crate) struct PendingActions(pub(crate) Vec<crate::script::ScriptAction>);
+
+/// Queues script actions for the next application point. Plugins outside this module use it, so a
+/// script effect queued in `Update` (a dialogue node) lands in the same place as one queued in
+/// `FixedUpdate`.
+pub(crate) fn push_script_actions(
+    pending: &mut PendingActions,
+    actions: impl IntoIterator<Item = crate::script::ScriptAction>,
+) {
+    pending.0.extend(actions);
+}
+
+/// Applies every queued script action, in queue order (plan D8).
+///
+/// This is the crate's one exclusive system: `fx` can write to any person component, so it needs the
+/// whole world. It runs after [`SocietySystems::Rules`] on society ticks, and it resolves every
+/// [`PersonId`] through [`PersonIndex::by_id`], skipping an action whose person is unknown with a
+/// `warn!`.
+fn apply_script_actions(world: &mut World) {
+    let actions = {
+        let Some(mut pending) = world.get_resource_mut::<PendingActions>() else {
+            return;
+        };
+        std::mem::take(&mut pending.0)
+    };
+    if actions.is_empty() {
+        return;
+    }
+    let now = world
+        .get_resource::<SocietyClock>()
+        .map_or(0.0, |clock| clock.now_days);
+    for action in actions {
+        crate::script_apply::apply(world, action, now);
+    }
+}
+
 /// Persons, ids, clock, RNG, sets and perception. Add it before every other society plugin, or use
 /// [`crate::SocietyPlugins`], which does.
 pub struct SocietyCorePlugin;
@@ -534,6 +578,13 @@ impl Plugin for SocietyCorePlugin {
             .init_resource::<PersonIndex>()
             .init_resource::<Perception>()
             .init_resource::<SocietyDefs>()
+            .init_resource::<crate::script::ScriptEngine>()
+            .init_resource::<crate::snapshot::SnapshotCell>()
+            .init_resource::<PendingActions>()
+            .add_message::<crate::interact::Interact>()
+            .add_message::<crate::interact::SocietyBark>()
+            .add_message::<crate::script::ScriptEvent>()
+            .add_message::<crate::script::ScriptError>()
             .add_observer(on_person_added)
             .add_observer(on_person_removed)
             .add_systems(Startup, setup_society)
@@ -568,6 +619,18 @@ impl Plugin for SocietyCorePlugin {
                 FixedUpdate,
                 (advance_clock, size_person_state).in_set(SocietySystems::Clock),
             )
-            .add_systems(FixedUpdate, perceive.in_set(SocietySystems::Perceive));
+            .add_systems(
+                FixedUpdate,
+                (perceive, crate::snapshot::build_snapshot)
+                    .chain()
+                    .in_set(SocietySystems::Perceive),
+            )
+            // One application point for every script write, after the rules have run.
+            .add_systems(
+                FixedUpdate,
+                apply_script_actions
+                    .after(SocietySystems::Rules)
+                    .run_if(society_tick_due),
+            );
     }
 }

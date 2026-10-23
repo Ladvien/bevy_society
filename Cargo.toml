@@ -10,8 +10,9 @@ keywords = ["bevy", "gamedev", "ai", "simulation", "npc"]
 categories = ["game-development", "simulation"]
 publish = false   # its ladvien dependencies are publish = false git dependencies
 
-# The `dialogue` and `fields` features arrive with their dependencies once the upstream changes they
-# need are merged (bevy_speech_bubbles' DialogueNodeEntered; bevy_stigmergy on Bevy 0.20).
+# `dialogue` arrives with its plugin (plan D11), which adds bevy_speech_bubbles and flips
+# `fx.converse` from a runtime error to a real conversation. Declaring the feature before the plugin
+# would advertise a capability the crate does not have.
 [features]
 default = ["steering", "fields"]
 steering = ["dep:bevy_orca"]
