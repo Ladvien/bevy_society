@@ -10,12 +10,12 @@ keywords = ["bevy", "gamedev", "ai", "simulation", "npc"]
 categories = ["game-development", "simulation"]
 publish = false   # its ladvien dependencies are publish = false git dependencies
 
-# The `dialogue`, `steering` and `fields` features arrive with their dependencies once the upstream
-# changes they need are merged (bevy_speech_bubbles' DialogueNodeEntered; bevy_orca and
-# bevy_stigmergy on Bevy 0.20).
+# The `dialogue` and `fields` features arrive with their dependencies once the upstream changes they
+# need are merged (bevy_speech_bubbles' DialogueNodeEntered; bevy_stigmergy on Bevy 0.20).
 [features]
-default = ["steering"]
+default = ["steering", "fields"]
 steering = ["dep:bevy_orca"]
+fields = ["dep:bevy_stigmergy"]
 
 [dependencies]
 bevy = { version = "0.20.0", default-features = false, features = ["bevy_log", "std"] }  # https://github.com/bevyengine/bevy — the engine
@@ -25,6 +25,7 @@ ron = "0.12"                                                                    
 rand_chacha = "0.10"   # https://github.com/rust-random/rand — names ChaCha8Rng; the stream comes from bevy_emerge_rng
 bevy_emerge_rng = { git = "https://github.com/Ladvien/bevy_emerge", rev = "a5dcbb08b228dae8678b886dd3e54c5e2d098e3b" }  # https://github.com/Ladvien/bevy_emerge — the seeded ChaCha8 stream and DetRng draws
 bevy_orca = { git = "https://github.com/Ladvien/bevy_orca", rev = "88168eb19c15712c6b6f97ba024635804c346cbe", optional = true }  # https://github.com/Ladvien/bevy_orca — ORCA reciprocal collision avoidance for walking persons (steering feature)
+bevy_stigmergy = { git = "https://github.com/Ladvien/bevy_stigmergy", rev = "9d17e8607ec8ecf8b0b9b2b7e6361217efdf637a", optional = true }  # https://github.com/Ladvien/bevy_stigmergy — per-cell presence and commotion fields (fields feature)
 
 [dev-dependencies]
 bevy = { version = "0.20.0" }                                                            # full umbrella, examples/tests only

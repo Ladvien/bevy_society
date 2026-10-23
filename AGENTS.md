@@ -32,8 +32,10 @@ Pinned to **Bevy 0.20.0**. Read the vendored source (`~/.cargo/registry/src/inde
 - `src/model/opinion.rs` — Deffuant influence, anchor pull, similarity, conformity.
 - `src/model/rumor_dk.rs` — Daley–Kendall stifling, telling weight, belief after hearing.
 - `src/model/balance.rs` — triadic balance step and relaxation toward zero.
+- `src/fields.rs` — social fields (feature `fields`): crowd presence/commotion and per-faction presence grids on `bevy_stigmergy`, `FieldInput` scoring and gradient targets.
 - `assets/starter.society.ron` — the starter pack, parsed by `DefsFile::starter()`.
 - `tests/defs.rs` — definition parsing, merging, id interning and error messages.
+- `tests/fields.rs` — millers' presence field points toward their cluster (feature `fields`).
 
 ## Build and test
 

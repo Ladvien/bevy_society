@@ -14,6 +14,8 @@ pub struct SocietyPlugins;
 impl PluginGroup for SocietyPlugins {
     fn build(self) -> PluginGroupBuilder {
         let group = PluginGroupBuilder::start::<Self>().add(SocietyCorePlugin);
+        #[cfg(feature = "fields")]
+        let group = group.add(crate::fields::SocialFieldPlugin);
         #[cfg(feature = "steering")]
         let group = group.add(crate::steering::SteeringPlugin);
         group

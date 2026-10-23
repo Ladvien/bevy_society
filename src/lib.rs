@@ -16,6 +16,8 @@ mod steering;
 mod beliefs;
 mod core;
 mod defs;
+#[cfg(feature = "fields")]
+mod fields;
 mod groups;
 mod mind;
 mod plugins;
@@ -37,6 +39,8 @@ pub use defs::{
     NodeEffectDef, SocietyDefs, TieDelta, TopicDef, TopicId, TriggerDef, TriggerOn,
     size_person_state,
 };
+#[cfg(feature = "fields")]
+pub use fields::{FieldChannel, SocialFieldPlugin, SocialFieldSettings, SocialFields};
 pub use groups::{
     CONTEST_STEEPNESS, FactionStat, FactionStats, Memberships, STANDING_FAMILIARITY, Status,
     contest_win_chance, standing_from,

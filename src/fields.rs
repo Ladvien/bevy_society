@@ -1,0 +1,327 @@
+//! Social fields: where persons gather, and where the talk is (feature `fields`, plan D9).
+//!
+//! Two stigmergic grids from `bevy_stigmergy`. The *crowd* grid has channel 0 (presence of everyone)
+//! and channel 1 (commotion from witnessed deeds). Each faction has its own grid whose channel 0 is the
+//! presence of its members. Every tick, each person deposits its presence, every witnessed deed
+//! deposits its harm as commotion, and then every grid evaporates and diffuses. Daily-life options read
+//! the fields through [`SocialFields::field_value`]. A `Gradient` option climbs a field through
+//! [`SocialFields::gradient_target`], and `OwnShare` is Schelling's tolerance input.
+//!
+//! Deposits are order-dependent `+=`, so they run in `PersonIndex.sorted` order.
+
+use bevy::prelude::*;
+use bevy_stigmergy::{ChannelDef, StigGrid};
+
+use crate::core::require_core;
+use crate::{
+    FactionId, FieldInput, Memberships, Person, PersonIndex, SocietyClock, SocietyDefs,
+    SocietySettings, SocietySystems,
+};
+
+/// One channel's tuning, mirrored as a `Reflect` type of this crate because `bevy_stigmergy`'s
+/// `ChannelDef` has none. It converts to that type when the grids are built.
+#[derive(Reflect, Debug, Clone, Copy, PartialEq)]
+pub struct FieldChannel {
+    /// Fraction of the value lost per **game-day**. Grids step with `dt_days`, so this is not a
+    /// per-second rate despite the upstream doc comment.
+    pub evaporate: f32,
+    /// Blend weight in `[0, 1]` toward the 4-neighbour average, applied each update.
+    pub diffuse: f32,
+    /// Radius in cells of a deposit's linear falloff.
+    pub deposit_radius: f32,
+}
+
+impl FieldChannel {
+    fn def(self) -> ChannelDef {
+        ChannelDef {
+            evaporate: self.evaporate,
+            diffuse: self.diffuse,
+            deposit_radius: self.deposit_radius,
+        }
+    }
+}
+
+/// Where the fields sit in the world and how they behave. Changing it rebuilds the fields empty.
+#[derive(Resource, Reflect, Debug, Clone, PartialEq)]
+#[reflect(Resource)]
+pub struct SocialFieldSettings {
+    /// World-plane position of the grid's corner (cell `(0, 0)` starts here).
+    pub origin: Vec2,
+    /// Side length of one cell in world units.
+    pub cell_size: f32,
+    /// Grid width in cells.
+    pub width: usize,
+    /// Grid height in cells.
+    pub height: usize,
+    /// Presence channel: where persons are. Faction grids use this channel too.
+    pub presence: FieldChannel,
+    /// Commotion channel: `|harm|` of each witnessed deed, deposited at the actor's cell.
+    pub commotion: FieldChannel,
+}
+
+impl Default for SocialFieldSettings {
+    fn default() -> Self {
+        Self {
+            origin: Vec2::new(-32.0, -32.0),
+            cell_size: 1.0,
+            width: 64,
+            height: 64,
+            presence: FieldChannel {
+                evaporate: 6.0,
+                diffuse: 0.1,
+                deposit_radius: 1.5,
+            },
+            commotion: FieldChannel {
+                evaporate: 12.0,
+                diffuse: 0.2,
+                deposit_radius: 2.5,
+            },
+        }
+    }
+}
+
+/// Per-channel peak values, cached after each tick. They are the normalisers of
+/// [`SocialFields::field_value`].
+#[derive(Debug, Clone, Default)]
+struct Peaks {
+    presence: f32,
+    commotion: f32,
+    factions: Vec<f32>,
+}
+
+/// The grids that daily-life options read. Built from [`SocialFieldSettings`] and the faction count, and
+/// rebuilt empty whenever the settings change or the faction count differs. Not `Reflect`, because
+/// `bevy_stigmergy`'s grids are plain data without it.
+#[derive(Resource)]
+pub struct SocialFields {
+    /// Channel 0: presence of every person. Channel 1: commotion from witnessed deeds.
+    pub crowd: StigGrid<2>,
+    /// One grid per faction, indexed by `FactionId.0`. Channel 0 is the presence of its members.
+    pub factions: Vec<StigGrid<1>>,
+    origin: Vec2,
+    cell_size: f32,
+    peaks: Peaks,
+}
+
+impl SocialFields {
+    /// Empty fields for `faction_count` factions on the grid described by `settings`.
+    pub fn new(settings: &SocialFieldSettings, faction_count: usize) -> Self {
+        let cells = all_cells(settings.width, settings.height);
+        let crowd = StigGrid::new(
+            settings.width,
+            settings.height,
+            cells.iter().copied(),
+            [settings.presence.def(), settings.commotion.def()],
+        );
+        let factions = (0..faction_count)
+            .map(|_| {
+                StigGrid::new(
+                    settings.width,
+                    settings.height,
+                    cells.iter().copied(),
+                    [settings.presence.def()],
+                )
+            })
+            .collect();
+        Self {
+            crowd,
+            factions,
+            origin: settings.origin,
+            cell_size: settings.cell_size,
+            peaks: Peaks {
+                presence: 0.0,
+                commotion: 0.0,
+                factions: vec![0.0; faction_count],
+            },
+        }
+    }
+
+    /// The cell containing a plane position: `floor((p − origin) / cell_size)`. Positions off the grid
+    /// map to cells that read as zero.
+    pub fn world_to_cell(&self, p: Vec2) -> IVec2 {
+        let q = ((p - self.origin) / self.cell_size).floor();
+        IVec2::new(q.x as i32, q.y as i32)
+    }
+
+    /// The value of `input` at `cell` for an actor whose faction memberships are `own`, in `[0, 1]`.
+    /// Crowd, commotion and the faction inputs divide the cell value by the channel's peak. A zero peak
+    /// reads as 0. `OwnShare` is own / (own + other) on raw values, and 0.5 when both are empty
+    /// (Schelling 1971, DOI 10.1080/0022250X.1971.9989794).
+    pub fn field_value(&self, input: FieldInput, own: &[FactionId], cell: IVec2) -> f32 {
+        match input {
+            FieldInput::Crowd => normalised(self.crowd.sample_cell(0, cell), self.peaks.presence),
+            FieldInput::Commotion => {
+                normalised(self.crowd.sample_cell(1, cell), self.peaks.commotion)
+            }
+            FieldInput::OwnFaction => {
+                let (value, peak) = self.faction_sum(own, cell, true);
+                normalised(value, peak)
+            }
+            FieldInput::OtherFactions => {
+                let (value, peak) = self.faction_sum(own, cell, false);
+                normalised(value, peak)
+            }
+            FieldInput::OwnShare => {
+                let (own_value, _) = self.faction_sum(own, cell, true);
+                let (other_value, _) = self.faction_sum(own, cell, false);
+                let total = own_value + other_value;
+                if total > 0.0 { own_value / total } else { 0.5 }
+            }
+        }
+    }
+
+    /// Where an option `Gradient(input, toward)` should walk from `pos`. The target is four cells
+    /// (`4 · cell_size`) from `pos`, along the normalised central-difference gradient of
+    /// [`Self::field_value`] at `pos`'s cell. It goes uphill when `toward` is true and downhill
+    /// otherwise. `None` on a flat field, which makes that option score zero. Finite differences are used
+    /// for every input, because OwnShare is a ratio that has no grid of its own.
+    pub fn gradient_target(
+        &self,
+        input: FieldInput,
+        own: &[FactionId],
+        pos: Vec2,
+        toward: bool,
+    ) -> Option<Vec2> {
+        let cell = self.world_to_cell(pos);
+        let value = |offset: IVec2| self.field_value(input, own, cell + offset);
+        let grad = Vec2::new(
+            0.5 * (value(IVec2::X) - value(IVec2::NEG_X)),
+            0.5 * (value(IVec2::Y) - value(IVec2::NEG_Y)),
+        );
+        if grad.length_squared() <= 0.0 {
+            return None;
+        }
+        let sign = if toward { 1.0 } else { -1.0 };
+        Some(pos + sign * grad.normalize() * 4.0 * self.cell_size)
+    }
+
+    /// Sum of the cell values and of the peaks across the factions that match (`member = true`) or do
+    /// not match (`member = false`) `own`.
+    fn faction_sum(&self, own: &[FactionId], cell: IVec2, member: bool) -> (f32, f32) {
+        self.factions
+            .iter()
+            .enumerate()
+            .filter(|(i, _)| own.contains(&FactionId(*i as u16)) == member)
+            .fold((0.0_f32, 0.0_f32), |(value, peak), (i, grid)| {
+                (
+                    value + grid.sample_cell(0, cell),
+                    peak + self.peaks.factions.get(i).copied().unwrap_or(0.0),
+                )
+            })
+    }
+
+    /// Recomputes the cached peaks. Called once per tick, after evaporation and diffusion.
+    fn refresh_peaks(&mut self) {
+        self.peaks.presence = self.crowd.hotspot_cell(0).1;
+        self.peaks.commotion = self.crowd.hotspot_cell(1).1;
+        self.peaks.factions = self
+            .factions
+            .iter()
+            .map(|grid| grid.hotspot_cell(0).1)
+            .collect();
+    }
+}
+
+/// A witnessed deed's commotion, deposited at `actor`'s cell in the crowd's commotion channel. The
+/// belief system (D5) writes it during `Propagate` when the feature is enabled. This module reads it
+/// in `Relate`, so it works only while [`SocialFieldPlugin`] is in the app.
+#[derive(Message, Debug, Clone, Copy)]
+pub(crate) struct Commotion {
+    /// The acting person whose cell receives the deposit.
+    pub(crate) actor: Entity,
+    /// `|harm|` of the deed.
+    pub(crate) amount: f32,
+}
+
+/// Installs the social fields: the crowd presence and commotion grids, plus one presence grid per
+/// faction. They are deposited into and evaporated every tick. Requires
+/// [`crate::SocietyCorePlugin`] and is included in `SocietyPlugins` when the `fields` feature is on.
+pub struct SocialFieldPlugin;
+
+impl Plugin for SocialFieldPlugin {
+    fn build(&self, app: &mut App) {
+        app.register_type::<SocialFieldSettings>()
+            .register_type::<FieldChannel>()
+            .init_resource::<SocialFieldSettings>()
+            .add_message::<Commotion>()
+            .add_systems(FixedUpdate, sync_fields.in_set(SocietySystems::Clock))
+            .add_systems(FixedUpdate, deposit_fields.in_set(SocietySystems::Relate));
+    }
+
+    fn finish(&self, app: &mut App) {
+        require_core(app, "SocialFieldPlugin");
+    }
+}
+
+/// The grid's cell list in ascending row-major order, as `StigGrid::new` requires.
+fn all_cells(width: usize, height: usize) -> Vec<IVec2> {
+    (0..height)
+        .flat_map(|y| (0..width).map(move |x| IVec2::new(x as i32, y as i32)))
+        .collect()
+}
+
+/// A value over its channel peak, in `[0, 1]`, or 0 when the peak is zero.
+fn normalised(value: f32, peak: f32) -> f32 {
+    if peak > 0.0 {
+        (value / peak).clamp(0.0, 1.0)
+    } else {
+        0.0
+    }
+}
+
+/// Rebuilds the fields when the settings change or the faction count differs. Runs on every fixed step.
+fn sync_fields(
+    mut commands: Commands,
+    settings: Res<SocialFieldSettings>,
+    defs: Res<SocietyDefs>,
+    fields: Option<Res<SocialFields>>,
+) {
+    let faction_count = defs.factions.len();
+    let stale = match &fields {
+        None => true,
+        Some(current) => settings.is_changed() || current.factions.len() != faction_count,
+    };
+    if stale {
+        commands.insert_resource(SocialFields::new(&settings, faction_count));
+    }
+}
+
+/// Deposits presence and commotion, then evaporates and diffuses every grid (plan D9). Tick-gated
+/// through the `Relate` set.
+fn deposit_fields(
+    fields: Option<ResMut<SocialFields>>,
+    clock: Res<SocietyClock>,
+    society: Res<SocietySettings>,
+    index: Res<PersonIndex>,
+    persons: Query<(&GlobalTransform, &Memberships), With<Person>>,
+    mut commotions: MessageReader<Commotion>,
+) {
+    let Some(mut fields) = fields else {
+        return;
+    };
+    let presence = clock.dt_days * 24.0;
+    for &(_, entity) in &index.sorted {
+        let Ok((transform, memberships)) = persons.get(entity) else {
+            continue;
+        };
+        let cell = fields.world_to_cell(society.plane.project(transform.translation()));
+        fields.crowd.deposit(0, cell, presence);
+        for faction in &memberships.0 {
+            if let Some(grid) = fields.factions.get_mut(usize::from(faction.0)) {
+                grid.deposit(0, cell, presence);
+            }
+        }
+    }
+    for commotion in commotions.read() {
+        let Ok((transform, _)) = persons.get(commotion.actor) else {
+            continue;
+        };
+        let cell = fields.world_to_cell(society.plane.project(transform.translation()));
+        fields.crowd.deposit(1, cell, commotion.amount);
+    }
+    fields.crowd.evaporate_diffuse(clock.dt_days);
+    for grid in &mut fields.factions {
+        grid.evaporate_diffuse(clock.dt_days);
+    }
+    fields.refresh_peaks();
+}
