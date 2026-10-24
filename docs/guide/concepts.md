@@ -76,10 +76,22 @@ are deterministic too.
 
 ## Scale
 
-Perception is brute force: every person against every other, once per tick. That is the chosen design
-up to roughly a thousand people, which at a 0.25 s tick is a few hundred thousand distance checks per
-tick — fine, and simple enough to reason about. Beyond that the cost is quadratic and a spatial index
-becomes the next change, not a tuning knob.
+Perception is brute force: every person against every other, once per tick. That is the chosen design,
+and its cost is quadratic. Measured with `examples/benchmark` on an M1 Max, release build, starter
+pack, `tick_secs = 0.25`:
+
+| persons | ms per society tick | pairs per tick | amortised per 60 fps frame |
+|---|---|---|---|
+| 100 | 0.5 | 4 950 | 0.03 ms (0.2%) |
+| 1 000 | **12.4** | 499 500 | 0.83 ms (4.9%) |
+| 5 000 | **350.7** | 12 497 500 | 23.4 ms (**140%**) |
+
+So a thousand people costs about 5% of a 60 fps budget — usable, but not free, and the amortisation
+assumes one society tick every fifteen frames. Five thousand costs more than a frame: that is the
+point at which a spatial index stops being an optimisation and becomes the only way to run it.
+
+`ms per tick` is the number that matters, not `ms per update`: a society tick happens once per
+`tick_secs`, and everything else in the crate's cost scales with it.
 
 ## Ids
 

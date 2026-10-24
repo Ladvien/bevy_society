@@ -90,9 +90,10 @@ scenarios:
     seed: 1
     population: 1000
     settings: { seconds_per_day: 240.0 }
-    ticks: 200
-    status: pending
+    ticks: 400
+    status: measured
     observable: >
       Cost per society tick at 1,000 persons, recorded in the iteration's `perf.md`. Perception is
       brute force and quadratic, so this number is what a host is buying. Report it as
-      milliseconds per tick, not as a pass/fail.
+      milliseconds per tick, not as a pass/fail. Measured 2026-10-31-01: 14.1 ms per tick at 1,000
+      persons (0.83 ms amortised per 60 fps frame), 0.55 ms at 100, 351 ms at 5,000.
