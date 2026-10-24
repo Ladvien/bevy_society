@@ -2402,7 +2402,7 @@ answered in the eval).
 
 **Dead-code delta.** Zero.
 
-**Commit** `pending`.
+**Commit** `9169bc8`.
 
 **Top 5 remaining.**
 
