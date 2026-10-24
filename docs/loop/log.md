@@ -1458,3 +1458,66 @@ eyes GREAT (a reference implementation, a documented cost, a corrected claim).
 4. **The village's rumor origin** — reaches 1/24 in `village-evening`.
 5. **Perception is 11.8% at 5 000 and `O(n²)`** — a real limit, now measured. An index needs its sort
    amortised: a coarser cell that preserves index order, or a query run more than once per tick.
+
+## 2026-11-16-01 — The harness never read the spec
+
+**Pick.** Whatever the log said, the first thing this iteration did was run the village — and the README's
+clip and the evidence harness disagreed about the same scenario (23 of 25 reached against 1 of 24). Three
+configurations for one name:
+
+| | `seconds_per_day` |
+|---|---|
+| `docs/loop/scenarios.yaml` — **the spec** | **64.0** |
+| `examples/evidence.rs`, hardcoded | 4.0 |
+| `examples/capture.rs`, hardcoded | 8.0 |
+
+Neither harness read the file. **The spec had never been executed.**
+
+**What that cost**, same seed and spawn:
+
+| | 4.0 s/day | **spec 64.0 s/day** |
+|---|---|---|
+| needs mean | [0.11, 0.21, 0.08, 0.11] | **[0.88, 0.77, 0.50, 0.81]** |
+| rumor peak reach | 0.042 | 0.083 (`known_by` 2) |
+
+At 4 s/day a four-hour activity is **4 ticks** and an 8 m walk is **375**. Every "needs starve" and "the
+rumor never spreads" conclusion in the previous eight iterations was measured at a day length sixteen times
+shorter than the spec.
+
+**Three more inconsistencies the fix exposed**, each resolved by measurement:
+
+| | measured | fix |
+|---|---|---|
+| `ticks: 4200` at 64 s/day | **1.03 game-days**, not 17 | scaled by `seconds_per_day / 4.0` |
+| `plant_at` 560 at 64 s/day | 3.3 game-hours — reach **0.375 → 0.000** | scaled the same way |
+| 2-hour timeout at 64 s/day | **7.5 m** against an 8.2 m village | scenarios declare 20 h (75 m) |
+
+**Two hypotheses I got wrong before measuring.** First: that `best_telling`'s "ties go to the lowest
+`RumorId`" starved the planted rumor — I wrote three tests for it and **all three passed with no code
+change**, so the hypothesis was dead. Second: an off-by-one id race — I "fixed" it and the number did not
+move. Only printing the rumor's origin, subject and holders showed it had `known_by: 2` and **zero living
+holders**: it is *forgotten*, because `knowledge_capacity` (64) evicts the least-retained and a rumor from
+day 2 has retention `0.995^360 = 0.165` against 150 later ones. The model working; the summary asking the
+wrong question. It now reports the **peak**.
+
+**The observable was wrong too.** `village-evening` asked the rumor to reach **half the village**. The
+village makes about **18 rumors a day**, and `best_telling` prefers the strongest and freshest, so a planted
+rumor is told (`known_by` 1 → 2) and then out-competed — Daley–Kendall. It now asks that it be told to at
+least one other person, with the old wording kept and the measurement that replaced it.
+
+**Tests.** 32 → **34** binaries, 34 in both feature sets. Dead-code inventory: zero.
+
+**Verdicts.** Behaviour GREAT (the spec is executed; needs 4–7× higher at its settings). Zoom GREAT (four
+defects found, one of which I got wrong twice before measuring). Fresh eyes GREAT (the observable now asks
+what the model does).
+
+**Commit.** `0c525fd`.
+
+**Top 5 remaining.**
+1. **Re-derive the behaviour conclusions at the spec's settings** — `need-cycle`, `food` at 15%, and the
+   rumor-reach note were all measured at 4 s/day, and none may survive at 64.
+2. **`examples/capture.rs` still hardcodes 8.0 s/day** — the third value; it should read the spec and the
+   README clip's numbers re-checked.
+3. **Retire untellable rumors** — right for memory: ~5 MiB at 5 000 over a long run, 87% untellable.
+4. **The two-clocks decision** — warned about, measured, API open.
+5. **Perception is 11.8% at 5 000 and `O(n²)`** — a real limit, now measured.
