@@ -87,3 +87,28 @@ fn the_starter_pack_still_compiles_with_the_village_additions() {
     .expect("the two merge");
     SocietyDefs::compile(file).expect("the merged definitions compile");
 }
+
+#[test]
+fn every_scenario_declares_a_seed() {
+    // `seed:` was decoration until 2026-11-17: `examples/evidence.rs` never read it, so every scenario
+    // ran at the crate default and five scenarios that differed only in seed were the same run.
+    const YAML: &str = include_str!("../docs/loop/scenarios.yaml");
+    for line in YAML.lines() {
+        let trimmed = line.trim();
+        if let Some(rest) = trimmed.strip_prefix("seed:") {
+            assert!(
+                rest.trim().parse::<u64>().is_ok(),
+                "a scenario's seed must be a number: {trimmed}"
+            );
+        }
+    }
+    let seeds: Vec<&str> = YAML
+        .lines()
+        .filter_map(|line| line.trim().strip_prefix("seed:"))
+        .collect();
+    assert_eq!(
+        seeds.len(),
+        7,
+        "every scenario declares a seed, so none silently runs at the crate default: {seeds:?}"
+    );
+}

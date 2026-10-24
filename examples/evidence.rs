@@ -187,6 +187,10 @@ struct Spec {
     travel_timeout_hours: f32,
     /// The scenario's `ticks:`, counted at **its own** `seconds_per_day`.
     ticks: usize,
+    /// The scenario's `seed:`. Unread until iteration 2026-11-17: every scenario ran at the crate
+    /// default, so the file's declared seeds were decoration and two scenarios that differed only in
+    /// seed were in fact the same run.
+    seed: Option<u64>,
 }
 
 impl Default for Spec {
@@ -197,6 +201,7 @@ impl Default for Spec {
             start_hour: d.start_hour,
             travel_timeout_hours: d.tuning.travel_timeout_hours,
             ticks: 800,
+            seed: None,
         }
     }
 }
@@ -222,6 +227,10 @@ fn scenario_spec(name: &str) -> Spec {
             continue;
         }
         if !in_scenario {
+            continue;
+        }
+        if let Some(rest) = trimmed.strip_prefix("seed:") {
+            spec.seed = rest.trim().parse::<u64>().ok();
             continue;
         }
         if let Some(rest) = trimmed.strip_prefix("ticks:") {
@@ -264,6 +273,7 @@ fn scenario_spec(name: &str) -> Spec {
 fn settings_for(scenario: &str) -> SocietySettings {
     let spec = scenario_spec(scenario);
     SocietySettings {
+        seed: spec.seed.unwrap_or(SocietySettings::default().seed),
         seconds_per_day: spec.seconds_per_day,
         start_hour: spec.start_hour,
         tick_secs: 1.0 / 64.0,
