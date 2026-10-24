@@ -2516,7 +2516,7 @@ line is the argument; the rising rival bar is shown). Fresh eyes GREAT (three se
 
 **Dead-code delta.** Zero.
 
-**Commit** `pending`.
+**Commit** `172f782`.
 
 **Top 5 remaining.**
 
