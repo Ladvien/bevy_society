@@ -2464,7 +2464,7 @@ asymmetry is structural. Trust still declines in a crowd.
 
 **Dead-code delta.** Zero.
 
-**Commit** `pending`.
+**Commit** `7dd9d02`.
 
 **Top 5 remaining.**
 
