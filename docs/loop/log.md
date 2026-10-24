@@ -2412,3 +2412,65 @@ answered in the eval).
 4. **`need-cycle` is still `pending`** - its observable claims `rest` and `food` cycle when only `food` does.
 5. **Pleasant affect still loses to distress** - by design at the per-event level, but the *frequency* of
    refusal (47% of interactions) is a pack property nobody has questioned.
+
+## 2026-12-03-01 - Nothing in the pack could raise trust
+
+**Pick.** The log's #5: the 47% refusal rate. Measuring it found an omission rather than a rate.
+
+**The finding.** `AcceptDef` scores `trust * (t - 0.5)`, so trust is centred on 0.5 — and `Tie::new` starts
+strangers there. `TieDelta` has a `trust` field any interaction can set, and **the word `trust` did not occur
+in `assets/starter.society.ron` at all**. The only mover was `witness_reaction`'s `trust_gain * harm`, negative
+for every deed the pack uses. Measured trust held toward the person approaching:
+
+| interaction | trust |
+|---|---|
+| `chat` | 0.27 |
+| `compliment` | 0.20 |
+| `gossip` | 0.24 |
+| `insult` | 0.13 |
+
+Every one below neutral, so the term subtracted on every acceptance draw, and **47% of interactions were
+refused**. The pack also defined `help` and `gift` and **used neither** — only `insult` carried a deed.
+
+**Change.** `chat`, `gossip` and `compliment` raise trust on accept (0.05 / 0.03 / 0.02).
+
+| measured, controlled | no delta | with delta |
+|---|---|---|
+| mean trust at an exchange | **0.261** | **0.345** |
+| accept rate | **0.486** | **0.533** |
+
+`village-evening`: mean pleasure **-0.066 -> -0.058**, positive person-ticks **3.4% -> 5.2%**, friends/rivals
+**21/44 -> 24/35**, needs unchanged.
+
+**What I tried and reverted, with the numbers.** A `help` activity so the pack's unused deeds would run:
+`Affinity > 0.55` erased all conflict (**rivals 44 -> 0**, friends 21 -> 81); `> 0.70` gave near-neutral mood
+but trust still declined; `> 0.80` was **inert** (1 acceptance in 12 000 ticks). Nothing between them is
+believable, which establishes that **deed density is not the lever**.
+
+**The finding that goes to a decision.** A trust *gain* reaches two parties; a trust *loss* reaches **every
+witness** at full magnitude. One chat is `+0.10`; one insult seen by three people is `-0.42`. **The penalty
+multiplies with the crowd and the reward cannot.** New decision file
+`a-deed-costs-what-the-crowd-saw.md`, three options, recommending witness dilution.
+
+**Evidence.** `runs/2026-12-03-01/evidence/trust.png` — the pleasure traces overlapping (honest: the mood effect
+is small), the controlled trust/accept bars, and the asymmetry that no pack tweak reaches.
+
+**Verdicts.** Behavior GREAT (the omission is a `grep` away from proven). Zoom GREAT (the plot refuses to
+overclaim a small mood change). Fresh eyes GREAT (the failed `help` attempt is recorded with all three
+settings, because knowing what does *not* work is the useful part).
+
+**Honest limit.** This is the smallest win in four iterations, and the reason is measured: the remaining
+asymmetry is structural. Trust still declines in a crowd.
+
+**Dead-code delta.** Zero.
+
+**Commit** `pending`.
+
+**Top 5 remaining.**
+
+1. **A witnessed deed costs every witness full magnitude** - one chat is +0.10, one insult seen by three is
+   -0.42. New decision file, and the reason trust still declines.
+2. **`Doing` names the target activity while travelling** - 49.8% of person-ticks; host-facing, escalated.
+3. **The clock decision** - the largest behavioural lever (15 points), escalated.
+4. **`rumor-crosses-a-cluster`** - 0.333 against the 40% it asserts, at both clocks.
+5. **`need-cycle` is still `pending`** - its observable claims `rest` and `food` cycle when only `food` does.

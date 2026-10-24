@@ -182,6 +182,19 @@
                 target_needs: [("social", 0.2)],
                 actor_emotion: Some((Liking, 0.2)),
                 target_emotion: Some((Liking, 0.2)),
+                // **Trust has to be able to rise.** `AcceptDef` centres it on 0.5 and `Tie::new` starts
+                // there, so a village where nothing raises it drifts below neutral and the term subtracts
+                // from every acceptance draw. Nothing in this pack set a `TieDelta::trust` at all; the only
+                // mover was `witness_reaction`'s `trust_gain * harm`, which is negative for a deed. Measured,
+                // mean trust at the moment of an exchange was **0.261** and **47% of interactions were
+                // refused**. A conversation that goes well is how people come to trust each other.
+                // 0.05, not 0.02. A witnessed `steal` moves trust by `witness_gain * harm` =
+                // `0.2 * -0.7` = **-0.14**, so at 0.02 one bad deed undid seven good conversations and
+                // the village's trust could only fall. Matching the deed's magnitude — a conversation
+                // against an insult, roughly — keeps a bad act costly without making recovery
+                // impossible.
+                actor_to_target: (trust: 0.05),
+                target_to_actor: (trust: 0.05),
             ),
             // A refusal is not an injury: the pack used to give it no outcome of its own, so the only
             // emotional consequence of being turned away was the crate's rejection distress — measured,
@@ -204,6 +217,9 @@
                 // listener is entertained. Same reasoning as `chat`.
                 actor_emotion: Some((Liking, 0.15)),
                 target_emotion: Some((Liking, 0.15)),
+                // A little less than `chat`: sharing news is a weaker basis for trust than a conversation.
+                actor_to_target: (trust: 0.03),
+                target_to_actor: (trust: 0.03),
             ),
             on_reject: (actor_emotion: Some((Distress, 0.1))),
             gossip: true,
@@ -216,7 +232,7 @@
         (
             id: "compliment",
             on_accept: (
-                target_to_actor: (affinity: 0.1),
+                target_to_actor: (affinity: 0.1, trust: 0.02),
                 target_emotion: Some((Joy, 0.3)),
             ),
             barks: (

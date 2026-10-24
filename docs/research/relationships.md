@@ -20,6 +20,9 @@ Each person keeps a `Ties` component: one `Tie` per person they know. A tie hold
   - otherwise Acquaintance.
   `refresh_label` (`:127–140`) returns the old and new label only when the label changes.
 
+- **Trust can rise and fall.** `chat` (+0.05 to each party), `gossip` (+0.03) and `compliment` (+0.02) raise it on accept; `witness_reaction` moves it by `trust_gain * harm`, so a witnessed `steal` (`harm -0.7`) is **-0.14 per witness**. The starter pack set **no** trust delta at all until 2026-12-03, so trust could only fall: measured, targets held **0.13-0.27** toward the person approaching them against the 0.5 that `AcceptDef` treats as neutral, and 47% of interactions were refused.
+- **The asymmetry that remains is a decision.** A gain reaches two parties; a loss reaches every witness at full magnitude. One chat is `+0.10`; one insult seen by three people is `-0.42`. See `docs/loop/needs-decision/a-deed-costs-what-the-crowd-saw.md`.
+
 ## Why these defaults
 
 - **Familiarity decay.** Murre & Dros (2015) fit a power function to forgetting (`10.1371_journal.pone.0120644`, converted; power-function passage checked). Anderson & Schooler (1991) show the same shape for memory (DOI `10.1111/j.1467-9280.1991.tb00174.x`, not converted; cited from DOI only).
