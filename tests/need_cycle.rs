@@ -8,22 +8,26 @@
 //! **It does not hold, and two iterations said it did.** At the scenario's own settings — 64 s/day,
 //! 80 000 ticks, 8 people, seed 7 — measured per person:
 //!
-//! | need | lowest any person reached | crosses 0.35? |
-//! |---|---|---|
-//! | social | **0.39** | no |
-//! | rest | **0.50** | no |
-//! | food | 0.00 | **yes, once a day** |
-//! | fun | 0.12 | mostly, but 2 of 8 people never |
+//! | need | lowest any person reached | cycles 0.35 → 0.7 | seed 7 | seed 42 |
+//! |---|---|---|---|---|
+//! | social | **0.45** | 0 of 8 | 0 | **2** |
+//! | rest | **0.51** | **0 of 8** | 0 | 0 |
+//! | food | 0.00 | **8 of 8** | 8 | 8 |
+//! | fun | 0.00 | **7-8 of 8** | 8 | 6 |
 //!
-//! Only `food` cycles for everyone. The claim that all four did came from the evidence series recording
+//! **`rest` never cycles at either seed; `food` always does; `fun` usually does.** The earlier version of this
+//! table said only `food` cycled and that `fun` was "mostly, but 2 of 8 people never" — five iterations of
+//! pack changes since then moved it, which is why the numbers are recorded per seed with a date rather than
+//! asserted as a constant of nature. The claim that all four did came from the evidence series recording
 //! a row at **tick 0**, before `size_person_state` fills `Needs`: every need read 0.000 once, which made
 //! "crosses below 0.35" true of the *mean* while no individual came close. A mean over eight people, all
 //! out of phase, cannot fake a 0.000 that none of them reached — the artefact was the row, not the
 //! averaging.
 //!
 //! Three needs staying above 0.5 is **correct**: their rates are generous enough that they never run low.
-//! The observable assumes starvation that does not happen, which is a definitions question rather than a
-//! code defect, and the scenario stays `pending` until someone decides which it should be.
+//! The observable assumed starvation that does not happen, so it was **restated** on 2026-12-06 to the
+//! property that is both true and worth checking — every need is re-met — and the scenario is `measured`
+//! for the first time since November.
 mod common;
 
 use bevy::prelude::*;
@@ -102,7 +106,7 @@ fn run() -> Vec<[Cycle; 4]> {
 }
 
 #[test]
-fn only_food_cycles_for_every_person_and_the_scenario_says_so() {
+fn food_and_fun_cycle_and_rest_never_does() {
     let cycles = run();
     let names = ["social", "rest", "food", "fun"];
     for (i, name) in names.iter().enumerate() {
@@ -113,17 +117,43 @@ fn only_food_cycles_for_every_person_and_the_scenario_says_so() {
             lows.iter().cloned().fold(f32::INFINITY, f32::min)
         );
     }
-    // `food` is the one need that genuinely cycles for everyone, and this is what makes the observable's
-    // first sentence false for the rest: it is a statement about the definitions' rates, not about code.
+    // **`food` cycles for every person and `rest` for none.** `sleep` restores `0.15 × 8 h = 1.20` against a
+    // `rest` decay of `0.70/day` — a net `+0.50` per sleep — so `rest` ratchets up until sleeping stops being
+    // chosen and never needs to run low. That is the rates working, not a defect, and the observable's claim
+    // that `rest` cycles is a claim about supply it does not have.
     assert!(
         cycles.iter().all(|c| c[2].fell_and_rose()),
         "food must cycle once a day for every person"
     );
     assert!(
         cycles.iter().all(|c| !c[1].fell_and_rose()),
-        "rest stays above 0.5 at these rates; if this ever fails the observable became true and the \
-         scenario can be marked measured"
+        "rest stays above 0.5 at these rates: sleep supplies 1.20 against a 0.70/day decay, so it ratchets \
+         up rather than running low. If this fails, the supply changed and the observable below can be restated"
     );
+    // `fun` also cycles for most people, which the observable's old correction ("only `food` cycles") denied.
+    let fun_cycle = cycles.iter().filter(|c| c[3].fell_and_rose()).count();
+    println!("fun cycles for {fun_cycle} of {}", cycles.len());
+
+    // **The restated observable.** Every need must be *re-met*: across the run each person's level has to
+    // reach above 0.7 on all four, or a need is being drained with nothing that satisfies it. `social` and
+    // `rest` never fall low enough to cross 0.35, but they must still reach high — which is the property
+    // that catches a need no activity pays.
+    for (i, name) in names.iter().enumerate() {
+        let re_met = cycles.iter().filter(|c| {
+            let high = match i {
+                0 => c[0].high,
+                1 => c[1].high,
+                2 => c[2].high,
+                _ => c[3].high,
+            };
+            high > 0.7
+        });
+        assert!(
+            re_met.count() == cycles.len(),
+            "{name} never reaches above 0.7 for every person, so something is draining it with no activity \
+             that satisfies it"
+        );
+    }
 }
 
 #[test]

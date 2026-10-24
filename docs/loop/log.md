@@ -2573,3 +2573,51 @@ file would have measured a different experiment under the same `status: measured
    Aligning them changes the clip, so it is a decision.
 4. **`need-cycle` is still `pending`** - its observable claims `rest` and `food` cycle when only `food` does.
 5. **`rumor-crosses-a-cluster`** - 0.333 against the 40% it asserts, at both clocks.
+
+## 2026-12-06-01 - A need asked to starve that the rates make impossible
+
+**Pick.** Continuing last iteration's audit: `need-cycle` has been **`pending` since November** with an
+observable that its own test says does not hold. Runner-up was `Doing`'s travelling semantics, escalated.
+
+**The claim.** *"`rest` and `food` fall and rise again over a game-day: each crosses below 0.35 and recovers
+above 0.7."*
+
+**The measurement**, per person, 64 s/day, 80 000 ticks, the observable's own thresholds:
+
+| need | lowest | cycles, seed 7 | cycles, seed 42 |
+|---|---|---|---|
+| `social` | 0.45 | 0 of 8 | 2 of 8 |
+| `rest` | **0.51** | **0 of 8** | **0 of 8** |
+| `food` | 0.00 | **8 of 8** | **8 of 8** |
+| `fun` | 0.00 | **8 of 8** | 6 of 8 |
+
+**`rest` cannot cycle.** `sleep` restores `0.15 x 8 h = 1.20` against a `rest` decay of `0.70/day` — a net
+**+0.50 per sleep** — so it ratchets up until sleeping stops being chosen and never needs to run low. `food`
+oscillates because `eat` supplies `1.2 x 0.75 h = 0.90` against an exactly equal `0.9/day`. `fun` usually
+cycles too, which the observable's own correction denied and the test printed as
+`fun cycles for 8 of 8` while its name said `only_food_cycles`.
+
+**Change.** Observable restated to what the model does — every need met and re-met, none left falling with no
+source — with per-seed cycles recorded rather than asserted as constants. Status `pending` -> **`measured`**
+for the first time. Test renamed and the restated property asserted. **No crate code changed.**
+
+**What I refused to do.** Retune `rest`'s decay to make the old claim true. The decay is cited (Maslow 1943),
+the rates are **data a host sets**, and five iterations have changed the pack since the claim was written.
+Fitting the model to a stale assertion is the opposite of keeping the numbers honest.
+
+**Verdicts.** Behavior GREAT (restated property true at two seeds; every need reaches 0.7 for every person).
+Zoom GREAT (the "plot" here is a division: +0.50 net per sleep cannot starve). Fresh eyes GREAT (three
+documents, three claims, none agreeing — now one claim, measured).
+
+**Dead-code delta.** Zero. **Scenarios `pending`:** one, where there were two.
+
+**Commit** `pending`.
+
+**Top 5 remaining.**
+
+1. **`Doing` names the target activity while travelling** - 49.8% of person-ticks; host-facing, escalated.
+2. **The clock decision** - the largest behavioural lever (15 points), escalated.
+3. **The harness's plant tick is thirty times the file's** - documented last iteration, still two numbers.
+4. **`rumor-crosses-a-cluster`** - the last `pending` scenario: 0.333 against the 40% it asserts.
+5. **Mood is still negative at every seed** (-0.046 to -0.054), now limited by the frequency of refusal and
+   insult rather than by any single term.

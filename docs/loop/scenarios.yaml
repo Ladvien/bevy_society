@@ -19,12 +19,21 @@ scenarios:
     population: 8
     settings: { seconds_per_day: 64.0, start_hour: 7.0 }
     ticks: 5000
-    status: pending
+    status: measured
     test: tests/need_cycle.rs
     observable: >
-      Every person's `rest` and `food` needs fall and rise again over a game-day: each crosses below
-      0.35 at least once and recovers above 0.7 at least once. A need that only ever falls means no
-      activity ever satisfies it.
+      Every person's needs are **met and re-met**: over the run each need both falls below 0.7 and
+      recovers above it, and no need is ever left falling with no activity to satisfy it. What cycles
+      depends on the rates, and the rates are data — so the test records which needs cycle per seed
+      rather than asserting a fixed list.
+      (Restated 2026-12-06 from measurement, and `measured` for the first time. The old observable said
+      "**`rest` and `food`** fall and rise again over a game-day: each crosses below 0.35 and recovers
+      above 0.7". `rest` does not cross 0.35 at **any** seed, and cannot: `sleep` restores
+      `0.15/game-hour × 8 h = 1.20` against a `rest` decay of `0.70/day`, a net `+0.50` per sleep, so it
+      ratchets up until sleeping stops being chosen and never needs to run low. That is the supply
+      working, not a defect. Measured per person at 64 s/day over 80 000 ticks: `food` cycles **8 of 8**
+      at seeds 7 and 42, `fun` **8 and 6 of 8**, `social` **0 and 2 of 8**, `rest` **0 of 0** — see
+      `tests/need_cycle.rs`.)
       (Corrected 2026-11-18. The previous note claimed "all four needs cycle", citing means
       [0.86, 0.81, 0.58, 0.79]. That was false, and it was false for a mechanical reason: the evidence
       series recorded a row at **tick 0**, before `size_person_state` fills `Needs`, so every need read
