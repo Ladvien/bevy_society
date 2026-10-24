@@ -1,0 +1,112 @@
+# Bram's day
+
+At the end: doing Some("work"), needs Some([0.0, 0.0, 0.0, 0.0]), mood P0.01 A0.01 D-0.02
+
+d1 15h05: started work
+d3 07h07: started compliment
+d3 07h07: finished work (interrupted)
+d3 07h07: compliment with Dena (accepted)
+d3 07h07: chat approached by V38 (accepted)
+d3 07h24: started chat
+d3 07h24: finished compliment (completed)
+d3 07h24: chat with Corin (accepted)
+d3 07h46: started gossip
+d3 07h46: finished chat (completed)
+d3 07h46: gossip with Corin (accepted)
+d3 08h09: started gossip
+d3 08h09: finished gossip (completed)
+d3 08h09: gossip with Corin (accepted)
+d3 08h31: started work
+d3 08h31: finished gossip (completed)
+d3 22h13: started sleep
+d3 22h13: finished work (completed)
+d5 11h43: started eat
+d5 11h43: finished sleep (completed)
+d6 18h11: chat approached by Hilda (refused)
+d7 03h45: started sleep
+d7 03h45: finished eat (interrupted)
+d7 11h48: started compliment
+d7 11h48: finished sleep (completed)
+d7 11h48: compliment with Alys (accepted)
+d7 12h05: started eat
+d7 12h05: finished compliment (completed)
+d8 14h20: compliment approached by Alys (accepted)
+d8 14h20: gossip approached by Ysolde (refused)
+d8 15h00: compliment approached by Alys (accepted)
+d8 15h16: compliment approached by Alys (accepted)
+d8 15h28: gossip approached by Ysolde (accepted)
+d8 16h01: gossip approached by Ysolde (accepted)
+d9 04h07: started sleep
+d9 04h07: finished eat (interrupted)
+d9 12h11: started compliment
+d9 12h11: finished sleep (completed)
+d9 12h11: compliment with Alys (refused)
+d9 12h28: started compliment
+d9 12h28: finished compliment (completed)
+d9 12h28: compliment with Alys (accepted)
+d9 12h45: started compliment
+d9 12h45: finished compliment (completed)
+d9 12h45: compliment with Alys (accepted)
+d9 13h01: started snub
+d9 13h01: finished compliment (completed)
+d9 13h01: insult with Alys (accepted)
+d9 13h13: started chat
+d9 13h13: finished snub (completed)
+d9 13h13: chat with Ysolde (accepted)
+d9 13h35: started work
+d9 13h35: finished chat (completed)
+d10 14h15: compliment approached by Alys (accepted)
+d11 05h37: started sleep
+d11 05h37: finished work (interrupted)
+d12 06h33: compliment approached by Alys (accepted)
+d12 06h50: compliment approached by Alys (accepted)
+d12 07h07: chat approached by Alys (accepted)
+d12 14h15: started wander
+d12 14h15: finished sleep (completed)
+d12 14h48: started work
+d12 14h48: finished wander (completed)
+d13 20h15: started chat
+d13 20h15: finished work (completed)
+d13 20h15: chat with V27 (refused)
+d13 20h37: started chat
+d13 20h37: finished chat (completed)
+d13 21h28: chat with V27 (accepted)
+d13 21h50: started gossip
+d13 21h50: finished chat (completed)
+d14 01h13: gossip with V27 (refused)
+d14 01h35: started sleep
+d14 01h35: finished gossip (completed)
+d15 13h07: started compliment
+d15 13h07: finished sleep (completed)
+d15 13h07: compliment with Alys (accepted)
+d15 13h24: started gossip
+d15 13h24: finished compliment (completed)
+d15 13h24: gossip with V27 (accepted)
+d15 13h46: started chat
+d15 13h46: finished gossip (completed)
+d15 13h46: chat with V27 (refused)
+d15 14h09: started gossip
+d15 14h09: finished chat (completed)
+d15 14h09: gossip with V27 (refused)
+d15 14h31: started snub
+d15 14h31: finished gossip (completed)
+d15 14h31: insult with V27 (accepted)
+d15 14h43: started compliment
+d15 14h43: finished snub (completed)
+d15 14h43: compliment with Alys (accepted)
+d15 15h00: started compliment
+d15 15h00: finished compliment (completed)
+d15 15h00: compliment with Alys (accepted)
+d15 15h16: started snub
+d15 15h16: finished compliment (completed)
+d15 15h16: insult with V27 (refused)
+d15 15h28: started snub
+d15 15h28: finished snub (completed)
+d15 15h28: insult with V27 (accepted)
+d15 15h39: started work
+d15 15h39: finished snub (completed)
+d15 15h56: compliment approached by Alys (accepted)
+d15 17h43: compliment approached by Alys (accepted)
+d15 18h00: compliment approached by Alys (accepted)
+d17 08h26: started work
+d17 08h26: finished work (completed)

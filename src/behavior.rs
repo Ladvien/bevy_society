@@ -534,10 +534,13 @@ struct ScriptContext<'a> {
 }
 
 /// One option a decision is weighing: an activity and what it points at.
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 struct Candidate {
     activity: u16,
-    target: DoingTarget,
+    /// The targets that tied for the activity's best score. The draw happens over *activities*
+    /// (Dill's "option" is an action), then one of these is picked uniformly — so an activity with
+    /// many eligible targets is not made more likely by having them.
+    targets: Vec<DoingTarget>,
     weight: f32,
     score: f32,
 }
@@ -651,20 +654,27 @@ fn decide_activities(
             view.home,
         );
         let position = perception.pos.get(slot).copied().unwrap_or(Vec2::ZERO);
-        let near: Vec<(Entity, Vec2)> = perception
-            .near
-            .get(slot)
-            .map(|list| {
-                list.iter()
-                    .filter_map(|(j, _)| {
-                        let j = *j as usize;
-                        let other = perception.persons.get(j).copied()?;
-                        let pos = perception.pos.get(j).copied()?;
-                        (other != person).then_some((other, pos))
-                    })
-                    .collect()
-            })
-            .unwrap_or_default();
+        // `near` and `near_ids` are built from one pass over `perception.near`, so index `k` of
+        // each describes the same neighbour. The id comes from `PersonIndex.sorted`, whose order is
+        // the same index order `perception.near` uses.
+        let mut near: Vec<(Entity, Vec2)> = Vec::new();
+        let mut near_ids: Vec<u32> = Vec::new();
+        if let Some(list) = perception.near.get(slot) {
+            for (j, _) in list {
+                let j = *j as usize;
+                let (Some(other), Some(pos)) = (
+                    perception.persons.get(j).copied(),
+                    perception.pos.get(j).copied(),
+                ) else {
+                    continue;
+                };
+                if other == person {
+                    continue;
+                }
+                near.push((other, pos));
+                near_ids.push(index.sorted.get(j).map_or(u32::MAX, |(id, _)| id.0));
+            }
+        }
 
         let decision = Decision {
             position,
@@ -709,13 +719,26 @@ fn decide_activities(
                 home.map(|h| h.0),
                 &mut rng.0,
             );
+            // **One candidate per activity, not per target.** Dill's weight-based draw is over
+            // *options*, and an option is an action; an action with eight eligible targets is not
+            // eight times as desirable as one with a single target. Scoring every target and
+            // keeping the best (with its ties) gives the activity one score, and the target is
+            // picked from the ties afterwards. Before this, `gossip` with eight neighbours held
+            // 8/9 of the selection mass and `relax` starved: measured, a Person activity went from
+            // 0.00 of all starts at one neighbour to 0.97 at twelve.
+            let mut best_for_activity: Option<(f32, Vec<DoingTarget>)> = None;
             for target in targets {
+                // `near` is built from `perception.near`, whose indices are positions in
+                // `PersonIndex.sorted`, so the id is a lookup rather than a scan. The scan this
+                // replaces was a measurable part of the decision cost at a thousand people.
                 let target_id = match target {
-                    DoingTarget::Person(other) => index
-                        .sorted
-                        .iter()
-                        .find(|(_, e)| *e == other)
-                        .map_or(-1, |(id, _)| i64::from(id.0)),
+                    DoingTarget::Person(other) => near_ids
+                        .get(
+                            near.iter()
+                                .position(|(e, _)| *e == other)
+                                .unwrap_or(usize::MAX),
+                        )
+                        .map_or(-1, |id| i64::from(*id)),
                     _ => -1,
                 };
                 let script_ref = script_ready.map(|(snapshot, engine)| ScriptContext {
@@ -735,21 +758,35 @@ fn decide_activities(
                 if score <= 0.0 {
                     continue;
                 }
-                let candidate = Candidate {
-                    activity: i as u16,
-                    target,
-                    weight: spec.weight,
-                    score,
-                };
-                match &mut best {
-                    Some((rank, list)) if *rank == spec.rank => list.push(candidate),
-                    Some((rank, list)) if spec.rank > *rank => {
-                        *rank = spec.rank;
-                        *list = vec![candidate];
+                match &mut best_for_activity {
+                    Some((best, ties)) if score > *best + f32::EPSILON => {
+                        *best = score;
+                        *ties = vec![target];
+                    }
+                    Some((best, ties)) if (score - *best).abs() <= f32::EPSILON => {
+                        ties.push(target);
                     }
                     Some(_) => {}
-                    None => best = Some((spec.rank, vec![candidate])),
+                    None => best_for_activity = Some((score, vec![target])),
                 }
+            }
+            let Some((score, targets)) = best_for_activity else {
+                continue;
+            };
+            let candidate = Candidate {
+                activity: i as u16,
+                targets,
+                weight: spec.weight,
+                score,
+            };
+            match &mut best {
+                Some((rank, list)) if *rank == spec.rank => list.push(candidate),
+                Some((rank, list)) if spec.rank > *rank => {
+                    *rank = spec.rank;
+                    *list = vec![candidate];
+                }
+                Some(_) => {}
+                None => best = Some((spec.rank, vec![candidate])),
             }
         }
 
@@ -762,20 +799,25 @@ fn decide_activities(
                 return None;
             }
             let mut roll = rng.0.unit() as f32 * total;
+            let mut chosen = (*viable.last()?).clone();
             for candidate in &viable {
                 roll -= candidate.weight * candidate.score;
                 if roll <= 0.0 {
-                    return Some(**candidate);
+                    chosen = (*candidate).clone();
+                    break;
                 }
             }
-            viable.last().map(|c| **c)
+            // The activity is chosen; now which of its tied targets. Uniform and seeded, so the
+            // same person and the same seed reach the same place.
+            let index = rng.0.below(chosen.targets.len().max(1));
+            let target = *chosen.targets.get(index)?;
+            Some((chosen.activity, target))
         });
 
         match picked {
-            Some(candidate) => {
-                let activity = ActivityId(candidate.activity);
+            Some((activity, target)) => {
+                let activity = ActivityId(activity);
                 let name = defs.activity_name(activity).to_owned();
-                let target = candidate.target;
                 plans.push((
                     person,
                     activity,
