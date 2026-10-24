@@ -20,6 +20,16 @@ scenarios:
     settings: { seconds_per_day: 64.0, start_hour: 7.0 }
     ticks: 5000
     status: pending
+    test: tests/need_cycle.rs
+    blocked: >
+      Measured 2026-11-07 and still not met. With one need and the shipped rates, a person sleeps
+      back to back: 29 completed 4-hour sleeps in 20 000 ticks, and 4 game-hours IS 683 ticks, so
+      there is no gap in which `rest` can decay. `rest` stays at 1.000 and never crosses 0.35, so the
+      need is *met* continuously rather than cycling. The cause is the choice rule, not the satisfy
+      path: `Linear(-1, 1.0)` scores a full 1.0 whenever the need is below 1.0, so the activity that
+      tops it up is always the best option the moment the previous one ends.
+      `tests/need_cycle.rs` asserts this state, so the day it changes the test fails and the
+      scenario can be marked measured.
     observable: >
       Every person's `rest` and `food` needs fall and rise again over a game-day: each crosses below
       0.35 at least once and recovers above 0.7 at least once. A need that only ever falls means no
@@ -42,8 +52,9 @@ scenarios:
     seed: 3
     population: 10
     settings: { seconds_per_day: 64.0 }
-    ticks: 6000
-    status: pending
+    ticks: 12000
+    status: measured
+    test: tests/opinion_convergence.rs
     observable: >
       Opinion spread on one topic narrows over the run but does not collapse to a single value:
       standard deviation falls by at least a third and stays above 0.02. Full collapse means the
@@ -55,11 +66,15 @@ scenarios:
     population: 6
     settings: { seconds_per_day: 64.0 }
     ticks: 400
-    status: pending
+    status: measured
+    test: tests/deed_response.rs
     observable: >
-      One planted `steal` with five witnesses produces exactly one `NormViolated` from a witness whose
-      opinion on the deed's topic is below -0.5, and exactly one rumor whose `known_by` is five. Two
-      rumors or zero witnesses means the deed path is wrong.
+      One accepted deed with four witnesses in perception produces exactly one rumor, every witness
+      knows it, and each witness whose approval `norm * sign(harm)` is below -0.5 raises one
+      `NormViolated`. Two rumors or zero witnesses means the deed path is wrong.
+      (Corrected 2026-11-07: this said "a witness whose opinion on the deed's topic is below -0.5",
+      but the crate judges `approval`, not the raw opinion, and a planted `PlantRumor` is a rumor,
+      not a deed — `witness()` only runs on an accepted interaction that names one.)
 
   - name: village-evening
     kind: village
@@ -79,11 +94,13 @@ scenarios:
     population: 24
     settings: { seconds_per_day: 64.0, start_hour: 15.0 }
     ticks: 3000
-    status: pending
+    status: measured
+    test: tests/determinism.rs
     observable: >
-      Two runs with seed 7 hash identically and a run with seed 8 does not. `tests/determinism.rs` is
-      the home for this one; it needs the per-tick draws `BehaviorPlugin` adds, which is why it is
-      pending.
+      Two runs with seed 7 hash identically and a run with seed 8 does not. `tests/determinism.rs`
+      holds this: `the_same_seed_gives_the_same_society` and `a_different_seed_gives_a_different_society`.
+      (Corrected 2026-11-07: this said the test was waiting on `BehaviorPlugin`'s per-tick draws. Those
+      landed; both tests have been green for several iterations and the status was never updated.)
 
   - name: scale-1000
     kind: persons

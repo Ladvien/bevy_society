@@ -20,11 +20,12 @@ mod common;
 
 use bevy::app::{App, PluginGroup};
 use bevy::ecs::name::Name;
+use bevy::ecs::world::World as EcsWorld;
 use bevy::prelude::{Entity, MinimalPlugins, Transform, TransformPlugin, Vec2};
 use bevy::time::TimeUpdateStrategy;
 use bevy_society::{
     ActivityEnded, ActivityStarted, Autonomous, Doing, Home, InteractionResolved, Knowledge, Mood,
-    Needs, Opinions, Person, Place, PlaceTags, PlantRumor, RumorBook, RumorId, SocietyClock,
+    Needs, Opinions, Person, Place, PlaceTags, PlantRumor, RumorBook, SocietyClock,
     SocietyDefs, SocietyPlugins, SocietySettings, TieLabel, Ties,
 };
 use std::collections::BTreeMap;
@@ -91,7 +92,7 @@ fn main() {
     }
     write_narrative(&mut app, tracked, &lines, &out);
     series(&rows, &out);
-    summary(&mut app, &world, &out);
+    summary(app.world(), &world, &out, planted);
     println!(
         "evidence: {} ticks, {} people, {} places, wrote {}",
         ticks,
@@ -689,20 +690,24 @@ fn series(rows: &[Row], out: &Path) {
 }
 
 /// Writes `summary.json`.
-fn summary(app: &mut App, world: &World, out: &Path) {
-    let world_ref = app.world();
+fn summary(ecs: &EcsWorld, world: &World, out: &Path, planted: Option<bevy_society::RumorId>) {
+    let world_ref = ecs;
     let living = world.villagers.len().max(1);
     let book = world_ref.resource::<RumorBook>();
-    let knowers = world
-        .villagers
-        .iter()
-        .filter(|&&e| {
-            world_ref
-                .get::<Knowledge>(e)
-                .is_some_and(|k| k.get(RumorId(0)).is_some())
-        })
-        .count();
-    let rumored = world.subject.is_some();
+    // The planted rumor, exactly as `series.csv` does it. This counted `RumorId(0)` — the first rumor
+    // the run ever made — and so reported `rumor_known_by: 0` for every scenario that plants a
+    // different one, which is every scenario with a rumor.
+    let knowers = planted.map_or(0, |id| {
+        world
+            .villagers
+            .iter()
+            .filter(|&&e| {
+                world_ref
+                    .get::<Knowledge>(e)
+                    .is_some_and(|k| k.get(id).is_some())
+            })
+            .count()
+    });
     let (mut friends, mut rivals) = (0u32, 0u32);
     for &entity in &world.villagers {
         if let Some(ties) = world_ref.get::<Ties>(entity) {
@@ -722,11 +727,7 @@ fn summary(app: &mut App, world: &World, out: &Path) {
         living,
         book.rumors.len(),
         knowers,
-        if rumored {
-            knowers as f32 / living as f32
-        } else {
-            0.0
-        },
+        knowers as f32 / living as f32,
         friends / 2,
         rivals / 2,
         clock.now_days,
