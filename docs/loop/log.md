@@ -546,3 +546,72 @@ limit documented. Fresh eyes GREAT — the harness found a shipped defect within
 4. **A spatial index for perception** past ~2 000 people, with benchmark numbers behind it.
 5. **`warn_unscored_fields` says "1 definitions"** — grammatically wrong; a plural helper would fix it,
    noted rather than done so the fix is deliberate.
+
+## 2026-11-03-01 — The quick start was a lie; now it is compiled
+
+**Pick.** The brief's candidate #3, host ergonomics, tested the only way that counts: be the host, copy
+the crate's own documentation, run it. Three of four entry points failed.
+
+| Entry point | As written | Result |
+|---|---|---|
+| `README.md` quick start | the block it calls "this code" | **0 society ticks in 600 updates** |
+| `docs/guide/getting-started.md` | `add_plugins(SocietyPlugins)` over `DefaultPlugins` | **panics** in `DialoguePlugin::finish` |
+| `examples/quickstart.rs` | same code, fixed step pinned | works: 59 exchanges, 30 accepted |
+
+A headless app has no frame clock, so `Time<Fixed>` never advances and the society is frozen. The
+example was right; the two documents telling a host to copy it were wrong, and the README said so
+falsely.
+
+**Change.** Not a corrected copy — a **running doctest** in `src/lib.rs`, so `cargo test --doc`
+executes the snippet a host is told to paste and asserts `tick > 0`. `tests/readme.rs` asserts the
+README's block is byte-equal to it. Deleting the `TimeUpdateStrategy` line from the README fails it
+(verified: failed, restored).
+
+**What the doctest caught, in its first run.** My hand-written repair named `TimeUpdateStrategy` from
+`bevy::prelude::*` — which does not contain it (`bevy_time`'s prelude is
+`{DelayedCommandsExt, Fixed, Real, Time, Timer, TimerMode, Virtual}`). **Every text-level assertion
+passed and the code did not compile.** That is the whole argument for compiled documentation.
+
+**Before → after.** Society ticks in 600 updates: **0 → 37**. The guide: panic → no panic.
+
+**Evidence.** `runs/2026-11-03-01/evidence/{before,after}-tick-count.txt`,
+`before-guide-panic.txt`, `after/{needs-rumor-friends.png, narrative.txt, summary.json}`,
+`after-need-cycle/needs.png`, `fresh-eyes/` (seed 99, 40 people).
+
+**Harness.** `--seed` and `--people` added (the fresh-eyes gate needs both and it had neither);
+`clock_label` now prints `d3 20h43` — without the day, a multi-day narrative reads as though the clock
+ran backwards at midnight. `--people 40` also panicked on `["millers","weavers","watch"][3]`; the
+faction index now wraps.
+
+**Behaviour measured while reading the evidence, recorded not fixed** (one change per iteration):
+
+| Observation | Measurement |
+|---|---|
+| `need3` never satisfied | 0.0 on **3 283 / 4 200 ticks (78.2%)** |
+| `need2` rarely satisfied | 0.0 on 1 950 / 4 200 (46.4%) |
+| rumor spreads instantly, then stops | changes at ticks **34 and 59**, then flat for 4 140 |
+| message pair asymmetric | **19** `ActivityEnded` vs **9** `ActivityStarted`, one person |
+
+The asymmetry is a crate defect with a located cause: `ActivityStarted` is written on arrival
+(`behavior.rs:340`) and for no-travel activities (`:832`); `ActivityEnded` is written for any removed
+`Doing` (`:449`), so a travel timeout ends an activity nobody was told started.
+
+**Tests.** 19 → **20** binaries, both feature sets; `cargo test --doc` 1 → **2**, one of which executes
+the quick start. Dead-code inventory: zero, unchanged.
+
+**Verdicts.** Behaviour GREAT (0 → 37 ticks, guide no longer panics, all asserted by compiled checks).
+Zoom GREAT — found two need-starvation defects, a frozen rumor and the start/end asymmetry by reading
+the plot the brief requires. Fresh eyes GREAT for the change at seed 99 / 40 people; **NOT YET** for
+need satisfaction, which is worse at 40 people than at 24, with numbers.
+
+**Commit.** `fa09163`.
+
+**Top 5 remaining.**
+1. **`ActivityStarted` / `ActivityEnded` asymmetry** — a start is only written on arrival; a travel
+   timeout emits an end for a start nobody saw. Everything downstream (gossip, witness reactions)
+   inherits it.
+2. **`need3` at 0.0 for 78% of ticks** — no starter activity satisfies it often enough;
+   `need-cycle` stays `pending` because of it.
+3. **Rumor reach frozen after tick 59** — should stifle (Daley–Kendall), not flat-line.
+4. **`Field` / `Gradient` wiring** — unchanged, four measured facts recorded.
+5. **`warn_unscored_fields` says "1 definitions"** — plural helper.
