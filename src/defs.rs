@@ -780,6 +780,13 @@ impl SocietyDefs {
             .collect()
     }
 
+    /// Whether the activity called `name` targets a field gradient.
+    pub fn activity_targets_gradient(&self, name: &str) -> bool {
+        self.activities
+            .iter()
+            .any(|spec| spec.name == name && matches!(spec.target, ActivityTarget::Gradient(..)))
+    }
+
     /// Whether any compiled activity targets a field gradient.
     pub fn has_gradient_activity(&self) -> bool {
         self.activities

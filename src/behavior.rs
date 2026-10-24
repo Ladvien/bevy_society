@@ -213,15 +213,15 @@ impl Plugin for BehaviorPlugin {
 fn warn_unscored_fields(defs: &SocietyDefs) {
     let mut offenders: Vec<&str> = Vec::new();
     for (name, signals) in defs.activity_signals() {
-        if signals
+        // An activity with *both* a Field input and a Gradient target is one offender, not two: it was
+        // counted twice before, which made the warning overstate how many definitions were affected.
+        let reads_a_field = signals
             .iter()
-            .any(|signal| matches!(signal, crate::defs::Signal::Field(_)))
-        {
+            .any(|signal| matches!(signal, crate::defs::Signal::Field(_)));
+        let walks_a_gradient = defs.activity_targets_gradient(name);
+        if reads_a_field || walks_a_gradient {
             offenders.push(name);
         }
-    }
-    if defs.has_gradient_activity() {
-        offenders.push("<an activity with a Gradient target>");
     }
     if offenders.is_empty() {
         return;

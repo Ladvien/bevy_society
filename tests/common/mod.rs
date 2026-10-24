@@ -1,5 +1,7 @@
-//! Shared test harness: a headless society app and person spawning.
+//! Shared test harness: a headless society app, person spawning, and log capture.
 #![allow(dead_code)]
+
+pub mod capture;
 
 use std::time::Duration;
 
