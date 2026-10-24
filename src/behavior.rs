@@ -191,7 +191,54 @@ impl Plugin for BehaviorPlugin {
 
     fn finish(&self, app: &mut App) {
         crate::core::require_core(app, "BehaviorPlugin");
+        // Both resources are present: `SocietyCorePlugin` initialized them.
+        let settings = app.world().resource::<SocietySettings>().clone();
+        let defs = app.world().resource::<SocietyDefs>();
+        warn_short_activities(defs, &settings);
     }
+}
+
+/// Warns about activities that are shorter than a couple of society ticks.
+///
+/// `ActivitySpec::duration_hours` is game hours and one tick is `dt_days`, so the two only
+/// correspond for a given `seconds_per_day`: a 0.1-hour `snub` lasts four ticks in the default
+/// 240-second day and **one** tick in a four-second day. An activity that ends on the tick it
+/// starts degenerates the society — a person re-decides every tick and repeats whatever scored
+/// highest — and that is silent. Measured, a crowd ran `snub` 38 times per person per game-day
+/// before anyone noticed.
+///
+/// The crate cannot fix the mismatch (which clock walking and durations belong to is a design
+/// decision), but it can say so at startup instead of leaving a host to discover it in a plot.
+fn warn_short_activities(defs: &SocietyDefs, settings: &SocietySettings) {
+    let tick_hours = f64::from(settings.tick_secs) / f64::from(settings.seconds_per_day) * 24.0;
+    if tick_hours <= 0.0 {
+        return;
+    }
+    let mut degenerate: Vec<String> = Vec::new();
+    for (index, activity) in defs.activities.iter().enumerate() {
+        // The reserved idle activity is a one-hour fallback and is meant to be short.
+        if index == usize::from(crate::defs::IDLE_ACTIVITY.0) {
+            continue;
+        }
+        let ticks = f64::from(activity.duration_hours) / tick_hours;
+        if ticks < 2.0 {
+            degenerate.push(format!(
+                "{} ({:.1}h = {:.1} ticks)",
+                activity.name, activity.duration_hours, ticks
+            ));
+        }
+    }
+    if degenerate.is_empty() {
+        return;
+    }
+    warn!(
+        "bevy_society: {} activities are shorter than two society ticks at seconds_per_day {} \
+         (one tick is {:.3} game-hours), so their people will re-decide every tick: {}",
+        degenerate.len(),
+        settings.seconds_per_day,
+        tick_hours,
+        degenerate.join(", ")
+    );
 }
 
 // -------------------------------------------------------------------------------------------------

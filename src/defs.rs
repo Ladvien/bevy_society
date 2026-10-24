@@ -763,6 +763,18 @@ impl SocietyDefs {
             .map_or("", |spec| spec.name.as_str())
     }
 
+    /// Every activity's name with its duration in game-hours, in definition order.
+    ///
+    /// A host needs this to check its own `seconds_per_day`: a duration shorter than a society tick
+    /// makes the activity degenerate, and `BehaviorPlugin` warns about it at startup. Exposed rather
+    /// than inferred so a host (or a test) can make the same check without the compiled internals.
+    pub fn activity_durations(&self) -> Vec<(&str, f32)> {
+        self.activities
+            .iter()
+            .map(|spec| (spec.name.as_str(), spec.duration_hours))
+            .collect()
+    }
+
     /// The name of an interaction, or `""` for an unknown id.
     pub fn interaction_name(&self, id: InteractionId) -> &str {
         self.interactions
