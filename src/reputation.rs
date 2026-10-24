@@ -163,7 +163,7 @@ pub(crate) fn actor_reaction(
 /// witnesses.
 pub(crate) fn spread_witnessed_rumor(
     book: &mut RumorBook,
-    witnesses: &mut [(Entity, &mut Knowledge)],
+    witnesses: &mut [(Entity, Knowledge)],
     subject: Entity,
     patient: Option<Entity>,
     deed: DeedId,
@@ -173,7 +173,15 @@ pub(crate) fn spread_witnessed_rumor(
 ) -> Option<RumorId> {
     let (origin, rest) = witnesses.split_first_mut()?;
     let id = plant_rumor(
-        book, origin.1, origin.0, subject, patient, deed, harm, now_days, truth,
+        book,
+        &mut origin.1,
+        origin.0,
+        subject,
+        patient,
+        deed,
+        harm,
+        now_days,
+        truth,
     );
     for (_, knowledge) in rest.iter_mut() {
         knowledge.insert(crate::beliefs::Known {

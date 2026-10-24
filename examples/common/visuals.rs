@@ -196,13 +196,20 @@ impl Default for SunClock {
 #[derive(Component)]
 pub struct VillageSun;
 
-/// Spawns the directional light the village is lit by.
+/// Spawns the directional light the village is lit by, plus a little ambient so the faces turned
+/// away from the sun stay readable instead of going black.
 pub fn spawn_sun(commands: &mut Commands) -> Entity {
+    // The crate-wide ambient: `AmbientLight` itself requires a `Camera` and overrides this per camera.
+    commands.insert_resource(GlobalAmbientLight {
+        color: Color::srgb(0.80, 0.86, 1.0),
+        brightness: 900.0,
+        affects_lightmapped_meshes: true,
+    });
     commands
         .spawn((
             VillageSun,
             DirectionalLight {
-                illuminance: 9_000.0,
+                illuminance: 16_000.0,
                 shadow_maps_enabled: true,
                 ..default()
             },
@@ -224,16 +231,16 @@ pub fn move_sun(
     let day_fraction = ((hour - 6.0) / 14.0).clamp(0.0, 1.0);
     let elevation = (day_fraction * std::f32::consts::PI).sin();
     let (color, illuminance) = if !sun_clock.0 {
-        (Color::WHITE, 9_000.0)
+        (Color::WHITE, 16_000.0)
     } else if elevation > 0.15 {
         // Dusk tints the light orange as the elevation falls.
         let warmth = (1.0 - elevation).clamp(0.0, 1.0);
         (
             Color::srgb(1.0, 0.95 - 0.25 * warmth, 0.85 - 0.45 * warmth),
-            2_000.0 + 12_000.0 * elevation,
+            6_000.0 + 22_000.0 * elevation,
         )
     } else {
-        (Color::srgb(0.35, 0.42, 0.65), 400.0)
+        (Color::srgb(0.35, 0.42, 0.65), 900.0)
     };
     for (mut light, mut transform) in &mut suns {
         light.color = color;

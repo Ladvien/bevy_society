@@ -58,6 +58,10 @@ pub struct VillageMaterials {
 }
 
 /// The entities a scene build produced, for the examples to keep looking at.
+///
+/// A resource because a `Startup` system is the only place with both `Commands` and the mesh and
+/// material assets: `Commands` borrows the world, so the two cannot be taken in the same expression.
+#[derive(Resource, Debug, Clone)]
 pub struct Village {
     /// The player person.
     pub player: Entity,

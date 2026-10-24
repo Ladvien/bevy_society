@@ -18,6 +18,7 @@ use bevy::{
     app::SubApps,
     asset::RenderAssetUsages,
     camera::RenderTarget,
+    prelude::IsDefaultUiCamera,
     prelude::*,
     render::{
         RenderPlugin,
@@ -108,9 +109,13 @@ impl Recorder {
             .resource_mut::<Assets<Image>>()
             .add(image);
 
+        // `IsDefaultUiCamera` is what makes UI (the HUD) render through this camera, which draws to
+        // the off-screen target rather than the window. Without it a capture shows the scene and no
+        // HUD at all.
         app.main.world_mut().spawn((
             Camera3d::default(),
             RenderTarget::from(target.clone()),
+            IsDefaultUiCamera,
             camera,
         ));
 
