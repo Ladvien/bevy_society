@@ -168,6 +168,11 @@
         (
             id: "chat",
             on_accept: (actor_needs: [("social", 0.2)], target_needs: [("social", 0.2)]),
+            // A refusal is not an injury: the pack used to give it no outcome of its own, so the only
+            // emotional consequence of being turned away was the crate's rejection distress — measured,
+            // half of all the village's negativity. A refused greeting is mildly deflating, not a small
+            // tragedy, and it is the definition's business to say so (OCC's *reproach*, mild).
+            on_reject: (actor_emotion: Some((Distress, 0.1))),
             influence: ["kindness", "honesty"],
             barks: (
                 actor: ["Morning, {target}!"],
@@ -178,6 +183,7 @@
         (
             id: "gossip",
             on_accept: (actor_needs: [("social", 0.15)], target_needs: [("social", 0.15)]),
+            on_reject: (actor_emotion: Some((Distress, 0.1))),
             gossip: true,
             barks: (
                 actor: ["Did you hear about {subject}?"],

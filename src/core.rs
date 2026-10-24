@@ -153,6 +153,18 @@ pub struct Tuning {
     /// Options below this fraction of the best score are dropped. Design default (no source paper
     /// gives this number); mechanism: dual-utility selection, Dill 2015, DOI 10.1201/b18373-5.
     pub tier_cutoff: f32,
+    /// Distress a person feels when the someone it approached **refuses** the interaction, before any
+    /// `on_reject` emotion of the definition's own.
+    ///
+    /// Design default (no source paper gives this number). Mechanism: rejection is an interpersonal
+    /// offence and the OCC appraisal for it is distress (Ortony, Clore & Collins, via Gratsch & Marsella
+    /// 2004, DOI 10.1016/j.cogsys.2004.02.002). It was a literal `0.3` in `exchange`, which is the crate's
+    /// only unnamed emotion intensity — every other one is a deed's `harm` or a `groups.rs` constant.
+    ///
+    /// Worth measuring before raising: this is the largest single source of negative emotion in the
+    /// village. Measured over 6 000 ticks and 8 people, **112 distress appraisals against 10 joy**, and
+    /// the ratio, not the magnitude, is what leaves every mood's pleasure at or below zero.
+    pub rejection_distress: f32,
     /// Hours a person may travel toward an activity before giving up.
     pub travel_timeout_hours: f32,
     /// Walking speed in metres per **real** second, used by the core walker that moves a person
@@ -189,6 +201,7 @@ impl Default for Tuning {
             contact_gain: 0.02,
             contest_steepness: 4.0,
             tier_cutoff: 0.25,
+            rejection_distress: 0.3,
             travel_timeout_hours: 2.0,
             walk_speed: 1.4,
         }

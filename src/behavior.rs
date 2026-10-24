@@ -1667,12 +1667,18 @@ fn exchange(
             let tie = ties.entry(target);
             tie.affinity = (tie.affinity - 0.05).clamp(-1.0, 1.0);
         }
-        world.write_message(crate::mind::Appraise {
-            person: actor,
-            kind: crate::mind::EmotionKind::Distress,
-            intensity: 0.3,
-            toward: Some(target),
-        });
+        // **The definition's own `on_reject` emotion wins.** A pack that says what a refusal feels
+        // like is not second-guessed; the crate's number is the fallback for a pack that says nothing,
+        // which the starter pack did. Emitting both stacked `0.3` on top of the definition's `0.1` and
+        // measured *worse* mood than either alone — two paths for one event.
+        if effects.actor_emotion.is_none() && settings.tuning.rejection_distress > 0.0 {
+            world.write_message(crate::mind::Appraise {
+                person: actor,
+                kind: crate::mind::EmotionKind::Distress,
+                intensity: settings.tuning.rejection_distress,
+                toward: Some(target),
+            });
+        }
     }
 
     // (6) Memories, both sides.

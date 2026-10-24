@@ -2240,3 +2240,57 @@ identical from a red assertion.
 3. **`rumor-crosses-a-cluster`** - 0.333 against the 40% it asserts, at both clocks.
 4. **The cluster's 1:24 chat:gossip starvation** - a second need; a schema change.
 5. **Scoring is the scale curve** - `people x activities x neighbours`; sampling is the only real lever.
+
+## 2026-11-30-01 - Nobody in the village is ever pleased
+
+**Pick.** Started from the narrative (which the last three iterations did not), then measured the *state*.
+`village-evening` has **max pleasure +0.000** over every person and every tick, stdev 0.031, for 17
+game-days. That is the most wrong thing a host can read from `Mood`, so it became the iteration.
+
+**What shipped, and what did not.** The mood imbalance is a decision (three answers disagree about what the
+model is). What shipped is the part that is unambiguously wrong: the refusal distress was a literal `0.3`
+— the crate's **only** unnamed emotion intensity, against its own rule — and a definition's `on_reject`
+now **replaces** it instead of stacking.
+
+| configuration | mean pleasure (8 people) |
+|---|---|
+| literal 0.3, pack has no `on_reject` | **-0.202** |
+| pack `on_reject 0.1`, both emitted | **-0.207** |
+| pack `on_reject 0.1`, fallback replaced | **-0.165** |
+
+The middle row is why: two paths for one event is worse than one.
+
+**The finding, recorded not retuned.** `Mood::step` pulls toward the emotion centre at 4:1 (`pull_per_day
+4.0`) and toward the personality baseline at 1:1 — and `pad::baseline` is **zero** for a neutral personality
+from `Personality::sample`. So pleasure's ceiling is zero, and the centre is negative nearly always:
+**1 302 distress appraisals against 427 joy** over 20 000 ticks, and **15 people ending with live `Anger`
+against 0 with `Joy`**. `Evidence/mood.png` shows pleasure starting at exactly zero, falling, and
+oscillating at -0.15 for 240 game-days without crossing the axis.
+
+**Two populations disagreed, and that is the useful part.** In a tight eight-person cluster refusals are
+about *half* the negativity (-0.202 -> -0.105 without them). In the real 24-person village they barely
+register (-0.150 -> -0.154), because people spend their time walking and working. A fix tuned on the first
+would have been mis-tuned for the second. Both numbers are in the decision file.
+
+**What I measured wrong first.** Counted *emotion entries observed per tick* and reported "52 038 distress
+appraisals". `Emotions::appraise` merges same-kind-same-target and caps, so a persisting emotion was counted
+once per tick. The real number is **112** — 12x smaller, and it turns "saturated" into "a 3:1 ratio the mood
+update cannot escape".
+
+**Verdicts.** Behavior GREAT (constant reaches the model; stacking provably worse). Zoom GREAT (the plot
+convicts the model: the zero-height `Joy` bar is the whole story). Fresh eyes GREAT (two populations, and
+they disagree).
+
+**Dead-code delta.** Zero.
+
+**Commit** `pending`.
+
+**Top 5 remaining.**
+
+1. **A village that is never pleased** - max pleasure +0.000; three defensible fixes, now measured. New
+   decision file, and the largest remaining believability defect.
+2. **`Doing` names the target activity while travelling** - 49.8% of person-ticks; host-facing, escalated.
+3. **The clock decision** - the largest behavioural lever (15 points), escalated.
+4. **`rumor-crosses-a-cluster`** - 0.333 against the 40% it asserts, at both clocks.
+5. **`need-cycle` is still `pending`** - its test passes but its observable claims `rest` and `food` cycle
+   when only `food` does; re-stating an observable is a decision.
