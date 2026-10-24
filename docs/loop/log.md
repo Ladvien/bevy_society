@@ -1908,3 +1908,52 @@ what its docs imply).
 4. **`need-cycle`'s observable** — three needs stay above 0.5 at these rates; a design question.
 5. **`examples/capture.rs` still hardcodes 8.0 s/day** — the README clip is measured under settings the spec
    does not declare.
+
+## 2026-11-23-01 - A `Place` activity asking for `Distance` was silently disabled
+
+**Pick.** Not "add `Distance` to `eat`" (the previous entry's leftover) but the thing that made that line a
+trap: `Signal::Distance` returned **1.0** for every `Place` and `Point`, so a place-targeted activity could
+not price its walk at all. Runner-up was the pack edit; it lost because it cannot work while the input is
+wrong -- measured on `eat`, adding the line took `food` from 0.402 to **0.034**, at zero **93%**.
+
+**The defect is not "the wrong place", it is "no place".** Written red first: both taverns in one run, 1 m and
+7 m, 6 000 decisions, gave **0 / 0**.
+
+**Change.** `PlaceView::position` (from the place's `Transform` and the society plane), `Decision::place_positions`,
+and the `Signal::Distance` arm for `DoingTarget::Place`. `Point` and `Itself` keep the maximum, with the source
+comment saying why each is genuinely unknown rather than merely unimplemented.
+
+**Before / after.**
+
+| | before | after |
+|---|---|---|
+| both taverns, 1 m vs 7 m | **0 / 0** | **5 999 / 0** |
+| `eat` + `Distance`, `food` mean | 0.034 (93% at zero) | **0.176 (0% at zero)** |
+| shipped pack, all series rows | 67 199 | **67 199 identical** |
+
+Travelling stays 58.9%, needs 0.545 -- **bit-identical**, because the pack asks for `Distance` on no `Place`.
+
+**Evidence.** `runs/2026-11-23-01/evidence/distance-signal.png` (red flat at zero, blue drifting to ~0.1),
+`baseline.csv`, `distance-broken-signal.csv`, `distance-fixed-signal.csv`.
+
+**Verdicts.** Behavior GREAT (0/0 -> 5 999/0, written red first). Zoom GREAT (the red line flat at zero is what
+"disabled" looks like; the blue drift is the harsh curve, recorded not tuned). Fresh eyes GREAT (seed 42:
+0.167 against 0.176, zero 0% at both).
+
+**Dead-code delta.** Zero. `PlaceView::position` and `Decision::place_positions` are read by the signal and
+asserted by the test.
+
+**What it hands on, unresolved.** `food` at 0.176 is still below its 0.402 baseline because
+`Linear(-1.0, 1.0)` scores a tavern 6.5 m away inside an 8 m radius at **0.19**. The input is now real; the
+**curve** is `needs-decision/travel-cost-is-not-scored.md`'s question, and it is answerable now.
+
+**Commit** `69833ea`.
+
+**Top 5 remaining.**
+
+1. **The travel curve's shape** - the input is correct, so this is finally a measurement question: try
+   `Linear(-0.4, 1.0)`, a `Logistic`, and `duration / (duration + walk)`, and pick on travelling% and needs.
+2. **The cluster's 1:24 starvation** - a second need; a schema change.
+3. **The clock decision** (`travel_timeout_hours` real-time) - escalated, still open.
+4. **A log-capture harness** - still blocking two warnings from being properly tested.
+5. **A spatial index for perception** past ~2 000 people, with benchmark numbers behind it.
