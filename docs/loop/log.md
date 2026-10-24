@@ -2888,3 +2888,57 @@ indiscriminate, trust saturated by the mechanism it gates). Pass 3 GREAT (one st
 3. **Meeting and befriending share one verb** - blocked behind (1).
 4. **`Doing` names the target activity while travelling** - 49.8% of person-ticks; host-facing, escalated.
 5. **The clock decision** - 5.4-hour walks against 0.75-hour activities.
+
+## 2026-12-12-01 - The README promised something the crate did not do
+
+**Pick.** Not the friendship clique — **five rounds have failed** on it (a `help` activity, a contact exchange,
+saturating affinity, a trust gate, saturating all three accumulators), and the loop's rule says log the blocker
+and move on. The blocker is in `needs-decision/friendship-has-no-diminishing-return.md` with the one untested
+shape. Also not the mood residual (-0.05, already near neutral after three iterations).
+
+What five rounds of model work never touched: **the public surface**.
+
+**The finding.** `README.md`: *"every rate is a named field on `Tuning`"*. It was false in two places.
+
+| literal | where | decides |
+|---|---|---|
+| `0.4`, `0.3`, `0.2`, `0.1` | `TieLabel::classify` | friend, rival, stranger |
+| `0.05` | `resolve_interactions` | affinity lost to a refused approach |
+
+The `classify` thresholds were documented *in the same function* as "design defaults (no source paper gives
+them)" — exactly the case the rule exists for.
+
+**Change.** Six `Tuning` fields, defaults equal to the literals; `classify` takes `&Tuning`.
+
+| | before | after |
+|---|---|---|
+| `village-evening` series rows | 67 199 | **67 199 identical** |
+| friends / rivals | 22 / 33 | **22 / 33** |
+| literals in non-test code | **6** | **0** |
+
+**The test that makes it real.** Raising `friend_affinity` to 0.9 must demote a tie from `Friend` to
+`Acquaintance` — otherwise the field could be declared and never read, and every other check would still pass.
+
+**Why it matters.** A host that wanted a colder village had to fork the crate. And it could not discover that
+`friend_familiarity = 0.3` is satisfied by **0.907** among friends and **0.908** among the rest — the term
+discriminates nothing, a fact readable only in the source.
+
+**No value changed.** The sweeps from earlier iterations showed none of them moves the village much (exposure
+0.05->0.005: friends 22->16). Visibility was the fix; choosing new values is the friendship decision's business.
+
+**Verdicts.** Three GREAT. Pass 2's check was that identity is the *proof* here rather than a coincidence, and it
+was verified row by row rather than by comparing summaries.
+
+**Dead-code delta.** Zero. **Tests:** 52 binaries, one new.
+
+**Commit** `pending`.
+
+**Top 5 remaining.**
+
+1. **A bound BELOW the friendship threshold.** The one untested shape, and what five failures lacked: `K < 0.4`
+   so friendship needs a second input, not just contact.
+2. **`friend_familiarity` discriminates nothing** - 0.907 vs 0.908. Now visible and adjustable, which is as far
+   as this iteration could take it without deciding the model.
+3. **Meeting and befriending share one verb** - blocked behind (1).
+4. **`Doing` names the target activity while travelling** - 49.8% of person-ticks; host-facing, escalated.
+5. **The clock decision** - 5.4-hour walks against 0.75-hour activities.

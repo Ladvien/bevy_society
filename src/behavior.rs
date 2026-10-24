@@ -1665,7 +1665,8 @@ fn exchange(
         // (5) Rejection penalty.
         if let Some(mut ties) = world.get_mut::<Ties>(actor) {
             let tie = ties.entry(target);
-            tie.affinity = (tie.affinity - 0.05).clamp(-1.0, 1.0);
+            tie.affinity =
+                (tie.affinity - settings.tuning.rejection_affinity_penalty).clamp(-1.0, 1.0);
         }
         // **The definition's own `on_reject` emotion wins.** A pack that says what a refusal feels
         // like is not second-guessed; the crate's number is the fallback for a pack that says nothing,

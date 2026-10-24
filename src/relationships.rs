@@ -37,12 +37,12 @@ impl TieLabel {
     /// The four thresholds are design defaults (no source paper gives them); they sit on two
     /// mechanisms the literature does supply: familiarity from mere exposure (Zajonc 1968,
     /// DOI 10.1037/h0025848) and affinity from similarity (Byrne 1961, DOI 10.1037/h0044721).
-    pub fn classify(affinity: f32, familiarity: f32) -> Self {
-        if affinity >= 0.4 && familiarity >= 0.3 {
+    pub fn classify(affinity: f32, familiarity: f32, tuning: &crate::Tuning) -> Self {
+        if affinity >= tuning.friend_affinity && familiarity >= tuning.friend_familiarity {
             Self::Friend
-        } else if affinity <= -0.4 && familiarity >= 0.2 {
+        } else if affinity <= -tuning.rival_affinity && familiarity >= tuning.rival_familiarity {
             Self::Rival
-        } else if familiarity < 0.1 {
+        } else if familiarity < tuning.stranger_familiarity {
             Self::Stranger
         } else {
             Self::Acquaintance
@@ -129,7 +129,7 @@ impl Tie {
         now_days: f32,
         tuning: &Tuning,
     ) -> Option<(TieLabel, TieLabel)> {
-        let next = TieLabel::classify(self.affinity, self.familiarity(now_days, tuning));
+        let next = TieLabel::classify(self.affinity, self.familiarity(now_days, tuning), tuning);
         if next == self.label {
             None
         } else {
@@ -460,11 +460,18 @@ mod tests {
 
     #[test]
     fn labels_follow_the_d4_thresholds() {
-        assert_eq!(TieLabel::classify(0.5, 0.5), TieLabel::Friend);
-        assert_eq!(TieLabel::classify(-0.5, 0.5), TieLabel::Rival);
-        assert_eq!(TieLabel::classify(0.0, 0.05), TieLabel::Stranger);
-        assert_eq!(TieLabel::classify(0.2, 0.5), TieLabel::Acquaintance);
-        assert_eq!(TieLabel::classify(0.5, 0.2), TieLabel::Acquaintance);
+        let tuning = Tuning::default();
+        assert_eq!(TieLabel::classify(0.5, 0.5, &tuning), TieLabel::Friend);
+        assert_eq!(TieLabel::classify(-0.5, 0.5, &tuning), TieLabel::Rival);
+        assert_eq!(TieLabel::classify(0.0, 0.05, &tuning), TieLabel::Stranger);
+        assert_eq!(
+            TieLabel::classify(0.2, 0.5, &tuning),
+            TieLabel::Acquaintance
+        );
+        assert_eq!(
+            TieLabel::classify(0.5, 0.2, &tuning),
+            TieLabel::Acquaintance
+        );
     }
 
     #[test]

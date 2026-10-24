@@ -202,6 +202,31 @@ pub struct Tuning {
     /// this number); mechanism: intergroup contact, Pettigrew & Tropp 2006,
     /// DOI 10.1037/0022-3514.90.5.751.
     pub contact_gain: f32,
+    /// Affinity at or above which, with [`Self::friend_familiarity`], a tie is a **friend**.
+    ///
+    /// All five label thresholds are **design defaults** — no source paper gives them. They were literals
+    /// inside `TieLabel::classify` until 2026-12-12, when the README's promise that every rate is a named
+    /// `Tuning` field was checked and found broken in two places.
+    ///
+    /// They are consequential and were invisible. Measured on `village-evening`: friend-ties average affinity
+    /// **0.792** against **-0.223** for the rest, but `friend_familiarity` is satisfied by **0.907** against
+    /// **0.908** — the familiarity term discriminates nothing at all. See
+    /// `docs/loop/needs-decision/friendship-has-no-diminishing-return.md`.
+    pub friend_affinity: f32,
+    /// Familiarity at or above which, with [`Self::friend_affinity`], a tie is a friend.
+    pub friend_familiarity: f32,
+    /// Affinity at or below `-rival_affinity`, with [`Self::rival_familiarity`], makes a tie a rival.
+    pub rival_affinity: f32,
+    /// Familiarity a rival needs — deliberately lower than a friend's, as the literal was.
+    pub rival_familiarity: f32,
+    /// Familiarity below which a tie is a stranger, whatever its affinity.
+    pub stranger_familiarity: f32,
+    /// Affinity lost by the person whose approach is **refused**, per refusal.
+    ///
+    /// Design default (no source paper gives it); it was a literal `0.05` in `resolve_interactions` until
+    /// 2026-12-12. A refusal is not an injury, so this is small, but it is the only thing that makes a
+    /// persistent pursuer reconsider.
+    pub rejection_affinity_penalty: f32,
     /// Steepness of the contest logistic. Design default (no source paper gives this number);
     /// mechanism: Bonabeau et al. 1995, DOI 10.1016/0378-4371(95)00064-e.
     pub contest_steepness: f32,
@@ -256,6 +281,12 @@ impl Default for Tuning {
             gossip_trust_gain: 0.3,
             gossip_affinity_gain: 0.2,
             contact_gain: 0.02,
+            friend_affinity: 0.4,
+            friend_familiarity: 0.3,
+            rival_affinity: 0.4,
+            rival_familiarity: 0.2,
+            stranger_familiarity: 0.1,
+            rejection_affinity_penalty: 0.05,
             contest_steepness: 4.0,
             tier_cutoff: 0.25,
             rejection_distress: 0.3,

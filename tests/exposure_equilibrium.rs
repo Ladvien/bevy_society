@@ -47,13 +47,13 @@ fn exposure_equilibrium_is_stated_and_compared_with_the_friend_threshold() {
     // What the equilibrium *means* for the Friend threshold is recorded, not asserted: whether proximity alone
     // should suffice for friendship is `needs-decision/friendship-has-no-diminishing-return.md`'s question, and
     // pinning it here would block the fix that file recommends.
-    let at_equilibrium = TieLabel::classify(equilibrium, 1.0);
+    let at_equilibrium = TieLabel::classify(equilibrium, 1.0, &tuning);
     println!(
         "a tie resting at the equilibrium reads {at_equilibrium:?}; the 0.4 Friend threshold is {}% below it",
         100.0 * (1.0 - 0.4 / equilibrium)
     );
     assert_eq!(
-        TieLabel::classify(1.0, 1.0),
+        TieLabel::classify(1.0, 1.0, &tuning),
         TieLabel::Friend,
         "the thresholds must still admit a maximally-affine, long-known tie as a Friend"
     );
