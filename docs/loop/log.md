@@ -2732,3 +2732,58 @@ Pass 3 **FAIL** (the verb conflates meeting and befriending).
 3. **`Doing` names the target activity while travelling** - 49.8% of person-ticks; host-facing, escalated.
 4. **The clock decision** - 5.4-hour walks against 0.75-hour activities, now with an observable outcome.
 5. **Mood is still negative at every seed** (-0.046 to -0.054).
+
+## 2026-12-09-01 - Friendship has no diminishing return
+
+**Pick.** The top of the list: tie formation is over-sensitive to contact volume. It earned the iteration
+because **two mechanisms in two iterations** produced a clique from a plausible local rule — a `help` activity
+(rivals 44 -> 0) and a contact-triggered exchange (friends 22 -> 267). A third attempt without knowing why
+would have failed the same way. Runner-up was `Doing`'s travelling semantics, escalated.
+
+**The measurement.** Friend-ties over 17 game-days: **25 -> 115**, linear, never flattening, with affinity
+pinned at **1.000** — the clamp, not an equilibrium.
+
+**Three sweeps, and two disproved my own hypothesis.**
+
+| knob | friends |
+|---|---|
+| `mere_exposure_per_day` 0.05 / 0.02 / 0.01 / 0.005 | **22 / 15 / 15 / 16** |
+| `balance_rate_per_day` 0.5 / 0.05 | **22 / 25** |
+
+I predicted exposure was the pump — its equilibrium is `0.05/(0.05+0.01) = 0.833`, far above the `0.4` Friend
+threshold, so proximity alone suffices. The sweep says it barely matters.
+
+**The cause.** **Affinity from interaction does not saturate.** Familiarity from exposure does (`1 - f`);
+affinity from exchange adds its `TieDelta` every time, relaxation removes only 0.01/day, and nothing discounts
+the *n*-th conversation. Measured on one pair: **45 interactions make a Friend**, affinity still climbing to
+**0.73 at 57**. So friendship is a monotone function of contact volume — which is why a 3x contact change gave a
+3x friend count, and why the contact cooldown could not be tuned (3 h / 12 h / 48 h gave 267 / 182 / 72 friends:
+a rate sweep on a monotone function just walks up and down the same line).
+
+**What shipped.** No model change — a saturating term on interaction affinity changes how every tie forms for
+every host, so it is `needs-decision/friendship-has-no-diminishing-return.md`'s call (three options,
+recommending saturation, which the crate already uses for exposure). What did ship:
+
+1. **A citation corrected.** `mere_exposure_per_day` cited **Zajonc 1968** as though the paper supplied the
+   rate. Zajonc supplies the mechanism and no number. The doc now states the equilibrium, the three sweeps, and
+   the 45-interaction result.
+2. **`tests/exposure_equilibrium.rs`** pins the arithmetic neither rate reveals alone, and is written so the
+   recommended fix does **not** have to delete it — it asserts the fixed point (true at any rate) and only
+   *records* what that means for the threshold.
+
+**Verdicts.** Three GREAT for the investigation. **No fix shipped**, stated plainly. The explanation covers
+**both** earlier failures as one cause, which is worth more than either iteration's reverted change.
+
+**Dead-code delta.** Zero. **Village unchanged:** friends 22 / rivals 33.
+
+**Commit** `pending`.
+
+**Top 5 remaining.**
+
+1. **Affinity from interaction has no saturating term.** 45 exchanges make a friend at any quality; this is the
+   single cause of both cliques and the only fix left that changes the shape of the model.
+2. **Meeting and befriending share one verb.** Still open; a bark or mood nudge on contact is the untried path
+   and would be safe once (1) lands.
+3. **`Doing` names the target activity while travelling** - 49.8% of person-ticks; host-facing, escalated.
+4. **The clock decision** - 5.4-hour walks against 0.75-hour activities.
+5. **Mood is still negative at every seed** (-0.046 to -0.054).

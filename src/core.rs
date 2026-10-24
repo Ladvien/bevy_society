@@ -114,8 +114,29 @@ pub struct Tuning {
     /// Familiarity gained by contact, per game-day (mere exposure; Zajonc 1968,
     /// DOI 10.1037/h0025848).
     pub exposure_per_day: f32,
-    /// Affinity gained by contact, per game-day, scaled by `1 - |affinity|` (Zajonc 1968,
-    /// DOI 10.1037/h0025848).
+    /// Affinity gained by contact, per game-day, scaled by `1 - |affinity|`.
+    ///
+    /// **Zajonc 1968 (DOI 10.1037/h0025848) supplies the mechanism, not this rate** — the finding is that
+    /// repeated exposure increases liking, not by how much per game-day. The rate is a design default.
+    ///
+    /// It and [`Self::affinity_relax_per_day`] are two first-order processes on one variable, so affinity
+    /// settles where they balance:
+    ///
+    /// ```text
+    /// equilibrium = exposure / (exposure + relax) = 0.05 / (0.05 + 0.01) = 0.833
+    /// ```
+    ///
+    /// `TieLabel::classify` calls a tie a **Friend** at affinity `0.4` — under half that equilibrium — so
+    /// proximity alone is *sufficient* for friendship. Measured, affinity reaches **0.999 by tick 9 599** on
+    /// `village-evening`.
+    ///
+    /// **But proximity is not what decides the village's friend count.** Lowering this rate to 0.02, 0.01 and
+    /// 0.005 moved friends only **22 → 15 → 15 → 16**, and lowering `balance_rate_per_day` from 0.5 to 0.05
+    /// moved it **22 → 25**. What moves it is the *number of exchanges*: measured, two people become a Friend
+    /// after **45 interactions**, and affinity keeps climbing to 0.73 by 57 with no diminishing return — so a
+    /// village with three times the contact has three times the friends. That is why two separate mechanisms
+    /// which added contact each produced a clique. The missing term is not a rate but a **saturating one**;
+    /// see `docs/loop/needs-decision/`.
     pub mere_exposure_per_day: f32,
     /// Relaxation of affinity toward zero, per game-day, never crossing zero. Design default (no
     /// source paper gives this number).
