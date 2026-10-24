@@ -2877,7 +2877,7 @@ indiscriminate, trust saturated by the mechanism it gates). Pass 3 GREAT (one st
 
 **Dead-code delta.** Zero. **Village unchanged:** friends 22 / rivals 33.
 
-**Commit** `pending`.
+**Commit** `3ef33b2`.
 
 **Top 5 remaining.**
 
