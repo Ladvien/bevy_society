@@ -1,0 +1,98 @@
+# The scenarios the loop runs. Every iteration measures against these, so a change that fixes one
+# cannot quietly break another.
+#
+# Each scenario is a fixed seed, population and settings override, a tick budget, and the observable
+# it should produce. `observable` is what a test asserts and what an iteration's evidence must show.
+#
+# `kind` says how to build it:
+#   persons  — N named persons at the given positions
+#   village  — the F1 village: four places, 24 villagers in three factions of eight
+#   cluster  — two groups far apart in the same society, so a rumor must cross a gap
+#
+# `positions` is either a grid (`grid: {cols, rows, spacing}`) or an explicit list.
+# A scenario with `status: pending` has no test yet; the loop may not claim it passes.
+
+scenarios:
+  - name: need-cycle
+    kind: persons
+    seed: 7
+    population: 8
+    settings: { seconds_per_day: 64.0, start_hour: 7.0 }
+    ticks: 5000
+    status: pending
+    observable: >
+      Every person's `rest` and `food` needs fall and rise again over a game-day: each crosses below
+      0.35 at least once and recovers above 0.7 at least once. A need that only ever falls means no
+      activity ever satisfies it.
+
+  - name: rumor-crosses-a-cluster
+    kind: cluster
+    seed: 11
+    population: 12
+    settings: { seconds_per_day: 64.0, start_hour: 15.0, contact_radius: 4.0 }
+    ticks: 4000
+    status: pending
+    observable: >
+      With the two groups 40 m apart and one person from each group brought together once, a rumor
+      planted in the first group reaches at least 40% of the second group. Zero reach means gossip
+      cannot cross a gap; instant reach means it teleports.
+
+  - name: opinion-converges-but-not-entirely
+    kind: persons
+    seed: 3
+    population: 10
+    settings: { seconds_per_day: 64.0 }
+    ticks: 6000
+    status: pending
+    observable: >
+      Opinion spread on one topic narrows over the run but does not collapse to a single value:
+      standard deviation falls by at least a third and stays above 0.02. Full collapse means the
+      confidence bound is not being respected.
+
+  - name: deed-draws-a-response
+    kind: persons
+    seed: 5
+    population: 6
+    settings: { seconds_per_day: 64.0 }
+    ticks: 400
+    status: pending
+    observable: >
+      One planted `steal` with five witnesses produces exactly one `NormViolated` from a witness whose
+      opinion on the deed's topic is below -0.5, and exactly one rumor whose `known_by` is five. Two
+      rumors or zero witnesses means the deed path is wrong.
+
+  - name: village-evening
+    kind: village
+    seed: 7
+    population: 24
+    settings: { seconds_per_day: 64.0, start_hour: 15.0 }
+    ticks: 3000
+    status: pending
+    observable: >
+      The hero-GIF scenario: ties form (at least three friendships and one rivalry), a rumor planted at
+      tick 300 reaches at least half the village, and at least six barks are written. This is the one
+      scenario whose numbers the README's clip depends on.
+
+  - name: determinism
+    kind: village
+    seed: 7
+    population: 24
+    settings: { seconds_per_day: 64.0, start_hour: 15.0 }
+    ticks: 3000
+    status: pending
+    observable: >
+      Two runs with seed 7 hash identically and a run with seed 8 does not. `tests/determinism.rs` is
+      the home for this one; it needs the per-tick draws `BehaviorPlugin` adds, which is why it is
+      pending.
+
+  - name: scale-1000
+    kind: persons
+    seed: 1
+    population: 1000
+    settings: { seconds_per_day: 240.0 }
+    ticks: 200
+    status: pending
+    observable: >
+      Cost per society tick at 1,000 persons, recorded in the iteration's `perf.md`. Perception is
+      brute force and quadratic, so this number is what a host is buying. Report it as
+      milliseconds per tick, not as a pass/fail.
