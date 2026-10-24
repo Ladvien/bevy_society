@@ -190,7 +190,7 @@ fn a_planted_rumor_spreads_through_gossip() {
 fn ctx_tellable_reports_whether_a_person_has_a_rumor_to_spread() {
     // The gap this closes: `ctx.knows` needs a rumor id, which an authored definitions file has no
     // way to name, so no script could ask "does this person have anything to tell?".
-    use bevy_society::{DefsFile, SocietyDefs, SocietySettings};
+    use bevy_society::SocietyDefs;
 
     let defs = SocietyDefs::from_ron(
         r#"(
