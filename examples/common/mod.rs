@@ -7,4 +7,5 @@
 
 pub mod recorder;
 pub mod scene;
+pub mod scenes;
 pub mod visuals;

@@ -17,7 +17,7 @@ const FRIEND_COLOR: Color = Color::srgb(0.25, 0.75, 0.35);
 const RIVAL_COLOR: Color = Color::srgb(0.85, 0.25, 0.25);
 
 /// Height above the ground the tie lines and rings are drawn at, clear of the ground plane.
-const MARK_HEIGHT: f32 = 0.06;
+pub const MARK_HEIGHT: f32 = 0.06;
 
 /// A ring drawn under everyone who knows the planted rumor.
 #[derive(Resource, Debug, Clone, Copy, Default)]
@@ -60,9 +60,12 @@ pub fn draw_ties(
                 continue;
             };
             let to = theirs.translation();
+            // Chest height, not ground level: at `MARK_HEIGHT` the lines run under the capsules and
+            // the ground plane's depth hides most of them. Measured on the ties clip, where a
+            // ground-level graph showed two short segments instead of a network.
             gizmos.line(
-                Vec3::new(from.x, MARK_HEIGHT, from.z),
-                Vec3::new(to.x, MARK_HEIGHT, to.z),
+                Vec3::new(from.x, from.y + 0.6, from.z),
+                Vec3::new(to.x, to.y + 0.6, to.z),
                 color.with_alpha(0.15 + 0.55 * familiarity),
             );
         }
@@ -101,7 +104,7 @@ pub fn draw_rumor_rings(
         let pos = transform.translation();
         gizmos.circle(
             Isometry3d::new(
-                Vec3::new(pos.x, MARK_HEIGHT, pos.z),
+                Vec3::new(pos.x, pos.y + 0.95, pos.z),
                 Quat::from_rotation_x(std::f32::consts::FRAC_PI_2),
             ),
             0.55,
@@ -113,6 +116,12 @@ pub fn draw_rumor_rings(
 /// The HUD's text node.
 #[derive(Component)]
 pub struct Hud;
+
+/// A per-clip line under the HUD, naming the feature the GIF is about.
+///
+/// One GIF per feature needs one sentence per GIF, or a reader has to infer what the colours mean.
+#[derive(Resource, Debug, Clone, Default)]
+pub struct SceneLabel(pub String);
 
 /// Builds the HUD: a text node in the top-left, with the font the host passed in.
 pub fn spawn_hud(commands: &mut Commands, font: Handle<Font>) -> Entity {
@@ -128,10 +137,15 @@ pub fn spawn_hud(commands: &mut Commands, font: Handle<Font>) -> Entity {
             TextColor(Color::WHITE),
             Node {
                 position_type: PositionType::Absolute,
-                top: px(10),
-                left: px(12),
+                top: px(8),
+                left: px(10),
+                // A dark plate behind the text. The village is bright grass and pale buildings, and
+                // white text over it is unreadable at the GIF's 640 px; the plate costs nothing and
+                // keeps every line legible whatever the camera is pointed at.
+                padding: UiRect::all(px(7)),
                 ..default()
             },
+            BackgroundColor(Color::srgba(0.05, 0.07, 0.10, 0.72)),
         ))
         .id()
 }
@@ -144,6 +158,7 @@ pub fn update_hud(
     books: Res<RumorBook>,
     index: Res<PersonIndex>,
     ties: Query<&Ties>,
+    label: Option<Res<SceneLabel>>,
     mut hud: Query<&mut Text, With<Hud>>,
 ) {
     let Ok(mut text) = hud.single_mut() else {
@@ -164,15 +179,31 @@ pub fn update_hud(
             }
         }
     }
-    let reach = books.rumors.first().map_or(String::new(), |rumor| {
-        format!(
-            "\n“Bram stole bread” — known by {}/{}",
-            rumor.known_by,
-            index.sorted.len().max(1)
-        )
+    // The **newest** alive rumor, not `RumorId(0)`. The first rumor a run makes is not the one the
+    // clip plants, and reading it reported a claim about the wrong one — the same mistake the
+    // evidence harness made twice and the capture's ring overlay made once.
+    let reach =
+        books
+            .rumors
+            .iter()
+            .rev()
+            .find(|rumor| rumor.alive)
+            .map_or(String::new(), |rumor| {
+                format!(
+                    "\n“Bram stole bread” — known by {}/{}",
+                    rumor.known_by,
+                    index.sorted.len().max(1)
+                )
+            });
+    let label = label.as_ref().map_or(String::new(), |label| {
+        if label.0.is_empty() {
+            String::new()
+        } else {
+            format!("\n{}", label.0)
+        }
     });
     **text = format!(
-        "Day {} · {:02}:{:02}\nFriendships {} · Rivalries {}{reach}",
+        "Day {} · {:02}:{:02}\nFriendships {} · Rivalries {}{reach}{label}",
         clock.day(),
         hour as u32,
         minutes,

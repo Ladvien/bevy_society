@@ -6,7 +6,15 @@ Give your Bevy world a living society: villagers who remember, gossip, take side
 
 ![A rumor spreads through a village at dusk](docs/media/hero.gif)
 
-One evening in a village of twenty-four people: Bram steals bread, the watch sees it, and by nightfall the rumor has reached half the village. Tie lines show friendships green and rivalries red; the red ring marks whoever knows the rumor.
+One evening in a village of twenty-four people: Bram steals bread, the watch sees it, and by nightfall the rumor has reached twenty-three of twenty-five. Tie lines show friendships green and rivalries red; the red ring marks whoever knows the rumor. Every clip below is the same village, same seed, same run — only the overlay changes.
+
+### One clip per feature
+
+| | |
+|---|---|
+| ![Mood](docs/media/mood.gif) **Mood** — PAD on every villager. Green is pleased, red is displeased; ring size is arousal. The colour scale is normalised to the ±0.4 the model actually produces, so a small mood shift is visible. | ![Opinion](docs/media/opinions.gif) **Opinions** — one column per villager on the honesty topic, green above the midpoint and red below. |
+| ![Needs](docs/media/needs.gif) **Needs** — a full green halo is a fed villager, a small red one is hungry. | ![Ties](docs/media/ties.gif) **Relationships** — the tie graph alone: green friendship, red rivalry, brightness by familiarity. |
+| ![Factions](docs/media/factions.gif) **Factions** — three colours, no ties, so the group structure is the only thing on screen. | The hero clip above is the same run with every overlay on. |
 
 ## What you get
 

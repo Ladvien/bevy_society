@@ -1,7 +1,36 @@
 # Demos
 
-`docs/media/hero.gif` is not hand-made. It is a recording of `examples/capture`, and this page is the
-recipe, so a later capture can be compared with it.
+`docs/media/*.gif` are not hand-made. Each is a recording of `examples/capture` with a different
+`--scene`, and this page is the recipe, so a later capture can be compared with it.
+
+## One clip per feature
+
+| file | `--scene` | what it shows |
+|---|---|---|
+| `hero.gif` | `village` | every overlay: rumor rings, tie lines, HUD |
+| `mood.gif` | `mood` | PAD rings — colour is pleasure, radius is arousal |
+| `opinions.gif` | `opinions` | one opinion column per villager |
+| `needs.gif` | `needs` | food halos — full and green is fed, small and red is hungry |
+| `ties.gif` | `ties` | the tie graph alone |
+| `factions.gif` | `factions` | faction colours, no lines |
+
+All six are the same village, same seed and same run: `{"frames": 240, "rumor_reach": 0.880,
+"friends": 36, "rivals": 45, "barks": 2810}`. Only the overlay and the camera differ, which is the
+point — a feature clip is a different *view* of one simulation, not a different simulation.
+
+### Overlay scales are normalised to the measured range, not to [-1, 1]
+
+The first mood clip was a field of identical dull-olive rings: PAD in this village spans only about
+±0.4, so a full [-1, 1] colour scale maps every villager to the same colour. The scale is normalised
+to `MOOD_SPAN = 0.45`, which is measured (4 200 ticks: pleasure [-0.387, 0.382], arousal [-0.361,
+0.447], dominance [-0.413, 0.513]), and the opinion columns are normalised the same way. A clip whose
+overlay cannot distinguish anyone is not a clip of that feature.
+
+### Overlays draw above the mesh, not at ground level
+
+`MARK_HEIGHT` is 0.06 m. Rings and tie lines drawn there are hidden by the villager capsules and by
+the ground plane's depth: measured, the ties clip showed two short segments where the graph has
+hundreds of edges. Everything now draws at chest or head height.
 
 ## Capture
 
@@ -12,7 +41,8 @@ recipe, so a later capture can be compared with it.
 cargo +1.98.1 run --release --example capture -- \
     --font /System/Library/Fonts/Supplemental/Arial.ttf \
     --out frames/hero \
-    --frames 480
+    --frames 240 \
+    --scene village
 ```
 
 What it does:
@@ -20,7 +50,8 @@ What it does:
 - Settings: `seconds_per_day 64.0`, `tick_secs 0.1`, `start_hour 15.0`, so the clip covers about six
   game-hours — one afternoon into one evening.
 - Six hundred unrecorded steps first, so ties have formed before the first captured frame.
-- `warm_up(3)`, then 480 recorded frames at 30 fps (16 s, 15:30 → 21:30).
+- `warm_up(3)`, then 240 recorded frames at 30 fps (8 s). The encode uses `STRIDE=2 FPS=60`
+  (see below), which keeps real-time speed at half the file.
 - At recorded frame 30 it writes the same `PlantRumor` the village example's `R` key writes: Bram stole
   bread, told by a weaver.
 - The camera orbits from 20° to 50° around the origin at radius 24, height 16, at 720×405.
@@ -110,14 +141,26 @@ determinism and that is a bug, not a rendering difference.
 
 ## Visual check
 
-Before committing a new GIF, look at frames 0, 160, 320 and 479 and at the GIF itself. Each must show:
+**Coalesce before you look.** `tools/gif.sh` writes with `-layers optimize`, which stores later frames
+as partial rectangles (`640x311+0+49`). Extracting one frame with `magick file.gif[N]` yields a
+corrupted image — that is the extractor, not the GIF. Use `magick file.gif -coalesce out_%03d.png`.
+
+Before committing a new GIF, look at frames 0, 120 and the last one **after coalescing**. Each must show:
 
 - faction colours that tell villagers apart at a glance;
 - legible balloons, with no clipped text;
 - the HUD (`Day n · hh:mm`, the rumor's reach, friendships and rivalries);
 - rumor rings appearing only after frame 30 and spreading;
 - tie lines;
-- a first frame that is not blank.
+- a first frame that is not blank;
+- the scene's own overlay legible as the thing it names — for `mood`, rings that differ in colour *and*
+  size between villagers; for `opinions`, columns that differ in height; for `ties`, a graph rather
+  than a handful of segments.
+
+Last checked 2026-11-10, all six clips, frames 0 / 120 / 239: HUD plate legible over grass and over
+night sky, captions correct, every overlay distinguishing at least two villagers, no blank first
+frame. The `factions` clip deliberately carries no tie lines, so its three colours are the only thing
+on screen.
 
 Any failure is a scene bug: fix `examples/common/scene.rs` or `visuals.rs` and capture again. Do not
 paper over it in the encode.
