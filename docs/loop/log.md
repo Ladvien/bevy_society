@@ -2611,7 +2611,7 @@ documents, three claims, none agreeing — now one claim, measured).
 
 **Dead-code delta.** Zero. **Scenarios `pending`:** one, where there were two.
 
-**Commit** `pending`.
+**Commit** `0db4a7c`.
 
 **Top 5 remaining.**
 
