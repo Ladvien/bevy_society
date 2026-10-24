@@ -442,3 +442,55 @@ eyes GREAT — a host now learns where the cliff is.
 4. **A spatial index for perception**, if a host needs past ~2 000 people. Now a `needs-decision/`
    note with numbers behind it rather than a guess.
 5. A log-capture harness so warnings can be asserted rather than read by hand.
+
+## 2026-11-01-01 — The log's premise was wrong, and the real bug is still open
+
+**Why this and not #1.** #1 is a definitions-schema change, which this loop escalates rather than
+decides. #3 was `Signal::Field` / `Gradient`, listed with "Moussaïd 2011 needs re-converting" as its
+blocker.
+
+**The premise was wrong.** The field grids are built, deposited, evaporated, diffused and queried
+correctly: `field_value(Crowd, …)` returns **1.0** at a crowded cell with sample == peak, and
+`gradient_target(Crowd, …)` returns `Some(Vec2(4.0, -4.2e-7))` on a crowd. Moussaïd 2011 is a
+crowd-*steering* paper; a `Gradient` target walks a steeper-is-better field and needs no crowd model
+at all. Nothing needs re-converting.
+
+The real gap: `signal_value`'s `Field` arm returns a constant 0 and `targets_for` returns no targets
+for `Gradient`. Measured, an activity with a `Gradient` target ran **0 person-ticks over 60**.
+
+**What I attempted and reverted.** Wire both call sites — `field_value` and `gradient_target` are
+public and the decision already holds positions. Threaded `Option<Res<SocialFields>>` through
+`decide_activities` → `score_option` → `signal_value` and through `targets_for`, with two tests. Both
+failed and the cause was not found: a trace showed the `Field` arm running with the actor's real
+position, `field_value` at that cell returned 1.0, and the score still came out 0 with the person
+idling every tick for 60 ticks. One ordering fact is established — `SocialFields` is created by a
+deferred command in `Clock`, and `deposit_fields` runs in `Relate`, after `Decide`, so a decision
+reads the *previous* tick's grid — but that does not explain the tick-20 case.
+
+**Shipped instead.** A startup `warn!` naming every definition that relies on a `Field` consideration
+or a `Gradient` target, plus `SocietyDefs::{activity_signals, has_gradient_activity}` and a public
+`Signal` so a host can run the same check. A host no longer writes a dead definition in silence.
+
+**Evidence.** `runs/2026-11-01-01/{research,eval,review}.md`,
+`evidence/gradient-never-chosen.json`, and `needs-decision/field-inputs-are-unscored.md` with four
+measured facts, what was reverted, what remains unexplained, and three options.
+
+**Before → after.** No behaviour change: the warning is the deliverable. Tests 17 → **18**
+(`tests/fields_unscored.rs`, 4 tests).
+
+**Dead-code inventory.** Unchanged at zero. `Signal` became public, which the accessors require.
+
+**Verdicts.** Behaviour GREAT — the four facts pinned, with the missing log assertion named (second
+occurrence; escalated). Zoom GREAT — silent on the starter pack, and `Signal`'s exposure justified.
+Fresh eyes GREAT — the negative result is recorded precisely enough to resume from.
+
+**Commit.** See `git log`.
+
+**Top 5 remaining.**
+1. **`Field` / `Gradient` wiring** — the actual bug, with four measured facts and the unexplained
+   tick-20 case recorded. Start from a single-person case with one cell of value 1.0.
+2. **The cluster's 1:24 starvation** — a second need; a schema change.
+3. **The clock decision** (`travel_timeout_hours` real-time) — escalated, still open.
+4. **A log-capture harness** — now blocking two separate warnings from being properly tested.
+   Promoted from fifth.
+5. **A spatial index for perception** past ~2 000 people, with benchmark numbers behind it.
