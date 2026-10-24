@@ -2230,7 +2230,7 @@ sets, not two seeds: live and silent with `fields` on, rejected at parse time wi
 slope, and 400 ticks is less than one 1-hour fallback. "The feature is dead" and "my probe is too short" look
 identical from a red assertion.
 
-**Commit** `pending`.
+**Commit** `c842ae9`.
 
 **Top 5 remaining.**
 
