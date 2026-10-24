@@ -780,6 +780,41 @@ impl SocietyDefs {
             .collect()
     }
 
+    /// How fast `need` decays per game-day, or `None` when the name is not defined.
+    ///
+    /// With [`Self::best_source`] this is the whole of a need's budget: a need whose best single use
+    /// supplies less than its decay must be met more than once a day, and a definition where that
+    /// number is large describes people who starve.
+    pub fn need_decay(&self, need: &str) -> Option<f32> {
+        let id = self.need_id(need)?;
+        self.needs
+            .get(usize::from(id.0))
+            .map(|spec| spec.decay_per_day)
+    }
+
+    /// The activity that supplies `need` most per use, with the amount it supplies, or `None` when no
+    /// activity satisfies it.
+    ///
+    /// A use supplies `satisfies · duration_hours`, because `satisfies` is a per-game-hour rate paid
+    /// for the activity's whole duration. Ties go to the earlier activity in definition order.
+    pub fn best_source(&self, need: &str) -> Option<(&str, f32)> {
+        let id = self.need_id(need)?;
+        self.activities
+            .iter()
+            .filter_map(|activity| {
+                let rate = activity
+                    .satisfies
+                    .iter()
+                    .find(|(slot, _)| *slot == id)
+                    .map(|(_, rate)| *rate)?;
+                Some((activity.name.as_str(), rate * activity.duration_hours))
+            })
+            .fold(None::<(&str, f32)>, |best, candidate| match best {
+                Some((_, amount)) if amount >= candidate.1 => best,
+                _ => Some(candidate),
+            })
+    }
+
     /// Whether the activity called `name` targets a field gradient.
     pub fn activity_targets_gradient(&self, name: &str) -> bool {
         self.activities

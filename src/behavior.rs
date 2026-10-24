@@ -214,8 +214,73 @@ impl Plugin for BehaviorPlugin {
         warn_short_activities(defs, &settings);
         warn_unscored_fields(defs);
         warn_short_travel_reach(&settings);
+        warn_unbalanced_needs(defs);
     }
 }
+
+/// Warns about a need whose best source cannot cover its decay at a plausible rate.
+///
+/// Every need decays per game-day and is supplied by activities that pay `satisfies · duration_hours`
+/// per use. A need whose source pays less than its decay needs more than one use a day; one whose
+/// source is also gated to a few hours, or sits behind a walk, will starve in practice. Measured on the
+/// starter pack: `fun` decays 0.8/day, its only source `relax` pays 0.6 per use, and a person therefore
+/// needs 1.33 of them a day — while a 24-person village manages 0.10, so `fun` sits at zero for a third
+/// of every run.
+///
+/// The threshold is **four uses a day**, not one. A cheap `Person`-targeted source that pays little is
+/// fine — `social` needs 2.78 chats a day and gets them, because the other person walks to the actor
+/// and a chat is three ticks. The crate cannot tell from definitions alone which sources are expensive
+/// to reach, so it warns only where the count is implausible for any activity shape.
+fn warn_unbalanced_needs(defs: &SocietyDefs) {
+    let mut starving: Vec<String> = Vec::new();
+    for (index, need) in defs.needs.iter().enumerate() {
+        let Some(best) = defs
+            .activities
+            .iter()
+            .filter_map(|activity| {
+                let rate = activity
+                    .satisfies
+                    .iter()
+                    .find(|(slot, _)| usize::from(slot.0) == index)
+                    .map(|(_, rate)| *rate)?;
+                Some((activity.name.as_str(), rate * activity.duration_hours))
+            })
+            .fold(None::<(&str, f32)>, |best, candidate| match best {
+                Some((_, amount)) if amount >= candidate.1 => best,
+                _ => Some(candidate),
+            })
+        else {
+            starving.push(format!("{} (no activity satisfies it)", need.name));
+            continue;
+        };
+        if best.1 <= 0.0 {
+            starving.push(format!("{} ({} supplies nothing)", need.name, best.0));
+            continue;
+        }
+        let uses_per_day = need.decay_per_day / best.1;
+        if uses_per_day > MAX_USES_PER_DAY {
+            starving.push(format!(
+                "{} (best source {} pays {:.2} per use against {:.2}/day decay, so {:.2} uses a day)",
+                need.name, best.0, best.1, need.decay_per_day, uses_per_day
+            ));
+        }
+    }
+    if starving.is_empty() {
+        return;
+    }
+    warn!(
+        "bevy_society: {} needs cannot be met by a plausible number of activities: {}. A need whose \
+         best source supplies less than a quarter of its daily decay will starve whatever the choice \
+         rule does.",
+        starving.len(),
+        starving.join("; ")
+    );
+}
+
+/// The most uses a day a need's best source may require before the crate says it is unbalanced.
+///
+/// `social` sits at 2.78 and is fine; a source behind a walk and an hour window at that count is not.
+const MAX_USES_PER_DAY: f32 = 4.0;
 
 /// Warns that `travel_timeout_hours` and the day length disagree badly enough that walks will time out.
 ///

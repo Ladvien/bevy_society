@@ -25,6 +25,32 @@ Each person has needs, scalars in `[0, 1]` that the definition file names and th
 
 Game AI Pro 3 ch. 13 multiplies raw consideration scores. Because a product of many factors falls as the count grows, an activity with many considerations scores lower than one with few, even when each factor is good. Compensation (`s′ = s + (1 − s)(1 − 1/n)s`) restores comparability by lifting a score toward 1 in proportion to the number of considerations. The crate keeps compensation on purpose. The code comment must read: "design choice: Game AI Pro 3 ch. 13 multiplies raw scores; compensation keeps many-consideration activities comparable." This is a departure from the source, recorded here and in `src/behavior.rs` when D7 lands.
 
+## Decision: a need's source must meet its decay
+
+Every need decays per game-day; every activity supplies `satisfies · duration_hours` per use. The starter
+pack's budget:
+
+| need | decay/day | best source | per use | uses/day |
+|---|---|---|---|---|
+| social | 1.00 | `chat` | 0.36 | 2.78 |
+| rest | 0.70 | `sleep` | 1.20 | 0.58 |
+| food | 0.90 | `eat` | 0.90 | 1.00 |
+| fun | 0.80 | `relax` | 0.60 | 1.33 |
+
+`fun` needs 1.33 uses a day and a 24-person village supplies 0.10, so it sits at zero for a third of a
+run. Raising `relax` to 0.55 per game-hour (0.825 per use, 0.97 uses a day) halves `fun`'s zero fraction
+— 33.8% → 18.8% — but **lowers** the mean of all four needs, 0.127 → 0.118, because the village is
+over-subscribed and one supply only crowds out another. Reverted.
+
+`BehaviorPlugin::finish` warns when a need's best source needs more than four uses a day, the point past
+which no activity shape is plausible. `SocietyDefs::need_decay` and `best_source` expose the same
+arithmetic to a host. The open question — what should a village's evening be — is
+`docs/loop/needs-decision/over-subscribed-evening.md`.
+
+Vansteenkiste & Ryan 2013 (DOI 10.1037/a0032359) is why this is worth naming rather than leaving to a
+plot: self-determination theory distinguishes **need satisfaction** from **need frustration**, and
+frustration is not merely a low value but a different state with its own behavioural consequences.
+
 ## What the model leaves out
 
 - Dual-utility selection and an activity-level weight beyond the compensation step.
