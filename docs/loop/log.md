@@ -169,3 +169,55 @@ flatten the society.
 3. `Signal::Field` / `ActivityTarget::Gradient` score nothing; Moussaïd 2011 needs re-converting.
 4. `docs/guide/authoring.md` does not say a consideration scoring 0 is final.
 5. Performance at 1,000 persons (`scale-1000`, still `pending`).
+
+## 2026-10-27-01 — Four defects between "rivalry" and one working rivalry
+
+**Why this and not the log's #1.** #1 is the clock decision, which this loop escalates rather than
+decides: it is written up in `needs-decision/travel-time-in-two-clocks.md` with three options and a
+recommendation. Taking it would be deciding it. #2 is measurable with the harness, so it was the pick.
+
+**Finding.** Four defects in a chain, each found by measuring the one before.
+
+1. **`snub` gated on low affinity.** `Logistic(-8, 0.3)` scores 0.92 at affinity 0.0 and 0.08 at
+   0.6, so the village snubbed strangers and never anyone it knew. Counted: **0** person-ticks in
+   the village against **2583** in a cluster. Now reads `ctx.grudge(actor, target)`.
+2. **Script considerations could not see their target.** `ScriptContext` was built once per person
+   with `target: -1`, so every target-reading `ctx` call was blind in a consideration for a Person
+   option. Now bound per candidate. Proven: a grudge of 0.9 resolves to `snub → Person(B)`.
+3. **Witness approval was signed by the norm, not the act.** A kindness-valuing witness *liked* an
+   insulter more: `+0.138` affinity, `+0.09` respect. Now `norm · sign(harm)`.
+4. **`patient_reaction` moves no affinity** — a victim keeps liking their insulter. The SPEC
+   specifies exactly that and no reachable source gives a rate, so it is recorded open rather than
+   invented.
+
+**Evidence.** `runs/2026-10-27-01/evidence/` and `eval.md`.
+
+**Before → after.**
+
+| scenario | friends | rivals |
+|---|---|---|
+| `rumor-crosses-a-cluster` | 19 → 0 | **11 → 30** |
+| `need-cycle` | — → 5 | **0 → 21** |
+| `village-evening` | 171 → 79 | 0 → 0 |
+
+Synthetic crowd of 12 strangers: **119 of 132** ties end below −0.4 affinity.
+
+**Dead-code inventory.** Unchanged at zero.
+
+**Verdicts.** Behaviour GREAT (the approval-sign change flagged as an interpretation, since the
+SPEC's wording is ambiguous). Zoom GREAT for the village, with a stranger-crowd saturation at
+−0.994 named rather than hidden. Fresh eyes GREAT — 30 rivals in one scenario and 0 in another from
+the same definitions, so the model has more than one attractor.
+
+**Commit.** See `git log`.
+
+**Top 5 remaining.**
+1. **Hostility saturation.** In a crowd with no positive activity, affinity pins at −1.0 and
+   `affinity_relax_per_day = 0.01` cannot damp it. Either relaxation scales with |a| or the deed's
+   affinity weight needs a floor.
+2. `patient_reaction` still moves no affinity; a victim keeps liking their insulter. Needs a cited
+   rate or an explicit design-default decision.
+3. **The clock decision** (`travel_timeout_hours` real-time) — escalated, still open, still the
+   largest host-ergonomics tax.
+4. `Signal::Field` / `Gradient` — Moussaïd 2011 needs re-converting.
+5. `scale-1000` perf.
