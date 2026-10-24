@@ -2931,7 +2931,7 @@ was verified row by row rather than by comparing summaries.
 
 **Dead-code delta.** Zero. **Tests:** 52 binaries, one new.
 
-**Commit** `pending`.
+**Commit** `c3c1c19`.
 
 **Top 5 remaining.**
 
