@@ -116,7 +116,7 @@ pub use defs::{
     AcceptDef, ActivityDef, ActivityId, ActivityTarget, Consideration, ConversationRuleDef,
     DeedDef, DeedId, DefsError, DefsFile, EffectsDef, FactionDef, FactionId, FieldInput,
     IDLE_ACTIVITY, Input, InteractionBarks, InteractionDef, InteractionId, NeedDef, NeedId,
-    NodeEffectDef, SocietyDefs, TieDelta, TopicDef, TopicId, TriggerDef, TriggerOn,
+    NodeEffectDef, Signal, SocietyDefs, TieDelta, TopicDef, TopicId, TriggerDef, TriggerOn,
     size_person_state,
 };
 #[cfg(feature = "dialogue")]

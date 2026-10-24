@@ -195,7 +195,45 @@ impl Plugin for BehaviorPlugin {
         let settings = app.world().resource::<SocietySettings>().clone();
         let defs = app.world().resource::<SocietyDefs>();
         warn_short_activities(defs, &settings);
+        warn_unscored_fields(defs);
     }
+}
+
+/// Warns that a definition relies on the social-field inputs, which the decision does not score.
+///
+/// A `Signal::Field` consideration currently scores 0 in every decision, and a
+/// `ActivityTarget::Gradient` produces no targets, so an activity that depends on either is accepted
+/// by the definitions file and can never be chosen. That is silent, and it is the same shape of
+/// defect as a `Script` consideration scoring nothing: a host writes a definition, gets a society
+/// where that activity never happens, and has no signal.
+///
+/// The fields themselves work — `SocialFieldPlugin` deposits, evaporates and exposes `field_value`
+/// and `gradient_target` — so this is a wiring gap in this crate, not a missing dependency, and the
+/// warning names it rather than pretending the feature exists.
+fn warn_unscored_fields(defs: &SocietyDefs) {
+    let mut offenders: Vec<&str> = Vec::new();
+    for (name, signals) in defs.activity_signals() {
+        if signals
+            .iter()
+            .any(|signal| matches!(signal, crate::defs::Signal::Field(_)))
+        {
+            offenders.push(name);
+        }
+    }
+    if defs.has_gradient_activity() {
+        offenders.push("<an activity with a Gradient target>");
+    }
+    if offenders.is_empty() {
+        return;
+    }
+    warn!(
+        "bevy_society: {} definitions rely on social-field inputs (`Field` considerations or a \
+         `Gradient` target), which the decision does not score yet: those activities will never be \
+         chosen. The field grids and `SocialFields::field_value` work; the decision is what does not \
+         read them. See `docs/loop/needs-decision/` — {}",
+        offenders.len(),
+        offenders.join(", ")
+    );
 }
 
 /// Warns about activities that are shorter than a couple of society ticks.

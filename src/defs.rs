@@ -763,6 +763,30 @@ impl SocietyDefs {
             .map_or("", |spec| spec.name.as_str())
     }
 
+    /// Every activity's name with the signals its considerations read, in definition order.
+    ///
+    /// A host needs this to check whether a definition relies on a signal the behaviour systems do
+    /// not yet score: `BehaviorPlugin` warns at startup about `Field` and about `Gradient` targets,
+    /// which the definitions file accepts but which currently choose nothing.
+    pub fn activity_signals(&self) -> Vec<(&str, Vec<crate::defs::Signal>)> {
+        self.activities
+            .iter()
+            .map(|spec| {
+                (
+                    spec.name.as_str(),
+                    spec.considerations.iter().map(|term| term.signal).collect(),
+                )
+            })
+            .collect()
+    }
+
+    /// Whether any compiled activity targets a field gradient.
+    pub fn has_gradient_activity(&self) -> bool {
+        self.activities
+            .iter()
+            .any(|spec| matches!(spec.target, ActivityTarget::Gradient(..)))
+    }
+
     /// Every activity's name with its duration in game-hours, in definition order.
     ///
     /// A host needs this to check its own `seconds_per_day`: a duration shorter than a society tick
@@ -1260,7 +1284,7 @@ pub(crate) struct Term {
 
 /// A compiled signal, with ids resolved.
 #[derive(Debug, Clone, Copy, PartialEq)]
-pub(crate) enum Signal {
+pub enum Signal {
     /// A need's level.
     Need(NeedId),
     /// Clock hour / 24.
