@@ -2942,3 +2942,76 @@ was verified row by row rather than by comparing summaries.
 3. **Meeting and befriending share one verb** - blocked behind (1).
 4. **`Doing` names the target activity while travelling** - 49.8% of person-ticks; host-facing, escalated.
 5. **The clock decision** - 5.4-hour walks against 0.75-hour activities.
+
+## 2026-12-13-01 - The bar is not the lever; the asymptote is
+
+**Pick.** Item 1 — a bound below the friendship threshold. Last iteration put the label thresholds on `Tuning`,
+which made the question measurable **without touching code**, and that is the condition that made a sixth attempt
+worth a round after five failures.
+
+**The bar is not the lever.** Sweeping `friend_affinity`:
+
+| bar | friends | rivals |
+|---|---|---|
+| 0.4 (shipped) | **22** | 33 |
+| 0.55 | 18 | 33 |
+| 0.70 | 18 | 33 |
+| 0.80 | 16 | 33 |
+
+Doubling the bar removes six pairs, because affinity reaches **1.0** for anyone in contact and every bar below
+1.0 is eventually passed.
+
+**And it is not a runaway.** A four-times-longer run:
+
+| day | friend-ties |
+|---|---|
+| 16.4 | 115 |
+| 24.6 | **122** peak |
+| 41.0 | 120 |
+| 57.4 | 109 |
+
+It saturates at **44% of all pairs** and then decays. **My prediction that a longer run gives a bigger clique was
+wrong**, and this measurement is what corrected it: the problem is a saturating system with a high asymptote.
+
+**The shape that works.** Clamp affinity to `[-0.35, 0.35]`, below the 0.4 bar, so contact alone cannot make a
+friend:
+
+| configuration | friends | rivals | mood |
+|---|---|---|---|
+| shipped | **22** | **33** | -0.054 |
+| clamp only | 0 | 18 | -0.078 |
+| clamp + trust 0.55 + bar 0.25 | **15** | **18** | -0.078 |
+| clamp + trust 0.55 + bar 0.30 | **12** | **18** | -0.078 |
+
+**Both counts fall** — the first shape in six attempts to do that without inverting the village. Holds at three
+seeds.
+
+**The cost, attributed.** Mood -0.054 -> -0.078, and the two bar settings give *identical* mood, so the cost is
+the **clamp**: `chat` and `compliment` gate on affinity at `Logistic(8.0, 0.4)` and `Logistic(8.0, 0.7)`, so a
+lower ceiling means fewer contacts and fewer `Liking` exchanges. A tradeoff with a mechanism, not a number that
+moved.
+
+**The bug not to repeat.** Scaling by the asymptote (`delta * (1 - |a|/K)`) is **asymmetric** — a negative step
+reaches the outer clamp while a positive one decays — and measured as rivals **rising 33 -> 48**. A plain
+`clamp(-K, K)` bounds both.
+
+**Not shipped.** Bounding the network and losing mood is a trade a host should choose; the decision file now
+carries every number needed to choose. What shipped is `--friend-affinity`, so a host can read its own village at
+a tighter or looser bar.
+
+**Verdicts.** Three GREAT for the investigation, with two of my own errors caught by measurement — the runaway
+prediction and the asymmetric clamp.
+
+**Dead-code delta.** Zero. **Tests:** 52 binaries. **Village unchanged:** friends 22 / rivals 33.
+
+**Commit** `pending`.
+
+**Top 5 remaining.**
+
+1. **Decide the clamp trade.** ±0.35 bounds the network (22/33 -> 15/18) and costs mood (-0.054 -> -0.078).
+   Whether that is a good village is a design call the decision file now supports with numbers.
+2. **Recover the mood cost.** The clamp lowers affinity for everyone; `mere_exposure_per_day` is a separate path
+   the clamp now also bounds. Whether a higher rate recovers mood without restoring the clique is untested.
+3. **Meeting and befriending share one verb** - blocked behind (1).
+4. **`Doing` names the target activity while travelling** - 49.8% of person-ticks; host-facing, escalated.
+5. **The clock decision** - 5.4-hour walks against 0.75-hour activities.

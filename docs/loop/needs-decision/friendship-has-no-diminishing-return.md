@@ -1,6 +1,10 @@
 # Should forty-five conversations make you friends?
 
-> **Five mechanisms have now been tested against this problem and none works — see "Five failures, one cause" at
+> **The sixth shape works, and costs mood. Measured 2026-12-13 — see "The clamp that bounds it" at the end:
+> affinity clamped to `[-0.35, 0.35]` takes friends **22 → 15** and rivals **33 → 18** (the first shape in six
+> to bound the network without inverting it), at a cost of mood **-0.054 → -0.078**.**
+>
+> **Five mechanisms were tested before that and none worked — see "Five failures, one cause" at
 > the end, which is the most useful thing in this file.**
 >
 > **Option 1 was tested on 2026-12-10 and does not work.** Saturating the gain — the recommendation below —
@@ -199,3 +203,70 @@ What remains is not a level but a **shape on the input**:
 **Option 1 is the only one left that changes the shape**, and it is untested. Two iterations have now been spent
 testing shapes that bounded at the wrong place; this one bounds *below* the threshold, which is the property
 none of the five failures had.
+
+## The clamp that bounds it, 2026-12-13
+
+The previous iteration put the label thresholds on `Tuning`, which made the question measurable without touching
+code. Two sweeps found where the lever actually is.
+
+### The bar is not the lever
+
+Raising `friend_affinity` barely moves the count, because affinity reaches **1.0** for anyone in contact — any
+bar below 1.0 is eventually passed:
+
+| `friend_affinity` | friends | rivals |
+|---|---|---|
+| 0.4 (shipped) | **22** | 33 |
+| 0.55 | 18 | 33 |
+| 0.70 | 18 | 33 |
+| 0.80 | 16 | 33 |
+
+### And it is not a runaway either
+
+A four-times-longer run shows the friend count **saturating** — it is not an ever-growing clique:
+
+| game-day | friend-ties |
+|---|---|
+| 8.2 | 77 |
+| 16.4 | 115 |
+| 24.6 | **122** (peak) |
+| 32.8 | 121 |
+| 41.0 | 120 |
+| 57.4 | 109 |
+
+So the problem is a **saturating system with a high asymptote** — 122 of 276 pairs, 44% of the village — not an
+unbounded one. The asymptote is where affinity settles, and affinity settles at **1.0**.
+
+### The shape that works
+
+Clamp affinity to `[-K, K]` with `K = 0.35`, **below** the bar, so contact alone can never make a friend and a
+second input is needed. Measured:
+
+| configuration | friends | rivals | mood |
+|---|---|---|---|
+| shipped | **22** | **33** | -0.054 |
+| clamp `±0.35`, no second input | **0** | 18 | -0.078 |
+| clamp `±0.35` + trust `≥ 0.55` + bar 0.25 | **15** | **18** | -0.078 |
+| clamp `±0.35` + trust `≥ 0.55` + bar 0.30 | **12** | **18** | -0.078 |
+
+**Both tie counts fall** — friends by a third, rivals by nearly half — for the first time in six attempts. It
+also holds at three seeds (4–6 friends at the strictest setting).
+
+### The cost, attributed
+
+Mood falls **-0.054 → -0.078**, and the two bar settings above give *identical* mood, so the cost is entirely
+the **clamp**, not the friend count. The chain is visible: affinity gated activities (`chat` at
+`Logistic(8.0, 0.4)`, `compliment` at `Logistic(8.0, 0.7)`) see a lower affinity, so fewer contacts happen, so
+fewer `Liking` exchanges, so lower mood.
+
+### The one thing not to repeat
+
+Scaling by the asymptote — `delta · (1 − |a|/K)` — is **asymmetric**: a negative delta steps past `-K` to the
+outer clamp while a positive one decays smoothly. Measured, rivals rose **33 → 48** instead of falling. A plain
+**clamp** to `[-K, K]` bounds both directions and is the version above.
+
+## Recommendation, revised
+
+**Clamp ±0.35 with a trust second input, and accept the mood cost** — or fix the mood cost first by raising
+`mere_exposure_per_day` back up, since exposure is a separate path to affinity that the clamp now also bounds.
+Untested: whether a higher exposure rate recovers mood without restoring the clique.

@@ -48,6 +48,9 @@ fn main() {
     if let Some(offset) = args.positivity_offset {
         settings.tuning.positivity_offset = offset;
     }
+    if let Some(bar) = args.friend_affinity {
+        settings.tuning.friend_affinity = bar;
+    }
     if let Some(seed) = args.seed {
         settings.seed = seed;
     }
@@ -1004,6 +1007,9 @@ struct Args {
     seed: Option<u64>,
     /// Overrides the scenario's population.
     people: Option<usize>,
+    /// Overrides `Tuning::friend_affinity`, so the same scenario can be read with a stricter or looser bar
+    /// for friendship.
+    friend_affinity: Option<f32>,
     /// Overrides `Tuning::positivity_offset`, so the same scenario can be re-read with a different
     /// resting mood.
     positivity_offset: Option<f32>,
@@ -1022,6 +1028,7 @@ impl Args {
             people: None,
             seconds_per_day: None,
             positivity_offset: None,
+            friend_affinity: None,
         };
         let mut argv = std::env::args().skip(1);
         while let Some(flag) = argv.next() {
@@ -1035,6 +1042,9 @@ impl Args {
                 }
                 "--positivity-offset" => {
                     args.positivity_offset = argv.next().and_then(|v| v.parse().ok())
+                }
+                "--friend-affinity" => {
+                    args.friend_affinity = argv.next().and_then(|v| v.parse().ok())
                 }
                 other => {
                     eprintln!("evidence: unknown argument {other}");
