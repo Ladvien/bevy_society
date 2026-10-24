@@ -4,6 +4,18 @@ All notable changes to bevy_society. The format follows [Keep a Changelog](https
 
 ## [Unreleased]
 
+### Fixed
+
+- **The travel timeout is fitted to the layout, and the village stops being asleep half the time.** `travel_timeout_hours` was **20 game-hours** — **74.7 m** of walking at 64 s/day — in a village **8.2 m** across whose longest walk is 2.2 hours. A person who could not reach its bed was therefore reported asleep for two and a half times the length of the sleep. Fitted to 4 hours (14.9 m):
+
+  | | 20 h | 4 h |
+  |---|---|---|
+  | reported asleep | 56.8% | **36.4%** |
+  | reported working | 14.8% | **21.5%** |
+  | mean of the four needs | 0.322 | **0.526** |
+
+  Holds at a second seed (36.2%, 0.511). `rest` falls (0.538 → 0.395) because people no longer sleep for hours they have not earned. Also fixed: `examples/evidence.rs` silently ignored a scenario's `contact_radius`, and parsed `scenarios.yaml` **once per tick** — 57 000 warnings in one run, which drowned the one that mattered. `rumor-crosses-a-cluster` reaches 0.333 at 12 h and 0.167 at 20, both below its 40% observable, so it returns to `pending`; the earlier 0.583 predated the `contact_radius` fix.
+
 ### Added
 
 - **`play`: a leisure activity you can walk to in one step, which fixes `fun`.** `fun` had one source, `relax` — a `Place` target behind a walk and a six-hour window — so a person needed 1.33 uses a day and got 0.10, sitting at zero for a third of every run. Raising `relax`'s rate was tried and reverted last iteration: it only moved the shortage. The new `play` targets a `Person`, so a use costs one decision rather than a walk: `fun` at zero **33.8% → 1.3%**, `fun` mean **0.061 → 0.112**, and the mean of all four needs flat (0.127 → 0.128). `social` and `food` each give up a little, because play competes for the same hours. Cost: **+9.2%** per tick at 5 000 people (275.5 → 300.8 ms), which is `10/9 − 1` scoring passes per neighbour. Also new: `SocietyDefs::sources_for(need)`, so a host can see every activity that supplies a need — `best_source` alone hid the fact that `fun` had exactly one.

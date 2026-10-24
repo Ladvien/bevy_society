@@ -67,11 +67,22 @@ fn the_village_scenarios_use_a_day_a_plausible_activity_can_live_in() {
             line.contains("seconds_per_day: 64.0"),
             "{name} should run a 64-second day, which makes a walk about one game-hour: {line}"
         );
-        // And a timeout that reaches across the village at that day length: 20 game-hours is ~75 m.
+        // And a timeout fitted to the layout at that day length. `village-evening` is an 8.2 m village
+        // where the longest walk is 2.2 game-hours, so 4 is generous; `rumor-crosses-a-cluster` puts its
+        // two groups 40 m apart, a 10.7 game-hour walk, so it needs more.
         assert!(
             line.contains("travel_timeout_hours"),
             "{name} must state a travel timeout fitted to its day length: {line}"
         );
+        // `contact_radius` is only meaningful where a scenario places people close enough for contact
+        // to matter as a *distance* rather than as the default. The cluster declares it; the village does
+        // not, and should not be forced to.
+        if name == "rumor-crosses-a-cluster" {
+            assert!(
+                line.contains("contact_radius"),
+                "{name} must state a contact radius the harness actually reads: {line}"
+            );
+        }
     }
 }
 

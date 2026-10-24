@@ -38,13 +38,18 @@ scenarios:
     kind: cluster
     seed: 11
     population: 12
-    settings: { seconds_per_day: 64.0, start_hour: 15.0, contact_radius: 4.0, travel_timeout_hours: 20.0 }
+    settings: { seconds_per_day: 64.0, start_hour: 15.0, contact_radius: 4.0, travel_timeout_hours: 12.0 }
     ticks: 1200
-    status: measured
+    status: pending
     observable: >
       With the two groups 40 m apart and one person from each group brought together once, a rumor
       planted in the first group reaches at least 40% of the second group. Zero reach means gossip
       cannot cross a gap; instant reach means it teleports.
+      (Measured 2026-11-20: **0.333 at a 12-hour travel timeout and 0.167 at 20** — both below the 40%
+      this asks for, and the earlier 0.583 was recorded before `contact_radius` was being applied, so it
+      was a different run. The scenario is `pending` until the crossing works or the observable is
+      re-stated. The gap is the design question: two groups 40 m apart need a 10.7 game-hour walk, so
+      either the gap is smaller, the timeout longer than a day, or a bridge activity exists.)
 
   - name: opinion-converges-but-not-entirely
     kind: persons
@@ -79,7 +84,7 @@ scenarios:
     kind: village
     seed: 7
     population: 24
-    settings: { seconds_per_day: 64.0, start_hour: 15.0, travel_timeout_hours: 20.0 }
+    settings: { seconds_per_day: 64.0, start_hour: 15.0, travel_timeout_hours: 4.0 }
     ticks: 4200
     status: measured
     observable: >

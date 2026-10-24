@@ -87,9 +87,13 @@ fn main() {
     let mut gossipers: Vec<(Entity, u32)> = Vec::new();
     let mut seen_exchanges: Vec<(Entity, u32)> = Vec::new();
     let _ = &mut seen_exchanges;
+    // Hoisted: `plant_at` parses `scenarios.yaml`, and calling it inside the loop parsed the whole file
+    // once per tick — 57 000 times in a 67 200-tick run, each printing a warning for every `settings:`
+    // key the harness does not read.
+    let plant_tick = plant_at(&args.scenario);
     for tick in 0..ticks {
         app.update();
-        if tick == plant_at(&args.scenario) {
+        if tick == plant_tick {
             planted = plant(&mut app, &world, &gossipers);
         }
         {
@@ -204,6 +208,10 @@ struct Spec {
     /// default, so the file's declared seeds were decoration and two scenarios that differed only in
     /// seed were in fact the same run.
     seed: Option<u64>,
+    /// The scenario's `contact_radius:`. **Unread until 2026-11-20**: `rumor-crosses-a-cluster` declares
+    /// 4.0 and the harness used the crate default of 4.0 anyway, so the value was right by luck; any
+    /// other number would have been silently ignored.
+    contact_radius: Option<f32>,
 }
 
 impl Default for Spec {
@@ -215,6 +223,7 @@ impl Default for Spec {
             travel_timeout_hours: d.tuning.travel_timeout_hours,
             ticks: 800,
             seed: None,
+            contact_radius: None,
         }
     }
 }
@@ -267,7 +276,9 @@ fn scenario_spec(name: &str) -> Spec {
                 "seconds_per_day" => spec.seconds_per_day = number,
                 "start_hour" => spec.start_hour = number,
                 "travel_timeout_hours" => spec.travel_timeout_hours = number,
+                "contact_radius" => spec.contact_radius = Some(number),
                 other => {
+                    // Once per parse, and `scenario_spec` is called a handful of times per run.
                     eprintln!(
                         "evidence: scenarios.yaml sets '{other}', which this harness ignores"
                     );
@@ -289,6 +300,9 @@ fn settings_for(scenario: &str) -> SocietySettings {
         seed: spec.seed.unwrap_or(SocietySettings::default().seed),
         seconds_per_day: spec.seconds_per_day,
         start_hour: spec.start_hour,
+        contact_radius: spec
+            .contact_radius
+            .unwrap_or(SocietySettings::default().contact_radius),
         tick_secs: 1.0 / 64.0,
         tuning: bevy_society::Tuning {
             travel_timeout_hours: spec.travel_timeout_hours,
