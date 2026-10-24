@@ -132,13 +132,11 @@ pub(crate) struct Contestant<'a> {
 /// The three deltas (0.1, 0.05, 0.05) and the two emotion intensities are design defaults; the
 /// mechanism — a winner's status rising and a loser's deference — is Bonabeau et al. 1995 (DOI
 /// 10.1016/0378-4371(95)00064-e) and Hemelrijk 1999 (DOI 10.1098/rspb.1999.0646).
-#[allow(dead_code)] // consumed by the D7 interaction system
 pub(crate) fn resolve_contest<R: DetRng>(
     rng: &mut R,
     steepness: f32,
     actor: Contestant<'_>,
     target: Contestant<'_>,
-    witnesses: &mut [&mut Ties],
 ) -> Entity {
     let p = contest_win_chance(
         steepness,
@@ -166,16 +164,18 @@ pub(crate) fn resolve_contest<R: DetRng>(
         .emotions
         .appraise(EmotionKind::Pride, 0.4, Some(loser_entity));
 
-    for witness in witnesses.iter_mut() {
-        let regard = witness.entry(winner_entity);
-        regard.respect = (regard.respect + 0.05).clamp(-1.0, 1.0);
-    }
     winner_entity
+}
+
+/// One witness of a contest raises its respect for the winner by 0.05 (plan D6). The caller loops over
+/// the actor's near persons other than the pair.
+pub(crate) fn witness_contest(ties: &mut Ties, winner: Entity) {
+    let regard = ties.entry(winner);
+    regard.respect = (regard.respect + 0.05).clamp(-1.0, 1.0);
 }
 
 /// Intergroup contact (plan D6; Pettigrew & Tropp 2006, DOI 10.1037/0022-3514.90.5.751): an accepted
 /// interaction between people who share no faction adds `contact_gain` affinity in both directions.
-#[allow(dead_code)] // consumed by the D7 interaction system
 pub(crate) fn intergroup_contact(a_to_b: &mut Tie, b_to_a: &mut Tie, tuning: &Tuning) {
     a_to_b.affinity = (a_to_b.affinity + tuning.contact_gain).clamp(-1.0, 1.0);
     b_to_a.affinity = (b_to_a.affinity + tuning.contact_gain).clamp(-1.0, 1.0);

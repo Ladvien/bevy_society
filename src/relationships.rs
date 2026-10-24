@@ -275,8 +275,6 @@ pub(crate) fn expose_toward(
 /// Triadic closure for one direction (Kossinets & Watts 2006, DOI 10.1126/science.1116869): when
 /// the owner meets someone who knows `target`, familiarity toward `target` rises to
 /// `f + introduction_familiarity · (1 − f)`, where `f` is the current familiarity.
-// Unused until D7 (interaction step 4) calls it; the allow keeps the clippy gate clean until then.
-#[allow(dead_code)]
 pub(crate) fn introduce_toward(ties: &mut Ties, target: Entity, now_days: f32, tuning: &Tuning) {
     let tie = ties.entry(target);
     let f = tie.familiarity(now_days, tuning);
