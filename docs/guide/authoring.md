@@ -151,10 +151,28 @@ Any other `{...}` is rejected at compile time rather than printed literally.
 )
 ```
 
-`on` is one of `Tick`, `Hour(h)`, `Interaction(name)`, `TieLabel(label)`, `RumorReach { deed, fraction }`,
-`NormViolated(deed)`, `NeedBelow { need, below }`, `Activity(name)`, `DialogueNode { conversation, node }`
-or `Custom(name)`. `if` is an optional Rhai condition; `once` fires at most once per (trigger, actor) and
-`cooldown_hours` gates by actor. See [`scripting.md`](scripting.md).
+`on` takes one of these forms:
+
+| `on` | fires when |
+|---|---|
+| `Tick` | every society tick |
+| `Hour(h)` | the clock crosses hour `h` |
+| `Interaction("name")` | that interaction resolves |
+| `TieLabel(Friend)` | a tie's label changes to it |
+| `RumorReach(deed: "steal", fraction: 0.5)` | a rumor of that deed reaches that fraction of the living |
+| `NormViolated("steal")` | a witness judges that deed a norm violation |
+| `NeedBelow(need: "social", below: 0.3)` | a need first falls below that level |
+| `Activity("name")` | that activity starts |
+| `DialogueNode(conversation: "greet", node: "n")` | that node is entered |
+| `Custom("name")` | the host fires it with `FireTrigger` |
+
+Two syntax traps, both measured: **struct variants take parentheses**, so `RumorReach { deed, fraction }` fails
+with `Expected opening (`; and **`TieLabel` variants are capitalised**, so `friend` fails with a list of the four
+valid names. Every row above is asserted by `tests/guide_blocks.rs` against the loader, so the table cannot drift
+from the crate without a test failing.
+
+`if` is an optional Rhai condition; `once` fires at most once per (trigger, actor) and `cooldown_hours` gates by
+actor. See [`scripting.md`](scripting.md).
 
 ## Conversations and node effects
 

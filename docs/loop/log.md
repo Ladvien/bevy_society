@@ -3015,3 +3015,58 @@ prediction and the asymmetric clamp.
 3. **Meeting and befriending share one verb** - blocked behind (1).
 4. **`Doing` names the target activity while travelling** - 49.8% of person-ticks; host-facing, escalated.
 5. **The clock decision** - 5.4-hour walks against 0.75-hour activities.
+
+## 2026-12-14-01 - Four of the guide's ten trigger forms did not parse
+
+**Pick.** Not item 2 (recovering the clamp's mood cost) but something a host hits *before* any of that: the guide
+they follow to write their first definitions file. No iteration had ever compiled it, and the loader is strict by
+design.
+
+**The finding.** `docs/guide/authoring.md`'s trigger list:
+
+| printed | loader says |
+|---|---|
+| `RumorReach { deed, fraction }` | `Expected opening (` |
+| `NeedBelow { need, below }` | `Expected opening (` |
+| `DialogueNode { conversation, node }` | `Expected opening (` |
+| `NormViolated(deed)` | `Expected string` |
+
+RON writes a **struct variant with parentheses**, and `NormViolated` is a **tuple** variant taking a bare string.
+**6 of the 10 documented forms parsed.**
+
+**A second trap.** The guide said `TieLabel(label)` — not a writable form. The variants are **capitalised**, so
+`TieLabel(friend)` fails with a list of the four valid names; the correct form is `TieLabel(Friend)`. And the
+**lowercase** spelling is real and correct twenty lines later, because `if:` is Rhai and takes
+`TieLabel::script_name()` = `"friend"`. Two spellings, both right, in one document.
+
+**Change.** The list becomes a table of all ten forms with what each fires on; `tests/guide_blocks.rs` extracts
+the guide's own blocks **from the markdown** and asserts every row against the loader. A copy inside the test
+would have kept passing after the drift, which is the failure mode.
+
+| | before | after |
+|---|---|---|
+| documented trigger forms that parse | **6 of 10** | **10 of 10** |
+| the guide's opening definitions file | never compiled | **asserted** |
+| the guide's conversation block | never compiled | **asserted** |
+
+**What I got wrong twice.** I predicted the prose was right and the *example* wrong, because `TriggerOn` is
+declared as a struct variant — running it showed the reverse, since RON accepts parentheses. Then my own test
+failed on `Interaction("chat")` for naming an interaction the file did not define, which was my bug, not the
+guide's. Both caught by running rather than reading.
+
+**Verdicts.** Three GREAT. Behavior GREAT (10 of 10, checked by the loader). Zoom GREAT (two of my assumptions
+corrected by runs). Fresh eyes GREAT (a host's first move is to copy one of these forms).
+
+**Dead-code delta.** Zero. **Tests:** 53 binaries, three new.
+
+**Commit** `pending`.
+
+**Top 5 remaining.**
+
+1. **Decide the clamp trade.** ±0.35 bounds the network (22/33 -> 15/18) and costs mood (-0.054 -> -0.078);
+   every number needed is in the decision file.
+2. **Recover the clamp's mood cost.** The clamp lowers affinity for everyone; whether a higher
+   `mere_exposure_per_day` recovers mood without restoring the clique is untested.
+3. **Meeting and befriending share one verb** - blocked behind (1).
+4. **`Doing` names the target activity while travelling** - 49.8% of person-ticks; host-facing, escalated.
+5. **The clock decision** - 5.4-hour walks against 0.75-hour activities.
