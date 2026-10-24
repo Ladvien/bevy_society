@@ -15,14 +15,27 @@ Measured on 200 people on one plaza, 3 000 ticks:
 | still tellable by at least one person | **70** |
 | untellable | **922 (93%)** |
 
-Two costs follow, both measured:
+**Correction 2026-11-14: the tick-cost claim below was wrong.** It said the per-tick walk over a growing
+book was a **4× blowup** after 3 000 ticks. Measured directly — 200 people, four places, five samples of
+100 ticks across a 6 000-tick run, with and without a `RumorReach` trigger:
 
-- `rules.rs` walks the **entire book every tick** looking for `RumorReach` triggers, so tick cost grows
-  with the length of the run. 1 000 people: **15.0 ms/tick** over a short run, **61.9 ms/tick** after
-  3 000 ticks of settling — a **4× blowup** with no increase in living people.
-- A person's `Knowledge` also grew without bound (344 entries after 4 000 ticks on 12 people). That
-  is now capped at `SocietySettings::knowledge_capacity` (default 64), which removed 2.3% of the long
-  run's cost. The remaining growth is the book.
+| tick | rumors | ms/tick, no trigger | ms/tick, with a trigger |
+|---|---|---|---|
+| 1 000 | 765 | 5.76 | 5.95 |
+| 3 000 | 2 412 | 3.51 | 3.07 |
+| 5 000 | 4 299 | 4.80 | 3.93 |
+
+The cost **does not grow**; it drifts down as the village settles. The 4× figure came from comparing a
+short benchmark against a long one and attributing the whole difference to the book. `tests/rumor_book.rs`
+now pins the truth.
+
+What the book does cost is **memory**, at about 48 bytes a rumor: 105 KiB at 3 000 ticks and 228 KiB at
+6 000 for 200 people, and roughly 5 MiB for 5 000 people over a comparable run.
+
+That changes the urgency rather than the recommendation. A 4× tick blowup would justify a breaking
+semantic change; 5 MiB over a long large run does not. The second half of the original claim holds: on a
+3 000-tick run **87%** of the book is untellable (301 of 2 250 tellable), so a retirement rule is still
+the right fix for memory.
 
 ## Why it is a decision and not a bug fix
 
