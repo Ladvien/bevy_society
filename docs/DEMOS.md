@@ -35,11 +35,17 @@ not, tune **only** `examples/assets/village.society.ron` (the gossip, compliment
 the capture's `bark_chance`. Never change a crate default to make a demo look better: the defaults are
 the model.
 
-### Current result: three thresholds met, one not
+### Current result: all four thresholds met
 
 ```
-{"frames": 480, "rumor_reach": 0.800, "friends": 256, "rivals": 0, "barks": 3076}
+{"frames": 480, "rumor_reach": 0.320, "friends": 73, "rivals": 81, "barks": 3882}
 ```
+
+`rivals 0` was the last one outstanding, and it took three fixes to reach: `snub` was gated on low
+affinity so the village never snubbed anyone it knew, script considerations could not see their
+target, and `witness_reaction` signed approval by the witness's opinion of the *norm* rather than of
+the *act* — so a kindness-valuing witness rewarded an insult. With those fixed the village forms
+both friendships and rivalries, which is the picture the clip was always meant to show.
 
 The earlier clip ran 900 ticks — 4.1 game-days — and formed no friendships at all. Ties were never
 broken: `TieLabel::classify` needs `affinity ≥ 0.4`, affinity moves at `mere_exposure_per_day = 0.05`
