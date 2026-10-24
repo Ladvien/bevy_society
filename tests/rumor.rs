@@ -133,3 +133,55 @@ fn settings_keep_seeded_randomness_out_of_planting() {
         second.world().resource::<RumorBook>().rumors,
     );
 }
+
+#[test]
+fn a_planted_rumor_spreads_through_gossip() {
+    // The chain case, end to end: A knows a rumor, and an accepted gossip interaction with B passes
+    // it on. Without this, `rumor_reach` in the hero capture stays at 1/n forever.
+    use bevy_society::{Interact, SocietyDefs, SocietySettings};
+
+    let defs = SocietyDefs::from_ron(
+        r#"(
+            topics: [(id: "honesty")],
+            deeds: [(id: "steal", topic: "honesty", harm: -0.7)],
+            interactions: [(id: "tell", accept: (base: 0.99), gossip: true)],
+        )"#,
+    )
+    .expect("the gossip definition parses");
+    let mut settings = settings();
+    settings.seconds_per_day = 1.0;
+    let mut app = headless(defs, settings);
+    // Three people: the rumor is about C, so B is a legitimate listener. A rumor about the listener
+    // is deliberately not told to them, which is what the gossip rule says.
+    let a = spawn_person(&mut app, "A", Vec2::ZERO);
+    let b = spawn_person(&mut app, "B", Vec2::new(1.0, 0.0));
+    let c = spawn_person(&mut app, "C", Vec2::new(-20.0, 0.0));
+    run(&mut app, 2);
+
+    plant(&mut app, a, c, "steal", true);
+    run(&mut app, 2);
+
+    app.world_mut().write_message(Interact {
+        actor: a,
+        target: b,
+        interaction: "tell".to_owned(),
+    });
+    run(&mut app, 4);
+
+    let book = app.world().resource::<RumorBook>();
+    assert_eq!(book.rumors.len(), 1, "one rumor");
+    assert_eq!(
+        book.rumors[0].known_by, 2,
+        "the listener learned it, so two people know it"
+    );
+    let learned = app
+        .world()
+        .get::<Knowledge>(b)
+        .and_then(|k| k.get(RumorId(0)).copied());
+    let learned = learned.expect("B knows the rumor");
+    assert!(learned.spreader, "a fresh listener spreads it on");
+    assert!(
+        book.reach(RumorId(0), 3) > 0.6,
+        "reach is known_by over living persons"
+    );
+}

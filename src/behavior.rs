@@ -6,6 +6,7 @@
 
 use bevy::ecs::query::QueryData;
 use bevy::prelude::*;
+use bevy::transform::components::Transform;
 use bevy_emerge_rng::DetRng;
 
 use crate::Tuning;
@@ -474,6 +475,7 @@ fn decide_activities(
     mut started: MessageWriter<ActivityStarted>,
     engine: Option<Res<crate::script::ScriptEngine>>,
     cell: Res<crate::snapshot::SnapshotCell>,
+    transforms: Query<(Entity, &Transform)>,
 ) {
     use bevy_emerge_rng::DetRng;
 
@@ -517,6 +519,21 @@ fn decide_activities(
     // The engine and the tick's snapshot are the same for every consideration in this pass, so they
     // are read once and shared by reference.
     let snapshot = cell.0.clone();
+    // Plane positions of everything a destination can name, gathered once: `Commands` cannot read
+    // the world while a plan is being written.
+    let mut positions: Vec<(Entity, Vec2)> = transforms
+        .iter()
+        .map(|(entity, transform): (Entity, &Transform)| {
+            (entity, settings.plane.project(transform.translation))
+        })
+        .collect();
+    positions.sort_by_key(|(e, _)| e.to_bits());
+    let position_of = |entity: Entity| {
+        positions
+            .binary_search_by_key(&entity.to_bits(), |(e, _)| e.to_bits())
+            .ok()
+            .map(|i| positions[i].1)
+    };
 
     let mut plans: Vec<(
         Entity,
@@ -685,8 +702,28 @@ fn decide_activities(
             started_day: now,
             arrived_day: in_place.then_some(now),
         });
-        if let DoingTarget::Point(point) = target {
-            entity.insert(Destination(point));
+        // Every target that is somewhere other than where the person stands needs a destination:
+        // a `Point` is that point, a `Place` is its transform, and a `Person` is that person's
+        // position offset toward the actor. Setting one only for `Point` meant a village whose
+        // activities all target places never walked anywhere.
+        match target {
+            DoingTarget::Point(point) => {
+                entity.insert(Destination(point));
+            }
+            DoingTarget::Place(place) => {
+                if let Some(at) = position_of(place) {
+                    entity.insert(Destination(at));
+                }
+            }
+            DoingTarget::Person(other) => {
+                if let (Some(theirs), Some(mine)) = (position_of(other), position_of(person)) {
+                    let toward = (mine - theirs).normalize_or_zero();
+                    entity.insert(Destination(
+                        theirs + toward * 0.75 * settings.interaction_radius,
+                    ));
+                }
+            }
+            DoingTarget::Itself => {}
         }
         if in_place {
             started.write(ActivityStarted {

@@ -442,3 +442,150 @@ fn a_script_consideration_sees_its_own_actor() {
         "the rested person's script returned 0.0, so it does not: {rested_activity:?}"
     );
 }
+
+#[test]
+fn a_place_target_gives_a_destination_and_the_person_walks() {
+    // Regression: `Destination` was set only for a `Point` target, so a village whose activities
+    // all target places never moved. Every person stood where they spawned for the whole run, which
+    // is what the hero capture showed.
+    let mut app = headless(defs(), fast_settings());
+    let shop = place(&mut app, "shop", Vec2::new(4.0, 0.0), "work", 4);
+    let person = spawn_person(&mut app, "Bram", Vec2::ZERO);
+    app.world_mut().entity_mut(person).insert(Autonomous);
+    // The steering component only exists with the `steering` feature; the destination assertion
+    // below holds either way, and the motion assertion is behind the feature.
+    #[cfg(feature = "steering")]
+    app.world_mut()
+        .entity_mut(person)
+        .insert(bevy_society::SocialMover::default());
+
+    step(&mut app, 2);
+
+    let destination = app
+        .world()
+        .get::<bevy_society::Destination>(person)
+        .copied()
+        .expect("a place target must give a destination, or nobody walks");
+    assert!(
+        destination.0.distance(Vec2::new(4.0, 0.0)) < 1.0,
+        "the destination is the place: {:?}",
+        destination.0
+    );
+
+    // And steering turns that into motion.
+    #[cfg(feature = "steering")]
+    let before = app
+        .world()
+        .get::<Transform>(person)
+        .map(|t| t.translation.x)
+        .unwrap_or(0.0);
+    #[cfg(feature = "steering")]
+    {
+        step(&mut app, 60);
+        let after = app
+            .world()
+            .get::<Transform>(person)
+            .map(|t| t.translation.x)
+            .unwrap_or(0.0);
+        assert!(
+            after > before + 0.2,
+            "the person walked toward the shop: {before} -> {after}"
+        );
+    }
+    let _ = shop;
+}
+
+#[test]
+fn a_person_target_stops_short_of_the_other_person() {
+    // Two people, one walking to the other: the destination is offset by 0.75 x interaction_radius
+    // so they do not occupy the same point.
+    let mut app = headless(
+        SocietyDefs::from_ron(
+            r#"(
+                needs: [(id: "social", decay_per_day: 0.0)],
+                topics: [(id: "kindness")],
+                activities: [(
+                    id: "chat",
+                    target: Person,
+                    duration_hours: 0.2,
+                    rank: 1,
+                    considerations: [(input: Distance, curve: Linear(-1.0, 1.0))],
+                )],
+            )"#,
+        )
+        .expect("the chat-only definition parses"),
+        fast_settings(),
+    );
+    let walker = spawn_person(&mut app, "Walker", Vec2::ZERO);
+    let other = spawn_person(&mut app, "Other", Vec2::new(6.0, 0.0));
+    app.world_mut().entity_mut(walker).insert(Autonomous);
+    app.world_mut().entity_mut(other).insert(Autonomous);
+
+    step(&mut app, 3);
+
+    let destination = app
+        .world()
+        .get::<bevy_society::Destination>(walker)
+        .copied()
+        .or_else(|| app.world().get::<bevy_society::Destination>(other).copied());
+    let destination = destination.expect("a person target gives a destination");
+    // The offset target is between the two, never on top of the other person.
+    assert!(
+        destination.0.distance(Vec2::new(6.0, 0.0)) > 0.1,
+        "the destination stops short of the target: {:?}",
+        destination.0
+    );
+}
+
+#[test]
+fn an_accepted_interaction_can_bark() {
+    // Barks are a message the crate writes; a host without speech bubbles renders them itself, so a
+    // village that never barks is silent for every host.
+    let defs = SocietyDefs::from_ron(
+        r#"(
+            topics: [(id: "kindness")],
+            interactions: [(
+                id: "chat",
+                accept: (base: 0.99),
+                barks: (
+                    actor: ["Morning, {target}!"],
+                    accepted: ["Good to see you."],
+                    rejected: ["Not now."],
+                ),
+            )],
+        )"#,
+    )
+    .expect("the bark definition parses");
+    let mut settings = settings();
+    settings.bark_chance = 1.0;
+    let mut app = headless(defs, settings);
+    let a = spawn_person(&mut app, "Alys", Vec2::ZERO);
+    let b = spawn_person(&mut app, "Bram", Vec2::new(1.0, 0.0));
+    run(&mut app, 2);
+
+    app.world_mut().write_message(Interact {
+        actor: a,
+        target: b,
+        interaction: "chat".to_owned(),
+    });
+    let mut barks = Vec::new();
+    for _ in 0..4 {
+        app.update();
+        barks.extend(
+            app.world_mut()
+                .resource_mut::<bevy::ecs::message::Messages<bevy_society::SocietyBark>>()
+                .drain(),
+        );
+    }
+
+    assert!(!barks.is_empty(), "a bark was written");
+    let actor_line = barks
+        .iter()
+        .find(|b| b.speaker == a)
+        .expect("the actor spoke");
+    assert_eq!(
+        actor_line.text, "Morning, Bram!",
+        "the template renders the target's name"
+    );
+    assert!(!actor_line.thought, "an interaction bark is speech");
+}

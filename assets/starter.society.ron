@@ -68,9 +68,18 @@
             id: "gossip",
             target: Person,
             duration_hours: 0.3,
+            // Gossip and chat compete directly, and the balance is delicate: at weight 1.0 a villager
+            // prefers telling a rumor and friendships stop forming, below 1.0 chat wins every time and
+            // a rumor never leaves whoever planted it. 1.0 is the better half of that trade for a
+            // demo — a society that talks about each other is the point of the crate — and
+            // `docs/DEMOS.md` records that the clip shows gossip at the cost of friendships.
+            weight: 1.0,
             considerations: [
+                // Telling a rumor needs someone to tell it *to*. Familiarity gated this out for
+                // most of a short game-day (the two only know each other once ties have formed), so
+                // the gate is distance: anyone in reach is worth telling.
                 (input: Trait(Extraversion), curve: Linear(1.0, 0.0)),
-                (input: Familiarity, curve: Linear(1.0, 0.0)),
+                (input: Distance, curve: Linear(-1.0, 1.0)),
             ],
             satisfies: [],
             interaction: Some("gossip"),

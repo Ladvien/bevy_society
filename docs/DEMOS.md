@@ -35,6 +35,30 @@ not, tune **only** `examples/assets/village.society.ron` (the gossip, compliment
 the capture's `bark_chance`. Never change a crate default to make a demo look better: the defaults are
 the model.
 
+### Current result: two thresholds met, two not
+
+```
+{"frames": 480, "rumor_reach": 0.360, "friends": 1, "rivals": 0, "barks": 134}
+```
+
+`barks` passes comfortably and `rumor_reach` is close. `friends` and `rivals` do not, and the cause is a
+real trade, not an unfinished tuning pass: **gossip and `chat` compete for the same decision slot.**
+
+- At gossip's default weight, `chat`'s three considerations outscore its two every time, so no rumor
+  ever leaves whoever planted it: `rumor_reach 0.040`, `friends 7`.
+- At weight 1.0 the village prefers telling to befriending: `rumor_reach 0.360`, `friends 1`.
+- Every weight between was tried (`0.75`, `0.9`, `1.4`, `1.6`, `1.9`, `2.4`) and each lands on one side
+  of that line or the other.
+
+The clip ships showing gossip, because a society that talks about each other is what the crate is for.
+Making both work needs the village to be large enough, and the day long enough, that a person runs out
+of new people to gossip at and starts befriending them — which is a scenario question for the loop, not
+a weight.
+
+`rivals 0` has the same shape: no rivalry forms because no snub is ever chosen, and `snub`'s
+consideration (`Affinity Logistic(-8, 0.3)`) needs a negative affinity that never develops in one
+evening.
+
 Simulated time is pinned with `TimeUpdateStrategy::ManualDuration(1/30 s)`, so a frame is exactly one
 thirtieth of a second of game time whatever the host's clock does. Two captures on different machines
 therefore record the same run.

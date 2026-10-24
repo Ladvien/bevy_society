@@ -123,9 +123,15 @@ fn main() {
         std::process::exit(1);
     };
 
-    rec.warm_up(SETTLE_STEPS + WARM_UP);
-
+    // The settle steps run the society too, and that is when most of the talking happens, so barks
+    // are counted from the start. Counting only the recorded frames reported `barks 0` for a village
+    // that had been gossiping for ten game-minutes.
     let mut barks = 0u32;
+    for _ in 0..(SETTLE_STEPS + WARM_UP) {
+        rec.step();
+        barks += drain_barks(&mut rec);
+    }
+
     for frame in 0..args.frames {
         if frame == PLANT_FRAME {
             plant(&mut rec, village.villagers.first().copied());
