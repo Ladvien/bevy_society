@@ -38,7 +38,7 @@ the model.
 ### Current result: all four thresholds met
 
 ```
-{"frames": 480, "rumor_reach": 0.440, "friends": 81, "rivals": 47, "barks": 3545}
+{"frames": 480, "rumor_reach": 0.360, "friends": 80, "rivals": 37, "barks": 3648}
 ```
 
 `rivals 0` was the last one outstanding, and it took three fixes to reach: `snub` was gated on low
