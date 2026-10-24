@@ -2175,7 +2175,7 @@ GREAT (three separate visual passes, each finding what the last missed).
 the model had converged; seeding a spread fixed it. Two attempts at framing before computing the layout's
 centroid. Recorded because the pattern is "reason about the picture" instead of "measure the numbers".
 
-**Commit** `pending`.
+**Commit** `f9ca267`.
 
 **Top 5 remaining.**
 
