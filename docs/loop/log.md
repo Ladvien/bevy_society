@@ -1052,3 +1052,71 @@ conclusion). Fresh eyes GREAT (the corrected note keeps the old one visible; the
 4. **The village's rumor origin** — reaches 1/24; an arbitrary villager cannot be the town crier.
 5. **`need-cycle`'s two remaining needs** — `social` and `rest` never cross 0.35 at the shipped rates;
    whether that is correct or too generous is unmeasured.
+
+## 2026-11-10-01 — One GIF per feature, and what the clips exposed
+
+**Pick.** The user's instruction: record a GIF per feature and inspect them. Beat the runner-up
+(`Place`/`Person` completion asymmetry) on one sentence: **the instruction was explicit, and doing it
+found three real defects in the demo path** — including a `RumorId(0)` bug that made the hero clip's
+headline number read 0.000.
+
+**Six clips, one run.**
+
+| scene | overlay |
+|---|---|
+| `village` | everything: rumor rings, tie lines, HUD |
+| `mood` | PAD ring, colour = pleasure, radius = arousal |
+| `opinions` | one column per villager on the honesty topic |
+| `needs` | food halo, radius and colour = how fed |
+| `ties` | the tie graph alone |
+| `factions` | faction colours, no tie lines |
+
+All six print identical numbers — `rumor_reach 0.880, friends 36, rivals 45, barks 2810` — which is the
+proof they are views of one simulation and not six different ones.
+
+**Three defects the frames exposed.**
+
+1. **Every overlay was invisible.** `MARK_HEIGHT` is 0.06 m, and the tie lines, rumor rings and need
+   rings all drew there — under the capsules and under the ground plane's depth. The ties clip showed
+   **two short segments** where the graph has hundreds of edges. Everything draws at chest/head height
+   now.
+
+2. **`RumorId(0)`, for the third time.** `draw_rumor_rings`, `stats()` and the HUD's "known by N" line
+   all read the first rumor the run made, not the theft the clip plants.
+
+   | | reported | actual |
+   |---|---|
+   | hero reach, before | **0.000** | 0.880 |
+   | hero reach, after | **0.880** | 0.880 |
+
+   The clip's entire subject was absent from its own numbers. `docs/DEMOS.md` had recorded this class
+   of bug as fixed twice; it was not.
+
+3. **The colour scales were unreadable.** PAD here spans only ±0.4 (measured, 4 200 ticks: pleasure
+   [-0.387, 0.382]), so mapping onto [-1, 1] gave every villager the same dull olive ring. Normalised
+   to `MOOD_SPAN = 0.45`; opinion columns likewise to `OPINION_SPAN = 0.5`.
+
+**A trap worth recording.** Extracting frame 60 from the GIF showed solid green, and I briefly concluded
+the GIF was corrupt. It was the extractor: `-layers optimize` stores partial rectangles
+(`640x311+0+49`), so `magick file.gif[60]` needs `-coalesce` first. That is now in `docs/DEMOS.md`,
+because the next person will hit it.
+
+**Files.** 15 MB total at 600 px `STRIDE=2 FPS=60` — half the size of the first encode at no loss of
+speed. Visual check at frames 0 / 120 / 239 of all six, coalesced: no blank first frame, HUD legible
+over grass and night sky, every overlay distinguishing at least two villagers.
+
+**Tests.** 27 binaries both feature sets, unchanged. Dead-code inventory: zero — `scenes.rs` is
+example code and every function is reached by a scene.
+
+**Verdicts.** Behaviour GREAT (six views of one run, one caption each). Zoom GREAT — three real demo
+defects found by looking rather than reading. Fresh eyes GREAT (captions in plain words, HUD legible
+over both grass and night).
+
+**Commit.** `0587be5`.
+
+**Top 5 remaining.**
+1. **`Place`/`Person` completion asymmetry** — 78 of 108 `eat`s interrupted against 0 of 152 socials.
+2. **Retire untellable rumors** — 93% of the book cannot spread; a 4× cost growth over 3 000 ticks.
+3. **The two-clocks decision** — warned about and measured, but the API question is still open.
+4. **The village's rumor origin** — reaches 1/24 in `village-evening`.
+5. **`need-cycle`'s two remaining needs** — `social` and `rest` never cross 0.35 at the shipped rates.
