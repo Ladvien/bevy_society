@@ -215,7 +215,12 @@ fn run(app: &mut App, ticks: usize) -> u64 {
     for _ in 0..ticks {
         app.update();
     }
-    app.world().resource::<SocietyClock>().tick;
+    // A society that never ticked would hash identically under any seed, so the clock is part of the
+    // evidence that this test measured anything at all.
+    assert!(
+        app.world().resource::<SocietyClock>().tick > (ticks as u64) / 2,
+        "the society must actually advance"
+    );
     hash(app)
 }
 

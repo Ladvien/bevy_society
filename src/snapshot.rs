@@ -15,9 +15,7 @@ use rand_chacha::ChaCha8Rng;
 use crate::behavior::Doing;
 use crate::beliefs::{Knowledge, Opinions};
 use crate::core::{PersonId, PersonIndex, SocietyClock, SocietyRng, SocietySettings};
-use crate::defs::{
-    ActivityId, DeedId, FactionId, IDLE_ACTIVITY, InteractionId, NeedId, SocietyDefs, TopicId,
-};
+use crate::defs::{ActivityId, FactionId, IDLE_ACTIVITY, NeedId, SocietyDefs, TopicId};
 use crate::groups::{Memberships, Status};
 use crate::mind::{Emotions, Memories, Mood, Needs, Personality};
 use crate::relationships::{TieLabel, Ties};
@@ -31,14 +29,10 @@ pub(crate) struct Names {
     pub(crate) needs: Vec<String>,
     /// Topic names, indexed by [`TopicId`].
     pub(crate) topics: Vec<String>,
-    /// Deed names, indexed by [`DeedId`].
-    pub(crate) deeds: Vec<String>,
     /// Faction names, indexed by [`FactionId`].
     pub(crate) factions: Vec<String>,
     /// Activity names, indexed by [`ActivityId`].
     pub(crate) activities: Vec<String>,
-    /// Interaction names, indexed by [`InteractionId`].
-    pub(crate) interactions: Vec<String>,
 }
 
 impl Names {
@@ -47,10 +41,8 @@ impl Names {
         Self {
             needs: defs.needs.iter().map(|s| s.name.clone()).collect(),
             topics: defs.topics.iter().map(|s| s.name.clone()).collect(),
-            deeds: defs.deeds.iter().map(|s| s.name.clone()).collect(),
             factions: defs.factions.iter().map(|s| s.name.clone()).collect(),
             activities: defs.activities.iter().map(|s| s.name.clone()).collect(),
-            interactions: defs.interactions.iter().map(|s| s.name.clone()).collect(),
         }
     }
 
@@ -64,24 +56,9 @@ impl Names {
         position(&self.topics, "topic", name).map(|i| TopicId(i as u16))
     }
 
-    /// The deed called `name`.
-    pub(crate) fn deed(&self, name: &str) -> Result<DeedId, String> {
-        position(&self.deeds, "deed", name).map(|i| DeedId(i as u16))
-    }
-
     /// The faction called `name`.
     pub(crate) fn faction(&self, name: &str) -> Result<FactionId, String> {
         position(&self.factions, "faction", name).map(|i| FactionId(i as u16))
-    }
-
-    /// The activity called `name`.
-    pub(crate) fn activity(&self, name: &str) -> Result<ActivityId, String> {
-        position(&self.activities, "activity", name).map(|i| ActivityId(i as u16))
-    }
-
-    /// The interaction called `name`.
-    pub(crate) fn interaction(&self, name: &str) -> Result<InteractionId, String> {
-        position(&self.interactions, "interaction", name).map(|i| InteractionId(i as u16))
     }
 
     /// The name of an activity, `""` for the idle activity or an unknown id.
@@ -106,8 +83,6 @@ fn position(names: &[String], kind: &str, name: &str) -> Result<usize, String> {
 /// One directed tie as scripts see it, with familiarity already evaluated at the tick start.
 #[derive(Clone, Copy)]
 pub(crate) struct TieView {
-    /// The person the tie points at, for lookups by id.
-    pub(crate) target: PersonId,
     /// The same person as an entity, for the lookups the `ctx` API makes.
     pub(crate) entity: Entity,
     /// Liking in `[-1, 1]`.
@@ -439,18 +414,13 @@ pub(crate) fn build_snapshot(
         let mut views: Vec<TieView> = ties
             .0
             .iter()
-            .filter_map(|tie| {
-                let key = tie.target.to_bits();
-                let slot = by_bits.binary_search_by_key(&key, |&(bits, _)| bits).ok()?;
-                Some(TieView {
-                    target: by_bits[slot].1,
-                    entity: tie.target,
-                    affinity: tie.affinity,
-                    trust: tie.trust,
-                    respect: tie.respect,
-                    familiarity: tie.familiarity(now as f32, tuning),
-                    label: tie.label,
-                })
+            .map(|tie| TieView {
+                entity: tie.target,
+                affinity: tie.affinity,
+                trust: tie.trust,
+                respect: tie.respect,
+                familiarity: tie.familiarity(now as f32, tuning),
+                label: tie.label,
             })
             .collect();
         views.sort_by_key(|t| t.entity.to_bits());

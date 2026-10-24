@@ -7,7 +7,7 @@
 use bevy::ecs::name::Name;
 use bevy::prelude::*;
 use bevy_emerge_rng::{DetRng, seeded};
-use bevy_society::{Autonomous, Home, Person, Personality, Place, PlaceTags, SocietyDefs, Tuning};
+use bevy_society::{Autonomous, Home, Person, Personality, Place, PlaceTags, SocietyDefs};
 
 /// Half the ground's side, in metres.
 pub const GROUND_HALF: f32 = 20.0;

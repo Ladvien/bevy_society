@@ -179,6 +179,10 @@ impl Plugin for BehaviorPlugin {
             )
             .add_systems(
                 FixedUpdate,
+                activity_barks.in_set(crate::SocietySystems::Interact),
+            )
+            .add_systems(
+                FixedUpdate,
                 report_to_triggers
                     .after(crate::SocietySystems::Interact)
                     .before(crate::SocietySystems::Rules),
@@ -1833,6 +1837,62 @@ fn person_id(world: &World, entity: Entity) -> i64 {
                 .map(|(id, _)| i64::from(id.0))
         })
         .unwrap_or(-1)
+}
+
+// -------------------------------------------------------------------------------------------------
+// Activity barks
+// -------------------------------------------------------------------------------------------------
+
+/// One thought line per activity start, with `bark_chance` (plan D7).
+///
+/// Reads the [`ActivityStarted`] messages the decision wrote, so the draw happens once per start in
+/// `ActivityStarted` order — the same order every other per-person loop uses.
+fn activity_barks(
+    mut starts: MessageReader<ActivityStarted>,
+    defs: Res<SocietyDefs>,
+    settings: Res<SocietySettings>,
+    mut rng: ResMut<crate::SocietyRng>,
+    names: Query<&Name>,
+    doing: Query<&Doing>,
+    mut barks: MessageWriter<crate::interact::SocietyBark>,
+) {
+    for start in starts.read() {
+        let Some(spec) = defs.activity_id(&start.activity) else {
+            continue;
+        };
+        let Some(activity) = defs.activities.get(usize::from(spec.0)) else {
+            continue;
+        };
+        if activity.barks.is_empty() || (rng.0.unit() as f32) >= settings.bark_chance {
+            continue;
+        }
+        let line = activity.barks[rng.0.below(activity.barks.len())].clone();
+        let of = |entity: Entity| {
+            names
+                .get(entity)
+                .map_or_else(|_| "someone".to_owned(), |n| n.as_str().to_owned())
+        };
+        let place = doing
+            .get(start.person)
+            .ok()
+            .and_then(|d| match d.target {
+                DoingTarget::Place(place) => names.get(place).ok(),
+                _ => None,
+            })
+            .map_or_else(|| "somewhere".to_owned(), |n| n.as_str().to_owned());
+        let mut text = line
+            .replace("{self}", &of(start.person))
+            .replace("{place}", &place);
+        if let Some(target) = start.target {
+            text = text.replace("{target}", &of(target));
+        }
+        barks.write(crate::interact::SocietyBark {
+            speaker: start.person,
+            text,
+            thought: true,
+            feeling: crate::interact::Feeling::from_emotions(&crate::mind::Emotions::default()),
+        });
+    }
 }
 
 // -------------------------------------------------------------------------------------------------

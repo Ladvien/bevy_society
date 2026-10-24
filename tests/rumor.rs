@@ -138,7 +138,7 @@ fn settings_keep_seeded_randomness_out_of_planting() {
 fn a_planted_rumor_spreads_through_gossip() {
     // The chain case, end to end: A knows a rumor, and an accepted gossip interaction with B passes
     // it on. Without this, `rumor_reach` in the hero capture stays at 1/n forever.
-    use bevy_society::{Interact, SocietyDefs, SocietySettings};
+    use bevy_society::Interact;
 
     let defs = SocietyDefs::from_ron(
         r#"(
