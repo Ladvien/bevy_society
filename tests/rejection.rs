@@ -14,9 +14,7 @@
 mod common;
 
 use bevy::prelude::*;
-use bevy_society::{
-    Autonomous, Home, InteractionResolved, Person, Place, PlaceTags, SocietyDefs,
-};
+use bevy_society::{Autonomous, Home, InteractionResolved, Person, Place, PlaceTags, SocietyDefs};
 use common::{headless, settings, spawn_person};
 
 /// Eight people around three places, in contact, for `ticks`.
