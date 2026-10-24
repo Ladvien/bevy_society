@@ -147,6 +147,9 @@ pub struct MoodRates {
     /// Emotional contagion rate (`contagion_per_day`, 0.3; Hatfield et al. 1993, DOI
     /// 10.1111/1467-8721.ep10770953).
     pub contagion_per_day: f32,
+    /// Pleasure's resting point above the personality baseline (`positivity_offset`, 0.1). See
+    /// `Tuning::positivity_offset` for the mechanism and the source.
+    pub positivity_offset: f32,
 }
 
 impl Default for MoodRates {
@@ -155,6 +158,7 @@ impl Default for MoodRates {
             pull_per_day: 4.0,
             return_per_day: 1.0,
             contagion_per_day: 0.3,
+            positivity_offset: 0.1,
         }
     }
 }
@@ -197,8 +201,14 @@ impl Mood {
         self.arousal += (centre[1] - self.arousal) * pull;
         self.dominance += (centre[2] - self.dominance) * pull;
 
+        // The resting point is the personality baseline **plus the positivity offset**. Cacioppo et al.
+        // 2013 put the offset on the *intercept* of the positive activation function — the approach
+        // motivation at zero input — which is exactly the point this return step pulls toward. Without
+        // it the intercept is the baseline alone, which is zero for a sampled personality, so pleasure
+        // has no way above zero and a village is never pleased.
+        let resting = baseline.pleasure + rates.positivity_offset;
         let back = (rates.return_per_day * dt_days).min(1.0);
-        self.pleasure += (baseline.pleasure - self.pleasure) * back;
+        self.pleasure += (resting - self.pleasure) * back;
         self.arousal += (baseline.arousal - self.arousal) * back;
         self.dominance += (baseline.dominance - self.dominance) * back;
 
@@ -600,6 +610,7 @@ fn update_minds(
         pull_per_day: tuning.mood_pull_per_day,
         return_per_day: tuning.mood_return_per_day,
         contagion_per_day: tuning.contagion_per_day,
+        positivity_offset: tuning.positivity_offset,
     };
     let pleasure: Vec<f32> = index
         .sorted
@@ -726,14 +737,32 @@ mod tests {
     }
 
     #[test]
-    fn mood_relaxes_to_baseline_without_emotions() {
+    fn mood_relaxes_to_baseline_plus_the_positivity_offset() {
         let base = Mood::from_pad([0.3, -0.2, 0.1]);
         let mut m = Mood::from_pad([-0.9, 0.9, -0.9]);
+        let rates = MoodRates::default();
         for _ in 0..200 {
-            m.step(base, [0.0; 3], 0.0, None, 0.05, &MoodRates::default());
+            m.step(base, [0.0; 3], 0.0, None, 0.05, &rates);
+        }
+        // Pleasure returns to the baseline **plus** the positivity offset (Cacioppo et al. 2013: the
+        // positive activation function's intercept is above the negative one's). Arousal and dominance
+        // have no such offset and return to the baseline itself.
+        assert!((m.pleasure - (base.pleasure + rates.positivity_offset)).abs() < 1e-3);
+        assert!((m.arousal - base.arousal).abs() < 1e-3);
+    }
+
+    #[test]
+    fn a_zero_offset_returns_pleasure_to_the_bare_baseline() {
+        let base = Mood::from_pad([0.3, -0.2, 0.1]);
+        let mut m = Mood::from_pad([-0.9, 0.9, -0.9]);
+        let rates = MoodRates {
+            positivity_offset: 0.0,
+            ..MoodRates::default()
+        };
+        for _ in 0..200 {
+            m.step(base, [0.0; 3], 0.0, None, 0.05, &rates);
         }
         assert!((m.pleasure - base.pleasure).abs() < 1e-3);
-        assert!((m.arousal - base.arousal).abs() < 1e-3);
     }
 
     fn mem(day: f32, other: Option<Entity>, valence: f32, importance: f32) -> Memory {

@@ -45,6 +45,9 @@ fn main() {
     if let Some(spd) = args.seconds_per_day {
         settings.seconds_per_day = spd;
     }
+    if let Some(offset) = args.positivity_offset {
+        settings.tuning.positivity_offset = offset;
+    }
     if let Some(seed) = args.seed {
         settings.seed = seed;
     }
@@ -993,6 +996,9 @@ struct Args {
     seed: Option<u64>,
     /// Overrides the scenario's population.
     people: Option<usize>,
+    /// Overrides `Tuning::positivity_offset`, so the same scenario can be re-read with a different
+    /// resting mood.
+    positivity_offset: Option<f32>,
     /// Overrides the scenario's `seconds_per_day`, so the same scenario can be re-read at a different
     /// watch speed. The **observable** should not move: `seconds_per_day` is how fast a host watches a day,
     /// not how much of it a person spends walking.
@@ -1007,6 +1013,7 @@ impl Args {
             seed: None,
             people: None,
             seconds_per_day: None,
+            positivity_offset: None,
         };
         let mut argv = std::env::args().skip(1);
         while let Some(flag) = argv.next() {
@@ -1017,6 +1024,9 @@ impl Args {
                 "--people" => args.people = argv.next().and_then(|v| v.parse().ok()),
                 "--seconds-per-day" => {
                     args.seconds_per_day = argv.next().and_then(|v| v.parse().ok())
+                }
+                "--positivity-offset" => {
+                    args.positivity_offset = argv.next().and_then(|v| v.parse().ok())
                 }
                 other => {
                     eprintln!("evidence: unknown argument {other}");

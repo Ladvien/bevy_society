@@ -86,6 +86,22 @@ pub struct Tuning {
     /// How fast mood returns to its personality baseline, per game-day. Mechanism: ALMA's mood
     /// update (Gebhard 2005, DOI 10.1145/1082473.1082478).
     pub mood_return_per_day: f32,
+    /// The **positivity offset**: pleasure's resting point above the personality baseline, added to it.
+    ///
+    /// Cacioppo, Cacioppo & Gollan 2013, DOI `10.1017/S0140525X13002537`: *"the intercept for the positive
+    /// activation function (i.e., the approach motivation at zero input) is higher than the intercept for
+    /// the negative activation function (producing the positivity offset), and the gain for the negative
+    /// activation function is higher than for the positivity activation function (producing the negativity
+    /// bias)."*
+    ///
+    /// The crate had the negativity **gain** — a landed insult gives Anger 0.5 against a compliment's Joy
+    /// 0.3, and distress outnumbers joy 3:1 — and no positivity **intercept**. Without it a person with no
+    /// emotions at all rests at the personality baseline, which is **zero** for a sampled personality, so
+    /// pleasure's ceiling was zero: measured on `village-evening`, its maximum over every person and tick
+    /// was exactly `+0.000` and nobody was ever pleased.
+    ///
+    /// 0.1 is a design default; the paper states the offset's existence and sign, not a magnitude.
+    pub positivity_offset: f32,
     /// Strength of pleasure contagion from contacts, per game-day (Hatfield 1993,
     /// DOI 10.1111/1467-8721.ep10770953).
     pub contagion_per_day: f32,
@@ -179,6 +195,7 @@ impl Default for Tuning {
             emotion_half_life_days: 0.1,
             mood_pull_per_day: 4.0,
             mood_return_per_day: 1.0,
+            positivity_offset: 0.1,
             contagion_per_day: 0.3,
             familiarity_tau_days: 1.0,
             familiarity_decay_exp: 0.5,

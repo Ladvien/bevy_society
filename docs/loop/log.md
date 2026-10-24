@@ -2294,3 +2294,60 @@ they disagree).
 4. **`rumor-crosses-a-cluster`** - 0.333 against the 40% it asserts, at both clocks.
 5. **`need-cycle` is still `pending`** - its test passes but its observable claims `rest` and `food` cycle
    when only `food` does; re-stating an observable is a decision.
+
+## 2026-12-01-01 - The affect model had a gain and no intercept
+
+**Pick.** Last iteration escalated "a village that is never pleased" with three options. Searching the
+literature found a **fourth**, with a source, and it is an omission rather than a tuning disagreement.
+
+**Cacioppo, Cacioppo & Gollan 2013** (DOI `10.1017/S0140525X13002537`): *"the intercept for the positive
+activation function (i.e., the approach motivation at zero input) is higher than the intercept for the
+negative activation function (producing the **positivity offset**), and the gain for the negative activation
+function is higher than for the positivity activation function (producing the **negativity bias**)."*
+
+The crate had the **gain** — a landed insult pays Anger 0.5 against a compliment's Joy 0.3, distress
+outnumbers joy 3:1 — and **no intercept**. So `Mood::step` returned pleasure to a personality baseline of
+exactly zero (traits centre on 0.5, Mehrabian's zero is there), and its ceiling was zero: measured,
+pleasure's maximum over every person and every tick was **+0.000**.
+
+**Change.** `Tuning::positivity_offset`, default 0.1, added to the resting point. Pleasure only; arousal and
+dominance have no offset in the model.
+
+| offset | mean pleasure | **max pleasure** | needs |
+|---|---|---|---|
+| 0.0 (old) | -0.154 | **+0.0000** | 0.596 |
+| **0.1 (new)** | -0.122 | **+0.0155** | 0.603 |
+| 0.3 | -0.058 | **+0.0476** | 0.603 |
+
+The ceiling crosses zero for the first time, monotonically in the offset. An idle person alone in a field:
+**+0.0000 → +0.0122**.
+
+**Honest limit.** This fixes the ceiling, not the mean. The steady state is
+`(pull·I·c + back·rest)/(pull·I + back)`, so a saturated negative centre at intensity 0.5 pins pleasure near
+-0.6 whatever the offset. The mean needs the **appraisal balance** (1 302 distress against 427 joy), which is
+`a-village-that-is-never-pleased.md`'s option 1 and stays a decision.
+
+**Tests updated rather than deleted.** Three asserted "mood returns to the baseline", which is now false by
+design. Each was rewritten to the new contract and kept, plus a new one asserting `positivity_offset: 0.0`
+reproduces the old behaviour exactly — so this is a setting, not a one-way door.
+
+**Evidence.** `runs/2026-12-01-01/evidence/positivity-offset.png` (three separated traces against the zero
+axis; the max bar rising through it while the mean bars stay below).
+
+**Verdicts.** Behavior GREAT (the intercept lands where the paper puts it, and the idle-person case is
+exactly zero at 0.0). Zoom GREAT (the plot shows the ceiling moving and the centre not). Fresh eyes GREAT
+(magnitude is a documented design default, and the old behaviour is one field away).
+
+**Dead-code delta.** Zero.
+
+**Commit** `pending`.
+
+**Top 5 remaining.**
+
+1. **The appraisal balance** - 1 302 distress against 427 joy; the offset fixed the ceiling and not the mean.
+   Option 1 in `a-village-that-is-never-pleased.md`, now with the ceiling separated out.
+2. **`Doing` names the target activity while travelling** - 49.8% of person-ticks; host-facing, escalated.
+3. **The clock decision** - the largest behavioural lever (15 points), escalated.
+4. **`rumor-crosses-a-cluster`** - 0.333 against the 40% it asserts, at both clocks.
+5. **`need-cycle` is still `pending`** - its test passes but its observable claims `rest` and `food` cycle
+   when only `food` does; re-stating an observable is a decision.

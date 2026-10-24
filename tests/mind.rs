@@ -81,7 +81,7 @@ fn joy_intensity_halves_every_tenth_of_a_game_day() {
 }
 
 #[test]
-fn joy_lifts_mood_toward_joy_and_then_returns_to_baseline() {
+fn joy_lifts_mood_toward_joy_and_then_returns_to_baseline_plus_the_offset() {
     let mut app = headless(SocietyDefs::default(), fast_settings());
     // All-zero traits give a low-pleasure baseline, so the Joy lift has room to show.
     let person = app
@@ -125,14 +125,30 @@ fn joy_lifts_mood_toward_joy_and_then_returns_to_baseline() {
     // Six game-days with no further appraisals: the emotion has decayed away and mood returns.
     run(&mut app, 6144);
     let settled = mood_of(&app, person);
+    // **Pleasure returns to the baseline plus the positivity offset**, not the bare baseline: Cacioppo et
+    // al. 2013 put the positive activation function's intercept above the negative one's, so an idle
+    // person rests mildly pleased. Arousal and dominance have no offset and do return to the baseline.
+    let offset = app
+        .world()
+        .resource::<bevy_society::SocietySettings>()
+        .tuning
+        .positivity_offset;
+    let expected = [baseline[0] + offset, baseline[1], baseline[2]];
     for axis in 0..3 {
         assert!(
-            (settled[axis] - baseline[axis]).abs() < 0.01,
-            "axis {axis}: {} should be within 0.01 of baseline {}",
+            (settled[axis] - expected[axis]).abs() < 0.01,
+            "axis {axis}: {} should be within 0.01 of {} (baseline {} plus the offset where it applies)",
             settled[axis],
+            expected[axis],
             baseline[axis]
         );
     }
+    assert!(
+        settled[0] > baseline[0],
+        "an idle person rests above its personality baseline: {} against {}",
+        settled[0],
+        baseline[0]
+    );
 }
 
 #[test]
