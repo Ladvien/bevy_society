@@ -50,10 +50,10 @@ ffmpeg -y -loglevel error -framerate "$FPS" -i "$FRAMES/frame%04d.png" \
   -vf "${decimate}scale=${WIDTH}:-1:flags=lanczos,split[a][b];[a]palettegen=max_colors=128[p];[b][p]paletteuse=dither=bayer:bayer_scale=3" \
   "$tmp/raw.gif"
 
-# Caption top-left.
+# Caption bottom-centre: the scene's own HUD occupies the top-left, and a caption there covers it.
 magick "$tmp/raw.gif" -coalesce \
-  -font "$BOLD" -pointsize 15 -fill white \
-  -gravity NorthWest -annotate +12+10 "$CAPTION" \
+  -font "$BOLD" -pointsize 15 -fill white -stroke black -strokewidth 1 \
+  -gravity South -annotate +0+14 "$CAPTION" \
   -layers optimize "$OUT"
 
 echo "gif.sh: $count frames -> $OUT ($(du -h "$OUT" | cut -f1))"

@@ -80,14 +80,25 @@ WIDTH=640 FPS=60 STRIDE=2 \
   do not shift between frames.
 - `STRIDE=2` keeps every other frame and `FPS=60` restores real-time speed, which halves the file for no
   loss of information.
-- The caption is burned in with ImageMagick because this ffmpeg build has no `drawtext` filter.
+- The caption is burned in with ImageMagick because this ffmpeg build has no `drawtext` filter. It sits
+  at the bottom centre with a thin black stroke: the scene's own HUD owns the top-left, and a caption
+  there covered it.
+
+`ffmpeg` and `magick` are not installed on every host; they are on `big`, so the encode runs there:
+
+```
+rsync -az frames/hero/ big:/tmp/bevy_society_hero/
+scp tools/gif.sh big:/tmp/bevy_society_gif.sh
+ssh big 'bash /tmp/bevy_society_gif.sh'   # with FONT/BOLD/WIDTH/FPS/STRIDE exported
+scp big:/tmp/bevy_society_hero.gif docs/media/hero.gif
+```
 
 Fonts per host:
 
 | Host | Regular | Bold |
 |---|---|---|
 | macOS | `/System/Library/Fonts/Supplemental/Arial.ttf` | `…/Arial Bold.ttf` |
-| Linux | `/usr/share/fonts/liberation/LiberationSans-Regular.ttf` | `…/LiberationSans-Bold.ttf` |
+| Linux (big) | `/usr/share/fonts/liberation/LiberationSans-Regular.ttf` | `…/LiberationSans-Bold.ttf` |
 | Windows | `C:\Windows\Fonts\arial.ttf` | `C:\Windows\Fonts\arialbd.ttf` |
 
 ## Comparing two captures
