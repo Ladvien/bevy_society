@@ -2006,7 +2006,7 @@ at the short-day end, which is where it warns). Fresh eyes GREAT (one sentence t
 **Honest limit.** This **reports** the coupling; it does not reduce it. Option 2 in the decision file is the
 only one that closes this half, and it is not mine to take.
 
-**Commit** `pending`.
+**Commit** `f015468`.
 
 **Top 5 remaining.**
 
