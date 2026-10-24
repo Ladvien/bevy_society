@@ -338,3 +338,58 @@ at 240 s.
 3. `Signal::Field` / `Gradient` — Moussaïd 2011 needs re-converting.
 4. A log-capture harness, so warnings can be asserted rather than read by hand.
 5. `scale-1000` perf.
+
+## 2026-10-30-01 — Gossip needs something to tell, and the starvation survives
+
+**Why.** The log's #1 was `chat` starving against `gossip`, escalated last iteration with three
+options. The recommendation was option 2 — gate gossip on having information — because it needs no
+schema change and matches what the literature says gossip is (**Sommerfeld et al. 2007**,
+`10.1073/pnas.0704598104`: gossip is reputation *information*, distinct from conversation).
+
+**The gap that had to be closed first.** Option 2 could not be expressed. `ctx.knows(a, rumor)`
+requires a rumor id, and an authored file has no way to name one. Added `ctx.tellable(a)`: whether a
+person knows a rumor they are still spreading.
+
+**Change.** `gossip` gains `Script("if ctx.tellable(actor) { 1.0 } else { 0.0 }")` as its leading
+consideration.
+
+**Before → after.**
+
+| activity | village before | after | cluster before | after |
+|---|---|---|---|---|
+| `chat` | 8746 | **9312** | 128 | 140 |
+| `gossip` | 15050 | 14160 | 3093 | 3186 |
+| `snub` | 6004 | **1617** | 2527 | 2188 |
+
+**The negative result, measured before the change was written.** The cluster's 1:24 ratio is
+unchanged. That scenario produces **279 rumors**, so `tellable` is true for almost everybody and the
+gate never closes. A gate on having something to tell only differentiates where rumors are scarce —
+the village, 28 rumors among 24 people. The decision note is updated: option 1 (a second need) is now
+the only remaining path, and tuning `tellable` to bite harder would be inventing a threshold to move
+a number.
+
+**The surprise.** `snub` falls **73%** in the village. Chain: gossip interactions produce insults →
+insults produce grudges → grudges drive snubs. Fewer gratuitous gossips, far fewer grudges. At 1617
+person-ticks over 24 people and 17 days that is ~4 ticks per person per day: a village with a few
+grudges, not a village without them.
+
+**Evidence.** `runs/2026-10-30-01/eval.md`; capture `{"rumor_reach": 0.360, "friends": 80,
+"rivals": 37, "barks": 3648}` — all four thresholds met.
+
+**Dead-code inventory.** Unchanged at zero.
+
+**Verdicts.** Behaviour GREAT — chat up, gossip down, snub −73%, and the second-order effect named.
+Zoom **NOT YET** for the cluster's ratio (279 rumors defeat the gate), GREAT for the gate itself at
+every edge, including subject-blindness documented in the code. Fresh eyes GREAT — capture clears all
+four thresholds and the cluster still reaches 0.333.
+
+**Commit.** See `git log`.
+
+**Top 5 remaining.**
+1. **The cluster's 1:24 starvation survives** — option 1: a second need (`belonging` for chat,
+   `social` for gossip). A schema change; now the only remaining path.
+2. **The clock decision** (`travel_timeout_hours` real-time) — escalated, still open, implicated in
+   three iterations.
+3. `Signal::Field` / `Gradient` — Moussaïd 2011 needs re-converting.
+4. A log-capture harness so warnings can be asserted rather than read by hand.
+5. `scale-1000` perf.

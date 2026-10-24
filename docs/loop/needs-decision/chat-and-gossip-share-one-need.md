@@ -62,6 +62,25 @@ Hosts set `gossip`'s `weight` below `chat`'s in their own defs.
 - **Against:** the starter pack still ships a configuration where one activity can starve the other,
   and a host has no signal that it happened.
 
+## Update: option 2 was implemented, and it does not fix the cluster
+
+`ctx.tellable(a)` was added (2026-10-30-01) and the starter `gossip` now gates on it. Measured:
+
+| | village | cluster |
+|---|---|---|
+| `chat` | 8746 → **9312** (+6.5%) | 128 → 140 |
+| `gossip` | 15050 → 14160 | 3093 → 3186 |
+| `snub` | 6004 → **1617** (−73%) | 2527 → 2188 |
+
+The gate is correct and worth keeping — it is the literature's mechanism and it cuts snubbing by
+nearly three quarters — but the cluster is unchanged. The reason is measured, not guessed: that
+scenario produces **279 rumors**, so `tellable` is true for almost everybody and the gate never
+closes. A gate on "having something to tell" can only differentiate where rumors are scarce.
+
+**So option 1 is now the only remaining path** for the cluster's 1:24 ratio: a second need, with
+`chat` serving `belonging` and `gossip` serving `social`. Option 3 stays rejected for the reason
+given.
+
 ## Recommendation
 
 **Option 2**, then **option 1** if it proves too strict. Option 2 needs no schema change, is
