@@ -1,0 +1,63 @@
+# Bram's day
+
+At the end: doing Some("eat"), needs Some([0.0, 0.0, 0.33046877, 0.0]), mood P0.02 A0.02 D-0.01
+
+d3 06h16: chat approached by Corin (accepted)
+d3 07h07: started compliment
+d3 07h07: finished work (interrupted)
+d3 07h07: compliment with Fenna (refused)
+d3 07h24: finished compliment (completed)
+d3 13h24: chat approached by Oswin (accepted)
+d3 15h22: chat approached by Jena (accepted)
+d3 15h33: chat approached by Quill (refused)
+d3 20h20: started chat
+d3 20h20: chat with Ivo (accepted)
+d3 20h43: finished chat (completed)
+d5 08h26: started relax
+d5 09h56: started compliment
+d5 09h56: finished relax (completed)
+d5 09h56: compliment with Fenna (accepted)
+d5 10h13: finished compliment (completed)
+d6 13h35: compliment approached by Alys (accepted)
+d6 13h52: gossip approached by Alys (refused)
+d7 02h15: finished eat (interrupted)
+d8 12h28: compliment approached by Hilda (accepted)
+d8 18h16: started gossip
+d8 18h16: finished sleep (interrupted)
+d8 18h16: gossip with Sable (refused)
+d8 18h39: started chat
+d8 18h39: finished gossip (completed)
+d8 18h39: chat with Kell (accepted)
+d8 19h01: finished chat (completed)
+d9 15h50: started eat
+d9 16h35: finished eat (completed)
+d10 04h18: started chat
+d10 04h18: chat with Corin (refused)
+d10 04h41: finished chat (completed)
+d11 16h13: started sleep
+d12 00h16: started sleep
+d12 00h16: finished sleep (completed)
+d12 08h20: started chat
+d12 08h20: finished sleep (completed)
+d12 08h20: chat with Edric (refused)
+d12 08h43: finished chat (completed)
+d12 13h58: compliment approached by Corin (refused)
+d12 15h56: gossip approached by Corin (refused)
+d12 17h15: gossip approached by Corin (refused)
+d13 07h30: started work
+d13 11h31: finished work (completed)
+d13 21h16: insult approached by Corin (accepted)
+d14 12h39: compliment approached by Kell (accepted)
+d14 14h15: gossip approached by Dena (refused)
+d14 18h33: gossip approached by Milo (refused)
+d14 19h58: gossip approached by Lira (accepted)
+d15 03h33: finished work (interrupted)
+d15 09h28: gossip approached by Milo (accepted)
+d15 17h48: gossip approached by Nera (accepted)
+d16 02h31: gossip approached by Wren (accepted)
+d16 10h58: chat approached by Corin (refused)
+d16 19h35: started chat
+d16 19h35: finished sleep (interrupted)
+d16 19h35: chat with Dena (accepted)
+d16 19h58: finished chat (completed)
+d18 00h28: started eat

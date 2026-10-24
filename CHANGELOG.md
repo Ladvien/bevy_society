@@ -6,6 +6,8 @@ All notable changes to bevy_society. The format follows [Keep a Changelog](https
 
 ### Fixed
 
+- **`ActivityStarted` and `ActivityEnded` are now a balanced pair.** A start is written when a person **decides**, which is the instant its `Doing` is inserted and `Doing::started_day` is stamped — not when it arrives. Before, a start was written only on arrival, while an end was written for *any* removed `Doing`, so a person whose target was out of reach emitted ends for activities no host was ever told about: **2 starts against 55 ends** for one person 50 m from its place, and 2 667 unpaired ends at 40 people. Arrival keeps its own meaning (`Doing::arrived_day` begins the duration and the `satisfies` payout). A host will notice that activity barks now fire as a person sets off rather than on arrival, which is the better reading of a line like "Back to it.".
+
 - **The quick start now works, and is compiled.** Two documents that tell a host how to begin were wrong: `README.md`'s quick start took **0 society ticks in 600 updates** (a headless app has no frame clock, so `Time<Fixed>` never advances without `TimeUpdateStrategy::ManualDuration`), and `docs/guide/getting-started.md`'s first block panicked in `DialoguePlugin::finish` without a speech-bubbles camera. Both fixed. The quick start is now a **running doctest** in `src/lib.rs` — `cargo test --doc` executes it and asserts `tick > 0` — and `tests/readme.rs` asserts the README's block is byte-equal to it, so they cannot drift. That doctest immediately caught a hand-written repair naming a `TimeUpdateStrategy` that Bevy 0.20 does not re-export in its prelude.
 
 ### Added

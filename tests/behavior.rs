@@ -687,3 +687,44 @@ fn a_script_consideration_reads_no_grudge_for_a_stranger() {
         "no grudge, no snub: {doing:?}"
     );
 }
+
+// -------------------------------------------------------------------------------------------------
+// The message pair
+// -------------------------------------------------------------------------------------------------
+
+/// **Every `ActivityEnded` has a matching `ActivityStarted`.**
+///
+/// A host subscribing to the pair — barks, a HUD, a log, a witness reaction — treats an end as the
+/// close of something it was told about. A person who decides an activity, walks, and times out
+/// (its target out of reach, `travel_timeout_hours` elapsed) used to emit an end for a start that
+/// was never written, because `ActivityStarted` was written only **on arrival**. Measured on one
+/// person who can never reach its place: 2 starts against 55 ends.
+#[test]
+fn every_activity_end_has_a_start() {
+    let mut app = headless(defs(), fast_settings());
+    // Far enough that the 2-hour timeout expires long before anyone could walk there, and this app
+    // has no steering plugin, so *nothing* ever arrives.
+    let shop = place(&mut app, "shop", Vec2::new(50.0, 0.0), "work", 4);
+    let person = spawn_person(&mut app, "Solo", Vec2::ZERO);
+    app.world_mut().entity_mut(person).insert(Home(shop));
+    app.world_mut().entity_mut(person).insert(Autonomous);
+
+    let (started, ended, _) = step(&mut app, 900);
+
+    let mine_starts = started.iter().filter(|m| m.person == person).count();
+    let mine_ends = ended.iter().filter(|m| m.person == person).count();
+    assert!(
+        mine_ends > 0,
+        "the person gave up on its unreachable target at least once: {ended:?}"
+    );
+    assert!(
+        mine_starts >= mine_ends,
+        "every end must pair with a start: {mine_starts} starts, {mine_ends} ends"
+    );
+    // A run can stop mid-activity, which leaves one start legitimately unpaired; what must never
+    // happen is an end with no start before it.
+    assert!(
+        mine_starts - mine_ends <= 1,
+        "at most the activity in flight at the end is unpaired: {mine_starts} starts, {mine_ends} ends"
+    );
+}

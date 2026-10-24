@@ -1,0 +1,106 @@
+# Bram's day
+
+At the end: doing Some("sleep"), needs Some([0.41953123, 0.2746093, 0.0, 0.0]), mood P0.06 A0.04 D-0.03
+
+d1 15h05: started work
+d3 07h07: started chat
+d3 07h07: finished work (interrupted)
+d3 07h07: chat with Fenna (refused)
+d3 07h30: started gossip
+d3 07h30: finished chat (completed)
+d3 07h30: gossip with Corin (accepted)
+d3 07h52: started gossip
+d3 07h52: finished gossip (completed)
+d3 13h41: gossip with Sable (refused)
+d3 14h03: started gossip
+d3 14h03: finished gossip (completed)
+d4 05h43: gossip with Ivo (refused)
+d4 06h05: started snub
+d4 06h05: finished gossip (completed)
+d4 06h05: insult with Ivo (accepted)
+d4 06h16: started compliment
+d4 06h16: finished snub (completed)
+d5 04h46: compliment approached by Hilda (accepted)
+d5 13h52: gossip approached by Hilda (accepted)
+d5 22h18: started sleep
+d5 22h18: finished compliment (interrupted)
+d7 09h22: gossip approached by Vesna (accepted)
+d7 09h56: chat approached by Oswin (accepted)
+d7 11h20: gossip approached by Lira (refused)
+d7 11h43: insult approached by Lira (accepted)
+d7 14h20: started compliment
+d7 14h20: finished sleep (interrupted)
+d7 14h20: compliment with Oswin (accepted)
+d7 14h37: started gossip
+d7 14h37: finished compliment (completed)
+d7 14h37: gossip with Perrin (accepted)
+d7 15h00: started compliment
+d7 15h00: finished gossip (completed)
+d7 19h35: gossip approached by Jena (refused)
+d8 10h46: compliment approached by Tomas (accepted)
+d8 11h09: gossip approached by Ysolde (refused)
+d8 12h11: insult approached by Jena (accepted)
+d8 13h41: compliment approached by Ulric (accepted)
+d8 14h03: insult approached by Ivo (refused)
+d8 15h05: gossip approached by Ivo (accepted)
+d8 16h52: compliment approached by Ivo (accepted)
+d8 20h15: gossip approached by Quill (accepted)
+d9 07h01: started compliment
+d9 07h01: finished compliment (interrupted)
+d9 08h31: insult approached by Sable (accepted)
+d9 17h09: compliment with Alys (refused)
+d9 17h26: started compliment
+d9 17h26: finished compliment (completed)
+d9 17h26: compliment with Vesna (refused)
+d9 17h43: started chat
+d9 17h43: finished compliment (completed)
+d9 17h43: chat with Vesna (accepted)
+d9 18h05: started gossip
+d9 18h05: finished chat (completed)
+d9 18h05: gossip with Ysolde (refused)
+d9 18h28: started snub
+d9 18h28: finished gossip (completed)
+d10 09h33: chat approached by Ivo (accepted)
+d10 10h58: compliment approached by Ivo (accepted)
+d10 11h09: gossip approached by Rhea (accepted)
+d10 14h09: insult with Jena (refused)
+d10 14h20: started compliment
+d10 14h20: finished snub (completed)
+d10 14h20: compliment with Lira (accepted)
+d10 14h37: started work
+d10 14h37: finished compliment (completed)
+d10 16h30: gossip approached by Perrin (accepted)
+d11 19h46: started compliment
+d11 19h46: finished work (completed)
+d12 13h13: compliment with Ivo (accepted)
+d12 13h30: started chat
+d12 13h30: finished compliment (completed)
+d12 13h30: chat with Fenna (refused)
+d12 13h52: started compliment
+d12 13h52: finished chat (completed)
+d12 16h52: compliment approached by Jena (accepted)
+d12 23h43: compliment with Tomas (accepted)
+d13 00h00: started sleep
+d13 00h00: finished compliment (completed)
+d13 14h37: chat approached by Ulric (accepted)
+d14 09h05: compliment approached by Corin (refused)
+d14 12h33: gossip approached by Perrin (refused)
+d14 16h01: started chat
+d14 16h01: finished sleep (interrupted)
+d14 16h24: gossip approached by Vesna (refused)
+d14 17h48: compliment approached by Hilda (refused)
+d15 19h41: gossip approached by Sable (accepted)
+d16 06h56: chat approached by Quill (accepted)
+d16 08h03: started gossip
+d16 08h03: finished chat (interrupted)
+d16 08h03: gossip with Fenna (accepted)
+d16 08h26: started compliment
+d16 08h26: finished gossip (completed)
+d16 20h26: compliment approached by Rhea (accepted)
+d17 06h05: compliment with Tomas (refused)
+d17 06h22: started gossip
+d17 06h22: finished compliment (completed)
+d17 11h43: compliment approached by Jena (accepted)
+d17 22h07: gossip with Ulric (accepted)
+d17 22h30: started sleep
+d17 22h30: finished gossip (completed)

@@ -1,0 +1,80 @@
+# Bram's day
+
+At the end: doing Some("gossip"), needs Some([0.0, 0.0, 0.0, 0.0]), mood P0.04 A0.03 D0.01
+
+d1 15h05: started work
+d3 07h07: started gossip
+d3 07h07: finished work (interrupted)
+d3 07h46: gossip with V33 (accepted)
+d3 08h09: started chat
+d3 08h09: finished gossip (completed)
+d3 12h39: gossip approached by Sable (accepted)
+d3 22h13: chat with Dena (refused)
+d3 22h35: started sleep
+d3 22h35: finished chat (completed)
+d5 14h37: started gossip
+d5 14h37: finished sleep (interrupted)
+d5 14h37: gossip with Hilda (refused)
+d5 15h00: started chat
+d5 15h00: finished gossip (completed)
+d5 15h00: chat with V28 (refused)
+d5 15h22: started gossip
+d5 15h22: finished chat (completed)
+d5 15h22: gossip with Wren (accepted)
+d5 15h45: started gossip
+d5 15h45: finished gossip (completed)
+d5 15h45: gossip with Corin (accepted)
+d5 16h07: started compliment
+d5 16h07: finished gossip (completed)
+d5 16h07: compliment with Fenna (refused)
+d5 16h24: started compliment
+d5 16h24: finished compliment (completed)
+d5 16h24: compliment with V29 (accepted)
+d5 16h41: started gossip
+d5 16h41: finished compliment (completed)
+d5 16h41: gossip with Fenna (accepted)
+d5 17h03: started compliment
+d5 17h03: finished gossip (completed)
+d7 09h00: compliment approached by Garet (accepted)
+d7 09h05: started chat
+d7 09h05: finished compliment (interrupted)
+d7 09h05: chat with V35 (accepted)
+d7 09h28: started chat
+d7 09h28: finished chat (completed)
+d7 10h30: gossip approached by Fenna (refused)
+d7 23h20: gossip approached by Alys (accepted)
+d9 01h30: started sleep
+d9 01h30: finished chat (interrupted)
+d9 13h58: insult approached by Fenna (accepted)
+d9 16h01: compliment approached by Ysolde (accepted)
+d10 06h39: chat approached by Edric (accepted)
+d10 17h31: started chat
+d10 17h31: finished sleep (interrupted)
+d11 08h48: chat approached by Alys (accepted)
+d11 10h52: chat approached by Garet (accepted)
+d12 09h33: started compliment
+d12 09h33: finished chat (interrupted)
+d12 09h33: compliment with Milo (accepted)
+d12 09h50: started chat
+d12 09h50: finished compliment (completed)
+d13 09h28: compliment approached by V30 (accepted)
+d13 11h20: compliment approached by Oswin (refused)
+d13 13h07: compliment approached by Wren (accepted)
+d13 13h07: compliment approached by V37 (accepted)
+d14 01h52: started sleep
+d14 01h52: finished chat (interrupted)
+d14 09h16: gossip approached by Vesna (refused)
+d14 10h24: insult approached by Vesna (accepted)
+d15 17h54: started chat
+d15 17h54: finished sleep (interrupted)
+d15 17h54: chat with Edric (accepted)
+d15 18h16: started chat
+d15 18h16: finished chat (completed)
+d16 06h50: compliment approached by Tomas (accepted)
+d16 08h48: gossip approached by Lira (refused)
+d16 11h26: gossip approached by Milo (refused)
+d17 10h01: chat approached by Fenna (refused)
+d17 10h18: started gossip
+d17 10h18: finished chat (interrupted)
+d17 15h00: compliment approached by Garet (accepted)
+d17 16h24: gossip approached by V30 (accepted)

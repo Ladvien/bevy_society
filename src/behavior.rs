@@ -79,6 +79,15 @@ pub struct InteractionResolved {
 }
 
 /// A person began doing an activity (plan D7).
+///
+/// Written when the person **decides**, which is the same instant its [`Doing`] is inserted and
+/// `Doing::started_day` is stamped — not when it arrives. The pair therefore brackets the component:
+/// one [`ActivityStarted`] when `Doing` appears, one [`ActivityEnded`] when it is removed, including
+/// when a walk times out and the activity never runs. A host may read an end as the close of
+/// something it was told about, whatever the reason it closed.
+///
+/// Arrival is a separate fact: it begins the activity's duration and its `satisfies` payout, and is
+/// visible on [`Doing::arrived_day`].
 #[derive(Message, Debug, Clone, PartialEq, Eq)]
 pub struct ActivityStarted {
     /// The person.
@@ -298,7 +307,6 @@ fn arrive_and_satisfy(
     transforms: Query<&GlobalTransform>,
     mut commands: Commands,
     mut people: Query<(&mut Doing, &mut Needs)>,
-    mut started: MessageWriter<ActivityStarted>,
     mut arrivals: Option<ResMut<ArrivalQueue>>,
 ) {
     let now = clock.now_days;
@@ -333,15 +341,9 @@ fn arrive_and_satisfy(
             }
             doing.arrived_day = Some(now);
             commands.entity(person).remove::<Destination>();
-            let person_target = match doing.target {
-                DoingTarget::Person(other) => Some(other),
-                _ => None,
-            };
-            started.write(ActivityStarted {
-                person,
-                activity: spec.name.clone(),
-                target: person_target,
-            });
+            // No `ActivityStarted` here: the decision already wrote it, paired with the
+            // `ActivityEnded` that closes it. Arrival begins the *duration* and the `satisfies`
+            // payout, which is what `arrived_day` is for.
             if let Some(arrivals) = arrivals.as_mut()
                 && let Some(interaction) = spec.interaction
             {
@@ -828,13 +830,16 @@ fn decide_activities(
             }
             DoingTarget::Itself => {}
         }
-        if in_place {
-            started.write(ActivityStarted {
-                person,
-                activity: name,
-                target: person_target,
-            });
-        }
+        // Written at decision, not on arrival: `Doing::started_day` is the day the activity
+        // started, and it is stamped just above. Emitting only on arrival meant a person who
+        // never arrived — its target out of reach, `travel_timeout_hours` elapsed — produced an
+        // `ActivityEnded` for a start no host was ever told about. Measured: 0 starts against
+        // 149 ends for one person whose place was 50 m away with no steering plugin.
+        started.write(ActivityStarted {
+            person,
+            activity: name,
+            target: person_target,
+        });
     }
 }
 
