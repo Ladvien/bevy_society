@@ -285,3 +285,56 @@ defect surfaced.
    implicated in three iterations' findings.
 4. `Signal::Field` / `Gradient` — Moussaïd 2011 needs re-converting.
 5. `scale-1000` perf.
+
+## 2026-10-29-01 — A warning for the bug that kept being silent
+
+**Why, and what changed mid-iteration.** Started on the log's #1: `chat` unreachable where gossip
+self-supplies the social need. Measured first — the village is healthy (chat:gossip 1:1.7), only
+the cluster starves (1:24). Then tried to fix it twice:
+
+| attempt | chat person-ticks | outcome |
+|---|---|---|
+| baseline | 128 | — |
+| gossip `satisfies` 1.0 → 0.3/h | **106** | worse, reverted |
+| gossip interaction 0.15 → 0.05 | **153** | +20%, still starved, reverted |
+
+The arithmetic that stopped it: a gossip fires ~17×/person/day, so any per-instance supply above
+0.06 covers the 1.0/day decay, and below that gossiping is worthless. **Not a tunable rate** — two
+activities serving one need with no differentiation, which is a schema question.
+
+So the iteration built the log's #2 instead, reframed by what #1 taught: the recurring defect is an
+activity shorter than one tick, and it has always been silent.
+
+**Change.** `BehaviorPlugin::finish` warns, naming each activity under two ticks with its own
+arithmetic; `SocietyDefs::activity_durations()` is public so a host can run the same check.
+
+```
+WARN bevy_society::behavior: ... 1 activities are shorter than two society ticks at
+seconds_per_day 4 (one tick is 0.094 game-hours), so their people will re-decide every
+tick: snub (0.1h = 1.1 ticks)
+```
+
+**Evidence.** `runs/2026-10-29-01/eval.md`; the two reverted attempts are in
+`evidence/cluster-gossip-satisfies-0.3/` and `evidence/cluster-interaction-0.05/`.
+
+**Before → after.** No behaviour change (both behavioural attempts were reverted). The observable
+change is a startup log line where there was silence. Tests 16 → **17**: `tests/degenerate.rs`
+brackets the threshold at 4.0 s (degenerate) and 240.0 s (sane).
+
+**Dead-code inventory.** Unchanged at zero.
+
+**Verdicts.** Behaviour GREAT — warning verified by running it, with the missing log-capture
+assertion named (the tests pin the invariant, not the line). Zoom GREAT — threshold bracketed from
+both sides, `idle` exempt, default day silent. Fresh eyes GREAT — fires at 1.0 s and 4.0 s, silent
+at 240 s.
+
+**Commit.** See `git log`.
+
+**Top 5 remaining.**
+1. **`chat` vs `gossip` share one need.** Write the `needs-decision/` note: a second need, or a
+   gossip variant gated on having something to tell. Oldest unresolved finding.
+2. **The clock decision** (`travel_timeout_hours` real-time) — escalated, still open, implicated in
+   three iterations, and provably the same class as the duration warning just added.
+3. `Signal::Field` / `Gradient` — Moussaïd 2011 needs re-converting.
+4. A log-capture harness, so warnings can be asserted rather than read by hand.
+5. `scale-1000` perf.
