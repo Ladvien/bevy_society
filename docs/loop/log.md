@@ -2066,7 +2066,7 @@ point of the pass).
 returned nothing usable, so `docs/research/memory.md` says so outright rather than citing something that does
 not address it.
 
-**Commit** `pending`.
+**Commit** `83443b2`.
 
 **Top 5 remaining.**
 
