@@ -2776,7 +2776,7 @@ recommending saturation, which the crate already uses for exposure). What did sh
 
 **Dead-code delta.** Zero. **Village unchanged:** friends 22 / rivals 33.
 
-**Commit** `pending`.
+**Commit** `156de9e`.
 
 **Top 5 remaining.**
 
