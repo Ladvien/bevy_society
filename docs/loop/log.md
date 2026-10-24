@@ -2340,7 +2340,7 @@ exactly zero at 0.0). Zoom GREAT (the plot shows the ceiling moving and the cent
 
 **Dead-code delta.** Zero.
 
-**Commit** `pending`.
+**Commit** `7f47593`.
 
 **Top 5 remaining.**
 
