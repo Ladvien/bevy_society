@@ -2133,3 +2133,55 @@ both reasoned from the code, both worth ~5%, neither the cause. The timers settl
 4. **The cluster's 1:24 chat:gossip starvation** -- a second need; a schema change.
 5. **`wander` scores 1.000 always** (no considerations) and pins the tier ceiling; giving it a curve made
    things worse, so the fix is in the cutoff policy.
+
+## 2026-11-28-01 - Every README clip had been showing the wrong thing
+
+**Pick.** Not a loop candidate but the thing a host sees first. The demos were not "a different view of one
+simulation" as `docs/DEMOS.md` claims: six clips, the same pixels, and a visual review found **seven**
+faults. Runner-up was the loop's own list, which is now entirely escalated decisions.
+
+**Crate change.** `Obstacle` — a component saying "this is solid". `steer_movers` passed `&[]` for ORCA's
+wall list; a walking person's `Transform` ended inside a building. Proven by a control: without an
+`Obstacle` the walker reached **0.01 m** from a block's centre (straight through); with one it stopped at
+**2.35 m**.
+
+**The seven faults.**
+
+| fault | cause |
+|---|---|
+| villagers inside buildings | places 3 m cubes, spawn 0.6 m from centre |
+| never moved | place half-width 1.5 m == `interaction_radius` 1.5 m |
+| never moved | `seconds_per_day = 8` made a 3 m walk cost 6.4 game-hours |
+| `needs` one colour | `NEED_CLIP = 1` is `rest`; food is 2 |
+| `opinions` one colour | `OpinionBar(0)` is `kindness`; honesty is 1 |
+| `village` no rumor | halos read `RumorId(0)`, not the planted rumor |
+| `factions` two colours | fixed camera + `Wander(6.0)` |
+
+The correct rumor function existed, was **dead code**, and was never called.
+
+**Also fixed.** `docs/guide/concepts.md` was **147 395 lines** of repeated `## Scale` — my own doc edit two
+iterations ago looped. Restored from `662fdce` (110 lines), scale section corrected, obstacles section added.
+
+**Evidence.** The six GIFs in `docs/media/`, each inspected at frames 0 / 120 / 239:
+`runs/2026-11-28-01/evidence/village.gif`.
+
+**Verdicts.** Behavior GREAT (each clip now shows its feature; both colours present in `opinions`, both sizes
+in `needs`). Zoom GREAT (no clipping, all three factions in frame, no ground edge, HUD readable). Fresh eyes
+GREAT (three separate visual passes, each finding what the last missed).
+
+**Dead-code delta.** Minus one: `draw_newest_rumor_rings` is now used.
+
+**What I got wrong.** Four attempts at the opinion bars before checking the data — the renderer was fine and
+the model had converged; seeding a spread fixed it. Two attempts at framing before computing the layout's
+centroid. Recorded because the pattern is "reason about the picture" instead of "measure the numbers".
+
+**Commit** `pending`.
+
+**Top 5 remaining.**
+
+1. **The clock decision** - still the largest behavioural lever (15 points), escalated.
+2. **`rumor-crosses-a-cluster`** - 0.333 against the 40% it asserts, at both clocks; the observable or the
+   geometry needs re-stating, which is a decision.
+3. **Scoring is the scale curve** - `people x activities x neighbours`; sampling is the only real lever.
+4. **The cluster's 1:24 chat:gossip starvation** - a second need; a schema change.
+5. **`wander` scores 1.000 always** - pins the tier ceiling; the fix is in the cutoff policy.

@@ -6,7 +6,8 @@
 
 use bevy::prelude::*;
 use bevy_society::{
-    Knowledge, PersonIndex, RumorBook, RumorId, SocietyClock, SocietySettings, TieLabel, Ties,
+    Autonomous, Knowledge, Person, PersonIndex, RumorBook, RumorId, SocietyClock, SocietySettings,
+    TieLabel, Ties,
 };
 
 /// Whether the tie lines are drawn. The village example toggles it with `T`; the capture leaves it on.
@@ -27,12 +28,14 @@ pub struct RumorMarkers(pub bool);
 ///
 /// Only labels that mean something are drawn, and only for ties the pair is actually familiar: a line
 /// between two strangers would be a lie about the relationship.
+#[allow(clippy::too_many_arguments)]
 pub fn draw_ties(
     show: Res<ShowTies>,
     clock: Res<SocietyClock>,
     settings: Res<SocietySettings>,
     index: Res<PersonIndex>,
     ties: Query<&Ties>,
+    villagers: Query<(), (With<Autonomous>, With<Person>)>,
     transforms: Query<&GlobalTransform>,
     mut gizmos: Gizmos,
 ) {
@@ -42,6 +45,12 @@ pub fn draw_ties(
     let now = clock.now_days as f32;
     let tuning = &settings.tuning;
     for &(_, entity) in &index.sorted {
+        // **Villagers only.** `PersonIndex` includes the player, who has ties to nobody it can see but
+        // still appeared in the hero clip as a line running off the bottom of the frame to an
+        // off-screen capsule. A demo line should join two people a viewer can point at.
+        if villagers.get(entity).is_err() {
+            continue;
+        }
         let (Ok(owned), Ok(mine)) = (ties.get(entity), transforms.get(entity)) else {
             continue;
         };
@@ -84,13 +93,21 @@ pub fn draw_rumor_rings(
     if !markers.0 {
         return;
     }
-    let Some(rumor) = books.rumors.first() else {
+    // **The newest alive rumor, not `RumorId(0)`.** This read `books.rumors.first()` — the first rumor
+    // the run ever produced, which is not the one the clip plants. The hero clip therefore drew rings for
+    // a rumor nobody in frame had heard, and showed no rings at all while the HUD counted 10/24. The
+    // correct version already existed in `scenes::draw_newest_rumor_rings` and was never called; that is
+    // the one below now.
+    let Some((index_of, _)) = books
+        .rumors
+        .iter()
+        .enumerate()
+        .rev()
+        .find(|(_, rumor)| rumor.alive)
+    else {
         return;
     };
-    if !rumor.alive {
-        return;
-    }
-    let id = RumorId(0);
+    let id = RumorId(index_of as u32);
     for &(_, entity) in &index.sorted {
         let (Ok(known), Ok(transform)) = (knowledge.get(entity), transforms.get(entity)) else {
             continue;
@@ -104,11 +121,11 @@ pub fn draw_rumor_rings(
         let pos = transform.translation();
         gizmos.circle(
             Isometry3d::new(
-                Vec3::new(pos.x, pos.y + 0.95, pos.z),
+                Vec3::new(pos.x, pos.y + 1.05, pos.z),
                 Quat::from_rotation_x(std::f32::consts::FRAC_PI_2),
             ),
-            0.55,
-            Color::srgb(0.95, 0.2, 0.2),
+            0.7,
+            Color::srgb(0.95, 0.15, 0.55),
         );
     }
 }
@@ -131,14 +148,23 @@ pub fn spawn_hud(commands: &mut Commands, font: Handle<Font>) -> Entity {
             Text::new("Day 0 · 00:00"),
             TextFont {
                 font: bevy::text::FontSource::Handle(font),
-                font_size: bevy::text::FontSize::Px(16.0),
+                font_size: bevy::text::FontSize::Px(13.0),
                 ..default()
             },
             TextColor(Color::WHITE),
+            bevy::text::LineHeight::Px(15.0),
             Node {
                 position_type: PositionType::Absolute,
-                top: px(8),
-                left: px(10),
+                // Bottom-left, not top-left. The top of the frame is where the village's far faction
+                // stands, so a HUD plate there covered the very people the clip was recorded to show.
+                //
+                // **Two lines, not six.** The plate used to stack day, friends, rivals, the rumor line and
+                // the scene label: a 430 px-wide slab covering a third of a 720 px frame, which forced
+                // every camera back to keep the village out from behind it. The rumor line now sits beside
+                // the counters rather than under them, and the scene label is the burned-in caption.
+                bottom: px(6),
+                left: px(8),
+                max_width: px(360),
                 // A dark plate behind the text. The village is bright grass and pale buildings, and
                 // white text over it is unreadable at the GIF's 640 px; the plate costs nothing and
                 // keeps every line legible whatever the camera is pointed at.
@@ -159,6 +185,7 @@ pub fn update_hud(
     index: Res<PersonIndex>,
     ties: Query<&Ties>,
     label: Option<Res<SceneLabel>>,
+    villagers: Query<(), (With<Autonomous>, With<Person>)>,
     mut hud: Query<&mut Text, With<Hud>>,
 ) {
     let Ok(mut text) = hud.single_mut() else {
@@ -189,21 +216,20 @@ pub fn update_hud(
             .rev()
             .find(|rumor| rumor.alive)
             .map_or(String::new(), |rumor| {
+                // `PersonIndex::sorted` includes every `Person` — the player too — while `known_by`
+                // counts the ones holding the rumor. Against the raw index the HUD read "17/25" in a
+                // village of 24 villagers, which looks like an off-by-one bug to anyone reading it.
+                let villagers = villagers.iter().count().max(1);
                 format!(
                     "\n“Bram stole bread” — known by {}/{}",
-                    rumor.known_by,
-                    index.sorted.len().max(1)
+                    rumor.known_by, villagers
                 )
             });
-    let label = label.as_ref().map_or(String::new(), |label| {
-        if label.0.is_empty() {
-            String::new()
-        } else {
-            format!("\n{}", label.0)
-        }
-    });
+    // The scene label is **not** in the HUD. Every GIF carries it as a burned-in caption, so printing it
+    // twice cost a third line of the plate and covered the village it described.
+    let _ = label;
     **text = format!(
-        "Day {} · {:02}:{:02}\nFriendships {} · Rivalries {}{reach}{label}",
+        "Day {} · {:02}:{:02}   Friendships {} · Rivalries {}{reach}",
         clock.day(),
         hour as u32,
         minutes,
@@ -242,6 +268,11 @@ pub fn spawn_sun(commands: &mut Commands) -> Entity {
             DirectionalLight {
                 illuminance: 16_000.0,
                 shadow_maps_enabled: true,
+                // Soft, small shadows. The default cascade covers a huge area, so a 1.4 m capsule's
+                // shadow rasterised into almost nothing and then smeared — at the GIF's 720 px the
+                // village read as a field of grey streaks. Narrowing the cascade concentrates the
+                // shadow map's texels on the 20 m the camera actually sees.
+                shadow_depth_bias: 0.02,
                 ..default()
             },
             Transform::from_rotation(Quat::from_euler(EulerRot::XYZ, -0.9, 0.6, 0.0)),
@@ -276,9 +307,11 @@ pub fn move_sun(
     for (mut light, mut transform) in &mut suns {
         light.color = color;
         light.illuminance = illuminance;
-        // The sun swings from east to west; below the horizon it keeps a low angle so the scene is not
-        // pitch black.
-        let pitch = -0.25 - 1.1 * elevation;
+        // **High enough that shadows do not swallow the frame.** The old `-0.25 - 1.1 * elevation`
+        // put the sun near the horizon, and a 1.4 m capsule threw a shadow several metres long — at 240
+        // px of a 405 px frame the clip was mostly shadow. A steep key light keeps each villager's shadow
+        // tight under it and every body lit.
+        let pitch = -1.35 - 0.20 * elevation;
         *transform = Transform::from_rotation(Quat::from_euler(EulerRot::XYZ, pitch, 0.6, 0.0));
     }
 }

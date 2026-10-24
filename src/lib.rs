@@ -182,5 +182,5 @@ pub use rules::{FireTrigger, RulesPlugin};
 pub use rumor::{PlantRumor, Rumor, RumorBook, RumorId, RumorLearned};
 pub use script::{ScriptEngine, ScriptError, ScriptEvent, ScriptId, ScriptValue};
 #[cfg(feature = "steering")]
-pub use steering::{SocialMover, SocialVelocity, SteeringPlugin};
+pub use steering::{Obstacle, SocialMover, SocialVelocity, SteeringPlugin};
 pub use trace::{Decision, DecisionTrace, ScoredOption};

@@ -61,9 +61,9 @@ fn setup_scene(
             materials.add(Color::srgb(0.40, 0.42, 0.45)),
         ],
         factions: vec![
-            materials.add(Color::srgb(0.88, 0.69, 0.25)),
-            materials.add(Color::srgb(0.23, 0.65, 0.63)),
-            materials.add(Color::srgb(0.42, 0.48, 0.66)),
+            materials.add(Color::srgb(0.95, 0.62, 0.10)),
+            materials.add(Color::srgb(0.15, 0.72, 0.35)),
+            materials.add(Color::srgb(0.45, 0.30, 0.90)),
         ],
         player: materials.add(Color::srgb(0.92, 0.92, 0.92)),
     };
@@ -93,7 +93,13 @@ fn main() {
     let scene = args.scene;
     let Some(mut rec) = Recorder::new_with(WIDTH, HEIGHT, orbit(0.0), &args.out, move |app| {
         app.insert_resource(SocietySettings {
-            seconds_per_day: 8.0,
+            // **32 s a day, not 8.** A walk is real-time (`walk_speed` m per second) while an
+            // activity's `duration_hours` is game-time, so `seconds_per_day` decides how far a person
+            // can get before its activity ends. At 8 s/day a 3 m walk cost 6.4 game-hours against a
+            // 0.3-hour chat, so nobody ever arrived anywhere and the clips showed twenty-four people
+            // standing exactly where they spawned for the whole run. At 32 s/day the same walk is
+            // 1.6 game-hours: still long enough to watch, short enough to finish inside a clip.
+            seconds_per_day: 32.0,
             tick_secs: 0.1,
             start_hour: 15.0,
             ..SocietySettings::default()
@@ -110,12 +116,18 @@ fn main() {
         // and lines over the crowd hid the colours that are its whole subject.
         app.insert_resource(ShowTies(matches!(scene, Scene::Village | Scene::Ties)));
         app.insert_resource(RumorMarkers(matches!(scene, Scene::Village)));
-        app.insert_resource(scenes::OpinionBar(0));
+        // **`honesty` is index 1, not 0.** The starter pack declares `kindness` (0) then `honesty` (1);
+        // this was 0, so the clip captioned "opinion of honesty" drew the village's kindness opinions.
+        // The watch faction is the honest one (0.7 against -0.2), so with the right topic a third of the
+        // bars go red — which is what makes the clip show a *contrast* rather than one colour.
+        app.insert_resource(scenes::OpinionBar(1));
         app.insert_resource(scenes::NeedRing(NEED_CLIP));
         app.insert_resource(common::visuals::SceneLabel(scene_label(scene).to_owned()));
-        // The sun follows the clock in every scene: a clip lit differently from the rest reads as
-        // a different simulation rather than a different view of the same one.
-        app.insert_resource(SunClock(true));
+        // Fixed daylight, deliberately. Following the clock sounded right and looked wrong: the
+        // village's run starts at 15:00 and reaches 22:00 inside a clip, so the last third of every
+        // GIF went dark blue and the feature it was recorded to show became unreadable. A README clip
+        // has to be legible in every frame, and the clock is in the HUD anyway.
+        app.insert_resource(SunClock(false));
         match scene {
             Scene::Mood => {
                 app.add_systems(Update, scenes::draw_mood_discs);
@@ -154,6 +166,15 @@ fn main() {
         barks += drain_barks(&mut rec);
     }
 
+    // **Fed at the moment recording starts, not at spawn.** The settle steps run the society for a long
+    // time, and the starter pack's needs have no `initial`, so by frame 0 the whole village had decayed
+    // to zero — the `needs` clip showed 24 identical red halos from first frame to last, a constant
+    // rather than a scale. Filling them here means the recording opens fed and a viewer watches hunger
+    // arrive. It touches only the demo's starting state, never the model or the run that produced the
+    // numbers printed above.
+    feed(&mut rec, &village);
+    spread_opinions(&mut rec, &village);
+
     for frame in 0..args.frames {
         if frame == PLANT_FRAME {
             plant(&mut rec, village.villagers.first().copied());
@@ -163,11 +184,14 @@ fn main() {
         if let Some(camera) = camera_entity(&mut rec) {
             // Each scene frames what it is about: the village wide, the tie graph close enough to
             // read individual lines, the overlay scenes close enough to read a 0.5 m ring.
-            let shot = match scene {
-                Scene::Village => orbit(fraction),
-                Scene::Ties => scenes::ties_camera(fraction),
-                _ => scenes::close_camera(fraction),
-            };
+            // Every scene is framed on **where the crowd actually is** this tick. A fixed frame lost a
+            // faction the moment it wandered: measured, `factions` showed two colours while claiming
+            // three. `Village` and `Ties` keep their own orbit so the clips differ in feel.
+            let (centre, spread) = scenes::crowd(rec.world());
+            // Same framing everywhere: each clip differs by what it *draws*, not by where the camera
+            // stands. They used to differ by framing too, which meant `village` and `ties` became
+            // near-identical once both were framed on the crowd.
+            let shot = scenes::crowd_camera(centre, spread, fraction);
             if let Some(mut transform) = rec.world().get_mut::<Transform>(camera) {
                 *transform = shot;
             }
@@ -187,21 +211,64 @@ fn main() {
     }
 }
 
+/// Fills every villager's needs to a comfortable level, so the recorded clip shows them fall.
+fn feed(rec: &mut Recorder, village: &scene::Village) {
+    for &entity in &village.villagers {
+        if let Some(mut needs) = rec.world().get_mut::<bevy_society::Needs>(entity) {
+            for level in needs.0.iter_mut() {
+                *level = 0.85;
+            }
+        }
+    }
+}
+
+/// Gives the villagers **opposing** opinions on honesty at the moment recording starts.
+///
+/// The settle steps run opinion dynamics to convergence: by frame 0 only about three of twenty-four
+/// villagers still held a negative view, so the `opinions` clip — captioned "green high, red low" — showed
+/// an almost uniformly green village and demonstrated a constant instead of a scale. Seeding a spread
+/// means the recording opens divided and a viewer watches the influence model pull the two sides
+/// together, which is what the feature actually is.
+///
+/// Only the demo's starting state changes; the model is untouched.
+fn spread_opinions(rec: &mut Recorder, village: &scene::Village) {
+    let topics = rec
+        .world()
+        .resource::<bevy_society::SocietyDefs>()
+        .topic_id("honesty")
+        .map(|id| usize::from(id.0));
+    let Some(topic) = topics else {
+        return;
+    };
+    for (i, &entity) in village.villagers.iter().enumerate() {
+        if let Some(mut opinions) = rec.world().get_mut::<bevy_society::Opinions>(entity) {
+            // Alternating strong positions, so the opening frame has both colours at full length.
+            let value = if i % 3 == 2 { 0.6 } else { -0.6 };
+            if let Some(slot) = opinions.0.get_mut(topic) {
+                *slot = bevy_society::Opinion::at(value);
+            }
+        }
+    }
+}
+
 /// The line the HUD shows under the counters, naming the feature the clip is about.
 fn scene_label(scene: Scene) -> &'static str {
     match scene {
         Scene::Village => "a rumor spreads · ties form",
-        Scene::Mood => "mood: green is pleased, red is displeased · ring size is arousal",
+        Scene::Mood => "mood: green pleased · amber neutral · red displeased · ring size = arousal",
         Scene::Opinions => "opinion on honesty: green above the middle, red below",
         Scene::Needs => "food: a full green ring is fed, a small red one is hungry",
         Scene::Ties => "ties: green is friendship, red is rivalry",
-        Scene::Factions => "faction colour · amber millers, teal weavers, blue watch",
+        Scene::Factions => "faction colour · orange millers, green weavers, violet watch",
     }
 }
 
-/// Which need the needs clip rings. `food` (index 1 in the starter pack), because hunger cycles
-/// fastest and is the need a viewer can see a village fail at.
-const NEED_CLIP: usize = 1;
+/// Which need the needs clip rings.
+///
+/// **`food` is index 2, not 1.** The starter pack declares `social` (0), `rest` (1), `food` (2),
+/// `fun` (3). This was `1`, so every "hunger" clip ringed `rest` while its caption and the HUD's own
+/// label said food — a demo that showed the wrong feature and named it confidently.
+const NEED_CLIP: usize = 2;
 
 /// The recorder's camera: the one it spawned looking through the off-screen target.
 fn camera_entity(rec: &mut Recorder) -> Option<Entity> {
@@ -286,17 +353,18 @@ fn stats(world: &mut World, village: &scene::Village) -> (f32, u32, u32) {
 
 /// A camera orbiting the origin: `fraction` 0..1 of the clip maps 20°..50° at radius 24, height 16.
 fn orbit(fraction: f32) -> Transform {
-    let degrees = 20.0 + 30.0 * fraction;
+    let degrees = 16.0 + 12.0 * fraction;
     let angle = degrees.to_radians();
     // Framed on the crowd at roughly the radius `scenes::close_camera` uses. The ground plane is 40 m
     // across and the villagers stand in 1.2 m clusters round the well and the tavern, so the earlier
     // 19 m / 13.5 m orbit — chosen when the village was a 12 m square — put two thirds of every frame
     // on empty grass.
-    let focus = Vec3::new(3.2, 0.9, -2.4);
+    // Whole village, same focus as the per-feature shots.
+    let focus = Vec3::new(0.0, 0.4, -2.5);
     Transform::from_xyz(
-        focus.x + 8.0 * angle.sin(),
-        7.0,
-        focus.z + 8.0 * angle.cos(),
+        focus.x + 5.0 * angle.sin(),
+        17.0,
+        focus.z + 5.0 * angle.cos(),
     )
     .looking_at(focus, Vec3::Y)
 }

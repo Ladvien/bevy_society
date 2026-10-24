@@ -5,7 +5,9 @@
 //! same rule `docs/DEMOS.md` states for the capture — a demo must not change the thing it demonstrates.
 
 use bevy::prelude::*;
-use bevy_society::{Knowledge, Mood, Needs, Opinions, PersonIndex, RumorBook, RumorId};
+use bevy_society::{
+    Autonomous, Knowledge, Mood, Needs, Opinions, Person, PersonIndex, RumorBook, RumorId,
+};
 
 use crate::common::visuals::MARK_HEIGHT;
 
@@ -80,6 +82,11 @@ const OPINION_SPAN: f32 = 0.5;
 #[derive(Resource)]
 pub struct OpinionBar(pub usize);
 
+/// A short perpendicular tick at the end of an opinion bar.
+fn gilt_cap(gizmos: &mut Gizmos, at: Vec3, color: Color) {
+    gizmos.line(at - Vec3::Z * 0.16, at + Vec3::Z * 0.16, color);
+}
+
 pub fn draw_opinion_bars(
     bar: Res<OpinionBar>,
     index: Res<PersonIndex>,
@@ -92,28 +99,36 @@ pub fn draw_opinion_bars(
             continue;
         };
         let value = opinion.value(bar.0).clamp(-1.0, 1.0);
+
         let pos = transform.translation();
-        let base = Vec3::new(pos.x, pos.y + 0.95, pos.z);
         // Measured, the village's opinions sit near zero and a proportional bar is invisible. The bar
         // is normalised to the range the model produces (about ±0.5) and given a floor, so "leaning
         // either way" is visible while the sign is what the colour says.
-        let height = 0.12 + 0.55 * (value.abs() / OPINION_SPAN).clamp(0.0, 1.0);
+
         let color = if value >= 0.0 {
             Color::srgb(0.25, 0.8, 0.35)
         } else {
             Color::srgb(0.85, 0.3, 0.25)
         };
-        // One vertical bar per villager, offset horizontally toward its own side so the column reads
-        // as a bar rather than a lattice: seven parallel lines look like a tie graph from this angle.
-        let side = if value >= 0.0 { 0.22 } else { -0.22 };
-        let base = base + Vec3::new(side, 0.0, 0.0);
-        gizmos.line(base, base + Vec3::Y * height, color);
-        // A short cap makes the top of the bar obvious without thickening the whole line.
-        gizmos.line(
-            base + Vec3::Y * height,
-            base + Vec3::Y * height + Vec3::X * 0.10,
-            color,
-        );
+        // **Horizontal, in the ground plane.** These were vertical lines 0.12-0.67 m tall while the
+        // camera looks down from ~20 m: seen end-on, a 0.5 m vertical line is a few pixels of nothing and
+        // the clip showed no overlay at all. Laid flat and drawn from the villager outward, the bar's
+        // *length* is what the camera sees, in the same plane as every other ring and tie.
+        // Long enough to compare at a glance. 0.35-1.5 m was still a stub from 20 m up; the village's
+        // opinions cluster near zero, so the *differences* live in the top of the range and need room.
+        // **Length carries magnitude from a fixed origin; colour carries the sign.** Two earlier versions
+        // failed for the same reason: this village's opinions cluster within ±0.2 of neutral, so a bar
+        // whose length came from `|value|` rendered every villager as the same short stub, and drawing red
+        // to the left put it behind the capsule at this camera angle. Now every bar runs the same way from
+        // its villager, its length is the magnitude, and the colour alone says which side of neutral — so
+        // a 0.04 negative is as legible as a 0.4 positive.
+        let length = 0.35 + 1.6 * (value.abs() / OPINION_SPAN).clamp(0.0, 1.0);
+        let direction = Vec3::X;
+        let from = Vec3::new(pos.x, pos.y - 0.75, pos.z);
+
+        gizmos.line(from, from + direction * length, color);
+        // A crossbar at the end, so the bar's reach is unambiguous at the GIF's width.
+        gilt_cap(&mut gizmos, from + direction * length, color);
     }
 }
 
@@ -136,7 +151,16 @@ pub fn draw_mood_discs(
         // measurement, not a guess, and it is what makes a mood swing visible as a colour change.
         let p = (mood.pleasure / MOOD_SPAN).clamp(-1.0, 1.0);
         let a = ((mood.arousal + MOOD_SPAN) / (2.0 * MOOD_SPAN)).clamp(0.0, 1.0);
-        let color = Color::srgb(0.55 - 0.5 * p, 0.55 + 0.45 * p, 0.25);
+        // A **diverging** ramp: green at pleased, amber at neutral, red at displeased. The old
+        // `(0.55-0.5p, 0.55+0.45p, 0.25)` ran red straight to green, so a mildly negative village — which
+        // this one is, 5 rivalries in — came out uniformly red and the clip showed one colour while
+        // claiming a scale. Amber in the middle makes both halves of the range visible.
+        let color = if p >= 0.0 {
+            Color::srgb(0.95 - 0.75 * p, 0.80 - 0.15 * p, 0.20)
+        } else {
+            let n = -p;
+            Color::srgb(0.95, 0.80 - 0.60 * n, 0.20 + 0.25 * n)
+        };
         gizmos.circle(
             Isometry3d::new(
                 Vec3::new(pos.x, pos.y + 0.95, pos.z),
@@ -224,6 +248,45 @@ pub fn newest_rumor_reach(
     knowers as f32 / living as f32
 }
 
+/// The centre of the crowd right now, and how far it reaches, from the villagers' transforms.
+///
+/// **The camera follows the crowd, not a constant.** The village has three groups that wander
+/// independently — `play` targets `Wander(6.0)` — so a fixed frame sooner or later loses one of them;
+/// measured, the `factions` clip showed the millers walking out of shot and the demo that exists to show
+/// *three* colours was down to two. Averaging the living positions keeps all of them in frame at every
+/// tick, and the orbit still gives the clip motion.
+pub fn crowd(world: &mut World) -> (Vec3, f32) {
+    let mut query = world.query_filtered::<&Transform, (With<Autonomous>, With<Person>)>();
+    let points: Vec<Vec3> = query.iter(world).map(|t| t.translation).collect();
+    if points.is_empty() {
+        return (Vec3::new(0.0, 0.4, -2.5), 0.0);
+    }
+    let count = points.len() as f32;
+    let centre = points.iter().fold(Vec3::ZERO, |sum, p| sum + *p) / count;
+    let spread = points
+        .iter()
+        .map(|p| Vec2::new(p.x - centre.x, p.z - centre.z).length())
+        .fold(0.0_f32, f32::max);
+    (Vec3::new(centre.x, 0.4, centre.z), spread)
+}
+
+/// A camera that holds the whole crowd, from its measured centre and spread.
+pub fn crowd_camera(centre: Vec3, spread: f32, fraction: f32) -> Transform {
+    // Far enough back that the crowd's **full diameter** fits the narrower (vertical) field of view.
+    // `spread` is the radius from the centroid, so the box to cover is `2 * spread` across; at a 45
+    // degree tilt the ground is compressed vertically, so the multiplier has to be generous. Measured at
+    // 2.6: the violet group sat on the left edge with half its members outside. 3.6 covers it, and the
+    // floor keeps a tight crowd from being filmed from the stratosphere.
+    let reach = (spread * 2.7).clamp(14.5, 27.0);
+    let angle = (18.0 + 12.0 * fraction).to_radians();
+    Transform::from_xyz(
+        centre.x + 0.27 * reach * angle.sin(),
+        reach,
+        centre.z + 0.27 * reach * angle.cos(),
+    )
+    .looking_at(centre, Vec3::Y)
+}
+
 /// A close camera for the overlay scenes: near enough that a 0.5 m ring reads as a ring.
 pub fn close_camera(fraction: f32) -> Transform {
     // Steeply down. The village's places are 6 m boxes and the villagers stand under them, so a low
@@ -233,26 +296,46 @@ pub fn close_camera(fraction: f32) -> Transform {
     // boxes, so a wide shot is mostly empty grass; the villagers stand in 1.2 m clusters round the
     // well and the tavern. A 6 m radius at 5 m up fills the frame with people and keeps their faces
     // toward the camera.
-    let angle = (30.0 + 25.0 * fraction).to_radians();
-    let focus = Vec3::new(3.2, 0.9, -2.4);
+    // Pulled back and raised from the old 7.2 m / 6.2 m: at that framing the two nearest places filled
+    // the frame and villagers were cut off at the bottom edge. The village's four places span
+    // (-6.5,-5) to (6.5,5), so a 13 m radius at 10 m up holds all of them with margin, and a 0.5 m ring
+    // is still about 20 px across at 720 px wide.
+    // **Framed on the three places the villagers actually use**: the well (0,0), tavern (6.5,-5) and
+    // market (-6.5,-5), whose centroid is (0, -3.3). Two earlier framings used the four-place centroid
+    // and then a guessed (-1.6,-1.9); both left the crowd in the top third with empty grass below.
+    //
+    // A fixed pitch with a slow drift rather than a full orbit: an orbit is pleasant but it turns the
+    // village so the ground's edge swings through frame, and a reader trying to follow one villager
+    // loses it. The drift keeps the clip alive without moving the world under the viewer.
+    // The crowd occupies x [-7.8, 7.8] and z [-6.3, 1.3], and `play` targets `Wander(6.0)`, so a
+    // villager may be 6 m outside that box in any direction. Framing only the layout left a tie line
+    // running off the bottom edge to a villager who had wandered out of shot.
+    //
+    // At 24 m up and 6.6 m out the frame covers 36.7 x 20.6 m: the 15.6 x 7.6 m layout plus 6 m of
+    // wander on every side. Higher than a cinematic shot because the whole point is that every actor in
+    // a relationship is visible at once.
+    let centre = Vec3::new(0.0, 0.4, -2.5);
+    let angle = (18.0 + 12.0 * fraction).to_radians();
     Transform::from_xyz(
-        focus.x + 7.2 * angle.sin(),
-        6.2,
-        focus.z + 7.2 * angle.cos(),
+        centre.x + 5.6 * angle.sin(),
+        20.5,
+        centre.z + 5.6 * angle.cos(),
     )
-    .looking_at(focus, Vec3::Y)
+    .looking_at(centre, Vec3::Y)
 }
 
 /// A close camera over the tie graph, ignoring the sun so the lines read against a flat background.
 pub fn ties_camera(fraction: f32) -> Transform {
     // Same framing as `close_camera`: the tie graph is about the crowd, and the earlier 13 m / 16 m
     // shot put four building tops in front of it.
-    let angle = (25.0 + 20.0 * fraction).to_radians();
-    let focus = Vec3::new(3.2, 0.9, -2.4);
+    // The whole village, so a tie line between two factions is visible as one. Framed on the same
+    // point as `close_camera` so the clips read as the same village from different angles.
+    let centre = Vec3::new(0.0, 0.4, -2.5);
+    let angle = (16.0 + 10.0 * fraction).to_radians();
     Transform::from_xyz(
-        focus.x + 7.0 * angle.sin(),
-        6.0,
-        focus.z + 7.0 * angle.cos(),
+        centre.x + 5.8 * angle.sin(),
+        21.0,
+        centre.z + 5.8 * angle.cos(),
     )
-    .looking_at(focus, Vec3::Y)
+    .looking_at(centre, Vec3::Y)
 }

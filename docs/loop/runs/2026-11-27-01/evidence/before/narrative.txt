@@ -1,0 +1,527 @@
+# Bram's day
+
+At the end: doing Some("sleep"), needs Some([0.9252462, 0.11840819, 0.45447195, 0.9673808]), mood P-0.13 A0.04 D-0.06
+
+d1 15h00: started work
+d1 21h52: started compliment
+d1 21h52: finished work (completed)
+d1 22h04: started sleep
+d1 22h04: finished compliment (completed)
+d2 02h04: started sleep
+d2 02h04: finished sleep (interrupted)
+d2 06h04: started chat
+d2 06h04: finished sleep (interrupted)
+d2 06h22: started play
+d2 06h22: finished chat (completed)
+d2 06h53: started gossip
+d2 06h53: finished play (completed)
+d2 07h11: started snub
+d2 07h11: finished gossip (completed)
+d2 07h17: started compliment
+d2 07h17: finished snub (completed)
+d2 07h30: started snub
+d2 07h30: finished compliment (completed)
+d2 07h36: started gossip
+d2 07h36: finished snub (completed)
+d2 07h54: started eat
+d2 07h54: finished gossip (completed)
+d2 12h30: started gossip
+d2 12h30: finished eat (completed)
+d2 12h48: started compliment
+d2 12h48: finished gossip (completed)
+d2 16h48: started play
+d2 16h48: finished compliment (interrupted)
+d2 17h18: started snub
+d2 17h18: finished play (completed)
+d2 17h25: started compliment
+d2 17h25: finished snub (completed)
+d2 17h58: started snub
+d2 17h58: finished compliment (completed)
+d2 18h05: started snub
+d2 18h05: finished snub (completed)
+d2 18h11: started gossip
+d2 18h11: finished snub (completed)
+d2 18h29: started compliment
+d2 18h29: finished gossip (completed)
+d2 18h42: started snub
+d2 18h42: finished compliment (completed)
+d2 18h48: started gossip
+d2 18h48: finished snub (completed)
+d2 19h06: started snub
+d2 19h06: finished gossip (completed)
+d2 19h13: started gossip
+d2 19h13: finished snub (completed)
+d2 19h31: started snub
+d2 19h31: finished gossip (completed)
+d2 19h37: started snub
+d2 19h37: finished snub (completed)
+d2 19h44: started snub
+d2 19h44: finished snub (completed)
+d2 19h50: started snub
+d2 19h50: finished snub (completed)
+d2 19h56: started snub
+d2 19h56: finished snub (completed)
+d2 20h03: started gossip
+d2 20h03: finished snub (completed)
+d2 20h21: started snub
+d2 20h21: finished gossip (completed)
+d2 20h27: started gossip
+d2 20h27: finished snub (completed)
+d2 20h45: started gossip
+d2 20h45: finished gossip (completed)
+d2 21h04: started compliment
+d2 21h04: finished gossip (completed)
+d2 21h16: started snub
+d2 21h16: finished compliment (completed)
+d2 21h22: started compliment
+d2 21h22: finished snub (completed)
+d2 21h53: started gossip
+d2 21h53: finished compliment (completed)
+d2 22h11: started sleep
+d2 22h11: finished gossip (completed)
+d3 02h11: started sleep
+d3 02h11: finished sleep (interrupted)
+d3 06h11: started gossip
+d3 06h11: finished sleep (interrupted)
+d3 06h30: started play
+d3 06h30: finished gossip (completed)
+d3 07h00: started snub
+d3 07h00: finished play (completed)
+d3 10h01: started compliment
+d3 10h01: finished snub (completed)
+d3 10h14: started work
+d3 10h14: finished compliment (completed)
+d3 16h25: started chat
+d3 16h25: finished work (completed)
+d3 16h44: started work
+d3 16h44: finished chat (completed)
+d3 20h44: started wander
+d3 20h44: finished work (completed)
+d3 21h14: started play
+d3 21h14: finished wander (completed)
+d3 21h44: started eat
+d3 21h44: finished play (completed)
+d4 01h18: started sleep
+d4 01h18: finished eat (completed)
+d4 05h18: started sleep
+d4 05h18: finished sleep (interrupted)
+d4 09h18: started chat
+d4 09h18: finished sleep (interrupted)
+d4 09h36: started work
+d4 09h36: finished chat (completed)
+d4 15h15: started work
+d4 15h15: finished work (completed)
+d4 19h15: started chat
+d4 19h15: finished work (completed)
+d4 19h33: started gossip
+d4 19h33: finished chat (completed)
+d4 19h52: started gossip
+d4 19h52: finished gossip (completed)
+d4 20h10: started compliment
+d4 20h10: finished gossip (completed)
+d4 20h29: started gossip
+d4 20h29: finished compliment (completed)
+d4 20h48: started compliment
+d4 20h48: finished gossip (completed)
+d4 21h00: started relax
+d4 21h00: finished compliment (completed)
+d5 00h48: started sleep
+d5 00h48: finished relax (completed)
+d5 04h48: started sleep
+d5 04h48: finished sleep (interrupted)
+d5 08h48: started gossip
+d5 08h48: finished sleep (interrupted)
+d5 09h07: started snub
+d5 09h07: finished gossip (completed)
+d5 09h42: started gossip
+d5 09h42: finished snub (completed)
+d5 10h00: started eat
+d5 10h00: finished gossip (completed)
+d5 14h00: started eat
+d5 14h00: finished eat (interrupted)
+d5 15h36: started play
+d5 15h36: finished eat (completed)
+d5 16h06: started compliment
+d5 16h06: finished play (completed)
+d5 16h49: started gossip
+d5 16h49: finished compliment (completed)
+d5 17h07: started snub
+d5 17h07: finished gossip (completed)
+d5 17h13: started gossip
+d5 17h13: finished snub (completed)
+d5 17h32: started snub
+d5 17h32: finished gossip (completed)
+d5 17h38: started gossip
+d5 17h38: finished snub (completed)
+d5 17h56: started compliment
+d5 17h56: finished gossip (completed)
+d5 18h09: started compliment
+d5 18h09: finished compliment (completed)
+d5 18h21: started snub
+d5 18h21: finished compliment (completed)
+d5 18h27: started snub
+d5 18h27: finished snub (completed)
+d5 18h34: started snub
+d5 18h34: finished snub (completed)
+d5 18h40: started snub
+d5 18h40: finished snub (completed)
+d5 18h46: started gossip
+d5 18h46: finished snub (completed)
+d5 19h05: started gossip
+d5 19h05: finished gossip (completed)
+d5 19h23: started wander
+d5 19h23: finished gossip (completed)
+d5 19h53: started compliment
+d5 19h53: finished wander (completed)
+d5 20h05: started compliment
+d5 20h05: finished compliment (completed)
+d5 20h18: started snub
+d5 20h18: finished compliment (completed)
+d5 20h24: started snub
+d5 20h24: finished snub (completed)
+d5 20h30: started compliment
+d5 20h30: finished snub (completed)
+d5 20h43: started compliment
+d5 20h43: finished compliment (completed)
+d5 20h56: started gossip
+d5 20h56: finished compliment (completed)
+d5 21h14: started snub
+d5 21h14: finished gossip (completed)
+d5 21h20: started snub
+d5 21h20: finished snub (completed)
+d5 21h27: started snub
+d5 21h27: finished snub (completed)
+d5 21h33: started gossip
+d5 21h33: finished snub (completed)
+d5 21h51: started relax
+d5 21h51: finished gossip (completed)
+d5 23h51: started sleep
+d5 23h51: finished relax (completed)
+d6 03h51: started sleep
+d6 03h51: finished sleep (interrupted)
+d6 07h51: started snub
+d6 07h51: finished sleep (interrupted)
+d6 07h58: started snub
+d6 07h58: finished snub (completed)
+d6 08h04: started eat
+d6 08h04: finished snub (completed)
+d6 12h04: started gossip
+d6 12h04: finished eat (interrupted)
+d6 12h22: started eat
+d6 12h22: finished gossip (completed)
+d6 16h22: started play
+d6 16h22: finished eat (interrupted)
+d6 16h53: started eat
+d6 16h53: finished play (completed)
+d6 20h53: started eat
+d6 20h53: finished eat (interrupted)
+d6 23h27: started sleep
+d6 23h27: finished eat (completed)
+d7 03h27: started sleep
+d7 03h27: finished sleep (interrupted)
+d7 07h27: started gossip
+d7 07h27: finished sleep (interrupted)
+d7 07h45: started compliment
+d7 07h45: finished gossip (completed)
+d7 07h58: started gossip
+d7 07h58: finished compliment (completed)
+d7 08h16: started snub
+d7 08h16: finished gossip (completed)
+d7 08h22: started compliment
+d7 08h22: finished snub (completed)
+d7 08h35: started work
+d7 08h35: finished compliment (completed)
+d7 16h16: started play
+d7 16h16: finished work (completed)
+d7 16h47: started compliment
+d7 16h47: finished play (completed)
+d7 16h59: started eat
+d7 16h59: finished compliment (completed)
+d7 21h18: started chat
+d7 21h18: finished eat (completed)
+d7 21h36: started snub
+d7 21h36: finished chat (completed)
+d7 22h44: started sleep
+d7 22h44: finished snub (completed)
+d8 02h44: started sleep
+d8 02h44: finished sleep (interrupted)
+d8 06h45: started snub
+d8 06h45: finished sleep (interrupted)
+d8 06h51: started play
+d8 06h51: finished snub (completed)
+d8 07h21: started compliment
+d8 07h21: finished play (completed)
+d8 07h33: started snub
+d8 07h33: finished compliment (completed)
+d8 07h40: started gossip
+d8 07h40: finished snub (completed)
+d8 07h58: started gossip
+d8 07h58: finished gossip (completed)
+d8 08h16: started compliment
+d8 08h16: finished gossip (completed)
+d8 08h29: started wander
+d8 08h29: finished compliment (completed)
+d8 08h59: started compliment
+d8 08h59: finished wander (completed)
+d8 09h11: started snub
+d8 09h11: finished compliment (completed)
+d8 09h17: started compliment
+d8 09h17: finished snub (completed)
+d8 12h21: started compliment
+d8 12h21: finished compliment (completed)
+d8 12h45: started compliment
+d8 12h45: finished compliment (completed)
+d8 12h57: started snub
+d8 12h57: finished compliment (completed)
+d8 13h03: started compliment
+d8 13h03: finished snub (completed)
+d8 13h16: started compliment
+d8 13h16: finished compliment (completed)
+d8 13h28: started snub
+d8 13h28: finished compliment (completed)
+d8 13h34: started eat
+d8 13h34: finished snub (completed)
+d8 15h41: started compliment
+d8 15h41: finished eat (completed)
+d8 15h54: started play
+d8 15h54: finished compliment (completed)
+d8 16h24: started gossip
+d8 16h24: finished play (completed)
+d8 16h42: started compliment
+d8 16h42: finished gossip (completed)
+d8 20h42: started gossip
+d8 20h42: finished compliment (interrupted)
+d8 21h01: started snub
+d8 21h01: finished gossip (completed)
+d8 21h07: started snub
+d8 21h07: finished snub (completed)
+d8 21h13: started compliment
+d8 21h13: finished snub (completed)
+d8 22h39: started sleep
+d8 22h39: finished compliment (completed)
+d9 02h39: started sleep
+d9 02h39: finished sleep (interrupted)
+d9 06h39: started gossip
+d9 06h39: finished sleep (interrupted)
+d9 06h57: started play
+d9 06h57: finished gossip (completed)
+d9 07h27: started compliment
+d9 07h27: finished play (completed)
+d9 07h40: started snub
+d9 07h40: finished compliment (completed)
+d9 07h59: started eat
+d9 07h59: finished snub (completed)
+d9 09h55: started snub
+d9 09h55: finished eat (completed)
+d9 10h19: started wander
+d9 10h19: finished snub (completed)
+d9 10h50: started snub
+d9 10h50: finished wander (completed)
+d9 10h56: started snub
+d9 10h56: finished snub (completed)
+d9 11h02: started gossip
+d9 11h02: finished snub (completed)
+d9 11h20: started gossip
+d9 11h20: finished gossip (completed)
+d9 11h39: started work
+d9 11h39: finished gossip (completed)
+d9 15h39: started gossip
+d9 15h39: finished work (interrupted)
+d9 15h57: started snub
+d9 15h57: finished gossip (completed)
+d9 16h03: started work
+d9 16h03: finished snub (completed)
+d9 20h04: started gossip
+d9 20h04: finished work (interrupted)
+d9 20h22: started play
+d9 20h22: finished gossip (completed)
+d9 20h52: started snub
+d9 20h52: finished play (completed)
+d9 20h58: started gossip
+d9 20h58: finished snub (completed)
+d9 21h17: started snub
+d9 21h17: finished gossip (completed)
+d9 21h23: started compliment
+d9 21h23: finished snub (completed)
+d9 21h35: started snub
+d9 21h35: finished compliment (completed)
+d9 21h42: started gossip
+d9 21h42: finished snub (completed)
+d9 22h00: started sleep
+d9 22h00: finished gossip (completed)
+d10 07h30: started gossip
+d10 07h30: finished sleep (completed)
+d10 07h48: started eat
+d10 07h48: finished gossip (completed)
+d10 11h48: started gossip
+d10 11h48: finished eat (interrupted)
+d10 12h07: started gossip
+d10 12h07: finished gossip (completed)
+d10 12h25: started compliment
+d10 12h25: finished gossip (completed)
+d10 12h58: started play
+d10 12h58: finished compliment (completed)
+d10 13h28: started eat
+d10 13h28: finished play (completed)
+d10 17h28: started compliment
+d10 17h28: finished eat (completed)
+d10 18h05: started snub
+d10 18h05: finished compliment (completed)
+d10 18h11: started compliment
+d10 18h11: finished snub (completed)
+d10 19h49: started compliment
+d10 19h49: finished compliment (completed)
+d10 21h14: started compliment
+d10 21h14: finished compliment (completed)
+d10 21h49: started relax
+d10 21h49: finished compliment (completed)
+d11 00h34: started sleep
+d11 00h34: finished relax (completed)
+d11 04h34: started sleep
+d11 04h34: finished sleep (interrupted)
+d11 08h34: started eat
+d11 08h34: finished sleep (interrupted)
+d11 10h36: started work
+d11 10h36: finished eat (completed)
+d11 14h36: started work
+d11 14h36: finished work (interrupted)
+d11 20h51: started relax
+d11 20h51: finished work (completed)
+d12 01h07: started sleep
+d12 01h07: finished relax (completed)
+d12 05h07: started sleep
+d12 05h07: finished sleep (interrupted)
+d12 16h39: started work
+d12 16h39: finished sleep (completed)
+d12 20h39: started snub
+d12 20h39: finished work (interrupted)
+d12 22h01: started sleep
+d12 22h01: finished snub (completed)
+d13 06h05: started play
+d13 06h05: finished sleep (completed)
+d13 06h36: started snub
+d13 06h36: finished play (completed)
+d13 09h08: started compliment
+d13 09h08: finished snub (completed)
+d13 09h21: started chat
+d13 09h21: finished compliment (completed)
+d13 09h39: started compliment
+d13 09h39: finished chat (completed)
+d13 13h39: started work
+d13 13h39: finished compliment (interrupted)
+d13 17h39: started chat
+d13 17h39: finished work (interrupted)
+d13 17h57: started play
+d13 17h57: finished chat (completed)
+d13 18h28: started snub
+d13 18h28: finished play (completed)
+d13 18h34: started compliment
+d13 18h34: finished snub (completed)
+d13 18h46: started eat
+d13 18h46: finished compliment (completed)
+d13 22h46: started sleep
+d13 22h46: finished eat (interrupted)
+d14 02h46: started sleep
+d14 02h46: finished sleep (interrupted)
+d14 06h47: started snub
+d14 06h47: finished sleep (interrupted)
+d14 06h53: started eat
+d14 06h53: finished snub (completed)
+d14 08h53: started compliment
+d14 08h53: finished eat (completed)
+d14 11h06: started chat
+d14 11h06: finished compliment (completed)
+d14 11h25: started work
+d14 11h25: finished chat (completed)
+d14 15h25: started chat
+d14 15h25: finished work (interrupted)
+d14 15h43: started gossip
+d14 15h43: finished chat (completed)
+d14 16h01: started wander
+d14 16h01: finished gossip (completed)
+d14 16h32: started compliment
+d14 16h32: finished wander (completed)
+d14 20h32: started gossip
+d14 20h32: finished compliment (interrupted)
+d14 20h50: started snub
+d14 20h50: finished gossip (completed)
+d14 20h56: started play
+d14 20h56: finished snub (completed)
+d14 21h27: started compliment
+d14 21h27: finished play (completed)
+d14 22h02: started sleep
+d14 22h02: finished compliment (completed)
+d15 06h27: started eat
+d15 06h27: finished sleep (completed)
+d15 10h27: started chat
+d15 10h27: finished eat (interrupted)
+d15 10h45: started play
+d15 10h45: finished chat (completed)
+d15 11h16: started gossip
+d15 11h16: finished play (completed)
+d15 11h34: started compliment
+d15 11h34: finished gossip (completed)
+d15 12h16: started snub
+d15 12h16: finished compliment (completed)
+d15 12h22: started compliment
+d15 12h22: finished snub (completed)
+d15 12h35: started compliment
+d15 12h35: finished compliment (completed)
+d15 12h47: started snub
+d15 12h47: finished compliment (completed)
+d15 12h53: started eat
+d15 12h53: finished snub (completed)
+d15 16h01: started work
+d15 16h01: finished eat (completed)
+d15 20h01: started compliment
+d15 20h01: finished work (interrupted)
+d15 21h37: started relax
+d15 21h37: finished compliment (completed)
+d15 23h56: started sleep
+d15 23h56: finished relax (completed)
+d16 03h56: started sleep
+d16 03h56: finished sleep (interrupted)
+d16 07h56: started snub
+d16 07h56: finished sleep (interrupted)
+d16 08h03: started chat
+d16 08h03: finished snub (completed)
+d16 08h21: started compliment
+d16 08h21: finished chat (completed)
+d16 08h33: started play
+d16 08h33: finished compliment (completed)
+d16 09h03: started compliment
+d16 09h03: finished play (completed)
+d16 09h16: started work
+d16 09h16: finished compliment (completed)
+d16 16h18: started gossip
+d16 16h18: finished work (completed)
+d16 16h36: started gossip
+d16 16h36: finished gossip (completed)
+d16 16h54: started compliment
+d16 16h54: finished gossip (completed)
+d16 17h06: started eat
+d16 17h06: finished compliment (completed)
+d16 19h48: started relax
+d16 19h48: finished eat (completed)
+d16 21h18: started gossip
+d16 21h18: finished relax (completed)
+d16 21h37: started compliment
+d16 21h37: finished gossip (completed)
+d16 23h42: started sleep
+d16 23h42: finished compliment (completed)
+d17 03h42: started sleep
+d17 03h42: finished sleep (interrupted)
+d17 07h43: started play
+d17 07h43: finished sleep (interrupted)
+d17 08h13: started eat
+d17 08h13: finished play (completed)
+d17 10h12: started work
+d17 10h12: finished eat (completed)
+d17 16h19: started work
+d17 16h19: finished work (completed)
+d17 20h19: started gossip
+d17 20h19: finished work (completed)
+d17 20h37: started relax
+d17 20h37: finished gossip (completed)
+d17 23h46: started sleep
+d17 23h46: finished relax (completed)

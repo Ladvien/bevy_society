@@ -7,10 +7,39 @@
 use bevy::ecs::name::Name;
 use bevy::prelude::*;
 use bevy_emerge_rng::{DetRng, seeded};
-use bevy_society::{Autonomous, Home, Person, Personality, Place, PlaceTags, SocietyDefs};
+#[cfg(feature = "steering")]
+use bevy_society::Obstacle;
+use bevy_society::{Autonomous, Home, Needs, Person, Personality, Place, PlaceTags, SocietyDefs};
 
 /// Half the ground's side, in metres.
-pub const GROUND_HALF: f32 = 20.0;
+///
+/// **40, not 20.** The camera has to cover the village plus `Wander(6.0)` of drift on every side, which
+/// is 27.6 x 19.6 m; a 40 m plane left its edge showing as a blue wedge in the top-left corner of the
+/// tie clip. At 80 m the plane is never in shot at any framing the demos use, and the sky is not.
+pub const GROUND_HALF: f32 = 40.0;
+
+/// Height of a place's stall, in metres. Low, so the crowd around it is the subject of the frame.
+pub const PLACE_HEIGHT: f32 = 1.2;
+
+/// Half-width of a place's stall, in metres.
+///
+/// **0.6 m, not 1.5.** A stall 3 m across could not be used at all: `interaction_radius` is 1.5 m, so
+/// a person had to stand within 1.5 m of the place's centre to be "arrived" — which is *inside* a 1.5 m
+/// half-width block. The two constraints were contradictory, so villagers were drawn standing in a
+/// building. At 1.2 m across, a person on the 1.1 m gather ring is outside the stall and within reach.
+pub const PLACE_HALF: f32 = 0.6;
+
+/// How far a walker is kept from a place's centre.
+///
+/// The stall's **corner** diagonal is `PLACE_HALF * sqrt(2) = 0.85 m`, and a body is 0.35 m, so 1.25 m
+/// is the smallest radius that keeps a capsule clear of the box at every angle. The old 0.95 m used the
+/// half-width rather than the corner, and a villager standing diagonally still overlapped it.
+#[cfg(feature = "steering")]
+pub const PLACE_REACH: f32 = 1.25;
+
+/// Radius of the ring villagers stand on around their place, in metres: outside the stall, and inside
+/// `interaction_radius` (1.5 m) so they start arrived and the duration is what limits an activity.
+pub const GATHER_RADIUS: f32 = 1.3;
 
 /// One village place: name, plane position, tags and how many may use it at once.
 pub const PLACES: &[(&str, Vec2, &[&str], u32)] = &[
@@ -21,10 +50,15 @@ pub const PLACES: &[(&str, Vec2, &[&str], u32)] = &[
 ];
 
 /// The three factions, one per column of villagers.
+///
+/// Chosen for **separation**, not taste. The old teal `(0.23, 0.65, 0.63)` and blue `(0.42, 0.48, 0.66)`
+/// differ by 0.19 in red and 0.17 in blue — close enough that under warm key light they read as one
+/// colour, and a viewer could not tell the weavers from the watch at the GIF's 720 px. These are spread
+/// across the hue circle (orange, green, violet) and stay distinct after a 256-colour palette.
 pub const FACTIONS: &[(&str, Color)] = &[
-    ("millers", Color::srgb(0.88, 0.69, 0.25)),
-    ("weavers", Color::srgb(0.23, 0.65, 0.63)),
-    ("watch", Color::srgb(0.42, 0.48, 0.66)),
+    ("millers", Color::srgb(0.95, 0.62, 0.10)),
+    ("weavers", Color::srgb(0.15, 0.72, 0.35)),
+    ("watch", Color::srgb(0.45, 0.30, 0.90)),
 ];
 
 /// The first villager's name, and the subject of the planted rumor. The rest follow from the list.
@@ -102,16 +136,23 @@ pub fn spawn_places(
     let mut out = Vec::with_capacity(PLACES.len());
     for (i, &(name, pos, tags, capacity)) in PLACES.iter().enumerate() {
         let material = materials.get(i).cloned().unwrap_or_default();
-        let height = 1.0 + 0.5 * capacity as f32;
+        // A low stall, not a tower. These used to be `1.0 + 0.5 * capacity` tall — up to 6 m for the
+        // tavern — and villagers stood *inside* them, so the README clips showed half-bodies emerging
+        // from a block. A 1.2 m stall reads as the thing a crowd has gathered around instead.
+        let height = PLACE_HEIGHT;
         out.push(
             commands
                 .spawn((
                     Name::new(name),
                     Place { capacity },
                     PlaceTags(tags.iter().map(|t| (*t).to_owned()).collect()),
-                    Mesh3d(meshes.add(Cuboid::new(3.0, height, 3.0))),
+                    Mesh3d(meshes.add(Cuboid::new(PLACE_HALF * 2.0, height, PLACE_HALF * 2.0))),
                     MeshMaterial3d(material),
                     Transform::from_xyz(pos.x, height / 2.0, pos.y),
+                    #[cfg(feature = "steering")]
+                    Obstacle {
+                        radius: PLACE_REACH,
+                    },
                 ))
                 .id(),
         );
@@ -129,7 +170,7 @@ pub fn spawn_villagers(
     meshes: &mut Assets<Mesh>,
     materials: &[Handle<StandardMaterial>],
     defs: &SocietyDefs,
-    home: Entity,
+    homes: &[Entity],
 ) -> Vec<Entity> {
     let capsule = meshes.add(Capsule3d::new(0.3, 1.2));
     let mut rng = seeded(VILLAGE_SEED);
@@ -146,8 +187,10 @@ pub fn spawn_villagers(
         // ticks and a 0.3 game-hour chat lasts 3 — nobody would ever arrive before their activity
         // ended. Starting arrived makes the duration the thing that limits an activity.
         let anchor = PLACES[column % PLACES.len()].1;
+        // **Outside** the stall, not on top of it. These used to stand 0.6 m from the place's centre
+        // while the place was a 3 m cube, so every villager was rendered inside a building.
         let angle = row as f32 * std::f32::consts::TAU / VILLAGERS_PER_FACTION as f32;
-        let pos = anchor + Vec2::new(0.6 * angle.cos(), 0.6 * angle.sin());
+        let pos = anchor + Vec2::new(GATHER_RADIUS * angle.cos(), GATHER_RADIUS * angle.sin());
         let honesty = if faction == "watch" {
             0.7
         } else {
@@ -163,7 +206,10 @@ pub fn spawn_villagers(
                 Name::new(*name),
                 Person,
                 Autonomous,
-                Home(home),
+                // Live at one place, work at another, so there is a commute to watch. All twenty-four
+                // used to live at the place they started at, which meant a person never had anywhere
+                // to go: measured, the clips showed the same clusters in every frame.
+                Home(homes[column % homes.len()]),
                 Transform::from_xyz(pos.x, 0.8, pos.y),
                 Mesh3d(capsule.clone()),
                 MeshMaterial3d(material),
@@ -199,6 +245,24 @@ pub fn spawn_player(
         .id()
 }
 
+/// Starts the demo's villagers **fed**.
+///
+/// The starter pack declares needs with no `initial`, so every person begins at 0.0 and the decision
+/// system has to claw its way up from nothing. A clip recorded after 3 800 settle ticks therefore opened
+/// with the whole village starving — the `needs` demo showed 24 identical red halos from its first frame
+/// to its last, which demonstrates a constant, not a scale.
+///
+/// Filling them at spawn means the clip opens fed and the need decays *during* the recording, so a viewer
+/// can watch hunger arrive. It changes only the demo's starting state, never the model.
+pub fn feed_villagers(
+    mut commands: Commands,
+    villagers: Query<Entity, (With<Autonomous>, Without<Needs>)>,
+) {
+    for entity in &villagers {
+        commands.entity(entity).insert(Needs(vec![0.85; 4]));
+    }
+}
+
 /// Builds the whole village. `materials` must already be built from the asset handles.
 pub fn build_village(
     commands: &mut Commands,
@@ -208,8 +272,10 @@ pub fn build_village(
 ) -> Village {
     spawn_ground(commands, meshes, materials.ground.clone());
     let places = spawn_places(commands, meshes, &materials.places);
-    let home = places.first().copied().unwrap_or(Entity::PLACEHOLDER);
-    let villagers = spawn_villagers(commands, meshes, &materials.factions, defs, home);
+    // Each faction's people live at **their own** place. All twenty-four used to share one `Home`
+    // while starting at their faction's place, so every sleep was a cross-village walk that could not
+    // be finished inside the travel timeout: measured, 25 interrupted sleeps against 4 completed.
+    let villagers = spawn_villagers(commands, meshes, &materials.factions, defs, &places);
     let player = spawn_player(commands, meshes, materials.player.clone());
     Village {
         player,

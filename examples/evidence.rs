@@ -429,7 +429,12 @@ fn village_with(app: &mut App, people: usize) -> World {
             .id()
     })
     .collect();
-    let home = places[0];
+    // Each faction's people live at **their own** place. Every villager used to share `places[0]`,
+    // while starting at their faction's place: so every sleep at Home was a cross-village walk that,
+    // at 64 s/day, could not be finished inside the 4-hour travel timeout. Measured on the resulting
+    // narrative: **25 interrupted sleeps against 4 completed**, each cut exactly four hours in and
+    // restarted. A home a person cannot reach is not a home.
+    let home_of = |column: usize| places[column % places.len()];
 
     let defs = app.world().resource::<SocietyDefs>().clone();
     let mut villagers = Vec::new();
@@ -472,7 +477,7 @@ fn village_with(app: &mut App, people: usize) -> World {
                 Person,
                 Autonomous,
                 Name::new(name.to_owned()),
-                Home(home),
+                Home(home_of(column)),
                 // 2.5 m spacing: a walk to a neighbour is ~110 ticks, not 640. The village is small
                 // enough that its people can actually reach each other inside a run.
                 // Start within `interaction_radius` of the faction's place: a walk is real-time

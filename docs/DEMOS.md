@@ -7,30 +7,55 @@
 
 | file | `--scene` | what it shows |
 |---|---|---|
-| `hero.gif` | `village` | every overlay: rumor rings, tie lines, HUD |
-| `mood.gif` | `mood` | PAD rings — colour is pleasure, radius is arousal |
-| `opinions.gif` | `opinions` | one opinion column per villager |
-| `needs.gif` | `needs` | food halos — full and green is fed, small and red is hungry |
-| `ties.gif` | `ties` | the tie graph alone |
-| `factions.gif` | `factions` | faction colours, no lines |
+| `village.gif` | `village` | the whole thing: rumor halos, tie lines, counters |
+| `mood.gif` | `mood` | mood halos — green pleased, amber neutral, red displeased; size is arousal |
+| `opinions.gif` | `opinions` | one opinion bar per villager on **honesty**: green high, red low |
+| `needs.gif` | `needs` | **hunger** halos — big green is fed, small red is hungry |
+| `ties.gif` | `ties` | the tie graph alone: green friendship, red rivalry |
+| `factions.gif` | `factions` | the three faction colours, no lines |
 
-All six are the same village, same seed and same run: `{"frames": 240, "rumor_reach": 0.880,
-"friends": 36, "rivals": 45, "barks": 2810}`. Only the overlay and the camera differ, which is the
-point — a feature clip is a different *view* of one simulation, not a different simulation.
+All six are the same village, same seed and the same run: `{"frames": 240, "rumor_reach": 0.520,
+"friends": 16, "rivals": 5, "barks": 959}`. Only what is drawn differs, which is the point — a feature
+clip is a different *view* of one simulation, not a different simulation.
 
-### Overlay scales are normalised to the measured range, not to [-1, 1]
+### The clips were rebuilt in 2026-11-28, and every one of them had been lying
 
-The first mood clip was a field of identical dull-olive rings: PAD in this village spans only about
-±0.4, so a full [-1, 1] colour scale maps every villager to the same colour. The scale is normalised
-to `MOOD_SPAN = 0.45`, which is measured (4 200 ticks: pleasure [-0.387, 0.382], arousal [-0.361,
-0.447], dominance [-0.413, 0.513]), and the opinion columns are normalised the same way. A clip whose
-overlay cannot distinguish anyone is not a clip of that feature.
+A visual review of the previous set found six separate faults. They are recorded because each has a
+shape a later change could reintroduce.
+
+| fault | what it looked like | cause |
+|---|---|---|
+| villagers inside the buildings | half a body emerging from a cream cube | places were 3 m cubes and villagers spawned **0.6 m** from their centres |
+| everyone bunched, never moved | the same clusters in every frame | a place's half-width was **1.5 m** and `interaction_radius` is **1.5 m** — being "arrived" required standing *inside* the block, so nobody ever walked |
+| the same again | no visible walking | `seconds_per_day = 8` made a **3 m walk cost 6.4 game-hours** against a 0.3-hour chat |
+| `needs` showed one colour | 24 identical red halos, first frame to last | the need's index was **1**, which is `rest`; `food` is 2 |
+| `opinions` showed one colour | all-green bars | topic index **0** is `kindness`; `honesty` is 1, and bars were drawn inside the capsule |
+| `village` showed no rumor | counters said 10/24, no halos | the ring read `RumorId(0)`, the first rumor the run made, not the planted one |
+| `factions` showed two colours | millers had walked out of shot | fixed camera, and `play` targets `Wander(6.0)` |
+
+Two of these changed the crate rather than the demo. **`Obstacle`** (`src/steering.rs`) is new: the
+component that says a thing is solid, fed to ORCA as a hard wall half-plane and backed by a resolver that
+pushes a walker out of it. Before it, `steer_movers` passed `&[]` for walls and the crate had no way to
+express a building at all. `examples/common/scene.rs` also gives each faction its own `Home`; all
+twenty-four shared one, which made every sleep a cross-village walk that timed out — measured, 25
+interrupted sleeps against 4 completed.
+
+### Overlay scales are normalised to the measured range, and the sign is the colour
+
+This village's PAD spans about ±0.4 and its opinions cluster within ±0.2 of neutral. A full [-1, 1] scale
+maps every villager to the same colour, so mood is normalised to `MOOD_SPAN = 0.45` (measured over 4 200
+ticks) and opinion to `OPINION_SPAN = 0.5`.
+
+Opinion bars are drawn **radially on the ground**, with the colour carrying the sign and the length the
+magnitude. A bar drawn from inside the capsule at waist height was occluded by the body it belonged to:
+11 046 negative bars were drawn per run and the clip rendered as though every villager were positive.
 
 ### Overlays draw above the mesh, not at ground level
 
-`MARK_HEIGHT` is 0.06 m. Rings and tie lines drawn there are hidden by the villager capsules and by
-the ground plane's depth: measured, the ties clip showed two short segments where the graph has
-hundreds of edges. Everything now draws at chest or head height.
+`MARK_HEIGHT` is 0.06 m. Rings and tie lines drawn there are hidden by the villager capsules and by the
+ground plane's depth: measured, the ties clip showed two short segments where the graph has hundreds of
+edges. Halos and ties therefore draw at chest or head height. Opinion bars are the exception and are
+drawn on the ground, because a bar needs its *length* in the camera's plane.
 
 ## Capture
 
@@ -97,33 +122,38 @@ therefore record the same run.
 
 ## Encode
 
-`tools/gif.sh` is the other half. It needs ImageMagick (`magick`) and the fonts named explicitly — a
-default font path exists on exactly one machine and fails after the whole encode has been spent.
+`tools/gif.py` is the other half, and it needs only **Pillow** — no ffmpeg, no ImageMagick. Both were
+absent on the machine that last rebuilt the clips, and `tools/gif.sh` failed *after* the frames had been
+rendered, twice. Pillow is already present wherever the evidence plots are made.
 
 ```
-FONT=/System/Library/Fonts/Supplemental/Arial.ttf \
-BOLD=/System/Library/Fonts/Supplemental/Arial\ Bold.ttf \
-WIDTH=640 FPS=60 STRIDE=2 \
-    bash tools/gif.sh frames/hero docs/media/hero.gif \
-    "bevy_society: one rumor, one village, one evening"
+python3 tools/gif.py frames/village docs/media/village.gif \
+    "a rumor spreads · ties form · relationships change"
 ```
 
-- Two-pass palette (`palettegen=max_colors=128`, `paletteuse=dither=bayer:bayer_scale=3`) so colours
-  do not shift between frames.
-- `STRIDE=2` keeps every other frame and `FPS=60` restores real-time speed, which halves the file for no
-  loss of information.
-- The caption is burned in with ImageMagick because this ffmpeg build has no `drawtext` filter. It sits
-  at the bottom centre with a thin black stroke: the scene's own HUD owns the top-left, and a caption
-  there covered it.
+Optional positional arguments after the caption: `width` (720), `stride` (1), `fps` (30).
 
-`ffmpeg` and `magick` are not installed on every host; they are on `big`, so the encode runs there:
+- **One palette for the whole clip**, `256` colours, built by adaptively quantizing the first frame. Two
+  wrong versions preceded it: a vertical montage of eight sample frames produced a palette dominated by
+  grass and turned every faction grey-green, and 128 colours compressed the amber/teal/blue faction
+  capsules into one another. A demo whose subject is colour needs the format's full depth.
+- The caption is burned into a 30 px strip below the frame. It is the *only* place the scene's name
+  appears: the in-scene HUD carried it as well, which cost a third line of the plate and covered the
+  village.
+- A fixed palette and fixed dither mean two clips a week apart are comparable; a palette change between
+  runs would look like a visual difference no code change caused.
 
-```
-rsync -az frames/hero/ big:/tmp/bevy_society_hero/
-scp tools/gif.sh big:/tmp/bevy_society_gif.sh
-ssh big 'bash /tmp/bevy_society_gif.sh'   # with FONT/BOLD/WIDTH/FPS/STRIDE exported
-scp big:/tmp/bevy_society_hero.gif docs/media/hero.gif
-```
+### Framing
+
+The camera is computed per frame from **where the crowd actually is** (`scenes::crowd`): the mean of the
+living villagers' positions and their maximum spread, with `reach = spread * 2.7` clamped to
+`[14.5, 27.0]` metres of height. A fixed frame lost a faction as soon as it wandered — `play` targets
+`Wander(6.0)` — and measured, the `factions` clip showed two colours while claiming three. The ground
+plane is 80 m across so its edge never enters shot.
+
+Three earlier framings, all wrong, in the order tried: 7.2 m out at 6.2 m up (two nearest stalls filled
+the frame, bottom edge cut people off); 11 m out at 8 m up (the far faction left the top, a third of the
+frame was empty grass); 24 m out (everything visible but every villager 8 px tall).
 
 Fonts per host:
 
@@ -141,25 +171,25 @@ determinism and that is a bug, not a rendering difference.
 
 ## Visual check
 
-**Coalesce before you look.** `tools/gif.sh` writes with `-layers optimize`, which stores later frames
-as partial rectangles (`640x311+0+49`). Extracting one frame with `magick file.gif[N]` yields a
-corrupted image — that is the extractor, not the GIF. Use `magick file.gif -coalesce out_%03d.png`.
+**Look at frames 0, 120 and the last one, for every clip, before committing.** `tools/gif.py` writes a
+plain full-frame GIF, so any image viewer or `read` can open it directly — no coalescing step needed.
 
-Before committing a new GIF, look at frames 0, 120 and the last one **after coalescing**. Each must show:
+Each frame must show:
 
 - faction colours that tell villagers apart at a glance;
 - legible balloons, with no clipped text;
 - the HUD (`Day n · hh:mm`, the rumor's reach, friendships and rivalries);
-- rumor rings appearing only after frame 30 and spreading;
-- tie lines;
-- a first frame that is not blank;
-- the scene's own overlay legible as the thing it names — for `mood`, rings that differ in colour *and*
-  size between villagers; for `opinions`, columns that differ in height; for `ties`, a graph rather
-  than a handful of segments.
+- rumor halos appearing only after frame 30 and spreading;
+- the scene's own overlay legible as the thing it names — for `mood`, halos that differ in colour *and*
+  size between villagers; for `opinions`, bars that differ in **both** colour and length; for `needs`,
+  halos that visibly shrink over the clip; for `ties`, a graph rather than a handful of segments;
+- **no villager intersecting a stall**, and nobody standing inside one;
+- all three factions in frame at every moment, not just at the start.
 
-Last checked 2026-11-10, all six clips, frames 0 / 120 / 239: HUD plate legible over grass and over
-night sky, captions correct, every overlay distinguishing at least two villagers, no blank first
-frame. The `factions` clip deliberately carries no tie lines, so its three colours are the only thing
+Last checked 2026-11-28, all six clips, frames 0 / 120 / 239: HUD plate legible over the grass in
+constant daylight (the clips no longer follow the clock — the last third of every one went dark blue and
+the feature became unreadable), captions correct, every overlay distinguishing at least two villagers, no
+blank first frame, no villager inside a stall. The `factions` clip deliberately carries no tie lines, so its three colours are the only thing
 on screen.
 
 Any failure is a scene bug: fix `examples/common/scene.rs` or `visuals.rs` and capture again. Do not
