@@ -50,10 +50,22 @@ scenarios:
     settings: { seconds_per_day: 64.0, start_hour: 15.0, contact_radius: 4.0, travel_timeout_hours: 12.0 }
     ticks: 1200
     status: pending
+    test: tests/cluster_reach.rs
     observable: >
       With the two groups 40 m apart and one person from each group brought together once, a rumor
       planted in the first group reaches at least 40% of the second group. Zero reach means gossip
       cannot cross a gap; instant reach means it teleports.
+      (Measured 2026-12-07: **0 of 6 at 64 s/day and 0 of 6 at 240**, over the same game-days. Every
+      layer was checked and works — steering walks at 1.4 m/s, 359 948 person-ticks of movement, a bridge
+      place chosen for 36 489, 6 720 ticks arrived, 434 ticks with both groups arrived, and one person
+      seeing two of the other group at **2.89 m** — and the count of cross-group interactions is **0**.
+      The cause: **an exchange fires on *arrival*, once.** Two people placed together in the smallest case
+      give 39 interactions over 20 000 ticks, so the mechanism is sound; but a pair that arrives at tick
+      100 and tick 500 shares 400 ticks of standing together and shares no arrival. They arrive hours
+      apart by construction, because a 20 m walk is 5.4 game-hours against a 0.75-hour activity. The crate
+      can see the groups and cannot exchange between them. `tests/cluster_reach.rs` pins the measurement so
+      the scenario cannot be marked `measured` on a number nobody checked, and
+      `needs-decision/how-can-two-groups-ever-meet.md` records the three options.)
       (Measured 2026-11-20: **0.333 at a 12-hour travel timeout and 0.167 at 20** — both below the 40%
       this asks for, and the earlier 0.583 was recorded before `contact_radius` was being applied, so it
       was a different run. The scenario is `pending` until the crossing works or the observable is

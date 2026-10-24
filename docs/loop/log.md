@@ -2621,3 +2621,55 @@ documents, three claims, none agreeing — now one claim, measured).
 4. **`rumor-crosses-a-cluster`** - the last `pending` scenario: 0.333 against the 40% it asserts.
 5. **Mood is still negative at every seed** (-0.046 to -0.054), now limited by the frequency of refusal and
    insult rather than by any single term.
+
+## 2026-12-07-01 - Two groups can see each other and cannot meet
+
+**Pick.** The last `pending` scenario, and the third iteration in a row on a claim nobody had checked.
+Runner-up was `Doing`'s travelling semantics, escalated.
+
+**The claim.** With two groups 40 m apart and *"one person from each brought together once"*, a rumor reaches
+40% of the second group. Measured: **0 of 6** at 64 s/day, **0 of 6** at 240.
+
+**Six layers, all working, outcome zero.**
+
+| layer | measured |
+|---|---|
+| steering in isolation | −1.4 m/s, walked 2.0 → 0.731 m |
+| movement in the cluster | **359 948** person-ticks moved |
+| a bridge place chosen | **36 489** person-ticks |
+| arriving at it | **6 720** person-ticks |
+| both groups arrived at once | **434 ticks** |
+| cross-group visibility | **2.89 m** |
+| cross-group interactions | **0** |
+
+**The cause.** An exchange fires **on *arrival*, once**. Two people placed together give **39 interactions**
+over 20 000 ticks, so the mechanism is sound; but a pair arriving at tick 100 and 500 shares 400 ticks of
+standing together and shares no arrival. They arrive hours apart by construction: a 20 m walk is **5.4
+game-hours** against a **0.75-hour** activity. That is `travel-time-in-two-clocks.md` producing an observable
+outcome for the first time.
+
+**Two fixes tried, measured, discarded.** A crossroads carrying `gathering` left the reach at 0.167 —
+`Place` targets pick the *nearest* match and each hearth is 2 m away. A market with a tag the hearths lack was
+chosen for 36 489 ticks and still reached 0 of 6.
+
+**Change.** `tests/cluster_reach.rs` measures the second group of six (not `rumor_reach`, which divides by
+twelve) and **asserts the current failure**, so marking the scenario `measured` requires deleting that line
+deliberately. `scenarios.yaml` records the measurement, the cause and its test. Decision file
+`how-can-two-groups-ever-meet.md` records the three options. **No crate code changed.**
+
+**Verdicts.** Three GREAT for the investigation; the scenario **fails**, asserted at two clocks. Nothing was
+marked `measured` on a number nobody checked.
+
+**Dead-code delta.** Zero. **Scenarios with no test:** zero, where there were two at the start of this audit.
+
+**Commit** `pending`.
+
+**Top 5 remaining.**
+
+1. **An exchange happens on arrival, not on contact.** The root cause above: two people sharing a place for
+   hundreds of ticks never exchange unless one happens to arrive. A contact-triggered exchange with a cooldown
+   is a real model change and the only thing that makes a shared place mean anything.
+2. **`Doing` names the target activity while travelling** - 49.8% of person-ticks; host-facing, escalated.
+3. **The clock decision** - now with an observable outcome: 5.4-hour walks against 0.75-hour activities.
+4. **The harness's plant tick is thirty times the file's** - documented, still two numbers.
+5. **Mood is still negative at every seed** (-0.046 to -0.054), limited by refusal and insult frequency.
