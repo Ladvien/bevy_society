@@ -52,7 +52,8 @@ impl Default for SocialMover {
 #[reflect(Component)]
 pub struct SocialVelocity(pub Vec2);
 
-/// Adds ORCA steering for [`SocialMover`]s. Requires [`SocietyCorePlugin`] (or `SocietyPlugins`).
+/// Adds ORCA steering for [`SocialMover`]s. Requires [`crate::SocietyCorePlugin`] (or
+/// [`crate::SocietyPlugins`]).
 ///
 /// Steering runs in `FixedUpdate` after [`SocietySystems::Rules`] on every fixed step, not only on
 /// society ticks, so motion stays smooth while the simulation ticks slowly.
