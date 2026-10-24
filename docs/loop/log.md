@@ -901,3 +901,67 @@ known-broken.
 3. **The two-clocks decision** — still the only cause of need starvation in a real layout.
 4. **The village's rumor origin** — reaches 1/24; an arbitrary villager cannot be the town crier.
 5. **`Field` / `Gradient` wiring** — unchanged.
+
+## 2026-11-08-01 — A host can now ask why
+
+**Pick.** The brief's own word **explainable**, which had no implementation: `Doing` says what a person
+is doing; nothing said what else it weighed or by how much. Beat the runner-up (last iteration's
+back-to-back sleep blocker) on one sentence: **that blocker was my test's own definition, not the
+crate's.**
+
+**Correction to the previous iteration.** The starter pack's `sleep` is gated `Hours(22·6)` and ranked 1,
+so one person sleeps **once per day** — measured, 10 sleeps in 10.1 days. Last iteration's "29 back-to-back
+sleeps in 20 000 ticks" came from a test definition with no hour gate and no rank. `need-cycle`'s
+observable is still not met by the shipped rates, but the cause is the rate balance, not a loop.
+
+**Change.** `DecisionTrace`: an opt-in ring of the last N decisions, each recording every option that
+scored, best first, with the winner marked. Built to the three constraints Game AI Pro 3 ch. 6 puts on
+a recorder:
+
+| Constraint (quoted from the chapter) | How it is met |
+|---|---|
+| "no impact on the outcome of simulating objects" | asserted: the same seed gives an **identical sequence of choices** with and without the trace |
+| "the memory requirements of the system must be fixed" | a ring of `capacity`, oldest dropped; 2 holds exactly 2, 8 holds exactly 8 after 4 000 ticks |
+| "minimal to no impact on the speed of the game simulation" | **15.16 ms/tick with it, 15.28 without** at 1 000 people |
+
+**The mistake the feature caught in itself.** The first closeness measure was
+`(chosen − next-in-sorted-list) / chosen`, and the village printed **`margin -0.33`** — impossible for a
+"fraction better". Selection is Dill's **weighted draw** over the viable tier, so the chosen option is
+often not the best: that village line picked the **sixth-best of six**. Replaced with `shortfall`
+against the best score; four unit tests pin it.
+
+**What it looks like.** From `evidence/village/why.txt`, seed 7, tick 4147:
+
+```
+# tick 4147: someone chose compliment (0.752), 25% below snub (1.000)
+
+ 1.000  snub
+ 1.000  relax
+ 1.000  wander
+ 0.971  eat
+ 0.912  chat
+ 0.752  compliment   <- chosen
+```
+
+Six options weighed, the lowest chosen, and every number invisible before this iteration. "someone"
+because the entity had despawned — which is why the trace copies names when it can and `describe`
+accepts a name list from the caller.
+
+**Tests.** 25 → **26** binaries both feature sets (7 new: 3 integration, 4 unit). Dead-code inventory:
+zero — the module is public and exercised by all seven.
+
+**Verdicts.** Behaviour GREAT (identical outcome with and without the recorder; options and scores
+readable). Zoom GREAT — the first output's negative margin was caught by reading it, not by reasoning.
+Fresh eyes GREAT — a host can say why, in one sentence, from data the crate now produces.
+
+**Commit.** `509a57d`.
+
+**Top 5 remaining.**
+1. **`need-cycle`'s rate balance** — the observable is still unmet by the shipped rates; the blocker note
+   is now wrong about the cause and should be re-measured against the starter pack's real definitions.
+2. **Retire untellable rumors** — 93% of the book cannot spread; a 4× cost growth over 3 000 ticks.
+   `needs-decision/retiring-untellable-rumors.md`.
+3. **The two-clocks decision** — still the only cause of need starvation in a real layout.
+4. **The village's rumor origin** — reaches 1/24; an arbitrary villager cannot be the town crier.
+5. **The trace hides the tier rule** — `why.txt` shows the scores but not that they were cut to a rank
+   tier and drawn by weight; a host reading only the table misses why a lower scorer can win.
