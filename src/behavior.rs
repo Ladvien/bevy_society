@@ -648,12 +648,19 @@ fn in_perception(
 // Deciding
 // -------------------------------------------------------------------------------------------------
 
-/// One place as a decision sees it (plan D7): its tag set and how full it is.
+/// One place as a decision sees it (plan D7): its tag set, how full it is, and **where it is**.
+///
+/// The position is what makes [`Signal::Distance`] meaningful for a `Place`. Without it the signal reported
+/// `1.0` — the maximum, "as far as it can see" — for every place, so a definition that asked for `Distance`
+/// on a `Place` target scored `0` and the activity could never be chosen. Measured: adding
+/// `Distance Linear(-1, 1)` to the starter pack's `eat` took `food` from a mean of 0.402 to **0.034**, at
+/// zero 93% of the time. The activity was not made travel-aware; it was disabled.
 struct PlaceView {
     entity: Entity,
     tags: Vec<String>,
     capacity: u32,
     used: u32,
+    position: Vec2,
 }
 
 /// Everything scoring one candidate needs, copied out of the world once per decision (plan D7).
@@ -669,6 +676,9 @@ struct Decision {
     ties: Vec<crate::relationships::Tie>,
     /// Neighbours with their plane positions, for `Distance`.
     near: Vec<(Entity, Vec2)>,
+    /// Places with their plane positions, so `Distance` works for a `Place` target too. Without these the
+    /// signal reported the maximum for every place, which silently disabled any activity targeting one.
+    place_positions: Vec<(Entity, Vec2)>,
     /// The person's close ties at the tick start, for `SocialProof`.
     close_ties: Vec<Entity>,
     /// What each close tie is doing, so `SocialProof` can count who else chose this activity.
@@ -731,7 +741,7 @@ fn decide_activities(
     mut rng: ResMut<crate::SocietyRng>,
     mut commands: Commands,
     people: Query<Decider>,
-    places: Query<(Entity, &crate::Place, &crate::PlaceTags)>,
+    places: Query<(Entity, &crate::Place, &crate::PlaceTags, &Transform)>,
     doing: Query<&Doing>,
     autonomous: Query<(), With<crate::Autonomous>>,
     mut started: MessageWriter<ActivityStarted>,
@@ -763,7 +773,7 @@ fn decide_activities(
     }
     let mut place_views: Vec<PlaceView> = places
         .iter()
-        .map(|(entity, place, tags)| PlaceView {
+        .map(|(entity, place, tags, transform)| PlaceView {
             entity,
             tags: tags.0.clone(),
             capacity: place.capacity,
@@ -771,6 +781,7 @@ fn decide_activities(
                 .iter()
                 .find(|(p, _)| *p == entity)
                 .map_or(0, |(_, n)| *n),
+            position: settings.plane.project(transform.translation),
         })
         .collect();
     place_views.sort_by_key(|p| p.entity.to_bits());
@@ -849,7 +860,12 @@ fn decide_activities(
             }
         }
 
+        let place_positions: Vec<(Entity, Vec2)> = place_views
+            .iter()
+            .map(|view| (view.entity, view.position))
+            .collect();
         let decision = Decision {
+            place_positions,
             position,
             needs: needs.0.clone(),
             personality: *personality,
@@ -1309,9 +1325,14 @@ fn signal_value(
                     .iter()
                     .find(|(e, _)| *e == other)
                     .map(|(_, p)| *p),
-                // A place or point is somewhere in the world; without its position in the decision
-                // the honest value is "as far as it can see", not a confident zero.
-                DoingTarget::Place(_) | DoingTarget::Point(_) | DoingTarget::Itself => None,
+                DoingTarget::Place(place) => decision
+                    .place_positions
+                    .iter()
+                    .find(|(e, _)| *e == place)
+                    .map(|(_, p)| *p),
+                // A `Point` is chosen by `Wander` and has no entry in the place list; `Itself` is the
+                // actor's own position, which is not what a distance consideration is asking about.
+                DoingTarget::Point(_) | DoingTarget::Itself => None,
             };
             there.map_or(1.0, |p| {
                 (decision.position.distance(p) / decision.perception_radius).min(1.0)

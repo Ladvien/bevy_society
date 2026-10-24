@@ -2,7 +2,7 @@
 
 ## What bevy_society does
 
-Each person has needs, scalars in `[0, 1]` that the definition file names and that scripts can move (`fx.need` clamps to `[0, 1]`). A person chooses an activity by scoring the activities on offer. Each activity has considerations: an input signal read from the person, the world or a tie, passed through a response curve to give a factor in `[0, 1]`. The factors combine into one score. The chosen activity is the highest-scoring one, sampled with the crate's deterministic RNG. **Status:** the response curves are on HEAD (`src/model/curves.rs`). The decision system, the combination rule and the compensation step are specified for D7 and are **not on HEAD `1b559ca`**; `src/behavior.rs` holds only the data types (`Doing`, `DoingTarget`, `Destination`). This note describes them as specified, and it says so wherever it applies.
+Each person has needs, scalars in `[0, 1]` that the definition file names and that scripts can move (`fx.need` clamps to `[0, 1]`). A person chooses an activity by scoring the activities on offer. Each activity has considerations: an input signal read from the person, the world or a tie, passed through a response curve to give a factor in `[0, 1]`. The factors combine into one score. The chosen activity is the highest-scoring one, sampled with the crate's deterministic RNG. **Status:** the response curves are on HEAD (`src/model/curves.rs`) and the decision system (`src/behavior.rs`: `decide`, `arrive`, the exchange) is on HEAD, with the combination rule and compensation step as described here. This note describes them as specified, and it says so wherever it applies.
 
 ## Equations as implemented
 
@@ -13,7 +13,8 @@ Each person has needs, scalars in `[0, 1]` that the definition file names and th
   - `Step(at)`: 1 when `x ≥ at`, else 0.
   - `Hours(from, to)`: 1 inside the hour window `[from, to)`, wrapping past midnight when `from > to`. Input is `h / 24`.
 - Compensation (specified for D7, not on HEAD): `s′ = s + (1 − s) · (1 − 1/n) · s`, where `s` is the combined score and `n` the number of considerations. Design choice: Game AI Pro 3 ch. 13 multiplies raw scores; compensation keeps many-consideration activities comparable (see the decision below).
-- Social proof (specified for D7): the share of close ties whose current activity matches, or 0 with no close ties.
+- Social proof: the share of close ties whose current activity matches, or 0 with no close ties.
+- `Distance`: for a `Person` target, `distance / perception_radius`, clamped to 1. For a **`Place`** it is the same quantity from that place's position — added 2026-11-23, because until then a `Place` reported `1.0` (the maximum) and any definition asking for `Distance` on one scored it at 0 under `Linear(-1, 1)`, silently disabling the activity. `Point` (a `Wander` destination, not in the place list) and `Itself` (the actor's own position) still report the maximum, and the source comment says why each is genuinely unknown. Measured: `eat` in the starter pack, `food` mean **0.402 → 0.034** with the broken input and **0.176** with it fixed. The **curve** is the open question, not the input: `Linear(-1.0, 1.0)` scores a tavern 6.5 m away inside an 8 m radius at **0.19**, too harsh for a daily destination (see `docs/loop/needs-decision/travel-cost-is-not-scored.md`).
 
 ## Why these defaults
 

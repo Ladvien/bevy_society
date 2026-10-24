@@ -71,6 +71,28 @@ a fair trade, and a small one. The bigger lever is the **decision**, not the pac
 near place over a far one for the same activity, and today `Place` targets offer one candidate per matching
 place with no distance in the score.
 
+## Blocker resolved 2026-11-23: `Distance` now works for a `Place`
+
+The options below all assumed a place could report its distance. It could not: `Signal::Distance` returned
+`1.0` for every `Place` and `Point`, because `PlaceView` carried no position. `Linear(-1, 1)` at 1.0 is
+exactly 0, so the obvious line **disabled** the activity:
+
+| | `food` mean | at zero |
+|---|---|---|
+| no `Distance` on `eat` | 0.402 | 0% |
+| `Distance Linear(-1, 1)` | **0.034** | **93%** |
+
+`PlaceView::position` and `Decision::place_positions` fix that: both taverns in one run, 1 m and 7 m, now
+give **5 999 / 0** instead of **0 / 0**. Behaviour with the shipped pack is unchanged — all 67 199 series
+rows identical — because nothing in it asks for `Distance` on a `Place`.
+
+What remains is the **curve**. With the signal correct, `eat` + `Distance Linear(-1, 1)` still leaves `food`
+at 0.176 against its 0.402 baseline, because a tavern 6.5 m away inside an 8 m perception radius scores
+**0.19**. A steep linear decay across the whole perception radius is too harsh for a destination a person
+walks to once a day. Choosing the shape — a shallower `Linear(-0.4, 1.0)`, a `Logistic`, or a term computed
+from `duration / (duration + walk)` as option 2 suggested — is the open question, and it is now answerable
+because the input is real.
+
 ## What ships now
 
 | item | state |
