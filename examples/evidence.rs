@@ -25,8 +25,8 @@ use bevy::prelude::{Entity, MinimalPlugins, Transform, TransformPlugin, Vec2};
 use bevy::time::TimeUpdateStrategy;
 use bevy_society::{
     ActivityEnded, ActivityStarted, Autonomous, Doing, Home, InteractionResolved, Knowledge, Mood,
-    Needs, Opinions, Person, Place, PlaceTags, PlantRumor, RumorBook, SocietyClock,
-    SocietyDefs, SocietyPlugins, SocietySettings, TieLabel, Ties,
+    Needs, Opinions, Person, Place, PlaceTags, PlantRumor, RumorBook, SocietyClock, SocietyDefs,
+    SocietyPlugins, SocietySettings, TieLabel, Ties,
 };
 use std::collections::BTreeMap;
 use std::fmt::Write as _;
