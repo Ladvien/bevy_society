@@ -221,3 +221,67 @@ the same definitions, so the model has more than one attractor.
    largest host-ergonomics tax.
 4. `Signal::Field` / `Gradient` — Moussaïd 2011 needs re-converting.
 5. `scale-1000` perf.
+
+## 2026-10-28-01 — The hostility runaway was three things, and damping was not one of them
+
+**Why.** The log's #1 was hostility saturation, which the previous review returned NOT YET on:
+affinity pinned at −1.0 with `affinity_relax_per_day = 0.01` unable to damp it. The obvious move —
+raise relaxation, or floor the deed's weight — would have tuned a symptom.
+
+**Finding.** Reproduced the runaway first: twelve strangers, mean affinity −0.047 → **−0.960**
+across 2000 ticks, monotone, 130 of 132 ties below −0.4. Then measured the mechanism, which was
+three separable causes:
+
+1. **`chat` could never run.** The census showed only gossip (5) and snub (7) ever chosen —
+   `chat` ran **zero times in 2000 ticks**. `chat`'s `Need(social) Linear(-1, 1)` scores 0.0 at a
+   full need, and `gossip` self-supplies that need, so chat's own gate never opened. The cluster
+   scenario also gave its people no places, leaving Person targets as the only options.
+2. **`snub`'s slope saturated.** `Linear(2.5, 0)` reaches 1.0 at grudge 0.4, which one witnessed
+   insult exceeds. Now `Linear(1.0, 0)`.
+3. **The harness ran a 60× shorter day than the definitions assume.** A 0.1-hour `snub` lasted
+   **1.07 ticks**, so people re-decided every tick and repeated the best option: 38 snubs per
+   person per game-day. The village branch also carried a `240.0` its own comment contradicted,
+   so `village-evening` was spanning 17 days by accident and the cluster 19.
+
+**The uncomfortable part.** Cause 3 means every "before → after" rival count in the previous
+iteration's log compared runs of different simulated lengths. The apparatus was wrong, it was
+mine, and it is recorded here so those entries are not read as comparable.
+
+**What the literature said, and why no damping was added.** Searched de-escalation, forgiveness
+and negative influence. **Takács, Flache & Mäs 2016** (*Discrepancy and Disliking Do Not Induce
+Negative Opinion Shifts*, `10.1371_journal.pone.0157948`) was **downloaded and converted this
+iteration** (21 pages, 121 s). Its result: **negative influence is not empirically supported** —
+people do not shift away from those they dislike, they stop being influenced by them. Damping is
+therefore not a rule to add to the influence model; it lives in *who one chooses to interact
+with*, which is the decision layer the hearth addresses.
+
+**Evidence.** `runs/2026-10-28-01/evidence/` and `eval.md`.
+
+**Before → after** (crowd of 12, same seed):
+
+| | before | after |
+|---|---|---|
+| distinct activities in play | 2 | **5** |
+| mean affinity at t=1200 | −0.899 | **−0.674** |
+| ties below −0.4 at t=1200 | 123 | **12 of 132** |
+
+**Dead-code inventory.** Unchanged at zero.
+
+**Verdicts.** Behaviour GREAT — the monopoly is broken and five activities appear; `chat` at 1 is
+recorded separately as still nearly unreachable. Zoom GREAT — the residual downward trend is
+justified against a converted paper rather than tuned away. Fresh eyes GREAT — three scenarios now
+give three distinct societies (110/0, 1/12, 2/8 friends/rivals), and the harness's own day-length
+defect surfaced.
+
+**Commit.** See `git log`.
+
+**Top 5 remaining.**
+1. `chat` is nearly unreachable: `Need(social) Linear(-1, 1)` scores 0 at a full need while gossip
+   self-supplies it. Either the gate's curve or the `satisfies` balance needs work.
+2. Durations do not scale with the day: every social activity is 1–3 ticks at a 4-second day. A
+   `duration_ticks` field, or documenting that `seconds_per_day` and durations must be set
+   together, is the honest fix.
+3. **The clock decision** (`travel_timeout_hours` real-time) — escalated, still open, now
+   implicated in three iterations' findings.
+4. `Signal::Field` / `Gradient` — Moussaïd 2011 needs re-converting.
+5. `scale-1000` perf.

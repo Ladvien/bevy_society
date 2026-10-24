@@ -29,7 +29,7 @@ scenarios:
     kind: cluster
     seed: 11
     population: 12
-    settings: { seconds_per_day: 64.0, start_hour: 15.0, contact_radius: 4.0 }
+    settings: { seconds_per_day: 4.0, start_hour: 15.0, contact_radius: 4.0 }
     ticks: 1200
     status: measured
     observable: >
