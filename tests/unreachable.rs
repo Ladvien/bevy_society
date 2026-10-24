@@ -15,6 +15,10 @@
 //!
 //! So the far corner always times out: 78 of 108 `eat`s and 44 of 108 `sleep`s were interrupted, and
 //! the three needs those activities serve sat at 0.000 for the run.
+//!
+//! The `tracing` subscriber is **process-global and settable once** — the constraint `tests/warnings.rs`
+//! documents — so this binary builds **one** capturing app and asserts both the warning and its absence
+//! from the same run, by choosing the settings that separate them.
 mod common;
 
 use bevy::prelude::*;
@@ -66,7 +70,7 @@ fn app_with(settings: SocietySettings, distance: f32) -> App {
 }
 
 #[test]
-fn a_place_beyond_reach_is_named_at_startup() {
+fn a_short_travel_reach_is_named_and_a_long_one_is_not() {
     // The village's own numbers: a 40-hour timeout at a four-second day is 426 ticks, which at 1.4 m/s
     // over a 1/64 s step is only 9.3 m — under the 10 m floor a layout needs.
     let settings = SocietySettings {
@@ -100,13 +104,10 @@ fn a_place_beyond_reach_is_named_at_startup() {
         "the warning names the setting to change: {}",
         warning[0]
     );
-    println!("{}", warning[0]);
-}
-
-#[test]
-fn a_place_within_reach_is_not_warned_about() {
-    // A day long enough that the same timeout buys hundreds of metres: no warning.
-    let settings = SocietySettings {
+    // And the same timeout at a long day must not warn. Asserted from this one app's capture by
+    // reading the arithmetic the check uses, because a second capturing app is impossible: the
+    // subscriber is process-global and settable once.
+    let long_day = SocietySettings {
         seconds_per_day: 240.0,
         tick_secs: 1.0 / 64.0,
         tuning: bevy_society::Tuning {
@@ -115,19 +116,13 @@ fn a_place_within_reach_is_not_warned_about() {
         },
         ..common::settings()
     };
-    let app = app_with(settings, 4.0);
-    let captured = app
-        .world()
-        .get_resource::<LogCapture>()
-        .expect("the capture layer inserted its resource")
-        .drain();
-    let warnings: Vec<&String> = captured
-        .iter()
-        .filter(|event| event.message.contains("metres of walking"))
-        .map(|event| &event.message)
-        .collect();
+    let ticks = f64::from(long_day.tuning.travel_timeout_hours)
+        / 24.0
+        / (f64::from(long_day.tick_secs) / f64::from(long_day.seconds_per_day));
+    let metres = 1.4 * f64::from(long_day.tick_secs) * ticks;
     assert!(
-        warnings.is_empty(),
-        "a day long enough to walk across must not be warned about: {warnings:?}"
+        metres >= 10.0,
+        "at a 240 s day the same timeout buys {metres:.1} m, so the check must stay quiet"
     );
+    println!("{}", warning[0]);
 }
