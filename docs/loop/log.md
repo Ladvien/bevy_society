@@ -615,3 +615,78 @@ need satisfaction, which is worse at 40 people than at 24, with numbers.
 3. **Rumor reach frozen after tick 59** — should stifle (Daley–Kendall), not flat-line.
 4. **`Field` / `Gradient` wiring** — unchanged, four measured facts recorded.
 5. **`warn_unscored_fields` says "1 definitions"** — plural helper.
+
+## 2026-11-04-01 — A start message a host could never have seen
+
+**Pick.** Last iteration's #1: the `ActivityStarted` / `ActivityEnded` asymmetry. Not the more visible
+need starvation, on one sentence: **a starved need is a tuning problem, an unpaired message is a
+broken contract.** Every host-facing consumer reads an end as the close of something it was told about.
+
+**Cause.** `Doing::started_day` is documented as *the day the activity started* and is stamped at
+decision, in the same `insert(Doing { .. })` the message accompanies. The message was out of step:
+`decide` wrote `ActivityStarted` only when `in_place`, which is hardcoded `false` for every decided
+activity, so a start waited for arrival — while `end_activities` wrote an end for **any** removed
+`Doing`, including a travel timeout.
+
+**Reproduction, and the number the iteration turns on.** One person, one place 50 m away, no steering
+plugin, so nothing ever arrives:
+
+| | starts | ends |
+|---|---|---|
+| before | **2** | **55** |
+| after | 150 | 149 (one in flight) |
+
+At 40 people: 23 745 / 26 412 before, 1 419 / 1 411 after, all completed. In the narrative the review
+gate requires, counting lines: `started` 14 vs `finished` **18** before; 27/26 and 22/21 after.
+
+**Change.** `decide` writes the start for every activity it picks; `arrive_and_satisfy` stops writing
+one (and loses the parameter, so it cannot). Arrival keeps its own meaning: `Doing::arrived_day`
+begins the duration and the `satisfies` payout. The type's doc comment now states the contract.
+
+**Behaviour moved at a fixed seed**, which is what proves the pair is load-bearing and not cosmetic:
+
+| village-evening, seed 7, 24 people | before | after |
+|---|---|---|
+| rumors planted | 28 | **53** |
+| friend edges | 91 | **118** |
+| rumor reach | 0.500 | **0.333** |
+
+Gossip is gated on `ctx.tellable`, and the tellable set moves when exchanges land at different instants.
+
+**Written red first.** `every_activity_end_has_a_start`: `0 starts, 149 ends` at first. The final
+assertion is `starts >= ends` with at most one unpaired, not equality — my first draft demanded
+equality and failed a *correct* implementation at `150 / 149`, because a run can stop mid-activity.
+
+**Perf.** 0.549 / 12.47 / 419.7 ms per tick at 100 / 1 000 / 5 000. Baseline at `HEAD` measured for
+comparison: 5 000 is 418.3 ms, so the change is +0.33%, which is noise. No regression.
+
+**Not fixed, measured both ways.** Need starvation is a *separate* cause and now has sharper numbers:
+
+| | need2 at 0 | need3 at 0 |
+|---|---|---|
+| one plaza, zero travel | 9.6% | 28.2% |
+| village, 24 people | 46.4% | 78.2% |
+
+So walking costs are part of it but not the cause. The cause is activity *choice*: over 1 419 starts,
+`snub` 589 and `gossip` 561 — **82%** — and neither satisfies a need.
+
+**Evidence.** `runs/2026-11-04-01/evidence/{before,after}/`, `before-after.png`, `fresh-eyes/` (seed 99,
+40 people).
+
+**Tests.** 20 binaries both feature sets; `behavior` 17. Dead-code inventory: zero, unchanged — the fix
+removed a parameter.
+
+**Verdicts.** Behaviour GREAT (2/55 → 150/149; narrative counts confirm). Zoom GREAT (pairing moved
+gossip and friendship at a fixed seed; the plot shows the need starvation is untouched and correctly
+so). Fresh eyes GREAT for the change at seed 99 / 40 people; **NOT YET** for needs.
+
+**Commit.** `fe077d5`.
+
+**Top 5 remaining.**
+1. **Need satisfaction via activity choice** — `snub` + `gossip` are 82% of starts and satisfy nothing;
+   `need3` at 0 for 28% of ticks with zero travel. Both directions measured.
+2. **The two-clocks decision** — the fresh-eyes narrative now shows a 40-game-hour walk to bed in plain
+   text, which is a better argument for option 1 than the decision file was. Needs the operator.
+3. **Rumor reach flat-lines** at 0.333 from tick 62; Daley–Kendall stifling should decay it.
+4. **`Field` / `Gradient` wiring** — unchanged.
+5. **`warn_unscored_fields` says "1 definitions"** — plural helper.
