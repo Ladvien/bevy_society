@@ -833,3 +833,71 @@ errors of mine and traced the village plant to its origin. Fresh eyes GREAT — 
    gossips or lower the target.
 4. **`Field` / `Gradient` wiring** — unchanged.
 5. **`warn_unscored_fields` says "1 definitions"** — plural helper.
+
+## 2026-11-07-01 — The scenarios now measure what they claim
+
+**Pick.** Not a model change: the crate's own evidence base. `scenarios.yaml` says *"a scenario with
+`status: pending` has no test yet; the loop may not claim it passes"*, and **four of seven were
+pending**. Two stated precise, falsifiable observables that nothing had ever checked. Beat the
+runner-up (the back-to-back sleep loop) on one sentence: *I cannot fix a defect the evidence base was
+unable to see.*
+
+**Two observables were wrong, which is why they could never have passed.**
+
+| Scenario | As written | What the crate does |
+|---|---|---|
+| `deed-draws-a-response` | a *planted* `steal` with five witnesses → one `NormViolated` | `PlantRumor` starts a rumor, it does not deliver a deed; `witness()` runs only from an accepted interaction. Measured: **0 violations, `known_by = 1`** |
+| | | Driven properly — accepted `insult` with `deed: Some("steal")` — **1 rumor, `known_by` 4, 4 violations** |
+| `opinion-converges-but-not-entirely` | 6 000 ticks → spread falls a third | 6 000 gives **0.3699**, a 27.6% fall. 12 000 gives **0.2398** |
+
+Both corrected in place with a dated note; neither threshold lowered.
+
+**`determinism` was pending on a reason that had stopped being true** — its two tests have been green
+for several iterations.
+
+**`need-cycle` stays pending, and the blocker is measured.** One person, `rest` decaying 0.7/day, a
+4-hour sleep satisfying 0.12 per game-hour:
+
+| | |
+|---|---|
+| completed sleeps in 20 000 ticks | **29** |
+| ticks in 4 game-hours | **683** |
+| `rest` range | **[1.000, 1.000]** |
+
+The sleeps are **back to back**, so the need is met continuously and never decays. The satisfy path is
+fine (`rate · hours` per use, clamped at 1.0, asserted). The cause is the choice rule:
+`Linear(-1, 1.0)` scores a full 1.0 anywhere below full, so the top-up activity is the best option the
+instant the last one ends. The test asserts this state, so the day it changes the test fails.
+
+**The harness had the same `RumorId(0)` bug I fixed in `series.csv` last iteration.** `summary.json`
+counted knowers of the first rumor the run made, so every scenario planting a later one reported
+`rumor_known_by: 0` — including `need-cycle`, which printed 0 knowers beside 119 rumors.
+
+| scenario | before | after | reach |
+|---|---|---|---|
+| `village-evening` | 0 | **1** | 0.042 |
+| `rumor-crosses-a-cluster` | 0 | **4** | 0.333 |
+
+That is a process failure worth naming: I fixed the symptom I was looking at, not the class.
+
+**Status.** Four pending → **one**, and that one says why. Tests 22 → **25** binaries both feature sets;
+dead-code inventory zero, unchanged.
+
+**Evidence.** `runs/2026-11-07-01/evidence/village.png` (needs, planted reach, opinion variance — the
+last plateaus at 0.033 and stops falling, so it narrows without collapsing).
+
+**Verdicts.** Behaviour GREAT (3 scenarios measured, 1 blocked with numbers, 2 observables corrected and
+dated). Zoom GREAT — it found the summary repeating last iteration's bug and exposed the back-to-back
+sleep loop. Fresh eyes GREAT — a host can now tell which claims are checked, corrected, or
+known-broken.
+
+**Commit.** `da0803f`.
+
+**Top 5 remaining.**
+1. **The back-to-back activity loop** — 29 consecutive sleeps, `rest` pinned at 1.0. Has a
+   failing-on-change test now, so it can be fixed against it.
+2. **Retire untellable rumors** — 93% of the book cannot spread; the per-tick walk is a 4× cost growth.
+   `needs-decision/retiring-untellable-rumors.md`.
+3. **The two-clocks decision** — still the only cause of need starvation in a real layout.
+4. **The village's rumor origin** — reaches 1/24; an arbitrary villager cannot be the town crier.
+5. **`Field` / `Gradient` wiring** — unchanged.
