@@ -1649,3 +1649,76 @@ GREAT (third artefact of the class, named, each now pinned by a test).
    configuration.
 4. **Retire untellable rumors** — right for memory: ~5 MiB at 5 000 over a long run, 87% untellable.
 5. **Perception is 11.8% at 5 000 and `O(n²)`** — a real limit, now measured.
+
+## 2026-11-19-01 — A person walking to bed is reported asleep
+
+**Pick.** Whatever the log's #1 said, counting the village's **activity mix** found a 2× discrepancy in what
+it reports doing — a defect rather than the design question the log had queued.
+
+| activity | share of person-ticks |
+|---|---|
+| **sleep** | **56.8%** |
+| eat | 14.9% |
+| work | 14.8% |
+| everything social | 9.2% |
+
+One 8-hour sleep a day is 33%; this run's **350 sleeps over 24 people over 17 days is 28.6%**. The reported
+figure cannot be right.
+
+**Four hypotheses, all disproved by measurement.**
+
+| hypothesis | killed by |
+|---|---|
+| a `Place` activity overruns its duration | `end_activities` reports **`elapsed_h = 8.004`** on every sleep that ends |
+| `satisfies` pays twice per tick | a 2-hour activity at 0.1/h paid **0.2010** — exact |
+| `best_telling`'s tie-break starves a fresh rumor | three tests passed with **no code change** |
+| a probe measuring overlapping sleeps | fixed with a queue; real range 8.00–28.00 |
+
+The second is the instructive one: the first version of that test used 1.0/h, so a 2-hour activity paid
+2.0 into a **ceiling of 1.0** and read `1.000` — which looks exactly like a half-rate payout. The need's
+clamp, not the crate, was the cause.
+
+**The one that held.** A villager tracked tick by tick while `Doing` says `sleep`:
+
+```
+   1: rest 0.087
+  12: rest 0.085
+```
+
+Decay alone is **−0.00017/tick** and the observed change is **−0.00018**. `sleep` pays 0.15/h =
+**+0.00088**. `rest` falls, so `arrive_and_satisfy` is not paying: `arrived_day` is `None` and the person
+is **walking**.
+
+`Doing.activity` names the target from the moment it is chosen, so every reader — the HUD, the harness,
+`activity_barks`, `report_to_triggers` — sees a person sleeping while it walks. The scales make it common:
+`travel_timeout_hours` 20 at 64 s/day is **3 414 ticks**; an 8-hour sleep is **1 365**. A walk to bed can
+last **two and a half times the sleep**, labelled asleep throughout.
+
+**Evidence.** `runs/2026-11-19-01/evidence/reported-asleep.png` — the reported-asleep count peaks at **22–23
+of 24** every night, against the red line of 8 that one 8-hour sleep allows.
+
+**What ships.** No library change: the fix changes a component a host reads, so it is
+`needs-decision/what-doing-reports-while-travelling.md`, recommending a reserved `travelling` activity with
+the target in its own field — every in-crate reader then right by default. `tests/travel.rs` pins the
+defect (ignored so it does not block later iterations; `cargo test -- --ignored` shows it).
+`tests/drift.rs` pins what **is** true: a `Place` activity pays exactly its duration, displacement
+included — 0.2010 and 0.2004 against 0.2.
+
+**Tests.** 35 → **36** binaries, 0 failures, in both feature sets. Dead-code inventory: zero; `src/`
+unchanged.
+
+**Verdicts.** Behaviour GREAT (measured, reproduced in isolation, pinned by a red test). Zoom GREAT (four
+hypotheses disproved, one caused by a need's clamp). Fresh eyes GREAT (every in-crate reader of
+`Doing.activity` is wrong today, and the fix makes them right).
+
+**Commit.** `867ce24`.
+
+**Top 5 remaining.**
+1. **`Doing` while travelling** — `needs-decision/what-doing-reports-while-travelling.md`; un-ignore
+   `tests/travel.rs` when it lands.
+2. **`need-cycle`'s observable** — three needs stay above 0.5 at these rates; a design question.
+3. **`opinion-converges-but-not-entirely` is not implemented in the harness** — it has a test but
+   `--scenario` rejects the name.
+4. **`examples/capture.rs` still hardcodes 8.0 s/day** — the README clip's "23 of 25" is measured under
+   settings the spec does not declare.
+5. **Retire untellable rumors** — right for memory: ~5 MiB at 5 000 over a long run, 87% untellable.
