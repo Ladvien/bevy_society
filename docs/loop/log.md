@@ -1521,3 +1521,68 @@ what the model does).
 3. **Retire untellable rumors** — right for memory: ~5 MiB at 5 000 over a long run, 87% untellable.
 4. **The two-clocks decision** — warned about, measured, API open.
 5. **Perception is 11.8% at 5 000 and `O(n²)`** — a real limit, now measured.
+
+## 2026-11-17-01 — The seed was decoration too
+
+**Pick.** The log's #1: re-derive the behaviour conclusions at the spec's settings. Beat fixing `food` at
+15% of ticks at zero on one sentence: **that number was measured at 4 s/day and does not survive the
+correction.**
+
+**The seed was unread.** Re-running the scenarios exposed the same class of defect again: `seed:` in
+`docs/loop/scenarios.yaml` was decoration. Every scenario ran at the crate default `0x5EED_5EED`, so the
+five that declare 7, 11, 3, 5 and 1 were **the same run**. `Spec` now reads it; `--seed` still overrides.
+Two consecutive `need-cycle` runs end at identical values — `[0.957, 0.608, 0.669, 0.867]` — so it is
+deterministic.
+
+**Every scenario at its own settings:**
+
+| scenario | need means | all four cycle? |
+|---|---|---|
+| `need-cycle` | [0.86, 0.81, 0.58, 0.79] | **yes** |
+| `village-evening` | [0.29, 0.53, 0.24, 0.26] | **yes** |
+| `rumor-crosses-a-cluster` | [0.64, 0.15, 0.40, 0.61] | **yes** |
+| `deed-draws-a-response` | [0.86, 0.81, 0.63, 0.81] | **yes** |
+
+**`need-cycle` is `measured`** after four iterations as `pending`. It was pending because at a four-second
+day a four-hour activity lasted four ticks while a walk took three hundred; at its own settings it is a
+clean daily cycle.
+
+**`rumor-crosses-a-cluster` reaches 0.583** against the 40% its observable asks for — it had been marked
+`measured` while failing. That is the second stale status this pair of iterations has found.
+
+**A conclusion retired, not fixed.** The log's *"`food` at 15% of ticks at zero"* (carried since
+2026-11-13) is an artefact: at the spec's settings `food` averages **0.58** in `need-cycle` and **0.24** in
+the village, with **one trough a day**.
+
+**The plot nearly fooled me.** `evidence/spec-needs.png` over 19.5 days looks like violent thrashing — all
+four needs sawtoothing between 0.2 and 1.0. Counting local minima below 0.4:
+
+| need | troughs / 19.5 days |
+|---|---|
+| social | **0** |
+| rest | **0** |
+| food | **20 (1.0/day)** |
+| fun | **0** |
+
+`evidence/need-cycle-zoom.png`, three game-days, is what one day is: each need decays steadily and jumps
+when its activity runs; `rest` holds 1.0 through sleep; `food` sawtooths 0.25 → 0.80 once a day. **A
+full-range plot can manufacture a defect**, and the trough count is what separates the two.
+
+**Tests.** 34 → **34** binaries (one test added to `scenario_spec`), 34 in both feature sets. Dead-code
+inventory: zero; `src/` unchanged.
+
+**Verdicts.** Behaviour GREAT (seed honoured and deterministic; all four scenarios cycle). Zoom GREAT (the
+plot faked a defect; the count disproved it). Fresh eyes GREAT (retires `food` at 15% and exposes a
+`measured` scenario that was failing).
+
+**Commit.** `7c6e3d1`.
+
+**Top 5 remaining.**
+1. **Per-person need cycles, not the mean** — the observable says *every person*; the series is a mean over
+   eight, so an individual could be failing.
+2. **`opinion-converges-but-not-entirely` is not implemented in the harness** — it has a test but
+   `--scenario` rejects the name.
+3. **`examples/capture.rs` still hardcodes 8.0 s/day** — the README clip is checked against a third
+   configuration.
+4. **Retire untellable rumors** — right for memory: ~5 MiB at 5 000 over a long run, 87% untellable.
+5. **Perception is 11.8% at 5 000 and `O(n²)`** — a real limit, now measured.
