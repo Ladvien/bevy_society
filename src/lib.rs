@@ -143,6 +143,7 @@ mod rumor;
 mod script;
 mod script_apply;
 mod snapshot;
+mod trace;
 
 pub use behavior::{
     ActivityEnded, ActivityStarted, BehaviorPlugin, Destination, Doing, DoingTarget,
@@ -182,3 +183,4 @@ pub use rumor::{PlantRumor, Rumor, RumorBook, RumorId, RumorLearned};
 pub use script::{ScriptEngine, ScriptError, ScriptEvent, ScriptId, ScriptValue};
 #[cfg(feature = "steering")]
 pub use steering::{SocialMover, SocialVelocity, SteeringPlugin};
+pub use trace::{Decision, DecisionTrace, ScoredOption};

@@ -57,6 +57,7 @@ fn main() {
         std::time::Duration::from_secs_f64(1.0 / 64.0),
     ))
     .insert_resource(settings)
+    .insert_resource(bevy_society::DecisionTrace::with_capacity(96, 6))
     .insert_resource(defs);
     let plugins = SocietyPlugins.build();
     #[cfg(feature = "dialogue")]
@@ -91,6 +92,7 @@ fn main() {
         std::process::exit(1);
     }
     write_narrative(&mut app, tracked, &lines, &out);
+    write_why(&mut app, tracked, &out);
     series(&rows, &out);
     summary(app.world(), &world, &out, planted);
     println!(
@@ -595,6 +597,33 @@ fn drain_narrative(app: &mut App, world: &World, tracked: Option<Entity>, lines:
         }
     }
     let _ = world;
+}
+
+/// Writes `why.txt`: the tracked person's last decision, with every option it weighed.
+fn write_why(app: &mut App, tracked: Option<Entity>, out: &Path) {
+    let Some(tracked) = tracked else {
+        return;
+    };
+    let Some(trace) = app.world().get_resource::<bevy_society::DecisionTrace>() else {
+        return;
+    };
+    let Some(decision) = trace.last_for(tracked) else {
+        return;
+    };
+    let mut text = format!("# {}\n\n", decision.describe(&[]));
+    for option in &decision.options {
+        let _ = writeln!(
+            text,
+            "{:>6.3}  {}{}",
+            option.score,
+            option.activity,
+            if option.chosen { "   <- chosen" } else { "" }
+        );
+    }
+    let path = out.join("why.txt");
+    if let Err(err) = std::fs::write(&path, text) {
+        eprintln!("evidence: cannot write {}: {err}", path.display());
+    }
 }
 
 /// Writes the tracked person's day as readable prose.

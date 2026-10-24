@@ -1,0 +1,69 @@
+# Bram's day
+
+At the end: doing Some("compliment"), needs Some([0.0, 0.83203346, 0.0, 0.0]), mood P0.02 A0.03 D-0.01
+
+d1 15h05: started work
+d3 07h07: started chat
+d3 07h07: finished work (interrupted)
+d3 07h07: chat with Edric (accepted)
+d3 07h30: started chat
+d3 07h30: finished chat (completed)
+d3 07h30: chat with Edric (accepted)
+d3 07h52: started eat
+d3 07h52: finished chat (completed)
+d3 08h20: chat approached by Garet (refused)
+d4 23h54: started sleep
+d4 23h54: finished eat (interrupted)
+d6 15h56: started work
+d6 15h56: finished sleep (interrupted)
+d6 16h35: chat approached by Fenna (accepted)
+d6 17h15: compliment approached by Fenna (accepted)
+d7 10h35: chat approached by Edric (accepted)
+d7 10h58: chat approached by Edric (accepted)
+d8 07h58: started chat
+d8 07h58: finished work (interrupted)
+d8 07h58: chat with Fenna (accepted)
+d8 08h20: started work
+d8 08h20: finished chat (completed)
+d8 09h33: compliment approached by Fenna (accepted)
+d9 07h58: chat approached by Ulric (refused)
+d10 00h22: started sleep
+d10 00h22: finished work (interrupted)
+d10 23h37: started sleep
+d10 23h37: finished sleep (completed)
+d11 07h35: insult approached by Ulric (refused)
+d11 07h41: started snub
+d11 07h41: finished sleep (completed)
+d11 07h41: insult with Ulric (accepted)
+d11 07h52: started compliment
+d11 07h52: finished snub (completed)
+d11 13h01: compliment with Fenna (refused)
+d11 13h18: started chat
+d11 13h18: finished compliment (completed)
+d11 13h18: chat with Hilda (refused)
+d11 13h41: started snub
+d11 13h41: finished chat (completed)
+d11 13h41: insult with Ulric (refused)
+d11 13h52: started gossip
+d11 13h52: finished snub (completed)
+d11 13h52: gossip with Wren (accepted)
+d11 14h15: started eat
+d11 14h15: finished gossip (completed)
+d13 06h16: started compliment
+d13 06h16: finished eat (interrupted)
+d13 07h58: compliment with Fenna (accepted)
+d13 08h15: started snub
+d13 08h15: finished compliment (completed)
+d14 08h03: insult approached by Hilda (accepted)
+d14 08h15: insult approached by Hilda (accepted)
+d14 12h11: insult with Ulric (accepted)
+d14 12h22: started chat
+d14 12h22: finished snub (completed)
+d14 12h22: chat with Wren (refused)
+d14 12h45: started eat
+d14 12h45: finished chat (completed)
+d15 20h48: insult approached by Ulric (refused)
+d16 04h46: started sleep
+d16 04h46: finished eat (interrupted)
+d17 19h46: started compliment
+d17 19h46: finished sleep (completed)

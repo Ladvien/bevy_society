@@ -4,6 +4,10 @@ All notable changes to bevy_society. The format follows [Keep a Changelog](https
 
 ## [Unreleased]
 
+### Added
+
+- **`DecisionTrace`: why a person did that.** A bounded, opt-in record of every decision — each option that scored, its score, and the one a weighted draw took. `Doing` says what a person is doing; nothing said what else it weighed or by how much. Built to the three constraints Game AI Pro 3 ch. 6 puts on a recorder: **no impact on the outcome** (asserted — the same seed gives a byte-identical sequence of choices with and without the trace), **fixed memory** (a ring of `capacity` decisions, oldest dropped), and **no measurable cost** (15.16 ms/tick with it against 15.28 without, at 1 000 people). `Decision::describe` renders one line: `tick 4147: someone chose compliment (0.752), 25% below snub (1.000)`.
+
 ### Fixed
 
 - **The scenarios now measure what they claim.** Three of the four `pending` scenarios in `docs/loop/scenarios.yaml` are `measured`, each with a test named in the file: `deed-draws-a-response` (`tests/deed_response.rs`), `opinion-converges-but-not-entirely` (`tests/opinion_convergence.rs`) and `determinism` (whose tests had been green for several iterations). `need-cycle` stays `pending` with a measured blocker: a person sleeps back to back — 29 four-hour sleeps in 20 000 ticks, and four game-hours *is* 683 ticks — so `rest` stays at 1.000 and never decays.

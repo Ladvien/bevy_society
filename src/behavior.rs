@@ -570,8 +570,13 @@ fn decide_activities(
     engine: Option<Res<crate::script::ScriptEngine>>,
     cell: Res<crate::snapshot::SnapshotCell>,
     transforms: Query<(Entity, &Transform)>,
+    mut trace: Option<ResMut<crate::trace::DecisionTrace>>,
 ) {
     use bevy_emerge_rng::DetRng;
+
+    // (person, scored options) for the trace; only filled when a host added the resource.
+    type Scored = (String, f32, bool);
+    let mut recorded: Vec<(Entity, Vec<Scored>)> = Vec::new();
 
     let now = clock.now_days;
     let tuning = &settings.tuning;
@@ -706,6 +711,9 @@ fn decide_activities(
             _ => None,
         };
         let mut best: Option<(u8, Vec<Candidate>)> = None;
+        // Every option that scored, for the trace only. `best` keeps the winning rank tier, so
+        // without this a host would never see the lower-rank activities a choice ruled out.
+        let mut all_scored: Vec<(String, f32)> = Vec::new();
         for (i, spec) in defs.activities.iter().enumerate() {
             // Index 0 is the reserved idle activity: it is the fallback, never a candidate.
             if i == 0 {
@@ -779,6 +787,13 @@ fn decide_activities(
                 weight: spec.weight,
                 score,
             };
+            if trace.is_some() {
+                all_scored.push((
+                    defs.activity_name(ActivityId(candidate.activity))
+                        .to_owned(),
+                    candidate.score,
+                ));
+            }
             match &mut best {
                 Some((rank, list)) if *rank == spec.rank => list.push(candidate),
                 Some((rank, list)) if spec.rank > *rank => {
@@ -788,6 +803,15 @@ fn decide_activities(
                 Some(_) => {}
                 None => best = Some((spec.rank, vec![candidate])),
             }
+        }
+
+        if trace.is_some() {
+            let mut scored: Vec<(String, f32, bool)> = all_scored
+                .into_iter()
+                .map(|(name, score)| (name, score, false))
+                .collect();
+            scored.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap_or(std::cmp::Ordering::Equal));
+            recorded.push((person, scored));
         }
 
         let picked = best.and_then(|(_, list)| {
@@ -814,6 +838,23 @@ fn decide_activities(
             Some((chosen.activity, target))
         });
 
+        if trace.is_some()
+            && let Some((_, scored)) = recorded.iter_mut().find(|(p, _)| *p == person)
+        {
+            let chosen = picked.map(|(activity, _)| activity);
+            if scored.is_empty() {
+                scored.push((
+                    defs.activity_name(crate::defs::IDLE_ACTIVITY).to_owned(),
+                    1.0,
+                    true,
+                ));
+            } else {
+                for (name, _, is_chosen) in scored.iter_mut() {
+                    *is_chosen = defs.activity_id(name).map(|id| id.0) == chosen;
+                }
+            }
+        }
+
         match picked {
             Some((activity, target)) => {
                 let activity = ActivityId(activity);
@@ -838,6 +879,26 @@ fn decide_activities(
                 defs.activity_name(crate::defs::IDLE_ACTIVITY).to_owned(),
                 None,
             )),
+        }
+    }
+
+    if let Some(trace) = trace.as_mut() {
+        for (person, scored) in recorded {
+            trace.push(crate::trace::Decision {
+                tick: clock.tick,
+                person,
+                // Resolved by `Decision::describe` when read: `decide_activities` is already at
+                // Bevy's 16-parameter limit, and a `Name` query would be the seventeenth.
+                name: None,
+                options: scored
+                    .into_iter()
+                    .map(|(activity, score, chosen)| crate::trace::ScoredOption {
+                        activity,
+                        score,
+                        chosen,
+                    })
+                    .collect(),
+            });
         }
     }
 

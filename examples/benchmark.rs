@@ -44,6 +44,9 @@ fn main() {
         ..SocietySettings::default()
     })
     .insert_resource(defs);
+    if std::env::var("BENCH_TRACE").is_ok() {
+        app.insert_resource(bevy_society::DecisionTrace::with_capacity(64, 8));
+    }
     let plugins = SocietyPlugins.build();
     #[cfg(feature = "dialogue")]
     let plugins = plugins.disable::<bevy_society::DialoguePlugin>();
