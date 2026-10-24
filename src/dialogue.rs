@@ -136,6 +136,10 @@ fn display_name(names: &Query<Option<&Name>>, entity: Entity) -> String {
 
 /// Starts a conversation for each [`TalkTo`] while none is open. Ignored talks are logged at
 /// `debug!`, because a host that talks to people every frame would otherwise flood the log.
+#[expect(
+    clippy::too_many_arguments,
+    reason = "the caller owns this state anyway; bundling it into a struct would hide the read/write split"
+)]
 fn talk_to(
     mut talks: MessageReader<TalkTo>,
     mut starts: MessageWriter<StartConversation>,
@@ -229,6 +233,10 @@ fn pick_conversation(
 /// Runs the node effects of every node the active conversation enters, and emits a
 /// [`TriggerEvent::Dialogue`] for the node. The actions wait in [`PendingActions`] for the next
 /// society tick, like every other script effect.
+#[expect(
+    clippy::too_many_arguments,
+    reason = "the node effect needs the defs, the snapshot, the queue and the two people; a struct would hide which are read and which are written"
+)]
 fn run_node_effects(
     mut entered: MessageReader<DialogueNodeEntered>,
     defs: Res<SocietyDefs>,

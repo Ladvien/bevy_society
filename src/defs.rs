@@ -589,7 +589,10 @@ fn check_disjoint<'a>(
 
 /// Compiled definitions: the resource the simulation reads. `Default` is the empty set plus the
 /// reserved `idle` activity.
-#[derive(Resource)]
+///
+/// `Clone` because an exclusive system takes a copy before writing the world: a `&SocietyDefs`
+/// borrowed from the world cannot coexist with `&mut World`, and every decision needs to read it.
+#[derive(Resource, Clone)]
 pub struct SocietyDefs {
     pub(crate) needs: Vec<NeedSpec>,
     pub(crate) topics: Vec<TopicSpec>,

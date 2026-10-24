@@ -7,6 +7,7 @@
 
 use std::sync::{Arc, Mutex};
 
+use bevy::ecs::query::QueryData;
 use bevy::prelude::*;
 use bevy_emerge_rng::{DetRng, seeded};
 use rand_chacha::ChaCha8Rng;
@@ -155,14 +156,6 @@ pub(crate) struct PersonView {
 }
 
 impl PersonView {
-    /// The tie this person holds toward `target`, when there is one.
-    pub(crate) fn tie_to(&self, target: PersonId) -> Option<&TieView> {
-        self.ties
-            .binary_search_by_key(&target.0, |t| t.target.0)
-            .ok()
-            .map(|i| &self.ties[i])
-    }
-
     /// The tie this person holds toward `target`, looked up by entity as the `ctx` API does.
     pub(crate) fn tie_to_id(&self, target: Entity) -> Option<&TieView> {
         self.ties
@@ -185,11 +178,6 @@ pub(crate) struct SocietySnapshot {
 }
 
 impl SocietySnapshot {
-    /// Game time in days at the tick start.
-    pub(crate) fn now_days(&self) -> f64 {
-        self.now_days
-    }
-
     /// Hour of the game-day at the tick start, in `[0, 24)`.
     pub(crate) fn hour(&self) -> f32 {
         self.hour
@@ -198,16 +186,6 @@ impl SocietySnapshot {
     /// Whole game-days elapsed at the tick start.
     pub(crate) fn day(&self) -> i64 {
         self.day
-    }
-
-    /// The compiled definition names.
-    pub(crate) fn names(&self) -> &Names {
-        &self.names
-    }
-
-    /// Every person, ascending by id.
-    pub(crate) fn persons(&self) -> &[PersonView] {
-        &self.persons
     }
 
     /// The person with id `id`, or an error naming the id.
@@ -380,6 +358,24 @@ impl SocietySnapshot {
     }
 }
 
+/// The components the snapshot copies out of each person.
+#[derive(QueryData)]
+#[query_data(mutable)]
+pub(crate) struct SnapshotSource<'w> {
+    personality: &'w Personality,
+    mood: &'w Mood,
+    emotions: &'w Emotions,
+    needs: &'w Needs,
+    ties: &'w Ties,
+    opinions: &'w Opinions,
+    knowledge: &'w Knowledge,
+    memberships: &'w Memberships,
+    status: &'w Status,
+    memories: &'w Memories,
+    doing: Option<&'w Doing>,
+    name: Option<&'w Name>,
+}
+
 /// The current snapshot, rebuilt every tick by [`build_snapshot`]. `None` before the first tick.
 #[derive(Resource, Default)]
 pub(crate) struct SnapshotCell(pub(crate) Option<Arc<SocietySnapshot>>);
@@ -392,20 +388,7 @@ pub(crate) fn build_snapshot(
     index: Res<PersonIndex>,
     mut rng: ResMut<SocietyRng>,
     mut cell: ResMut<SnapshotCell>,
-    people: Query<(
-        &Personality,
-        &Mood,
-        &Emotions,
-        &Needs,
-        &Ties,
-        &Opinions,
-        &Knowledge,
-        &Memberships,
-        &Status,
-        &Memories,
-        Option<&Doing>,
-        Option<&Name>,
-    )>,
+    people: Query<SnapshotSource>,
 ) {
     let names = defs
         .as_deref()
@@ -423,7 +406,10 @@ pub(crate) fn build_snapshot(
 
     let mut persons = Vec::with_capacity(index.sorted.len());
     for &(id, entity) in &index.sorted {
-        let Ok((
+        let Ok(view) = people.get(entity) else {
+            continue;
+        };
+        let (
             personality,
             mood,
             emotions,
@@ -436,10 +422,20 @@ pub(crate) fn build_snapshot(
             memories,
             doing,
             name,
-        )) = people.get(entity)
-        else {
-            continue;
-        };
+        ) = (
+            view.personality,
+            view.mood,
+            view.emotions,
+            view.needs,
+            view.ties,
+            view.opinions,
+            view.knowledge,
+            view.memberships,
+            view.status,
+            view.memories,
+            view.doing,
+            view.name,
+        );
         let mut views: Vec<TieView> = ties
             .0
             .iter()

@@ -102,7 +102,10 @@ mod script;
 mod script_apply;
 mod snapshot;
 
-pub use behavior::{Destination, Doing, DoingTarget};
+pub use behavior::{
+    ActivityEnded, ActivityStarted, BehaviorPlugin, Destination, Doing, DoingTarget,
+    InteractionResolved,
+};
 pub use beliefs::{BeliefsPlugin, Knowledge, Known, Opinion, Opinions, belief_after_hearing};
 pub use core::{
     AssessmentNorm, Autonomous, Home, NextPersonId, Perception, Person, PersonId, PersonIndex,

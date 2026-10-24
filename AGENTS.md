@@ -39,7 +39,9 @@ Pinned to **Bevy 0.20.0**. Read the vendored source (`~/.cargo/registry/src/inde
 - `src/script.rs` — Rhai compilation, the sandbox limits and the `ctx` / `fx` API.
 - `src/script_apply.rs` — the one place a queued `fx` write reaches the world.
 - `src/rules.rs` — the trigger queue and its evaluation, `RulesPlugin`.
+- `src/behavior.rs` — daily-life decisions, arrival, need satisfaction and the social exchange, `BehaviorPlugin`.
 - `src/interact.rs` — the `Interact` request, `SocietyBark` and its `Feeling`.
+- `tests/behavior.rs` — decisions, arrival, completion, travel timeout and exchange resolution.
 - `src/dialogue.rs` — conversations and barks through `bevy_speech_bubbles` (feature `dialogue`): `TalkTo`, `DialoguePlugin`, speaker lifetime, node effects.
 - `src/defs.rs` — authored definitions (`DefsFile`), validation, and the compiled `SocietyDefs` with id interning and spawn helpers.
 - `src/script.rs` — Rhai compilation, the sandbox limits and the `ctx` / `fx` runtime API.

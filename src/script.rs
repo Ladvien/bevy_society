@@ -28,6 +28,7 @@ pub struct ScriptId(pub u32);
 
 /// A compiled script with the authored path that names it, so runtime errors can say where they
 /// came from.
+#[derive(Clone)]
 pub(crate) struct CompiledScript {
     /// The authored path, for example `trigger 'greet'`.
     pub(crate) owner: String,
@@ -443,7 +444,7 @@ impl ScriptEngine {
     }
 
     /// The authored path of a script, for error messages.
-    pub(crate) fn owner<'a>(scripts: &'a [CompiledScript], id: ScriptId) -> &'a str {
+    pub(crate) fn owner(scripts: &[CompiledScript], id: ScriptId) -> &str {
         scripts
             .get(id.0 as usize)
             .map_or("<unknown script>", |s| s.owner.as_str())
@@ -579,11 +580,7 @@ fn register_ctx(engine: &mut Engine) {
     // `Array`, not `Vec<i64>`: Rhai's indexer is registered for its own array type, so a plain
     // `Vec<i64>` would arrive in the script without being indexable (`ctx.persons()[0]` would fail).
     engine.register_fn("persons", |ctx: &mut Ctx| -> rhai::Array {
-        ctx.0
-            .person_ids()
-            .into_iter()
-            .map(|id| Dynamic::from(id))
-            .collect()
+        ctx.0.person_ids().into_iter().map(Dynamic::from).collect()
     });
     engine.register_fn(
         "faction_size",

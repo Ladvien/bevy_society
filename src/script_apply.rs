@@ -218,9 +218,7 @@ fn join_or_leave(world: &mut World, person: i64, faction: String, join: bool) {
 
 /// The entity of a live person, or `None` with a `warn!` when the id names nobody.
 fn entity(world: &World, id: i64) -> Option<Entity> {
-    let Some(index) = world.get_resource::<PersonIndex>() else {
-        return None;
-    };
+    let index = world.get_resource::<PersonIndex>()?;
     let Ok(id) = u32::try_from(id) else {
         warn!("bevy_society: a script named person id {id}, which is not a person; ignored");
         return None;

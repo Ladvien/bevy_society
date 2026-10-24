@@ -161,6 +161,13 @@ pub(crate) fn actor_reaction(
 /// origin, at full belief and spreading; every other witness knows it at full belief and spreads it
 /// too. `known_by` counts every witness once. Returns the new rumor, or `None` when there were no
 /// witnesses.
+///
+/// The caller owns each witness's `Knowledge` and writes every value back, because
+/// `Query::get_mut` cannot hand out a slice of `&mut Knowledge` for a variable-length set.
+#[expect(
+    clippy::too_many_arguments,
+    reason = "the caller owns this state anyway; bundling it into a struct would hide the read/write split"
+)]
 pub(crate) fn spread_witnessed_rumor(
     book: &mut RumorBook,
     witnesses: &mut [(Entity, Knowledge)],
