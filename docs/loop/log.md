@@ -690,3 +690,80 @@ so). Fresh eyes GREAT for the change at seed 99 / 40 people; **NOT YET** for nee
 3. **Rumor reach flat-lines** at 0.333 from tick 62; Daley–Kendall stifling should decay it.
 4. **`Field` / `Gradient` wiring** — unchanged.
 5. **`warn_unscored_fields` says "1 definitions"** — plural helper.
+
+## 2026-11-05-01 — A crowd made a person less likely to eat
+
+**Pick.** Last iteration's #1: need starvation by activity choice. Beat the escalated two-clocks
+decision on one sentence: **a decision needs an operator, and this bug does not** — Dill's own text
+settles it. Fixing it also strips the confound out of that decision, so the next operator question is
+a clean one.
+
+**Cause.** `targets_for` gives a `Person` activity one candidate per person in perception, a `Place`
+activity one per matching place — and selection drew over *every candidate*. So an activity's
+selection mass was `weight · score · (number of targets)`. In the starter pack:
+
+| activity | starts | share | target kind |
+|---|---|---|---|
+| gossip | 582 | 41.0% | Person |
+| snub | 556 | 39.2% | Person |
+| eat | 38 | 2.7% | Place |
+| relax | 38 | 2.7% | Place |
+
+`gossip` and `snub` satisfy **no need** and took 80% of every decision. Starvation then scaled with
+the number of neighbours, every rate held fixed: `fun` at 0 for 5.9% of ticks with one person,
+**43.4%** with sixteen.
+
+**What the source says.** Dill: *"Add up the total weight of all valid **options**"* and *"Rank uses
+absolute utility to divide the **options** into categories"* — an option is an action, not an
+action-target pair (Game AI Pro 2 ch. 3, `gameaipro2-ch03-dual-utility-reasoning`).
+
+**Change.** Scoring stays per target, because considerations legitimately read the target
+(`Distance`, `Affinity`). Each activity now becomes **one** candidate carrying its best score and
+every target that tied for it; the draw runs over activities; the target is picked uniformly from the
+ties from the seeded RNG.
+
+**Written red first.** `a_crowd_does_not_multiply_a_person_activity_s_odds`: **0.97** at twelve
+neighbours, **0.50** after.
+
+**Before → after, with travel removed so only choice differs** (the village layout, four places at the
+origin):
+
+| | need0 | need1 | need2 | need3 |
+|---|---|---|---|---|
+| zero% at 0, before | 0.0 | 0.0 | **39.3** | **64.7** |
+| zero% at 0, after | 0.0 | 0.0 | **1.9** | **4.8** |
+| mean, before | 0.924 | 0.810 | 0.298 | 0.132 |
+| mean, after | 0.869 | 0.810 | **0.554** | **0.526** |
+
+**Perf — and the honest reading of it.** At 1 000 people the tick got *more* expensive, 12.46 →
+14.95 ms, which looks like a regression until decisions are counted: 50.4 → 68.6 per tick (+36%). Per
+decision the cost *fell*, 247.1 → **218.7 µs (−11.5%)**, because the `PersonId` lookup stopped
+scanning `PersonIndex.sorted` and now uses one pass over `perception.near`. At 5 000 the net is
+**418.3 → 277.0 ms, −34%**.
+
+**What this does not fix, isolated with numbers.** The real village still starves — the two-clocks
+walk. Same 24 people, places at the origin instead of metres apart: means 0.87/0.81/0.55/0.53 versus
+0.11/0.17/0.07/0.05. Choice is fixed; travel is `needs-decision/travel-time-in-two-clocks.md`, open
+since 2026-10-25.
+
+**Evidence.** `runs/2026-11-05-01/evidence/{before,after}/`, `before-after.png`, `fresh-eyes/`
+(seed 99, 40 people — rivals 0 → **6**, the first disagreements the village has had).
+
+**Tests.** 20 → **21** binaries both feature sets; determinism 2/2 (the target pick is seeded).
+Dead-code inventory: zero, unchanged — `Candidate` is private.
+
+**Verdicts.** Behaviour GREAT (0.97 → 0.50; starvation scaling gone at every population). Zoom GREAT
+(choice fixed; remaining flat regions attributed with numbers to the escalated decision). Fresh eyes
+GREAT at seed 99 / 40 people — coherent narrative, rivals back; needs still NOT YET, cause isolated.
+
+**Commit.** `e04f9f4`.
+
+**Top 5 remaining.**
+1. **The two-clocks decision** — now the *only* cause of need starvation, measured both ways.
+   Recommends option 1; needs the operator.
+2. **Rumor reach is a step function** — flat after tick ~60 at both seeds; Daley–Kendall stifling
+   should decay it.
+3. **`Field` / `Gradient` wiring** — unchanged.
+4. **`warn_unscored_fields` says "1 definitions"** — plural helper.
+5. **`need-cycle` is still `pending`** in `scenarios.yaml` — with this fix it may pass once travel
+   lands, and should be measured against both.
