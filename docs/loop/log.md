@@ -3070,3 +3070,61 @@ corrected by runs). Fresh eyes GREAT (a host's first move is to copy one of thes
 3. **Meeting and befriending share one verb** - blocked behind (1).
 4. **`Doing` names the target activity while travelling** - 49.8% of person-ticks; host-facing, escalated.
 5. **The clock decision** - 5.4-hour walks against 0.75-hour activities.
+
+## 2026-12-15-01 - The clamp's cost is the opinion model, not mood
+
+**Pick.** Item 2, recovering the clamp's mood cost — the thing that would let item 1's decision be made.
+
+**The mood cost is a curve/gate mismatch.** `compliment` gates on `Affinity` at `Logistic(8.0, 0.7)`:
+
+| affinity | score |
+|---|---|
+| 0.35 (clamp ceiling) | **0.057** |
+| 0.79 (unclamped mean) | **0.673** |
+
+Compliments are **12x less likely** under the clamp. No rate was missing — the gate sits far above the ceiling.
+
+**The repair works.**
+
+| configuration | friends | rivals | mood |
+|---|---|---|---|
+| shipped | 22 | 33 | -0.054 |
+| clamp, gate unchanged | 0 | 10 | -0.078 |
+| clamp + gate `Logistic(16.0, 0.25)` | 0 | 10 | **-0.045** |
+| + `friend_affinity` 0.30 + trust 0.5 | **16** | **10** | **-0.045** |
+
+Better than baseline on **all three** axes. The first two rows have 0 friends because `friend_affinity` 0.4 is
+unreachable under a 0.35 ceiling — a bar under the clamp must move with it.
+
+**And it cannot ship.** `tests/opinion_convergence.rs` fails:
+
+| | before | with the clamp |
+|---|---|---|
+| opinion spread, 12 000 ticks | 0.5106 -> **0.24** (53%) | 0.5106 -> **0.3813** (25%) |
+
+Deffuant influence is **weighted by tie strength**, so bounding affinity bounds opinion convergence. The
+scenario asserts a third.
+
+**The finding.** `affinity` is shared between **liking and influence**, so a scenario's tick count is silently a
+statement about that rate. Six earlier attempts missed it because none changed the affinity *scale* — they
+changed rates, gates or the accumulation shape. This one changed the range, and the range is load-bearing in a
+second model.
+
+**Reverted.** Three options recorded: longer `ticks:`, a compensating `influence_mu`, or a separate influence
+weight (a schema change).
+
+**Verdicts.** Pass 1 GREAT (the repair, exactly explained). Pass 2 **FAIL** (the full suite, not the scenario I
+aimed at, found the cost). Pass 3 GREAT (the coupling is the lesson).
+
+**Dead-code delta.** Zero. **Tests:** 53 binaries clean. **Village unchanged:** 22 / 33.
+
+**Commit** `pending`.
+
+**Top 5 remaining.**
+
+1. **`affinity` is shared by liking and influence.** The clamp needs a decision about the opinion model; three
+   options are in the decision file, the third a schema change.
+2. **Decide the clamp trade.** Now measured as good on all three axes *if* the opinion coupling is resolved.
+3. **Meeting and befriending share one verb** - blocked behind (1) and (2).
+4. **`Doing` names the target activity while travelling** - 49.8% of person-ticks; host-facing, escalated.
+5. **The clock decision** - 5.4-hour walks against 0.75-hour activities.

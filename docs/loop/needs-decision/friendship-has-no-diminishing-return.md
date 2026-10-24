@@ -270,3 +270,49 @@ outer clamp while a positive one decays smoothly. Measured, rivals rose **33 →
 **Clamp ±0.35 with a trust second input, and accept the mood cost** — or fix the mood cost first by raising
 `mere_exposure_per_day` back up, since exposure is a separate path to affinity that the clamp now also bounds.
 Untested: whether a higher exposure rate recovers mood without restoring the clique.
+
+## The clamp's real cost is not mood — it is the opinion model, 2026-12-15
+
+Last iteration attributed the clamp's cost to mood (`-0.054 → -0.078`) via fewer affinity-gated contacts, and
+recommended recovering it by raising `mere_exposure_per_day`. That recommendation was tested and is **wrong in
+kind**: the clamp's largest effect is on a different model entirely.
+
+### The mechanism, measured
+
+`compliment` gates on `Affinity` at `Logistic(8.0, 0.7)`. At the clamp ceiling of `0.35` that curve scores
+**0.057**, against **0.673** at the unclamped mean of `0.79` — compliments become **12× less likely**. That is
+why mood fell, and it is a curve/gate mismatch, not a missing rate.
+
+Moving the gate down to `Logistic(16.0, 0.25)` to match the ceiling **fixes the mood**:
+
+| configuration | friends | rivals | mood |
+|---|---|---|---|
+| shipped | 22 | 33 | **-0.054** |
+| clamp 0.35, gate unchanged | 0 | 10 | -0.078 |
+| clamp 0.35 + gate at 0.25 | 0 | 10 | **-0.045** |
+| clamp 0.35 + gate 0.25 + `friend_affinity` 0.30 + trust ≥ 0.5 | **16** | **10** | **-0.045** |
+| …with `friend_affinity` 0.25 | 24 | 10 | -0.045 |
+
+So the trade can be made **good on both axes**: fewer friends than the shipped 22, a third of the rivals (33 →
+10), and mood *better* than baseline (-0.045 against -0.054).
+
+### But it breaks the opinion model
+
+`tests/opinion_convergence.rs` fails:
+
+| | before | with the clamp |
+|---|---|---|
+| opinion spread, 12 000 ticks | 0.5106 → **0.24** (53% fall) | 0.5106 → **0.3813** (25% fall) |
+
+The scenario asserts a fall of at least a third. Deffuant influence is **weighted by tie strength**, so halving
+the affinity ceiling roughly halves how fast opinions converge. That is a coupling across three models — ties to
+opinions — that none of the six earlier attempts touched, because none of them changed the affinity *scale*.
+
+### What that means
+
+The clamp is not one number. Changing the affinity scale **re-times the opinion model**, and 12 000 ticks was
+chosen because unclamped convergence crosses a third around 9 000. Any clamp needs either a longer
+`ticks:` in `opinion-converges-but-not-entirely`, or a compensating increase in `influence_mu`.
+
+**This is the thing to decide**, and it is bigger than the earlier trade: bounding the tie network means
+re-tuning the opinion scenario, because influence and liking share one variable.
