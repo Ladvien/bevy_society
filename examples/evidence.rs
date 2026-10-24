@@ -139,14 +139,20 @@ fn society_defs(scenario: &str) -> Result<SocietyDefs, String> {
 /// One game-day is 64 ticks: short enough that a scenario of a few thousand ticks spans days.
 fn settings_for(scenario: &str) -> SocietySettings {
     let mut settings = SocietySettings {
-        seconds_per_day: 1.0,
+        // Four seconds per game-day: at `tick_secs = 1/64` a tick is 0.094 game-hours, so a 0.1-hour
+        // `snub` lasts about one tick and a 1200-tick run spans 4.9 days. The other values tried in
+        // this file's history (`1.0`, `240.0`) put a snapshot of the same run at 19 days or at 4.9,
+        // which is why the scenarios' rivals counts were not comparable across iterations.
+        seconds_per_day: 4.0,
         // One society tick per update, the same rate the tests use, so a scenario's tick count is
         // the number of updates it asked for regardless of which scenario it is.
         tick_secs: 1.0 / 64.0,
         ..SocietySettings::default()
     };
     if scenario.starts_with("village") {
-        // The village's evening: a 64-second day so six game-hours fit in 480 ticks.
+        // A four-second game-day. Activities in the starter pack last 0.1-8 game-hours, so this must
+        // stay short enough that a few thousand ticks span several days: at 4.0 a tick is 0.094
+        // game-hours and 4200 ticks is 17 days.
         settings.seconds_per_day = 4.0;
         settings.start_hour = 15.0;
         // Walking advances `speed / 64` metres per tick (real time) while this timeout is game
@@ -335,6 +341,26 @@ const PLACE_POSITIONS: [Vec2; 4] = [
 
 /// Two groups far apart, so a rumor has to cross a gap.
 fn cluster(app: &mut App) -> World {
+    // Each group gets a hearth. Without one the only activities available are Person targets, so
+    // the crowd gossips and snubs with nothing else to do: measured, `chat` never once ran in 2000
+    // ticks because gossip monopolised the social need, and affinity ran away to -0.96.
+    let mut places = Vec::new();
+    for (i, centre) in [-20.0_f32, 20.0].iter().enumerate() {
+        places.push(
+            app.world_mut()
+                .spawn((
+                    Name::new(format!("hearth{i}")),
+                    Place { capacity: 6 },
+                    PlaceTags(vec![
+                        "gathering".to_owned(),
+                        "food".to_owned(),
+                        "work".to_owned(),
+                    ]),
+                    Transform::from_xyz(*centre, 0.0, 0.0),
+                ))
+                .id(),
+        );
+    }
     let mut villagers = Vec::new();
     for i in 0..12 {
         let group = i / 6;
@@ -358,7 +384,7 @@ fn cluster(app: &mut App) -> World {
     let subject = villagers.first().copied();
     let origin = villagers.get(6).copied();
     World {
-        places: Vec::new(),
+        places,
         villagers,
         subject,
         origin,

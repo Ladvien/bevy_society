@@ -43,6 +43,7 @@ A rumour is a record about one deed by one person. It has an origin, a subject, 
 
 ## Sources
 
+- Takács, K., Flache, A. & Mäs, M. (2016). Discrepancy and disliking do not induce negative opinion shifts. https://doi.org/10.1371/journal.pone.0157948 · `10.1371_journal.pone.0157948` — the negative result this crate's reputation model respects: people do not shift opinions away from those they dislike, so no "hostility damps itself" rule was added. Damping is located in who a person chooses to interact with, which is the decision layer.
 - Bondü, R. & Richter, P. (2016). Interrelations of justice, rejection, provocation, and moral disgust sensitivity and their links with the hostile attribution bias, trait anger, and aggression. https://doi.org/10.3389/fpsyg.2016.00795 · `10.3389_fpsyg.2016.00795` — the mechanism behind snubbing: rejection and provocation sensitivity predict reactive aggression, i.e. a reaction to how one has been treated. Cited for the mechanism only; the study reports correlations, so the starter pack's grudge curve slope is a design default.
 - Park, J. S. et al. (2023). Generative Agents. https://doi.org/10.48550/arXiv.2304.03442 · `10.48550_arxiv.2304.03442`
 - Moreno, Y., Nekovee, M. & Pacheco, A. F. (2004). Dynamics of rumor spreading in complex networks. https://doi.org/10.1103/PhysRevE.69.066130 · `10.1103_physreve.69.066130`
