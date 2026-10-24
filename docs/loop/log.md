@@ -1722,3 +1722,67 @@ hypotheses disproved, one caused by a need's clamp). Fresh eyes GREAT (every in-
 4. **`examples/capture.rs` still hardcodes 8.0 s/day** — the README clip's "23 of 25" is measured under
    settings the spec does not declare.
 5. **Retire untellable rumors** — right for memory: ~5 MiB at 5 000 over a long run, 87% untellable.
+
+## 2026-11-20-01 — The village was asleep half the day because a timeout was nine times too long
+
+**Pick.** The previous iteration filed *a person walking to bed is reported asleep* as a decision. It is —
+but the **scale** of the problem is a settings value nobody chose deliberately: `travel_timeout_hours` was
+**20 game-hours** for a village **8.2 m** across.
+
+At 64 s/day one game-hour is 170.7 ticks and walking is 0.0219 m a tick:
+
+| timeout | ticks | reach |
+|---|---|---|
+| 20 h | 3 413 | **74.7 m** |
+| 4 h | 683 | **14.9 m** |
+| village diagonal | 375 | **2.2 h** |
+
+Nine times the longest walk, and an 8-hour sleep is 1 365 ticks against a 3 413-tick timeout — so a person
+who cannot reach its bed is reported asleep for **two and a half times the sleep**.
+
+**Fitted to 4 hours**, same seed and spawn:
+
+| | 20 h | **4 h** |
+|---|---|---|
+| reported asleep | 56.8% | **36.4%** |
+| reported working | 14.8% | **21.5%** |
+| needs mean | [0.268, 0.538, 0.217, 0.267] | **[0.709, 0.395, 0.402, 0.599]** |
+| **total** | **0.322** | **0.526** |
+
+Holds at seed 42 (36.2%, 0.511). `rest` falls 0.538 → 0.395, which is correct: people no longer sleep for
+hours they have not earned. `evidence/timeout-fitted.png`.
+
+**Two silent harness bugs, found while measuring.**
+
+| | consequence |
+|---|---|
+| `contact_radius` declared and never applied | `rumor-crosses-a-cluster` set 4.0; the reader mapped three keys and not this one. Right by coincidence (4.0 is the crate default), wrong for any other number |
+| `scenarios.yaml` parsed **once per tick** | `plant_at` parses the file and was called inside the loop: **57 000 warnings** in a 67 200-tick run |
+
+The second hid the first: the one warning worth reading was repeated 57 000 times. `cargo test` never runs an
+example, so no gate caught either. `tests/scenario_spec.rs` now asserts the cluster states a
+`contact_radius`.
+
+**What that exposed.** With `contact_radius` actually applied, the cluster reaches **0.333** at 12 hours and
+**0.167** at 20 — both below its 40% observable. The **0.583** recorded two iterations ago predated the fix,
+so it was a different run. The scenario returns to **`pending`** with the design question in its note: two
+groups 40 m apart need a **10.7 game-hour** walk.
+
+**Still wrong.** Reported asleep is 36.4%, above the 33.3% one 8-hour sleep a day implies — walks are still
+mislabelled. This reduced the scale of the lie from 2.5× to 1.1×; the decision file stands.
+
+**Tests.** 36 binaries, 0 failures, both feature sets. Dead-code inventory: zero; `src/` unchanged.
+
+**Verdicts.** Behaviour GREAT (56.8% → 36.4% asleep, need total 0.322 → 0.526, holds at a second seed). Zoom
+GREAT (both panels agree; `rest` falling is correct; the cluster's apparent regression was measured, not
+assumed). Fresh eyes GREAT (two silent harness bugs, one drowning the other).
+
+**Commit.** `05f9aa3`.
+
+**Top 5 remaining.**
+1. **`Doing` while travelling** — the labelling defect stands; 36.4% is still above 33.3%.
+2. **`rumor-crosses-a-cluster` is `pending`** — 0.333 against a 40% observable; a 10.7 h crossing walk.
+3. **`need-cycle`'s observable** — three needs stay above 0.5 at these rates; a design question.
+4. **`examples/capture.rs` still hardcodes 8.0 s/day** — the README clip's "23 of 25" is measured under
+   settings the spec does not declare.
+5. **Retire untellable rumors** — right for memory: ~5 MiB at 5 000 over a long run, 87% untellable.
