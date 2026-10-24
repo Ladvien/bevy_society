@@ -3118,7 +3118,7 @@ aimed at, found the cost). Pass 3 GREAT (the coupling is the lesson).
 
 **Dead-code delta.** Zero. **Tests:** 53 binaries clean. **Village unchanged:** 22 / 33.
 
-**Commit** `pending`.
+**Commit** `7ca8f47`.
 
 **Top 5 remaining.**
 
