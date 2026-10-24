@@ -22,14 +22,26 @@ scenarios:
     status: pending
     test: tests/need_cycle.rs
     blocked: >
-      Measured 2026-11-07 and still not met. With one need and the shipped rates, a person sleeps
-      back to back: 29 completed 4-hour sleeps in 20 000 ticks, and 4 game-hours IS 683 ticks, so
-      there is no gap in which `rest` can decay. `rest` stays at 1.000 and never crosses 0.35, so the
-      need is *met* continuously rather than cycling. The cause is the choice rule, not the satisfy
-      path: `Linear(-1, 1.0)` scores a full 1.0 whenever the need is below 1.0, so the activity that
-      tops it up is always the best option the moment the previous one ends.
-      `tests/need_cycle.rs` asserts this state, so the day it changes the test fails and the
-      scenario can be marked measured.
+      Re-measured 2026-11-09 against the starter pack, which corrects the note below it. With the
+      shipped definitions and this scenario's own settings, `food` and `fun` DO cycle — both reach
+      [0.000, 1.000] and both cross 0.35 and recover past 0.7 — while `social` bottoms at 0.364 and
+      `rest` at 0.495, never crossing 0.35 because both are met too well to starve. So the observable
+      is not blocked by a broken satisfy path or by a back-to-back loop; it is a statement about
+      *which* needs starve at *these* rates.
+      The earlier note (kept below, superseded) claimed a back-to-back sleep loop. That loop was an
+      artefact of `tests/need_cycle.rs`'s own definition, which had no `Hours` gate: the starter
+      pack's `sleep` is gated `Hours(22, 6)` and ranked 1, and one person sleeps once per day
+      (measured: 10 sleeps in 10.1 days).
+      What actually starves needs in the village is travel: a 13 m walk takes 527 ticks and the
+      40-hour timeout allows 426, so far-corner villagers always time out and 78 of 108 `eat`s were
+      interrupted. `BehaviorPlugin` now warns at startup when a timeout buys less than 10 m of
+      walking.
+    superseded: >
+      Measured 2026-11-07. With one need and a test-local definition having no hour gate, a person
+      sleeps back to back: 29 completed 4-hour sleeps in 20 000 ticks, and 4 game-hours IS 683 ticks,
+      so `rest` stays at 1.000 and never crosses 0.35. The cause claimed was `Linear(-1, 1.0)` scoring
+      a full 1.0 whenever the need is below 1.0. Both the definition and the conclusion were wrong;
+      see `blocked` above.
     observable: >
       Every person's `rest` and `food` needs fall and rise again over a game-day: each crosses below
       0.35 at least once and recovers above 0.7 at least once. A need that only ever falls means no

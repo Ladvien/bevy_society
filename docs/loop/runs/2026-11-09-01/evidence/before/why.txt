@@ -1,0 +1,8 @@
+# tick 4147: someone chose compliment (0.752), 25% below snub (1.000)
+
+ 1.000  snub
+ 1.000  relax
+ 1.000  wander
+ 0.971  eat
+ 0.912  chat
+ 0.752  compliment   <- chosen

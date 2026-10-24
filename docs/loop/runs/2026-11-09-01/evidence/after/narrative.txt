@@ -1,0 +1,35 @@
+# Bram's day
+
+At the end: doing Some("eat"), needs Some([0.0, 0.0, 0.0, 0.0]), mood P0.03 A0.02 D-0.02
+
+d1 15h05: started work
+d3 19h41: chat approached by Garet (refused)
+d3 20h20: chat approached by Garet (accepted)
+d3 22h07: started sleep
+d3 22h07: finished work (interrupted)
+d6 01h58: started sleep
+d6 01h58: finished sleep (completed)
+d6 10h01: started gossip
+d6 10h01: finished sleep (completed)
+d6 10h01: gossip with Nera (accepted)
+d6 10h24: started chat
+d6 10h24: finished gossip (completed)
+d6 10h24: chat with Nera (accepted)
+d6 10h46: started eat
+d6 10h46: finished chat (completed)
+d8 17h48: started relax
+d8 17h48: finished eat (interrupted)
+d9 01h41: insult approached by Edric (accepted)
+d9 22h58: started sleep
+d9 22h58: finished relax (completed)
+d11 09h39: started compliment
+d11 09h39: finished sleep (completed)
+d12 11h48: gossip approached by Jena (refused)
+d13 15h28: compliment with Garet (accepted)
+d13 15h45: started work
+d13 15h45: finished compliment (completed)
+d14 19h07: gossip approached by Garet (refused)
+d15 03h45: started sleep
+d15 03h45: finished work (completed)
+d16 10h41: started eat
+d16 10h41: finished sleep (completed)

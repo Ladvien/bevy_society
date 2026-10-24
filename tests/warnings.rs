@@ -101,6 +101,24 @@ fn every_startup_warning_is_asserted_from_one_app() {
         duration[0]
     );
 
+    // The travel-reach warning: this app uses the default 2-hour timeout at a four-second day, which
+    // buys 0.5 m of walking — far under the 10 m floor.
+    let travel: Vec<&String> = captured
+        .iter()
+        .filter(|event| event.message.contains("metres of walking"))
+        .map(|event| &event.message)
+        .collect();
+    assert_eq!(
+        travel.len(),
+        1,
+        "exactly one short-travel-reach warning: {captured:?}"
+    );
+    assert!(
+        travel[0].contains("travel_timeout_hours"),
+        "the warning names the setting to change: {}",
+        travel[0]
+    );
+
     #[cfg(feature = "fields")]
     {
         let field: Vec<&String> = captured

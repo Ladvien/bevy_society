@@ -162,12 +162,16 @@ fn settings_for(scenario: &str) -> SocietySettings {
         // game-hours and 4200 ticks is 17 days.
         settings.seconds_per_day = 4.0;
         settings.start_hour = 15.0;
-        // Walking advances `speed / 64` metres per tick (real time) while this timeout is game
-        // hours, so the two only correspond for a given `seconds_per_day`. At 4.0 one tick is 5.6
-        // game-minutes, so 40 hours is 427 ticks: enough for the 6 m walk this scenario's spawn
-        // layout asks for (274 ticks) and short enough that a stuck walker still gives up. The
-        // coupling itself is recorded in `needs-decision/travel-time-in-two-clocks.md`.
-        settings.tuning.travel_timeout_hours = 40.0;
+        // Walking advances `speed / 64` metres per tick (real time) while this timeout is game hours,
+        // so the two only correspond for a given `seconds_per_day`. At 4.0 one tick is 5.6 game-minutes
+        // and 1.4 m/s is 0.0219 m, so a timeout of `h` game-hours buys `h · 10.7` ticks.
+        //
+        // 55 hours is 587 ticks. *Measured*, not estimated: an 8.2 m walk takes 308 ticks and the
+        // 13 m corner takes **527**, so the earlier 40 (427 ticks) starved every far-corner villager —
+        // 78 of 108 `eat`s were interrupted and `food` sat at 0.000 for the run. `BehaviorPlugin` now
+        // warns at startup when a timeout buys less than 10 m of walking, which is what caught this.
+        // The coupling itself is `needs-decision/travel-time-in-two-clocks.md`.
+        settings.tuning.travel_timeout_hours = 55.0;
     }
     settings
 }

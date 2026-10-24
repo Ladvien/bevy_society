@@ -205,8 +205,53 @@ impl Plugin for BehaviorPlugin {
         let defs = app.world().resource::<SocietyDefs>();
         warn_short_activities(defs, &settings);
         warn_unscored_fields(defs);
+        warn_short_travel_reach(&settings);
     }
 }
+
+/// Warns that `travel_timeout_hours` and the day length disagree badly enough that walks will time out.
+///
+/// Two clocks meet at a walk: [`SocialMover::speed`](crate::SocialMover) is metres per **real** second
+/// applied at the fixed step, while `travel_timeout_hours` is **game** hours. A host sets both, and
+/// nothing told it they must agree. The coupling is `needs-decision/travel-time-in-two-clocks.md`,
+/// still open — but the *silence* is not a decision the crate may defer, because it can compute how
+/// much walking a timeout buys.
+///
+/// Measured on the project's own village at `seconds_per_day = 4`, where a 40-hour timeout is 426
+/// ticks: an 8.2 m walk takes 308 ticks and fits, and the 13 m corner takes **527** and does not. The
+/// far corner's people always time out, 78 of 108 `eat`s were interrupted, and `food` sat at 0.000
+/// for the whole run.
+///
+/// The warning fires only when the timeout buys less than `MIN_WALK_METRES`, a distance no village
+/// layout can be smaller than and still be a village. Above that the crate stays quiet: the reachable
+/// distance depends on the host's layout, which `finish` cannot see.
+fn warn_short_travel_reach(settings: &SocietySettings) {
+    let seconds_per_tick = f64::from(settings.tick_secs);
+    let day_seconds = f64::from(settings.seconds_per_day);
+    if seconds_per_tick <= 0.0 || day_seconds <= 0.0 {
+        return;
+    }
+    let ticks_available =
+        f64::from(settings.tuning.travel_timeout_hours) / 24.0 / (seconds_per_tick / day_seconds);
+    // The default walking speed. Named here because the warning must speak for the default a host
+    // gets; a host that sets its own `SocialMover::speed` is beyond what this check can see.
+    let speed = 1.4_f64;
+    let metres = speed * seconds_per_tick * ticks_available;
+    if metres >= MIN_WALK_METRES {
+        return;
+    }
+    warn!(
+        "bevy_society: a travel_timeout_hours of {} at seconds_per_day {} allows {:.0} ticks, which at \
+         {speed} m/s is only {:.1} metres of walking — less than {MIN_WALK_METRES:.0} m. People whose \
+         activity is further away will always time out, and the needs those activities satisfy will \
+         never be met. Raise travel_timeout_hours or shorten the walks.",
+        settings.tuning.travel_timeout_hours, settings.seconds_per_day, ticks_available, metres
+    );
+}
+
+/// The shortest walk a village layout can reasonably ask for, in metres. Below this a timeout is
+/// certainly too short; above it the crate cannot tell, because it does not know the layout.
+const MIN_WALK_METRES: f64 = 10.0;
 
 /// Warns that a definition relies on the social-field inputs, which the decision does not score.
 ///

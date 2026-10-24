@@ -1,0 +1,8 @@
+# tick 3794: someone chose eat (0.971), 3% below work (1.000)
+
+ 1.000  work
+ 1.000  wander
+ 0.971  eat   <- chosen
+ 0.904  chat
+ 0.644  gossip
+ 0.557  compliment
