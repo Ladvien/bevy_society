@@ -2721,7 +2721,7 @@ Pass 3 **FAIL** (the verb conflates meeting and befriending).
 
 **Dead-code delta.** Zero — system, field and tuning entry all reverted.
 
-**Commit** `pending`.
+**Commit** `2e0cb65`.
 
 **Top 5 remaining.**
 
