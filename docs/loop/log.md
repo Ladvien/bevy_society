@@ -53,3 +53,62 @@ the 480-frame capture reports `friends 0, barks 0, rumor_reach 0.040` against th
 3. `ActivitySpec::barks` is never read: the SPEC says an activity's barks are thought lines on start.
 4. `docs/guide/authoring.md` does not say a consideration scoring 0 is final.
 5. Performance at 1,000 persons (`scale-1000`, still `pending`).
+
+## 2026-10-25-01 — The evidence harness, and the two numbers it changed
+
+**Why this and not the log's top item.** The log had said for two iterations that the capture
+formed no friendships, and every judgement about it was made from one end-state number. The
+loop's step 6 makes plots and a narrative a mandatory gate; neither existed
+(`docs/loop/runs/*/evidence/` held a stray cargo log). Building the gate came first, and it chose
+the work.
+
+**Change.** `examples/evidence` runs a scenario headlessly and writes `narrative.txt`,
+`series.csv` and `summary.json`. Three scenarios now produce evidence under
+`runs/2026-10-25-01/evidence/`. It then exposed two defects, both in the *scenario* rather than
+the model:
+
+1. **The run was too short for ties.** Same code, same seed, same village: 4.1 game-days gives
+   0 friends and 0 rivals; 17 game-days gives 125 and 0. Affinity moves at
+   `mere_exposure_per_day 0.05` against `affinity_relax_per_day 0.01`, and a tie measured at the
+   end of the short run read `aff 0.067, familiarity 0.818` — a neutral acquaintance, exactly
+   what those rates predict.
+2. **Walking and its timeout are in different clocks.** `speed` is metres per real second
+   (`0.022 m/tick`), `travel_timeout_hours` is game hours (21 ticks at `seconds_per_day = 4.0`).
+   A 14 m walk needed 640 ticks. Every activity ended interrupted, `satisfies` never paid out,
+   and needs sat at 0.000.
+
+**Evidence.** `runs/2026-10-25-01/evidence/{village-evening,need-cycle,rumor-crosses-a-cluster}/`.
+The controlled comparison is `village-evening` at two lengths and
+`rumor-crosses-a-cluster`, which forms **11 rivalries** — proving rivalry is reachable and the
+village's zero is a property of that village.
+
+**Before → after** (the capture, same seed):
+
+| | before | after |
+|---|---|---|
+| `rumor_reach` | 0.040 | **0.800** |
+| `friends` | 0 | **256** |
+| `rivals` | 0 | 0 |
+| `barks` | 1 | **3076** |
+| interrupted endings | 37 | **0** |
+
+**Dead-code inventory.** Unchanged at zero.
+
+**Verdicts.** Behaviour GREAT (second attempt — the first demanded the series rather than the
+summary, which is the whole point of the harness). Zoom GREAT, with `rivals 0` and a low mean
+need level named. Fresh eyes GREAT for the crate, NOT YET for the village's rivalry.
+
+**Escalated.** `docs/loop/needs-decision/travel-time-in-two-clocks.md` — three options,
+recommendation to make the timeout real-time in a later iteration as a breaking change.
+
+**Commit.** See `git log`.
+
+**Top 5 remaining.**
+1. Rivalry: `snub` needs a negative affinity the village never creates. Plant a rumor about a
+   villager and let gossip drive it, or give the definitions a friction input.
+2. Mean need level: `rest` decays 0.7/day while sleep restores at most 1.2/night, so the village
+   lives near 0.15. One of those two starter numbers is wrong for a 24-hour day.
+3. `Signal::Field` and `ActivityTarget::Gradient` still score nothing. Moussaïd 2011 is the right
+   model and its equations were stripped in conversion — re-convert before implementing.
+4. `docs/guide/authoring.md` does not say a consideration scoring 0 is final.
+5. Performance at 1,000 persons (`scale-1000`, still `pending`).
