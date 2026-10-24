@@ -112,3 +112,60 @@ recommendation to make the timeout real-time in a later iteration as a breaking 
    model and its equations were stripped in conversion — re-convert before implementing.
 4. `docs/guide/authoring.md` does not say a consideration scoring 0 is final.
 5. Performance at 1,000 persons (`scale-1000`, still `pending`).
+
+## 2026-10-26-01 — The social need gets a rate; two low needs turn out to be correct
+
+**Why.** The log said "mean need level" and attributed it to `rest` decaying 0.7/day against
+sleep's 1.2/night — arithmetic, not measurement. The harness built last iteration could test
+that per need, so it did first.
+
+**Finding.** All four needs sat below 0.35 for 94–96% of ticks, which a cycling need does not do.
+Three distinct causes, measured separately:
+
+1. **`social` was genuinely under-supplied.** It decays 1.0/day and its entire supply was
+   one-shot interaction effects (+0.2 per accepted chat), while `eat` paid food at 1.2 per
+   game-hour and `sleep` paid rest at 0.15. `chat` and `gossip` — the two activities that serve
+   social — were the only two declaring `satisfies: []`. Counted: **420 rises against 20 365
+   falls**, one rise per 80 ticks where break-even needs one per 51.
+2. **Every activity is shorter than the walk to it.** A duration is game-time; a walk is
+   real-time (`speed / 64` m/tick). At this day length a 3.5 m walk is 160 ticks and a 0.3
+   game-hour chat is 3. This is the second victim of the clock decision escalated last
+   iteration; the scenario now starts villagers arrived.
+3. **`food` and `fun` being low is correct.** `eat`'s consideration is
+   `Need(food) Logistic(-10, 0.35)` — 0.0015 at a full need, 0.50 at 0.35. A villager eats when
+   hungry. A mean of 0.056 is that curve's shape, not a leak.
+
+**Change.** `chat` gains `satisfies: [("social", 1.2)]`, `gossip` gains
+`[("social", 1.0)]`. Nothing else.
+
+**Evidence.** `runs/2026-10-26-01/evidence/` — before and after at the same seed, plus
+`rumor-crosses-a-cluster` as the fresh-eyes run.
+
+**Before → after** (4200 ticks, seed 7):
+
+| need | before | after |
+|---|---|---|
+| social | 0.105 | **0.225** |
+| rest | 0.218 | 0.200 |
+| food | 0.048 | 0.056 |
+| fun | 0.041 | 0.046 |
+
+Capture: reach 0.640, 252 friends, 3376 barks — within noise of last iteration, `rivals 0`
+unchanged.
+
+**Dead-code inventory.** Unchanged at zero.
+
+**Verdicts.** Behaviour GREAT (the residual shortfall attributed to the clock, not ignored).
+Zoom GREAT — `food`'s low mean explained as a correct logistic, and the rise:fall ratio fixed.
+Fresh eyes GREAT — the cluster scenario still forms **11 rivalries**, so the change did not
+flatten the society.
+
+**Commit.** See `git log`.
+
+**Top 5 remaining.**
+1. **The clock decision.** Make `travel_timeout_hours` real-time. Until then every short
+   activity in every host is unreachable without a scenario work-around.
+2. Rivalry in the village: `snub` needs a negative affinity that nothing creates.
+3. `Signal::Field` / `ActivityTarget::Gradient` score nothing; Moussaïd 2011 needs re-converting.
+4. `docs/guide/authoring.md` does not say a consideration scoring 0 is final.
+5. Performance at 1,000 persons (`scale-1000`, still `pending`).
