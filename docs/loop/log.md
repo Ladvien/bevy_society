@@ -2673,3 +2673,62 @@ marked `measured` on a number nobody checked.
 3. **The clock decision** - now with an observable outcome: 5.4-hour walks against 0.75-hour activities.
 4. **The harness's plant tick is thirty times the file's** - documented, still two numbers.
 5. **Mood is still negative at every seed** (-0.046 to -0.054), limited by refusal and insult frequency.
+
+## 2026-12-08-01 - The fix works and the rate cannot be chosen
+
+**Pick.** The root cause established last iteration (an exchange fires on *arrival*, once). Runner-up was
+`Doing`'s travelling semantics, escalated.
+
+**Built.** `talk_in_contact` in the `Interact` set, walking the `Perception.contact` neighbourhood that
+`expose_contacts` already computes, one `chat` per pair gated by a new `contact_talk_cooldown_hours` and a new
+`Tie::last_spoke_day` (`last_contact_day` is stamped every tick two people are near and cannot serve as a
+cooldown).
+
+**The mechanism works.**
+
+| | before | after |
+|---|---|---|
+| two co-located people, 20 000 ticks | **30 exchanges** | **89** |
+| cooldown | — | first gap **1 920 ticks at 3 h**, then held |
+
+**And it breaks the village.**
+
+| cooldown | friends | rivals |
+|---|---|---|
+| none (shipped) | **22** | **33** |
+| 3 h | **267** | **0** |
+| 12 h | 182 | 3 |
+| 48 h | 72 | 12 |
+
+267 friend pairs in 24 people is **97% of all possible pairs**. The contact pass adds **13 742** requests
+against ~7 500 baseline interactions — it nearly triples all social contact, because in a village everyone is
+always in contact.
+
+**Why no rate works.** High enough to bridge a 40 m gap is high enough to make everyone friends. The mechanism
+conflates **meeting** with **befriending**: two people in a tavern are aware of each other, they do not become
+friends by standing.
+
+**Reverted.** The crate is back at friends 22 / rivals 33. The measurements are the deliverable, and the
+decision file records three options — recommending a "sharing a place" effect be a **bark or mood nudge rather
+than an exchange**, and the scenario's observable be restated.
+
+**This is the second mechanism to produce a clique from a plausible local rule** — the `help` activity did the
+same two iterations ago (rivals 44 → 0). Two independent findings say the village's tie formation is far more
+sensitive to contact volume than its rates suggest, which is worth knowing before a third attempt.
+
+**Verdicts.** Pass 1 GREAT (the mechanism, verified tick by tick). Pass 2 **FAIL** (267 friends, 0 rivals).
+Pass 3 **FAIL** (the verb conflates meeting and befriending).
+
+**Dead-code delta.** Zero — system, field and tuning entry all reverted.
+
+**Commit** `pending`.
+
+**Top 5 remaining.**
+
+1. **Meeting and befriending share one verb.** New decision file; two mechanisms have now failed on it. A
+   contact effect that is a bark or a mood nudge rather than an `Interact` is the untried path.
+2. **Tie formation is over-sensitive to contact volume** - 22 friends becomes 267 at a 3-hour contact rate.
+   The village's friendship ceiling needs a measured relationship to contact, not just a rate.
+3. **`Doing` names the target activity while travelling** - 49.8% of person-ticks; host-facing, escalated.
+4. **The clock decision** - 5.4-hour walks against 0.75-hour activities, now with an observable outcome.
+5. **Mood is still negative at every seed** (-0.046 to -0.054).

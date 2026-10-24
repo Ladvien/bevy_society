@@ -1,83 +1,89 @@
 # How can two groups ever meet?
 
-## The state, measured
+> **Investigated 2026-12-08. The mechanism works and the rate cannot be chosen without breaking the
+> village.** The finding is below; nothing shipped.
+
+## The state
 
 `rumor-crosses-a-cluster` has been `pending` since November. Its observable:
 
 > With the two groups 40 m apart and **one person from each group brought together once**, a rumor planted in
 > the first group reaches at least 40% of the second group.
 
-Measured, the rumor reaches **0 of 6** in the second group at 64 s/day **and** at 240 s/day.
+Measured: **0 of 6** in the second group, at 64 s/day and at 240.
 
-## What is *not* wrong
+## The cause, established
 
-Each layer was checked separately, and all of them work:
+**An exchange fires on *arrival*, once.** Two people placed together at the same place give **39** interactions
+over 20 000 ticks, so the mechanism is sound; but a pair arriving at tick 100 and tick 500 shares 400 ticks of
+standing together and shares **no arrival**. They arrive hours apart by construction: a 20 m walk is **5.4
+game-hours** against a 0.75-hour activity.
 
-| layer | measured |
-|---|---|
-| steering in isolation | velocity **−1.4 m/s**, walked 2.0 → 0.731 m |
-| movement in the cluster | **359 948** person-ticks moved more than 5 cm |
-| choosing a bridge | market chosen as target **36 489** person-ticks |
-| arriving at it | **6 720** person-ticks arrived |
-| both groups there at once | **434 ticks** with a group-0 *and* a group-1 person arrived |
-| cross-group visibility | at one such tick a group-0 person had persons 7 and 11 in `near`, at **5.24 m** and **2.89 m** |
-| interactions between groups | **0** |
+Six layers were checked separately and all work — steering at 1.4 m/s, 359 948 person-ticks of movement, a
+bridge place chosen for 36 489, 6 720 ticks arrived, 434 ticks with both groups arrived, and one person seeing
+two of the other group at **2.89 m** — while cross-group interactions are **0**.
 
-So two people from opposite groups stand 2.89 m apart, each sees the other, `contact_radius` is 4 m, `chat`
-carries no script gate, and **no exchange fires between them**.
+## The fix that works, and why it cannot ship as built
 
-## The cause
+A `talk_in_contact` system in the `Interact` set, which walks the `Perception.contact` neighbourhood that
+`expose_contacts` already computes and queues a `chat` per pair, gated by `contact_talk_cooldown_hours`.
 
-**An exchange fires on *arrival*, once.** Proven by the smallest possible case: two people, both already at the
-same place, within `contact_radius` — **39 interactions** over 20 000 ticks. So the mechanism works.
+Proximity predicts who interacts with whom — Eckland 1968, quoted in Buss 1993
+(DOI `10.1037/0033-295x.100.2.204`): *"the chances are about 50-50 that the 'one and only' lives within walking
+distance."* Measured, it takes a pair of co-located people from **30** exchanges in 20 000 ticks to **89**, and
+the cooldown works exactly as designed (first gap 1 920 ticks at a 3-hour cooldown, then held).
 
-The cluster's 434 overlap ticks are ticks where both groups *are* arrived. Arrival is a single instant per
-activity, so a pair that arrived at tick 100 and tick 500 shares 400 ticks of standing together and shares no
-arrival. Nothing fires.
+**But it wrecks the village:**
 
-And they arrive hours apart by construction: a 20 m walk to a shared place is **5.4 game-hours** at 64 s/day,
-while the activity that brought them lasts 0.75. The walk and the visit are on different scales, which is
-`travel-time-in-two-clocks.md` again.
+| cooldown | friends | rivals |
+|---|---|---|
+| none (shipped) | **22** | **33** |
+| 3 h | **267** | **0** |
+| 12 h | 182 | 3 |
+| 48 h | 72 | 12 |
 
-So two groups can occupy the same place indefinitely and never exchange, **not** because the crate cannot see
-them — it can, at 2.89 m — but because it resolves exchanges on arrival rather than on contact.
+267 friend pairs in a village of 24 is **97% of all possible pairs** — a clique, not a society. Even 48 hours
+triples the baseline. The reason is scale: the contact pass adds **13 742** requests over 17 game-days against a
+baseline of roughly **7 500** accepted interactions. It nearly triples all social contact in the village.
+
+So the two goals conflict at these numbers. Any rate high enough to bridge a 40 m gap is high enough to make
+everyone friends, because in a village *everyone is always in contact*.
 
 ## Options
 
-### 1. Make contact itself an exchange trigger
+### 1. Contact talk, but not as an exchange
 
-A system that, for each pair within `contact_radius` who have not exchanged recently, fires an `Interact`.
-That is a new mechanism, and it would change the crate's cost profile (pairs, every tick).
+Queue the conversation as a **bark** or a mood nudge rather than a full `chat` exchange with its tie effects.
+Two people who share a place are aware of each other; they do not become friends by standing.
 
-- **For:** "two people standing together talk" is what a host expects, and it is the only thing that makes a
-  shared place meaningful.
-- **Against:** a new per-tick pair pass; needs a cooldown to avoid a firehose; a real model change.
+- **For:** decouples "meeting" from "befriending", which is the actual conflation. A rumor could still pass.
+- **Against:** a rumor passing *requires* a gossip exchange, so this does not bridge the cluster.
 
-### 2. Bridge with a `Person` target, not a place
+### 2. Gate contact talk on the tie
 
-Give one person an activity targeting the *other group's* people, reachable by widening `perception_radius`
-locally or by shrinking the gap to 8 m.
+Only pairs with affinity above a threshold, or ties already acquainted, speak on contact.
 
-- **For:** no new mechanism; uses the exchange as designed.
-- **Against:** it is not a *cluster* scenario any more — the gap is the subject.
+- **For:** keeps the village's rate near baseline; new contacts stay rare.
+- **Against:** the cluster's groups have no ties between them, so the gate closes exactly where the scenario
+  needs it open.
 
 ### 3. Restate the observable
 
-Say what the crate does: a rumor crosses when someone chooses a person in the other group as a gossip target,
-which needs them within perception.
+Accept that a meeting needs one person to *choose* the other as a target, which needs them within
+`perception_radius`, and that a 40 m gap cannot be crossed by the decision model at this clock.
 
-- **For:** honest, cheap.
-- **Against:** it retires a scenario that names a real question — "can gossip cross a gap" — without answering
-  it.
+- **For:** honest, and it names the real constraint (`travel-time-in-two-clocks.md`).
+- **Against:** retires the scenario without answering it.
 
 ## Recommendation
 
-**Find out whether option 1's reading is right before choosing.** The decisive test is one pair, placed within
-`contact_radius`, both already arrived at the same place, and a check of whether `InteractionResolved` ever
-fires for them. If it does not, the crate's exchange is arrival-driven and the scenario needs option 1 or 2.
+**Option 3 for the scenario, and option 1 as a separate feature.** The scenario asks for a crossing the
+decision model cannot produce at its clock; restating it is honest. A "people who share a place notice each
+other" system is worth having *for its own sake* — it is what makes a tavern feel occupied — but it must be a
+bark or mood effect, not an exchange, or the village becomes a clique.
 
 ## What ships now
 
-Nothing from this exploration. The scenario stays `pending` and its observable unchanged. The measurement chain
-above is recorded so the next attempt starts from the containment rather than from the symptom — and because
-six layers each checked out while the outcome was zero, which is worth having written down.
+Nothing. The `talk_in_contact` change was written, measured at four cooldowns, and **reverted**; the crate is
+back at friends 22 / rivals 33. The measurements above are the deliverable, so the next attempt does not
+re-tune a rate that cannot be right.
