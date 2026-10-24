@@ -63,3 +63,21 @@ A `Person`-targeted leisure activity — telling stories, playing — so a use c
 
 Deferred because it is a definitions-file addition a host would have to know about, and because the
 number it should carry is the design question this file exists to ask.
+
+## Resolved 2026-11-13: option 1, as `play`
+
+The starter pack gains `play`: `target: Person`, `duration_hours: 0.5`, `satisfies fun 1.7` (0.85 per use,
+0.94 uses a day) and an `Affinity Linear(0.0, 0.8)` gate so it is available with acquaintances.
+
+| | before | after |
+|---|---|---|
+| `fun` at zero | 33.8% | **1.3%** |
+| `fun` mean | 0.061 | **0.112** |
+| mean of all four needs | 0.127 | **0.128** |
+
+The total is flat: `social` 0.124 → 0.107 and `food` 0.101 → 0.080, because play competes for the same
+hours. That is the honest reading — a reallocation that happens to hit the worst-served need, not a free
+win. The difference from the reverted rate change is that this source does not consume the evening.
+
+Cost: the 5 000-person tick rises **9.2%** (275.5 → 300.8 ms), which is `10/9 − 1` scoring passes per
+neighbour. A host that prefers the cheaper tick drops `play` and keeps `relax`.

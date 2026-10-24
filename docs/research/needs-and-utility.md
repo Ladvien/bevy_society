@@ -43,7 +43,9 @@ run. Raising `relax` to 0.55 per game-hour (0.825 per use, 0.97 uses a day) halv
 over-subscribed and one supply only crowds out another. Reverted.
 
 `BehaviorPlugin::finish` warns when a need's best source needs more than four uses a day, the point past
-which no activity shape is plausible. `SocietyDefs::need_decay` and `best_source` expose the same
+which no activity shape is plausible. The starter pack now also carries `play` — `Person`-targeted,
+0.5 h, 0.85 per use — so `fun` needs 0.94 uses a day rather than 1.33, and in a 24-person village it
+sits at zero for 1.3% of ticks rather than 33.8%. `SocietyDefs::need_decay` and `best_source` expose the same
 arithmetic to a host. The open question — what should a village's evening be — is
 `docs/loop/needs-decision/over-subscribed-evening.md`.
 

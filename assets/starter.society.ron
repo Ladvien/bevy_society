@@ -87,6 +87,30 @@
             barks: [],
         ),
         (
+            id: "play",
+            target: Person,
+            duration_hours: 0.5,
+            considerations: [
+                // Cheap to reach, like `chat`: the other person walks to the actor, so a use costs half
+                // an hour rather than a walk plus a sitting. That is the whole difference from `relax`,
+                // which has the same purpose but costs a walk and an evening window — measured, a person
+                // got 0.10 of the 1.33 `relax`es a day that `fun`'s decay demanded.
+                //
+                // Intrinsic motivation arises in need-supportive social contexts rather than in
+                // solitude: Vansteenkiste & Ryan 2013 (DOI 10.1037/a0032359) on self-determination
+                // theory. Playing *with* someone is the social form of leisure.
+                (input: Need("fun"), curve: Linear(-1.0, 1.0)),
+                (input: Affinity, curve: Linear(0.0, 0.8)),
+                (input: Distance, curve: Linear(-1.0, 1.0)),
+            ],
+            // `satisfies` is a per-game-hour rate paid for the whole duration, so 1.7 x 0.5 h = 0.85 per
+            // use against `fun`'s 0.8/day: one session covers a day. Design default, sized to the decay
+            // the same way `relax`'s rate has to be, and no paper gives the number.
+            satisfies: [("fun", 1.7), ("social", 0.3)],
+            interaction: Some("chat"),
+            barks: ["Ha!"],
+        ),
+        (
             id: "compliment",
             target: Person,
             duration_hours: 0.2,

@@ -39,17 +39,20 @@ fn every_need_has_a_source() {
 }
 
 #[test]
-fn the_budget_exposes_the_one_need_that_starves() {
-    // The crate's own warning threshold is four uses a day. `social` needs 2.78 and gets them, because
-    // a chat targets a `Person` and costs three ticks. This asserts the arithmetic, not a behaviour:
-    // the behaviour is in `tests/needs.rs` and the evidence dir.
+fn every_need_is_now_covered_by_one_use_a_day() {
+    // `play` was added for exactly this: `fun` had one source, `relax`, which needed 1.33 uses a day and
+    // got 0.10. With `play` the best source pays 0.85 and needs 0.94 uses a day.
     let defs = SocietyDefs::starter().expect("the starter pack compiles");
-    let fun_decay = defs.need_decay("fun").expect("fun is defined");
-    let (_, per_use) = defs.best_source("fun").expect("fun has a source");
-    let uses_per_day = fun_decay / per_use;
-    println!("fun needs {uses_per_day:.2} relaxes a day; measured supply is 0.10");
-    assert!(
-        uses_per_day > 1.0,
-        "if this ever becomes <= 1, one evening session covers a day and the imbalance is gone"
-    );
+    for need in ["rest", "food", "fun"] {
+        let decay = defs.need_decay(need).expect("the need is defined");
+        let (activity, per_use) = defs.best_source(need).expect("the need has a source");
+        let uses_per_day = decay / per_use;
+        println!("{need:5} {uses_per_day:.2} uses/day of {activity}");
+        assert!(
+            uses_per_day <= 1.0,
+            "{need} needs {uses_per_day:.2} uses of {activity} a day; one should cover it"
+        );
+    }
+    // `social` is the exception and stays one: it needs 2.78 chats and gets them, because a chat
+    // targets a `Person` and costs three ticks.
 }

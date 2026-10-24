@@ -792,6 +792,27 @@ impl SocietyDefs {
             .map(|spec| spec.decay_per_day)
     }
 
+    /// Every activity that supplies `need`, with the amount each pays per use, in definition order.
+    ///
+    /// A need with one source is a need with no choice: whatever else competes for the same hour takes
+    /// from it. `fun` in the starter pack had exactly one.
+    pub fn sources_for(&self, need: &str) -> Vec<(&str, f32)> {
+        let Some(id) = self.need_id(need) else {
+            return Vec::new();
+        };
+        self.activities
+            .iter()
+            .filter_map(|activity| {
+                let rate = activity
+                    .satisfies
+                    .iter()
+                    .find(|(slot, _)| *slot == id)
+                    .map(|(_, rate)| *rate)?;
+                Some((activity.name.as_str(), rate * activity.duration_hours))
+            })
+            .collect()
+    }
+
     /// The activity that supplies `need` most per use, with the amount it supplies, or `None` when no
     /// activity satisfies it.
     ///
