@@ -1,5 +1,13 @@
 # Should a village ever be pleased?
 
+> **Largely resolved, in two steps and not by the options below.** 2026-12-01 added the **positivity offset**
+> (option 2's "a term for life going well", with a source: Cacioppo et al. 2013's positive *intercept*), which
+> fixed the **ceiling** — max pleasure went from exactly `+0.000` to `+0.0155`. 2026-12-02 gave `chat` and
+> `gossip` a mutual `Liking` on accept (option 1, the appraisal balance), which fixed most of the **mean**:
+> `-0.122 -> -0.066` at three seeds, and the steady state went from **Joy 0 / Liking 0** to **Joy 22 /
+> Liking 14**. Mean pleasure is still mildly negative and that is now a deliberate negativity bias, not a
+> defect. The original analysis follows, because it is what made both steps findable.
+
 ## The problem, measured
 
 `village-evening`, seed 7, 24 people, 17 game-days:
@@ -78,3 +86,23 @@ option 1 needs the full-village numbers before it is tuned.
 `Tuning::rejection_distress` names the refusal constant, which was a literal `0.3` and the crate's only
 unnamed emotion intensity. A definition's own `on_reject` emotion now **replaces** it rather than stacking
 with it, which measured *better* than either alone.
+
+## What actually fixed it, 2026-12-02
+
+Option 1, but not by tuning a rate. Measuring where the 3:1 came from gave a structural answer:
+
+| | count |
+|---|---|
+| refusals | 1 216 |
+| distress appraisals | **1 216** |
+| acceptances | 1 338 |
+| positive appraisals | **443** |
+
+**Every refusal is exactly one appraisal and no acceptance is.** `chat` and `gossip` — 43% of accepted
+interactions — paid no emotion to either party, and `compliment` paid only its target. Giving both a mutual
+`Liking` moved the ratio to **1.06:1** and mean pleasure from **-0.122 to -0.066** at all three seeds.
+
+**Why the mean stays negative, deliberately.** Cacioppo et al. give the negative channel the steeper *gain*;
+an insult pays `Anger 0.5` against a conversation's `Liking 0.2`, refusals are more frequent than acceptances
+in a crowd, and so distress outnumbers joy even now. That is the negativity bias the paper describes, and the
+remaining headroom is a question about the pack, not the model.

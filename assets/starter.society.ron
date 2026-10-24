@@ -167,7 +167,22 @@
     interactions: [
         (
             id: "chat",
-            on_accept: (actor_needs: [("social", 0.2)], target_needs: [("social", 0.2)]),
+            // **An accepted conversation is an appraisal.** It used to pay `social` to both people and
+            // nothing to either one's mood, so 43% of accepted interactions in the village were
+            // affectively silent — and they are the most common 43%. Measured over 20 000 ticks: 1 216
+            // refusals produced exactly 1 216 distress appraisals while 1 338 acceptances produced 443
+            // positive ones, because only `compliment` gave Joy and only to its target.
+            //
+            // `Liking` rather than `Joy`: OCC's joy is a *prospect* emotion about an event, and what a
+            // conversation gives is liking for the person one had it with. Cacioppo, Cacioppo & Gollan
+            // 2013 (DOI 10.1017/S0140525X13002537) give the negative channel the steeper gain, so this
+            // is modest against an insult's `Anger 0.5` — a bias, not a silence.
+            on_accept: (
+                actor_needs: [("social", 0.2)],
+                target_needs: [("social", 0.2)],
+                actor_emotion: Some((Liking, 0.2)),
+                target_emotion: Some((Liking, 0.2)),
+            ),
             // A refusal is not an injury: the pack used to give it no outcome of its own, so the only
             // emotional consequence of being turned away was the crate's rejection distress — measured,
             // half of all the village's negativity. A refused greeting is mildly deflating, not a small
@@ -182,7 +197,14 @@
         ),
         (
             id: "gossip",
-            on_accept: (actor_needs: [("social", 0.15)], target_needs: [("social", 0.15)]),
+            on_accept: (
+                actor_needs: [("social", 0.15)],
+                target_needs: [("social", 0.15)],
+                // Listening to gossip is mildly agreeable for both: the teller is heard and the
+                // listener is entertained. Same reasoning as `chat`.
+                actor_emotion: Some((Liking, 0.15)),
+                target_emotion: Some((Liking, 0.15)),
+            ),
             on_reject: (actor_emotion: Some((Distress, 0.1))),
             gossip: true,
             barks: (

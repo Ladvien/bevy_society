@@ -2351,3 +2351,64 @@ exactly zero at 0.0). Zoom GREAT (the plot shows the ceiling moving and the cent
 4. **`rumor-crosses-a-cluster`** - 0.333 against the 40% it asserts, at both clocks.
 5. **`need-cycle` is still `pending`** - its test passes but its observable claims `rest` and `food` cycle
    when only `food` does; re-stating an observable is a decision.
+
+## 2026-12-02-01 - Pleasant conversation was affectively silent
+
+**Pick.** The log's #1 (the appraisal balance), and measuring it turned a *ratio* into a *structural fact*.
+
+| | count |
+|---|---|
+| refusals | 1 216 |
+| distress appraisals | **1 216** |
+| acceptances | 1 338 |
+| positive appraisals | **443** |
+
+**Every refusal is exactly one appraisal and no acceptance is.** `chat` and `gossip` — **43% of accepted
+interactions**, the two most common — paid `social` to both people and **no emotion to either**, and
+`compliment` paid only its target, so the actor who initiates a pleasant exchange gained no affect from it in
+any interaction.
+
+Runner-up was `Doing`'s travelling semantics (49.8% of person-ticks) — a component a host reads, so escalated.
+
+**Change.** `chat` and `gossip` pay mutual `Liking` on accept (0.2 and 0.15). `Liking`, not `Joy`: OCC's joy
+is a prospect emotion about an event; what a conversation gives is liking for the person.
+
+| | before | after |
+|---|---|---|
+| positive appraisals | **443** | **1 491** |
+| negative:positive | **3.58 : 1** | **1.06 : 1** |
+| mean pleasure, seed 7 | -0.1224 | **-0.0657** |
+| seed 42 | -0.1268 | **-0.0652** |
+| seed 99 | -0.1102 | **-0.0696** |
+| steady state | Anger 14, Distress 4, **Joy 0, Liking 0** | Anger 14, Distress 25, **Joy 22, Liking 14** |
+| max pleasure | -0.047 | **+0.237** |
+
+Needs unchanged (0.603 -> 0.607), so this is a mood correction and not a simulation rewrite.
+
+**Honest limit.** Mean pleasure is still negative and distress still outnumbers joy, because refusals are
+frequent and each is one distress. Cacioppo et al. 2013 give the negative channel the steeper **gain**, so an
+insult still pays `Anger 0.5` against a conversation's `Liking 0.2` — the bias survives, and it should.
+
+**This closes a three-iteration chain**: the ceiling (positivity offset, 2026-12-01), now the mean. The
+decision file records both.
+
+**Evidence.** `runs/2026-12-02-01/evidence/appraisal-balance.png` — three seeds, every green trace above its
+red counterpart for 240 game-days; the Joy bar going from 0 to 22 while Anger stays at 14.
+
+**Verdicts.** Behavior GREAT (`Distress` equals the refusal count *exactly*, `assert_eq!`; positives now 1.5 per
+10 acceptances against 1 per 3). Zoom GREAT (three seeds, all consistent to 0.005; the zero-height Joy bar was
+the defect). Fresh eyes GREAT (the bias survives — Anger unchanged — and the two questions a host would ask are
+answered in the eval).
+
+**Dead-code delta.** Zero.
+
+**Commit** `pending`.
+
+**Top 5 remaining.**
+
+1. **`Doing` names the target activity while travelling** - 49.8% of person-ticks; host-facing, escalated.
+2. **The clock decision** - the largest behavioural lever (15 points), escalated.
+3. **`rumor-crosses-a-cluster`** - 0.333 against the 40% it asserts, at both clocks.
+4. **`need-cycle` is still `pending`** - its observable claims `rest` and `food` cycle when only `food` does.
+5. **Pleasant affect still loses to distress** - by design at the per-event level, but the *frequency* of
+   refusal (47% of interactions) is a pack property nobody has questioned.
