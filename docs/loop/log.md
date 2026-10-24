@@ -2833,3 +2833,58 @@ shipping a model change sold as a fix that leaves 260 friend pairs).
 3. **`Doing` names the target activity while travelling** - 49.8% of person-ticks; host-facing, escalated.
 4. **The clock decision** - 5.4-hour walks against 0.75-hour activities.
 5. **Mood is still negative at every seed** (-0.046 to -0.054).
+
+## 2026-12-11-01 - Five mechanisms, one cause
+
+**Pick.** Last iteration concluded the lever was "the threshold and its inputs". I tested that directly, twice.
+Both failed, and the failures gave a better answer than a fix.
+
+**What the thresholds actually do.** Measured at the end of a run:
+
+| | affinity | trust | familiarity |
+|---|---|---|---|
+| friend-ties (115) | **0.792** | **0.480** | 0.907 |
+| other ties (53) | -0.223 | 0.068 | 0.908 |
+
+`classify` demands familiarity `>= 0.3`; **every pair in contact has 0.907 and 0.908** — it does not discriminate
+at all. Trust separates sevenfold, which is why a gate on it looked right.
+
+**Both tests negative.**
+
+| configuration | friends | rivals |
+|---|---|---|
+| shipped | **22** | **33** |
+| `Friend` also needs trust >= 0.6 | 22 | 33 |
+| contact talk 3 h + trust >= 0.35 | **267** | **0** |
+| saturate affinity, trust, respect | 23 | 43 |
+| saturate all three + contact talk | **268** | **0** |
+
+**Why.** `chat` pays `trust: 0.05` per accepted exchange, so contact talk at ~8 a day adds **+0.4 trust/day** —
+trust saturates exactly as affinity does, and the gate is on a quantity the same mechanism supplies. And
+saturation bounds at **1.0** while every threshold is `<= 0.4`, so it changes *when* a bar is crossed, never
+*whether*.
+
+**The statement that covers all five failures.** A `help` activity (rivals 44 -> 0), a contact exchange (friends
+22 -> 267), saturating affinity (260), a trust gate (267), and saturating everything (268) all failed for one
+reason: **no tie variable can sit below a threshold for a pair that has had contact.** All four accumulate,
+every exchange supplies all of them, and the bound is above the bar.
+
+**What is left.** One untested shape: an asymptote **below** the threshold (`K < 0.4`), so no amount of contact
+with one person suffices and friendship needs a second input. It is the only property none of the five had.
+
+**Verdicts.** Pass 1 **FAIL** (twice). Pass 2 GREAT (the distributions explain both negatives — familiarity
+indiscriminate, trust saturated by the mechanism it gates). Pass 3 GREAT (one statement, five failures).
+
+**Dead-code delta.** Zero. **Village unchanged:** friends 22 / rivals 33.
+
+**Commit** `pending`.
+
+**Top 5 remaining.**
+
+1. **Bound the tie accumulators BELOW the threshold.** The single untested shape, and the only property the five
+   failures lacked. `K < 0.4` for affinity so friendship needs a second input.
+2. **Familiarity is in `classify` and discriminates nothing** - 0.907 vs 0.908. Either drop it from the rule or
+   make it saturate lower; it is currently a comment pretending to be a gate.
+3. **Meeting and befriending share one verb** - blocked behind (1).
+4. **`Doing` names the target activity while travelling** - 49.8% of person-ticks; host-facing, escalated.
+5. **The clock decision** - 5.4-hour walks against 0.75-hour activities.

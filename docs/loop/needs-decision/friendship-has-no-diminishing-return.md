@@ -1,5 +1,8 @@
 # Should forty-five conversations make you friends?
 
+> **Five mechanisms have now been tested against this problem and none works — see "Five failures, one cause" at
+> the end, which is the most useful thing in this file.**
+>
 > **Option 1 was tested on 2026-12-10 and does not work.** Saturating the gain — the recommendation below —
 > leaves the clique intact: with a contact exchange at 3 h, friends are **260** under saturation against
 > **267** without it, and rivals are **0** in both. Saturation only slows the *approach* to affinity 1; it does
@@ -146,3 +149,53 @@ for most pairs — a lower asymptote, a threshold above the asymptote, or a gate
 **Option 2 is the one to try next**, because it uses a quantity the crate already models and already moves
 slowly. Saturation was the cheapest fix and it is now known not to work, which is worth having measured rather
 than assumed.
+
+## Five failures, one cause
+
+Every mechanism tried against "everyone becomes friends" has failed, and each failed for the same reason.
+
+| mechanism | measured | tried |
+|---|---|---|
+| a `help` activity, so positive deeds exist | rivals **44 → 0** | 2026-12-03 |
+| a contact-triggered exchange at 3 h | friends **22 → 267** | 2026-12-08 |
+| saturating **affinity**, the recommended fix | **260** with contact | 2026-12-10 |
+| a **trust** gate on the `Friend` label | **267** — no effect | 2026-12-11 |
+| saturating **all three** accumulators (affinity, trust, respect) | 23 alone, **268** with contact | 2026-12-11 |
+
+### Why the trust gate did nothing
+
+Measured distributions at the end of a run:
+
+| | affinity | trust | familiarity |
+|---|---|---|---|
+| friend-ties (115) | **0.792** | **0.480** | 0.907 |
+| other ties (53) | −0.223 | 0.068 | 0.908 |
+
+Trust *does* separate them, sevenfold. But `chat` pays `trust: 0.05` per accepted exchange to both parties, so
+contact talk at an 8-a-day rate adds `+0.4/day` and trust saturates exactly as affinity does. **A gate on trust
+is a gate on a quantity the same mechanism saturates.**
+
+### Why saturation cannot work
+
+Saturating bounds a variable at **1.0** — above every threshold in `classify` (0.4, 0.3, 0.2, 0.1). It changes
+how fast the bound is approached, not whether the threshold is passed. Measured twice: affinity alone (260) and
+all three (268).
+
+### The structural conclusion
+
+**No tie variable can be below a threshold for a pair that has had contact.** Affinity, trust, respect and
+familiarity all accumulate, and every exchange supplies all of them, so any level-based gate is passed by
+contact volume alone.
+
+What remains is not a level but a **shape on the input**:
+
+1. **Bound the accumulator below the threshold.** e.g. affinity asymptote `K = 0.35` with `Friend` at 0.4, so no
+   amount of contact with one person is sufficient and friendship needs a second input. Untested.
+2. **Gate on `max_ties`,** lowering the cap from 150 to something a village of 24 could respect. Bounds the
+   count rather than the meaning.
+3. **Do not add contact exchanges.** Restate the two scenarios that wanted them, and accept that the decision
+   model's meetings happen by targeting a person, not by proximity.
+
+**Option 1 is the only one left that changes the shape**, and it is untested. Two iterations have now been spent
+testing shapes that bounded at the wrong place; this one bounds *below* the threshold, which is the property
+none of the five failures had.
