@@ -1850,3 +1850,61 @@ GREAT (the labelling decision's consequence is 62.5% of a life in transit, and t
 4. **`need-cycle`'s observable** — three needs stay above 0.5 at these rates; a design question.
 5. **`examples/capture.rs` still hardcodes 8.0 s/day** — the README clip's "23 of 25" is measured under
    settings the spec does not declare.
+
+## 2026-11-22-01 — A coin flip decided which tavern you walked to
+
+**Pick.** The log's #1's *unblocked half*: a `Place` target carries no distance, so the far tavern and the
+near one are equally likely. Implementing the decision file's crate-level travel consideration needs an
+operator; this needs none — the decision already knows the distance, it just did not consult it.
+
+**The defect.** `targets_for` returns **every** place carrying the tag, a `Place` target has no `Distance`
+term, so they all score identically and tie — and the tie was a uniform pull from the seeded RNG. Measured
+with two taverns serving `food`, one **1 m** away and one **9 m**:
+
+| | near | far |
+|---|---|---|
+| before | 3 020 | **2 979** |
+| after | **5 999** | **0** |
+
+**The fix.** Nearest wins for `Place` and `Point`; the uniform pull stays for `Person`. That asymmetry is
+deliberate: a tavern does not move, so there is nothing to randomise for variety — but a villager that
+always talks to the physically closest person has one friend. Ties on distance fall back to `min_by`'s
+first-of-equal and the seeded draw is untouched, so determinism holds 2/2.
+
+**In the village**, same seed and spawn:
+
+| | random tie | **nearest tie** |
+|---|---|---|
+| travelling | 62.5% | **58.9%** |
+| need mean | 0.526 | **0.545** |
+| `work` | 9.1% | 10.1% |
+
+Holds at seed 42 (58.8%, 0.550). `need-cycle` and `rumor-crosses-a-cluster` unchanged.
+
+**The effect is small and the plot says so.** `evidence/nearest.png` shows the two travelling lines
+overlapping heavily: the village's four places sit within about 13 m of each other, so near and far rarely
+differ. The defect is unambiguous in isolation and modest in this layout. Reporting 62.5% → 58.9% as a fix
+for travelling would overclaim; `needs-decision/travel-cost-is-not-scored.md` is the larger lever, with its
+own measured 12-point improvement from a different mechanism.
+
+**What it makes true.** `Signal::Distance` existed, was documented as an input, and was **not consulted** for
+the one target kind whose destination cannot move. A host reading the docs would have assumed the decision
+prefers a near place. It now does.
+
+**Tests.** 37 → **38** binaries, 0 failures, both feature sets. Dead-code inventory: zero — `place_distance`
+is reached from the tie-break and asserted by the new test.
+
+**Verdicts.** Behaviour GREAT (3 020/2 979 → 5 999/0; village 62.5% → 58.9%, holds at a second seed). Zoom
+GREAT (the plot shows a small effect and the review says so). Fresh eyes GREAT (a documented signal now does
+what its docs imply).
+
+**Commit.** `bf74eed`.
+
+**Top 5 remaining.**
+1. **Travel cost is not scored** — `needs-decision/travel-cost-is-not-scored.md`. Five activities score
+   `Distance` nowhere; eight are shorter than a crossing walk.
+2. **`Doing` while travelling** — the labelling decision; un-ignore `tests/travel.rs` when it lands.
+3. **`rumor-crosses-a-cluster` is `pending`** — 0.333 against a 40% observable; a 10.7 h crossing walk.
+4. **`need-cycle`'s observable** — three needs stay above 0.5 at these rates; a design question.
+5. **`examples/capture.rs` still hardcodes 8.0 s/day** — the README clip is measured under settings the spec
+   does not declare.
