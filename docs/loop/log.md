@@ -393,3 +393,52 @@ four thresholds and the cluster still reaches 0.333.
 3. `Signal::Field` / `Gradient` — Moussaïd 2011 needs re-converting.
 4. A log-capture harness so warnings can be asserted rather than read by hand.
 5. `scale-1000` perf.
+
+## 2026-10-31-01 — What a thousand people cost, and where the design breaks
+
+**Why this.** `scale-1000` had been `pending` since the loop began, the brief ranks performance fourth,
+and `docs/guide/concepts.md` asserted the brute-force perception was *"fine"* to about a thousand
+people with no number behind it. An adjective about the crate's own cost is exactly the sort of claim
+this loop exists to replace.
+
+**Change.** `examples/benchmark` spawns N autonomous persons, settles them so they are not all idle,
+then times N society ticks and reports `ms_per_tick`. Nothing in the library changed.
+
+**The numbers** (release, M1 Max, starter pack, `tick_secs = 0.25`):
+
+| persons | ms/tick | pairs/tick | amortised per 60 fps frame |
+|---|---|---|---|
+| 100 | 0.549 | 4 950 | 0.03 ms (0.2%) |
+| 1 000 | **14.086** | 499 500 | 0.83 ms (4.9%) |
+| 5 000 | **351.640** | 12 497 500 | 23.4 ms (**140%**) |
+
+**Reproducible:** 14.168 and 14.167 ms/tick across two independent 400-tick runs — a 0.01% spread.
+
+**Quadratic, confirmed numerically:** cost grows **25.0×** for 25× the pairs (1 000 → 5 000), and
+`ms_per_million_pairs` stays flat at 28.1–28.2. The 100-person figure reads 110 because fixed overhead
+dominates at 4 950 pairs.
+
+**What a host learns.** 100 people is free; 1 000 is 4.9% of a 60 fps budget, usable but not free, and
+that amortisation assumes one tick every fifteen frames; 5 000 costs more than a whole frame. The
+guide's "fine up to about a thousand" was right at 1 000 and wrong at 5 000, and the table now says
+where the cliff is.
+
+**Evidence.** `runs/2026-10-31-01/evidence/scale-{100,1000,5000}.json`, `eval.md`, `perf.md`.
+
+**Dead-code inventory.** Unchanged at zero.
+
+**Verdicts.** Behaviour GREAT — 0.01% reproducible, with the idle-crowd and per-update traps both
+closed, and per-system attribution flagged as inference from the quadratic shape rather than a
+profile. Zoom GREAT — quadratic confirmed as exactly 25.0×, the 100-person outlier explained. Fresh
+eyes GREAT — a host now learns where the cliff is.
+
+**Commit.** See `git log`.
+
+**Top 5 remaining.**
+1. **The cluster's 1:24 starvation** — option 1: a second need (`belonging` for chat, `social` for
+   gossip). A schema change; the only remaining path, and now the oldest open finding.
+2. **The clock decision** (`travel_timeout_hours` real-time) — escalated, still open.
+3. **`Signal::Field` / `Gradient`** — Moussaïd 2011 needs re-converting.
+4. **A spatial index for perception**, if a host needs past ~2 000 people. Now a `needs-decision/`
+   note with numbers behind it rather than a guess.
+5. A log-capture harness so warnings can be asserted rather than read by hand.
