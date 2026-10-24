@@ -2526,3 +2526,50 @@ line is the argument; the rising rival bar is shown). Fresh eyes GREAT (three se
    -0.05; what remains is the *frequency* of refusal and insult, not any single term.
 4. **`rumor-crosses-a-cluster`** - 0.333 against the 40% it asserts, at both clocks.
 5. **`need-cycle` is still `pending`** - its observable claims `rest` and `food` cycle when only `food` does.
+
+## 2026-12-05-01 - A scenario marked `measured` that nothing asserted
+
+**Pick.** Orient step: four iterations had changed the model and the pack, so I ran the scenarios and read
+their stated observables. `village-evening` claims a rumor planted at tick 300 is *"told to at least one other
+person"* — and **`grep` across `tests/` found nothing asserting it**. Runner-up was `Doing`'s travelling
+semantics, escalated.
+
+**Ten seeds at the harness's tick:**
+
+| seed | 3 | 4 | 5 | 6 | 1 | 7 | 11 | 42 | 99 | 8 |
+|---|---|---|---|---|---|---|---|---|---|---|
+| `known_by` | 2 | 2 | 2 | 2 | 3 | 5 | 3 | 3 | **1** | **1** |
+
+**The flake was not the model.** Three separate faults:
+
+1. **Two plant ticks, thirty times apart.** The file says **300**; `plant_at` scales the authored 560 by
+   `seconds_per_day / 4` and plants at **8 960**. Measured: **7 of 7 seeds** spread the rumor at 300 (reaching
+   2-8 villagers), 8 of 10 at 8 960 — a tick past the village's busiest period.
+2. **`known_by` counted the player**, a `Person` without `Autonomous` that never gossips. At seeds 8 and 99 the
+   harness said 1 while the count over `PersonIndex` was 2: one villager and the player. A rumor reaching only
+   the player has died, and counting it would have made the observable true while the mechanism failed.
+3. **Nothing asserted any of it.**
+
+**Change.** `tests/village_evening.rs` asserts the condition across seven seeds, counting villagers only. Both
+ticks are now stated in `scenarios.yaml` and in `plant_at`'s doc, with the measurement. No model change.
+
+**What I got wrong on the way.** Two hypotheses, both measured and discarded: that `knowledge_capacity`
+eviction caused it (nobody holds more than **26** rumors against a cap of **64**), and that a 4 200-tick test
+would work at the harness's 8 960 tick (the plant never happened — **0 of 5**).
+
+**Verdicts.** Behavior GREAT (the mechanism works; the documentation described a run the harness does not
+perform). Zoom GREAT (8 of 10 versus 7 of 7 is the whole finding). Fresh eyes GREAT (a reader of the scenario
+file would have measured a different experiment under the same `status: measured`).
+
+**Dead-code delta.** Zero. **Tests that assert a scenario:** one, where there were none.
+
+**Commit** `pending`.
+
+**Top 5 remaining.**
+
+1. **`Doing` names the target activity while travelling** - 49.8% of person-ticks; host-facing, escalated.
+2. **The clock decision** - the largest behavioural lever (15 points), escalated.
+3. **The harness's plant tick is thirty times the file's** - now documented, but they are still two numbers.
+   Aligning them changes the clip, so it is a decision.
+4. **`need-cycle` is still `pending`** - its observable claims `rest` and `food` cycle when only `food` does.
+5. **`rumor-crosses-a-cluster`** - 0.333 against the 40% it asserts, at both clocks.

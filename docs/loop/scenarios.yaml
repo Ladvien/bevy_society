@@ -91,6 +91,13 @@ scenarios:
       The hero-GIF scenario: ties form (at least three friendships and one rivalry), a rumor planted at
       tick 300 is **told to at least one other person**, and at least six barks are written. This is the
       one scenario whose numbers the README's clip depends on.
+      (Corrected 2026-12-05: **the harness does not plant at tick 300.** `examples/evidence.rs::plant_at`
+      scales the authored 560 by `seconds_per_day / 4`, which is **8 960** at this scenario's 64 s/day —
+      560 was authored against the old four-second harness day. Measured at 300, the condition holds at
+      **7 of 7 seeds** (reaching 2-8 villagers); at 8 960 it holds at 8 of 10. The two ticks are now stated
+      here so neither is mistaken for the other, and `tests/village_evening.rs` asserts the condition at
+      300 across seven seeds. The condition also counts **villagers**, not `PersonIndex`: the player is a
+      `Person` without `Autonomous` and never gossips, so a rumor that reached only the player has died.)
       (Corrected 2026-11-16: this asked for the rumor to reach **half the village**. Measured over 17
       game-days at this scenario's own settings, the village creates about **18 rumours a day** — a deed
       every few minutes — and `best_telling` correctly prefers the strongest, freshest one each time. A

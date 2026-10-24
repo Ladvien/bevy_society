@@ -336,6 +336,14 @@ fn ticks_for(scenario: &str, day_override: Option<f32>) -> usize {
 /// village has not yet gossiped, so the rumor is planted among people with nothing to say and never
 /// spreads. Measured: reach 0.000 over 17 game-days, against 0.375 when planted after the village had
 /// a history.
+///
+/// **So this is not the tick `scenarios.yaml` names.** The file says "a rumor planted at tick 300"; this
+/// function returns **8 960** for `village-evening` at 64 s/day. The same conversion is applied to the
+/// `ticks:` count above, so both mean "the same point in game-days", but the two numbers in the
+/// documentation and in the run disagree by a factor of thirty. Measured, the observable holds at **7 of 7
+/// seeds when planted at 300** (reaching 2-8 villagers) and at 8 of 10 at 8 960 — a tick that late is
+/// past the village's busiest period, so a single planted rumor competes with more of the ~39 a day it
+/// creates. `tests/village_evening.rs` asserts the condition at 300; `scenarios.yaml` now states both ticks.
 fn plant_at(scenario: &str) -> usize {
     let authored = match scenario {
         "village-evening" | "village" => 560,
