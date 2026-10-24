@@ -2662,7 +2662,7 @@ marked `measured` on a number nobody checked.
 
 **Dead-code delta.** Zero. **Scenarios with no test:** zero, where there were two at the start of this audit.
 
-**Commit** `pending`.
+**Commit** `f3d7372`.
 
 **Top 5 remaining.**
 
