@@ -1344,3 +1344,56 @@ measured and stated).
 3. **The two-clocks decision** — warned about, measured, no longer the cause of starvation, API open.
 4. **The village's rumor origin** — reaches 1/24 in `village-evening`.
 5. **`food` at 15% of ticks at zero** — the worst-served need now that `fun` is fixed.
+
+## 2026-11-14-01 — The number that steered eight iterations and was never measured
+
+**Pick.** The log's #1: retiring untellable rumors. Beat doing the retirement on one sentence: **the
+justification for that breaking change is wrong**, and shipping a semantic change to `RumorBook.alive` on
+a false premise is worse than shipping nothing.
+
+**The claim.** Since 2026-11-06-01 the top-5 list has carried: *"93% of the book cannot spread; a 4× cost
+growth over 3 000 ticks."* Eight iterations. Twice the #1 item. It is the reason
+`needs-decision/retiring-untellable-rumors.md` calls for changing what `alive` means.
+
+It was never measured. It came from comparing a short benchmark against a long one and attributing the
+whole difference to the book.
+
+**Measured**, 200 people, four places, five samples of 100 ticks across a 6 000-tick run, with and
+without a `RumorReach` trigger:
+
+| tick | rumors | ms/tick, none | ms/tick, trigger |
+|---|---|---|---|
+| 1 000 | 765 | 5.76 | 5.95 |
+| 3 000 | 2 412 | 3.51 | 3.07 |
+| 5 000 | 4 299 | 4.80 | 3.93 |
+
+**The cost does not grow.** It drifts down as the village settles into longer activities, and a trigger
+makes no difference — 4 299 pointer-chases beside 200 people scored against every neighbour is nothing.
+
+**What the book does cost** is memory: ~48 B a rumor, so **105 KiB** at 3 000 ticks, **228 KiB** at 6 000,
+about **5 MiB** for 5 000 people over a comparable run.
+
+**The other half holds.** 2 250 rumors, every one `alive`, **301 still tellable** — **87% untellable**. The
+retirement rule is still the right fix for memory, and still a decision: `alive` means "the subject is
+still in the world", three places read it, and a host sees it. What changes is urgency — 4× would justify
+breaking that semantic, 5 MiB does not.
+
+**A first draft that measured nothing.** The helper used `common::settings()`'s default 240-second day,
+where 3 000 ticks is half a game-day, and reported `0 rumors, 0 alive, 0 still tellable` — a test that
+would have passed on nothing. It sets a four-second day now, with a comment.
+
+**Tests.** 30 → **31** binaries, 31 in both feature sets. Dead-code inventory: zero; no library change.
+
+**Verdicts.** Behaviour GREAT (grows, all alive, 87% untellable, ~48 B/rumor, pinned by two tests). Zoom
+GREAT (the late rise in ms/tick is decision timing, not the book; stated as "does not grow", not "flat").
+Fresh eyes GREAT (the decision file leads with the correction and the change in urgency).
+
+**Commit.** `53584ee`.
+
+**Top 5 remaining.**
+1. **Retire untellable rumors** — still right for memory, now with a true cost and a decision file a host
+   can act on: 5 MiB, not 4×.
+2. **A spatial index for perception** — the measured 9.2% from 2026-11-13-01.
+3. **The two-clocks decision** — warned about, measured, no longer the cause of starvation, API open.
+4. **The village's rumor origin** — reaches 1/24 in `village-evening`.
+5. **`food` at 15% of ticks at zero** — the worst-served need now that `fun` is fixed.
