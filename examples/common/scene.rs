@@ -205,11 +205,3 @@ pub fn build_village(
         villagers,
     }
 }
-
-/// The tuning the village runs with: the crate defaults, except that its people reach out more.
-///
-/// A village of twenty-four is small; at the crate's default a chance meeting happens rarely enough
-/// that a sixteen-second clip shows almost nothing. Only the two social draws move, never a rule.
-pub fn village_tuning() -> Tuning {
-    Tuning::default()
-}
