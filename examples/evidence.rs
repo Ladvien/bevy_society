@@ -296,7 +296,14 @@ fn village(app: &mut App) -> World {
                 Home(home),
                 // 2.5 m spacing: a walk to a neighbour is ~110 ticks, not 640. The village is small
                 // enough that its people can actually reach each other inside a run.
-                Transform::from_xyz(-3.8 + 2.5 * column as f32, 0.0, -3.8 + 2.5 * row as f32),
+                // Start within `interaction_radius` of the faction's place: a walk is real-time
+                // (`speed / 64` m per tick) while a duration is game-time, so a grid walk of 2.5 m
+                // (160 ticks) outlasts a 0.3 game-hour chat (3 ticks) and nobody ever arrives.
+                Transform::from_xyz(
+                    PLACE_POSITIONS[column % PLACE_POSITIONS.len()].x + 0.6 * (row as f32).cos(),
+                    0.0,
+                    PLACE_POSITIONS[column % PLACE_POSITIONS.len()].y + 0.6 * (row as f32).sin(),
+                ),
                 memberships,
                 opinions,
             ))
@@ -316,6 +323,15 @@ fn village(app: &mut App) -> World {
         origin,
     }
 }
+
+/// Where the village's four places stand, in `PLACES` order, mirrored from
+/// `examples/common/scene.rs` so the harness and the capture frame the same village.
+const PLACE_POSITIONS: [Vec2; 4] = [
+    Vec2::new(0.0, 0.0),
+    Vec2::new(6.5, -5.0),
+    Vec2::new(-6.5, -5.0),
+    Vec2::new(6.5, 5.0),
+];
 
 /// Two groups far apart, so a rumor has to cross a gap.
 fn cluster(app: &mut App) -> World {

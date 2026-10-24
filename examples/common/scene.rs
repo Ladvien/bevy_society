@@ -141,7 +141,13 @@ pub fn spawn_villagers(
         let material = materials.get(column).cloned().unwrap_or_default();
         // 2.5 m spacing. A walker covers `speed / 64` metres per tick, so a 14 m village put every
         // place 640 ticks away and nobody ever arrived; at this spacing a neighbour walk is ~110.
-        let pos = Vec2::new(-5.25 + 3.5 * column as f32, -5.25 + 3.5 * row as f32);
+        // Villagers start within `interaction_radius` of a place: a walk is real-time
+        // (`speed / 64` m per tick) while a duration is game-time, so a 3.5 m grid walk takes 160
+        // ticks and a 0.3 game-hour chat lasts 3 — nobody would ever arrive before their activity
+        // ended. Starting arrived makes the duration the thing that limits an activity.
+        let anchor = PLACES[column % PLACES.len()].1;
+        let angle = row as f32 * std::f32::consts::TAU / VILLAGERS_PER_FACTION as f32;
+        let pos = anchor + Vec2::new(0.6 * angle.cos(), 0.6 * angle.sin());
         let honesty = if faction == "watch" {
             0.7
         } else {

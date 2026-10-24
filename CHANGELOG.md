@@ -6,6 +6,8 @@ All notable changes to bevy_society. The format follows [Keep a Changelog](https
 
 ### Added
 
+- **`chat` and `gossip` satisfy `social` while they run.** They were the two activities that serve the social need and the only two that declared no `satisfies` rate, so time spent talking counted for nothing while `eat` (+1.2/h) and `sleep` (+0.15/h) both paid out. Measured over 4200 ticks at the same seed, mean `social` rose from 0.105 to 0.225.
+
 - **Thought barks on activity start.** An activity's `barks` lines are written as `SocietyBark { thought: true }` when it starts, with `bark_chance`, through a system that reads `ActivityStarted` so the draw happens once per start in `PersonIndex` order. The dead-code inventory is now empty: every public item the crate declares is reachable.
 
 - **Movement and gossip reach the capture.** `Destination` was set only for a `Point` target, so a village whose activities all target places never walked: everybody stood where they spawned. Every target now gets one — a place's transform, or a person's position offset by `0.75 × interaction_radius` — and `tests/behavior.rs` pins both. The starter pack's `gossip` activity is gated on distance rather than familiarity, so a rumor can spread in one evening instead of waiting for ties, and the capture counts barks across its settle steps rather than only the recorded frames.
