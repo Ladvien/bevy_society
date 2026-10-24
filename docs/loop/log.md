@@ -1282,3 +1282,65 @@ result is kept with its numbers and a decision file).
 3. **The two-clocks decision** — warned about, measured, no longer the cause of starvation, API open.
 4. **The village's rumor origin** — reaches 1/24 in `village-evening`.
 5. **`work` at 72%** — the lowest completion of the three fixed activities.
+
+## 2026-11-13-01 — Leisure needs a companion, not a bigger number
+
+**Pick.** The log's #1: a cheap source for `fun`. Beat the runner-up (retiring untellable rumors) on one
+sentence: **`fun` at zero for a third of every run is the most visible wrong thing when you watch the
+society, and last iteration established that no rate can fix it.**
+
+**The insight.** `fun` and `social` sit at opposite ends of the same budget:
+
+| need | uses/day needed | actual supply | cost of one use |
+|---|---|---|---|
+| social | 2.78 (`chat`) | **ample** | 3 ticks; the other person walks to you |
+| fun | 1.33 (`relax`) | **0.10** | a walk plus 16 ticks, in a 6-hour window |
+
+`social` needs *more* uses a day and is never short. The difference is not the rate — it is that a `chat`
+targets a `Person`.
+
+**The change.** `play`: `target: Person`, 0.5 h, `satisfies fun 1.7` (0.85 per use, 0.94 uses a day),
+gated `Affinity Linear(0.0, 0.8)` so acquaintances can play, not only close friends. `relax` stays as the
+solitary form.
+
+**Grounding.** Vansteenkiste & Ryan 2013 (DOI 10.1037/a0032359): self-determination theory puts
+relatedness among the basic needs and locates intrinsic motivation in need-supportive *social* contexts —
+"individuals can be vital, open, curious and caring" *with others*. Leisure done with someone is the
+social form of the need.
+
+**Before → after**, same seed and layout, after tick 200:
+
+| | before | after |
+|---|---|---|
+| `fun` at zero | 33.8% | **1.3%** |
+| `fun` mean | 0.061 | **0.112** |
+| `social` mean | 0.124 | 0.107 |
+| `food` mean | 0.101 | 0.080 |
+| **mean of all four** | **0.127** | **0.128** |
+
+`evidence/play.png`, `evidence/{before,after}.csv`. The plot and the numbers agree this time — last
+iteration's reverted rate change had a plot that looked better while its total was worse.
+
+**The honest cost.** 275.5 → **300.8 ms** per tick at 5 000 people, **+9.2%**, measured three times
+(300.786, 300.709, 300.906). Predicted `10/9 − 1 = +11.1%` if scoring dominates, so it is the tenth
+activity scoring once per neighbour. A host that prefers the cheaper tick drops `play`.
+
+**A test fired correctly.** `tests/need_budget.rs` asserted `fun` needs **> 1** use a day with the message
+*"if this ever becomes <= 1, one evening session covers a day and the imbalance is gone"*. It fired.
+Rewritten to assert the opposite for `rest`, `food` and `fun`, with `social` documented as the exception.
+
+**Tests.** 29 → **30** binaries, 30 in both feature sets. Dead-code inventory: zero.
+
+**Verdicts.** Behaviour GREAT (`fun` at zero 33.8% → 1.3%, mean doubled, total flat). Zoom GREAT (plot and
+numbers agree; no flatline, no saturation). Fresh eyes GREAT (the activity explains itself; its 9.2% cost
+measured and stated).
+
+**Commit.** `f3b6259`.
+
+**Top 5 remaining.**
+1. **Retire untellable rumors** — 93% of the book cannot spread; a 4× cost growth over 3 000 ticks.
+2. **A spatial index for perception** — every `Person`-targeted activity scores once per neighbour, and
+   this iteration's 9.2% is that cost. Now has a price attached.
+3. **The two-clocks decision** — warned about, measured, no longer the cause of starvation, API open.
+4. **The village's rumor origin** — reaches 1/24 in `village-evening`.
+5. **`food` at 15% of ticks at zero** — the worst-served need now that `fun` is fixed.
