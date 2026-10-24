@@ -2474,3 +2474,55 @@ asymmetry is structural. Trust still declines in a crowd.
 3. **The clock decision** - the largest behavioural lever (15 points), escalated.
 4. **`rumor-crosses-a-cluster`** - 0.333 against the 40% it asserts, at both clocks.
 5. **`need-cycle` is still `pending`** - its observable claims `rest` and `food` cycle when only `food` does.
+
+## 2026-12-04-01 - A crowd multiplied a penalty and could not multiply a reward
+
+**Pick.** Last iteration's decision file, and I looked for a source before treating it as a preference.
+
+**The finding.** `witness_reaction` applied `trust_gain * harm` at full magnitude to **every** witness, so a
+deed's total cost grew linearly with the crowd while a trust *gain* from an interaction reached only two
+people. One chat was `+0.10`; one insult seen by three people was `-0.42`.
+
+**The source.** Sommerfeld, Krambeck, Semmann & Milinski 2007, PNAS, DOI `10.1073/pnas.0704598104` — already
+the crate's gossip citation — measured that transmission *dampens*: *"the more extreme a gossip was, the less
+impact it had on the reader"*, and cited Hess & Hagen on *"an increase in **believability** with an increasing
+number of sources"*. Believed more, moving each recipient less. So dilution is a measured behaviour, not a
+symmetry argument, which turns a decision into a fix.
+
+**Change.** `Tuning::witness_dilution` (default 0.5, square root).
+
+| witnesses | before | **after** |
+|---|---|---|
+| 1 | 0.0800 | **0.0800** |
+| 5 | **0.0800** | **0.0431** |
+
+Trust at an exchange **0.345 -> 0.435**, accept rate **0.533 -> 0.558**.
+
+| seed | pleasure before | **after** | rivals before -> after |
+|---|---|---|---|
+| 7 | -0.0579 | **-0.0536** | 35 -> 33 |
+| 42 | **-0.1268** | **-0.0456** | 50 -> **34** |
+| 99 | **-0.1102** | **-0.0522** | 45 -> 47 |
+
+**Two things not smoothed over.** Seed 7 barely moved; seeds 42 and 99 moved a lot. And **seed 99's rivals
+rose** (45 -> 47) while its mood improved — a village that trusts more also insults more often, because the
+activity is not gated on trust. Both are in the eval and on the plot.
+
+**Evidence.** `runs/2026-12-04-01/evidence/dilution.png` — the flat red line of the old behaviour against the
+diluting green curve; three seeds plotted individually; the rival bars including the one that rose.
+
+**Verdicts.** Behavior GREAT (red first at 0.0800 vs 0.0800 — the defect in one line). Zoom GREAT (the flat
+line is the argument; the rising rival bar is shown). Fresh eyes GREAT (three seeds, disagreeing, all shown).
+
+**Dead-code delta.** Zero.
+
+**Commit** `pending`.
+
+**Top 5 remaining.**
+
+1. **`Doing` names the target activity while travelling** - 49.8% of person-ticks; host-facing, escalated.
+2. **The clock decision** - the largest behavioural lever (15 points), escalated.
+3. **Mood is still negative at every seed** (-0.046 to -0.054). The chain has moved it from -0.150 to about
+   -0.05; what remains is the *frequency* of refusal and insult, not any single term.
+4. **`rumor-crosses-a-cluster`** - 0.333 against the 40% it asserts, at both clocks.
+5. **`need-cycle` is still `pending`** - its observable claims `rest` and `food` cycle when only `food` does.

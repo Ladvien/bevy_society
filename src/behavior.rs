@@ -2046,6 +2046,8 @@ fn witness(
         .unwrap_or_default();
 
     let mut approvals: Vec<(Entity, f32)> = Vec::new();
+    // Everyone who saw it, for `Tuning::witness_dilution`; the crowd is the same for every witness.
+    let watcher_count = witnesses.len();
     for watcher in witnesses {
         let opinions = world
             .get::<crate::Opinions>(watcher)
@@ -2077,6 +2079,7 @@ fn witness(
             Some(patient),
             trust_in_patient,
             settings,
+            watcher_count,
             now,
         );
         // Write every component back, unconditionally: a lost `Knowledge` restore is silent amnesia.

@@ -78,13 +78,21 @@ pub(crate) fn witness_reaction(
     patient: Option<Entity>,
     trust_in_patient: Option<f32>,
     settings: &SocietySettings,
+    // How many witnesses saw this deed, including this one; see `Tuning::witness_dilution`.
+    witnesses: usize,
     now_days: f64,
 ) -> WitnessReaction {
     // EXPERIMENT: approval of the *act*, not of the norm. A witness who values kindness (opinion
     // > 0) disapproves of an insult (harm < 0).
     let norm = opinions.value(usize::from(deed_topic.0)).clamp(-1.0, 1.0);
     let approval = norm * harm.signum();
-    let gain = trust_gain(&settings.tuning, personality.conscientiousness);
+    // **A deed seen by many costs each of them less.** Without this the total cost grew linearly with the
+    // crowd while a trust gain could only ever reach two people, so a village's trust could only fall.
+    // `witness_dilution` is the exponent: 0.0 is the old behaviour, 1.0 divides by the count, 0.5 is the
+    // square root. The dilution applies to the deed's *magnitude*, never to its direction or to whether it
+    // is right to disapprove — a witness that objects still objects.
+    let seen = (witnesses.max(1) as f32).powf(settings.tuning.witness_dilution);
+    let gain = trust_gain(&settings.tuning, personality.conscientiousness) / seen;
 
     let justified = patient.is_some()
         && settings.assessment == AssessmentNorm::Standing

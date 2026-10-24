@@ -150,6 +150,24 @@ pub struct Tuning {
     /// Trust gain per unit of deed harm from a witness. Design default (no source paper gives this
     /// number); mechanism: image scoring, Nowak & Sigmund 1998, DOI 10.1038/31225.
     pub witness_gain: f32,
+    /// How a deed's per-witness cost shrinks as the crowd watching it grows.
+    ///
+    /// `0.0` applies the full `witness_gain · harm` to every witness, so the deed's total cost grows
+    /// linearly with the crowd — while a trust *gain* from an interaction reaches only the two parties. One
+    /// `chat` is `+0.10` in total; one insult seen by three people is `-0.42`, and trust in a village can
+    /// only fall. Measured, `village-evening`'s mean trust at the moment of an exchange was **0.261** against
+    /// the 0.5 `AcceptDef` treats as neutral.
+    ///
+    /// `1.0` divides the cost by the number of witnesses, so a deed costs the same *in total* however many
+    /// people saw it.
+    ///
+    /// The literature measures the transmission rather than the total: Sommerfeld, Krambeck, Semmann &
+    /// Milinski 2007, PNAS, DOI `10.1073/pnas.0704598104` — *"transmission by gossip had a dampening effect
+    /// on the cooperation levels compared with acting on direct observation. The more extreme a gossip was,
+    /// the less impact it had on the reader"* — and, citing Hess & Hagen, *"an increase in believability
+    /// with an increasing number of sources"*. Believed more, moving each recipient less. 0.5 is the
+    /// midpoint: a squared-root dilution.
+    pub witness_dilution: f32,
     /// Absolute harm above which a deed becomes a rumor. Design default (no source paper gives this
     /// number); mechanism: gossip as reputation, Sommerfeld et al. 2007, DOI 10.1073/pnas.0704598104.
     pub rumor_threshold: f32,
@@ -212,6 +230,7 @@ impl Default for Tuning {
             anchor_pull: 0.1,
             conformity_per_day: 0.2,
             witness_gain: 0.2,
+            witness_dilution: 0.5,
             rumor_threshold: 0.3,
             gossip_trust_gain: 0.3,
             gossip_affinity_gain: 0.2,

@@ -13,6 +13,8 @@ A rumour is a record about one deed by one person. It has an origin, a subject, 
 - Norm violation: `NormViolated` is written when a witness's approval `a < −0.5` (specified for D7).
 - Reputation assessment (`SocietySettings.assessment`, default `Standing`): either image scoring or standing. The witness approval `a` moves the actor's trust and respect under the chosen assessment.
 
+- **Witness dilution.** A deed's per-witness trust cost is divided by `witnesses ^ Tuning.witness_dilution` (default 0.5). Sommerfeld et al. 2007 (DOI `10.1073/pnas.0704598104`) measured that gossip transmission dampens — *"the more extreme a gossip was, the less impact it had on the reader"* — and cited Hess & Hagen on believability rising with the number of sources: the same news, believed by more people and weighing less in each. Measured, one witnessed insult costs each witness **0.0800** with one bystander and **0.0431** with five; without dilution it was 0.0800 in both and the aggregate grew with the crowd while a trust gain could only reach two people.
+
 ## Why these defaults
 
 - **Telling weight.** Park et al. (2023) weight memories for retrieval by importance, relevance and recency. The code's telling weight takes the recency and importance parts; relevance is replaced by the teller's belief. Park's text: "we treat recency as an exponential decay function over the number of sandbox game hours since the memory was last retrieved. Our decay factor is 0.995." (`10.48550_arxiv.2304.03442`, converted; passage checked). Departure: the crate measures from creation, not retrieval (see `memory.md`).

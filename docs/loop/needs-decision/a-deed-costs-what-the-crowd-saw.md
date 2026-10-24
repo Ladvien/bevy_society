@@ -1,5 +1,13 @@
 # Should a witnessed deed cost the same for every witness?
 
+> **Resolved 2026-12-04: no, and the literature settles it.** Sommerfeld, Krambeck, Semmann & Milinski 2007
+> (DOI `10.1073/pnas.0704598104`) measured that gossip transmission *dampens* — *"the more extreme a gossip
+> was, the less impact it had on the reader"* — and cited Hess & Hagen on believability rising with the number
+> of sources. Believed more, moving each recipient less: a per-witness dilution. `Tuning::witness_dilution`
+> (default 0.5, a square root) implements it. Measured, one witnessed insult now costs each witness **0.0800**
+> with one bystander and **0.0431** with five, where before it was 0.0800 in both. The analysis that prompted
+> the question follows.
+
 ## The state, measured
 
 A trust *gain* from an interaction goes to the **two parties**. A trust *loss* from a witnessed deed goes to
