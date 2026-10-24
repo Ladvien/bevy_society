@@ -1397,3 +1397,64 @@ Fresh eyes GREAT (the decision file leads with the correction and the change in 
 3. **The two-clocks decision** — warned about, measured, no longer the cause of starvation, API open.
 4. **The village's rumor origin** — reaches 1/24 in `village-evening`.
 5. **`food` at 15% of ticks at zero** — the worst-served need now that `fun` is fixed.
+
+## 2026-11-15-01 — The spatial index that was built, measured, and did not pay
+
+**Pick.** The log's #2: a spatial index for perception. Beat retiring untellable rumors on one sentence:
+**last iteration measured that the book costs memory, not ticks**, so the index is the remaining
+performance item — and its cost is real and `O(n²)`.
+
+**The claim, corrected again.** The log said the `Person`-targeted scoring was worth 9.2%. Perception
+itself is worse. Measured standalone over the benchmark's layout:
+
+| people | brute-force loop, ms/tick | pairs | edges |
+|---|---|---|---|
+| 1 000 | **1.45** | 999 000 | 169 000 |
+| 5 000 | **35.49** | 24 995 000 | 4 264 430 |
+
+35.5 of 300.8 ms is **11.8%** of a tick at 5 000.
+
+**The index, to the paper's recipe.** Ihmsen et al., *SPH Fluids in Computer Graphics* §2: "grids are
+built in `O(n)` and particles are accessed in `O(1)`", cells as wide as the query radius, the nine
+adjacent cells queried. Implemented exactly that, with neighbour lists restored to ascending index order
+because every per-person loop in the crate depends on it.
+
+**It found the same neighbours and gave nothing.**
+
+| | brute force | `HashMap` grid | `BTreeMap` grid |
+|---|---|---|---|
+| 100 | **0.573 ms** | 0.707 | — |
+| 1 000 | 15.67 ms | 15.99 | **16.97** |
+| 5 000 | 300.8 ms | **297.96** | — |
+
+A 1% gain at 5 000 is noise; **19% slower at 100** is not. The crate's own examples are villages of tens
+to hundreds. **Reverted.**
+
+**Why, measured.** Brute force yields each neighbour list already sorted by index — both loops walk
+`0..n`. The grid scrambles them and pays `sort_unstable` over **4 264 430 entries** to restore the order,
+which costs about what the 25 M distance checks cost, plus nine hash lookups per person. SPH amortises a
+neighbourhood query over several solver passes per tick; this crate makes **one**.
+
+**What ships.** `tests/perception.rs`: a reference brute force computed from `Perception`'s own positions,
+compared entry for entry against what the crate stored — **32 016 neighbour entries across 180 people**.
+The next index is checked against a computed reference rather than trusted, which is the discipline that
+caught `RumorId(0)` three times and the 4× rumour claim last iteration. The measured cost is documented on
+`perceive`.
+
+**Tests.** 31 → **32** binaries, 32 in both feature sets. Dead-code inventory: zero; `src/` is unchanged
+from `HEAD`.
+
+**Verdicts.** Behaviour GREAT (identical neighbours, pinned by a 32 016-entry comparison). Zoom GREAT — the
+grid *worked* and gave 1%, and a weaker pass would have shipped a 19%-slower small village for it. Fresh
+eyes GREAT (a reference implementation, a documented cost, a corrected claim).
+
+**Commit.** `028daaf`.
+
+**Top 5 remaining.**
+1. **Retire untellable rumors** — right for memory: ~5 MiB at 5 000 over a long run, 87% untellable. A
+   decision, not a fix.
+2. **The two-clocks decision** — warned about, measured, no longer the cause of starvation, API open.
+3. **`food` at 15% of ticks at zero** — the worst-served need now that `fun` is fixed.
+4. **The village's rumor origin** — reaches 1/24 in `village-evening`.
+5. **Perception is 11.8% at 5 000 and `O(n²)`** — a real limit, now measured. An index needs its sort
+   amortised: a coarser cell that preserves index order, or a query run more than once per tick.
