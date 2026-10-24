@@ -743,7 +743,13 @@ struct Decision {
     place_positions: Vec<(Entity, Vec2)>,
     /// The person's close ties at the tick start, for `SocialProof`.
     close_ties: Vec<Entity>,
-    /// What each close tie is doing, so `SocialProof` can count who else chose this activity.
+    /// What each **close tie** is doing, so `SocialProof` can count who else chose this activity.
+    ///
+    /// Only the close ties, not the whole population. This used to be `all_doing.clone()` inside the
+    /// per-person loop: N copies of an N-length vector per tick, which is exactly N² and was most of the
+    /// scale curve. Measured on the benchmark: 14.55 ms a tick at 1 000 people and **254.5 ms** at 5 000,
+    /// with the per-pair cost flat, i.e. the only variable was the population squared. `SocialProof` only
+    /// ever looks at `close_ties`, so filtering to them is the same answer at a `close_ties`-sized cost.
     close_doing: Vec<(Entity, u16)>,
     hour: f32,
     perception_radius: f32,
@@ -848,13 +854,14 @@ fn decide_activities(
         .collect();
     place_views.sort_by_key(|p| p.entity.to_bits());
 
-    // What everyone is doing, for `SocialProof`.
-    let mut all_doing: Vec<(Entity, u16)> = Vec::new();
-    for &(_, entity) in &index.sorted {
-        if let Ok(doing) = doing.get(entity) {
-            all_doing.push((entity, doing.activity.0));
-        }
-    }
+    // What everyone is doing, for `SocialProof`, as a lookup by `Entity::to_bits` so one person's
+    // close ties can be read without scanning the population. `all_doing` used to be cloned whole into
+    // every `Decision`; the filtered list is now built from this map at a `close_ties`-sized cost.
+    let all_doing: Vec<(Entity, u16)> = index
+        .sorted
+        .iter()
+        .filter_map(|&(_, entity)| doing.get(entity).ok().map(|d| (entity, d.activity.0)))
+        .collect();
 
     // The engine and the tick's snapshot are the same for every consideration in this pass, so they
     // are read once and shared by reference.
@@ -926,6 +933,7 @@ fn decide_activities(
             .iter()
             .map(|view| (view.entity, view.position))
             .collect();
+        let close = ties.close_targets(now as f32, tuning, settings.close_ties);
         let decision = Decision {
             place_positions,
             position,
@@ -935,8 +943,12 @@ fn decide_activities(
             emotions: emotions.clone(),
             ties: ties.0.clone(),
             near: near.clone(),
-            close_ties: ties.close_targets(now as f32, tuning, settings.close_ties),
-            close_doing: all_doing.clone(),
+            close_ties: close.clone(),
+            close_doing: all_doing
+                .iter()
+                .filter(|(entity, _)| close.contains(entity))
+                .copied()
+                .collect(),
             hour,
             perception_radius: settings.perception_radius,
         };

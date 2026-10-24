@@ -121,7 +121,12 @@ scenarios:
     ticks: 400
     status: measured
     observable: >
-      Cost per society tick at 1,000 persons, recorded in the iteration's `perf.md`. Perception is
-      brute force and quadratic, so this number is what a host is buying. Report it as
-      milliseconds per tick, not as a pass/fail. Measured 2026-10-31-01: 14.1 ms per tick at 1,000
-      persons (0.83 ms amortised per 60 fps frame), 0.55 ms at 100, 351 ms at 5,000.
+      Cost per society tick at 1,000 persons, recorded in the iteration's `perf.md`. Report it as
+      milliseconds per tick, not as a pass/fail. Measured 2026-11-26-01 (uniform grid for
+      perception): **13.5 ms** per tick at 1,000 persons (0.90 ms amortised per 60 fps frame),
+      0.59 ms at 100, 49.9 ms at 2,000, 245.1 ms at 5,000.
+      (Corrected 2026-11-26. The note used to say perception's all-pairs scan was the quadratic
+      term. Measured with direct timers at 5,000 people it is 36 ms of a ~320 ms fixed step — about
+      12%. The term that scales is scoring every `Person`-targeted activity against every neighbour:
+      182 neighbours at that density, so ~3.6M consideration evaluations a tick. See
+      `runs/2026-11-26-01/perf.md`.)

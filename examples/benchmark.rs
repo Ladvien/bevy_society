@@ -5,9 +5,11 @@
 //! cargo run --release --example benchmark -- --people 1000 --ticks 200
 //! ```
 //!
-//! Perception is brute force over every pair of persons (`docs/guide/concepts.md` states the design
-//! and claims it is "fine" to about a thousand), so the number here is what a host is buying when
-//! it spawns that many people. It is reported as **milliseconds per society tick**, not per update:
+//! `docs/guide/concepts.md` records the design and the measured numbers. Briefly: perception runs through
+//! a uniform grid, and the cost that scales is **scoring every neighbour against every `Person`-targeted
+//! activity**, not the pair search — measured, an all-pairs scan was 36 ms of a 254 ms tick at 5 000
+//! people, while the scoring is `people x activities x neighbours`. It is reported as **milliseconds per
+//! society tick**, not per update:
 //! a host's frame budget is per frame, and a society tick is whatever fraction of a second
 //! [`SocietySettings::tick_secs`] makes it.
 //!

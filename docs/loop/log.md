@@ -2078,3 +2078,58 @@ not address it.
 4. **`rumor-crosses-a-cluster` is still `pending`** at 0.167 reach against the 40% it asks for; the observable
    may need re-stating, which is a decision.
 5. **A spatial index for perception** past ~2 000 people, with benchmark numbers behind it.
+
+## 2026-11-26-01 - The scale curve was not where the crate said it was
+
+**Pick.** Candidate #4, performance, after measuring and setting aside the log's #4 (`rumor-crosses-a-cluster`
+`pending`): it is **0.333 at 64 s/day and 0.250 at 240**, i.e. 2-3 of 12, at both clocks. Two groups 40 m
+apart never merge; the observable asks for a crossing needing a 10.7 game-hour walk. A **spec** question, not
+a crate defect -- left in the decision file rather than re-declared.
+
+**Change.** `perceive` runs a uniform grid, one cell per `perception_radius` (Ericson 2005, *Real-Time
+Collision Detection* §7.1.1), filled in ascending index order so the answer is the all-pairs answer exactly.
+`close_doing` is built from the person's close ties instead of cloning the population per person.
+
+| persons | all pairs | **grid** |
+|---|---|---|
+| 100 | 0.99 ms | **0.59 ms** |
+| 1 000 | 14.55 ms | **13.50 ms** |
+| 2 000 | 53.96 ms | **49.91 ms** |
+| 5 000 | 254.54 ms | **245.13 ms** |
+
+**3-7%.** Real, free, and much smaller than expected.
+
+**The finding that matters more.** The crate said perception's all-pairs scan was the quadratic term. Direct
+timers at 5 000 people: `perceive` is **36 ms of a ~320 ms fixed step** -- 12%. The term that scales is
+**scoring**: every `Person`-targeted activity against every neighbour, 182 of them at that density
+(0.995 people per m², so they are genuinely there), giving ~3.6M consideration evaluations a tick against
+144 000 at 1 000. **No index removes that.** `docs/guide/concepts.md`, `examples/benchmark.rs` and
+`scenarios.yaml` now say so instead of the false thing.
+
+**Identity.** 67 199 of 67 199 `village-evening` rows identical; `tests/perception.rs` pins the grid's
+neighbour lists against all-pairs at n = 1, 2, 40, 200, 500 across two radii -- **0 mismatched**.
+
+**Evidence.** `runs/2026-11-26-01/evidence/grid.png` -- the two cost curves almost on top of each other, the
+measured 36/29/226 ms breakdown, and neighbours per person rising 0.4 -> 182.
+
+**Verdicts.** Behavior GREAT (bit-identical, pinned). Zoom GREAT (the plot is a correction, the middle panel
+is the refutation). Fresh eyes GREAT.
+
+**What I got wrong.** Two guesses before measuring -- a per-person `all_doing.clone()`, then a lookup map --
+both reasoned from the code, both worth ~5%, neither the cause. The timers settled it in one run.
+`tests/leaf.rs` also caught a `HashMap` I put in `behavior.rs`; removed rather than allow-listed.
+
+**Dead-code delta.** Zero.
+
+**Commit** `pending`.
+
+**Top 5 remaining.**
+
+1. **Scoring is the scale curve** -- `people x Person-activities x neighbours`. Sampling neighbours, or
+   fewer Person-targeted activities, is the only thing that changes what a host can afford. Needs a decision.
+2. **The clock decision** -- the largest behavioural lever (15 points), escalated, unmoved.
+3. **`rumor-crosses-a-cluster`** -- 0.333 against the 40% it asks for, at both clocks; the observable or the
+   geometry needs re-stating, which is a decision.
+4. **The cluster's 1:24 chat:gossip starvation** -- a second need; a schema change.
+5. **`wander` scores 1.000 always** (no considerations) and pins the tier ceiling; giving it a curve made
+   things worse, so the fix is in the cutoff policy.
