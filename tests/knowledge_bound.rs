@@ -14,9 +14,7 @@
 mod common;
 
 use bevy::prelude::*;
-use bevy_society::{
-    Autonomous, Home, Knowledge, Place, PlaceTags, SocietyDefs, SocietySettings,
-};
+use bevy_society::{Autonomous, Home, Knowledge, Place, PlaceTags, SocietyDefs, SocietySettings};
 use common::{headless, spawn_person};
 
 fn defs() -> SocietyDefs {
