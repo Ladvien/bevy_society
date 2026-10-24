@@ -1,5 +1,8 @@
 # Why do `Field` considerations and `Gradient` targets score nothing?
 
+> **Resolved 2026-11-29: they score now.** The wiring was one of three causes; the other two were in the
+> tests that had declared the feature dead. See "What actually went wrong" at the end.
+
 ## The state, measured
 
 With the `fields` feature on (the default), all of this is true at once:
@@ -66,3 +69,29 @@ check, and `Signal` is now public with them.
 
 **Option 1 with option 2's diagnosis first**: find out why the score is 0 *before* deciding whether
 the ordering needs to change. The warning means no host is misled in the meantime.
+
+## What actually went wrong, 2026-11-29
+
+Wired and working. Measured: `field_value(Crowd)` at the chooser reads **0.120**, `gradient_target`
+returns `Some(Vec2(-2.0, 0.0))`, and a `Field`-only activity is chosen **6 times in 2 400 ticks** where it
+had been chosen **0**.
+
+Three causes, and the two that made the earlier attempt look like a scoring bug were in the probe:
+
+1. **A crowd in one cell has no slope.** `field_value` divides a cell by the channel's **peak**, a global
+   maximum, so every cell in the hottest part of the grid reads 1.0. That is a plateau, and
+   `gradient_target` correctly returns `None` because there is no direction to walk. Every earlier attempt
+   "always had a crowd", as this file suspected; the crowd was also *in one place*, which is the thing that
+   hid it. A gradient needs high cells and low ones adjacent: nine people at the origin, chooser 2 m away.
+2. **The fallback outlasted the test.** `idle` lasts one game-hour. At `seconds_per_day = 240` with
+   `tick_secs = 1/64` a tick is **0.0015625** game-hours, so one fallback holds **640 ticks**. The original
+   test ran 60; two of mine ran 400 (0.625 game-hours). The person was still idle every time.
+3. **The wiring**, which also needed `Decision::own_factions` — the `OwnFaction` and `OtherFactions` inputs
+   are faction-relative and the decision carried no memberships.
+
+**The warning changed meaning.** It now fires only when the `fields` feature is **off**, and only compiles
+into that build: with the feature on a `Field` definition is an ordinary definition. With it off the
+definitions file rejects `Field` and `Gradient` at parse time, so the warning is a backstop rather than the
+contract.
+
+`tests/field_scores.rs` pins the behaviour.

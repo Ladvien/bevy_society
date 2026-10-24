@@ -212,7 +212,10 @@ impl Plugin for BehaviorPlugin {
         let settings = app.world().resource::<SocietySettings>().clone();
         let defs = app.world().resource::<SocietyDefs>();
         warn_short_activities(defs, &settings);
-        warn_unscored_fields(defs);
+        #[cfg(not(feature = "fields"))]
+        {
+            warn_unscored_fields(defs);
+        }
         warn_short_travel_reach(&settings);
         warn_walk_outlasts_activity(defs, &settings);
         warn_unbalanced_needs(defs);
@@ -388,17 +391,18 @@ fn warn_walk_outlasts_activity(defs: &SocietyDefs, settings: &SocietySettings) {
 /// certainly too short; above it the crate cannot tell, because it does not know the layout.
 const MIN_WALK_METRES: f64 = 10.0;
 
-/// Warns that a definition relies on the social-field inputs, which the decision does not score.
+/// Warns when a definition reads a social field that **cannot be populated**.
 ///
-/// A `Signal::Field` consideration currently scores 0 in every decision, and a
-/// `ActivityTarget::Gradient` produces no targets, so an activity that depends on either is accepted
-/// by the definitions file and can never be chosen. That is silent, and it is the same shape of
-/// defect as a `Script` consideration scoring nothing: a host writes a definition, gets a society
-/// where that activity never happens, and has no signal.
+/// `Signal::Field` and `ActivityTarget::Gradient` were both dead: the signal returned a constant `0.0`
+/// and the gradient produced no targets, so a definition using either compiled and could never be
+/// chosen. Both are wired now — measured, an activity whose only consideration is `Field(Crowd)` is
+/// chosen 6 times in 2 400 ticks against a 1-hour fallback.
 ///
-/// The fields themselves work — `SocialFieldPlugin` deposits, evaporates and exposes `field_value`
-/// and `gradient_target` — so this is a wiring gap in this crate, not a missing dependency, and the
-/// warning names it rather than pretending the feature exists.
+/// What remains worth warning about is the **feature being off**. The grids are built by
+/// `SocialFieldPlugin`, which only exists with the `fields` feature; without it any `Field` definition
+/// is still dead, and the definitions file accepts it either way. That is the same silence as before,
+/// one layer down.
+#[cfg_attr(feature = "fields", allow(dead_code))]
 fn warn_unscored_fields(defs: &SocietyDefs) {
     let mut offenders: Vec<&str> = Vec::new();
     for (name, signals) in defs.activity_signals() {
@@ -416,10 +420,9 @@ fn warn_unscored_fields(defs: &SocietyDefs) {
         return;
     }
     warn!(
-        "bevy_society: {} definitions rely on social-field inputs (`Field` considerations or a \
-         `Gradient` target), which the decision does not score yet: those activities will never be \
-         chosen. The field grids and `SocialFields::field_value` work; the decision is what does not \
-         read them. See `docs/loop/needs-decision/` — {}",
+        "bevy_society: {} definitions read social fields (`Field` considerations or a `Gradient` \
+         target) but the `fields` feature is off, so no grid exists and those activities will never be \
+         chosen. Enable `fields`, or remove the definitions. See `docs/loop/needs-decision/` — {}",
         offenders.len(),
         offenders.join(", ")
     );
@@ -741,6 +744,8 @@ struct Decision {
     /// Places with their plane positions, so `Distance` works for a `Place` target too. Without these the
     /// signal reported the maximum for every place, which silently disabled any activity targeting one.
     place_positions: Vec<(Entity, Vec2)>,
+    /// The person's factions at the tick start, for the `Field` inputs.
+    own_factions: Vec<crate::FactionId>,
     /// The person's close ties at the tick start, for `SocialProof`.
     close_ties: Vec<Entity>,
     /// What each **close tie** is doing, so `SocialProof` can count who else chose this activity.
@@ -760,6 +765,7 @@ struct Decision {
 #[query_data(mutable)]
 struct Decider<'w> {
     ties: &'w Ties,
+    memberships: &'w crate::Memberships,
     needs: &'w Needs,
     personality: &'w Personality,
     mood: &'w Mood,
@@ -815,7 +821,7 @@ fn decide_activities(
     mut started: MessageWriter<ActivityStarted>,
     engine: Option<Res<crate::script::ScriptEngine>>,
     cell: Res<crate::snapshot::SnapshotCell>,
-    transforms: Query<(Entity, &Transform)>,
+    fields: Option<Res<FieldGrids>>,
     mut trace: Option<ResMut<crate::trace::DecisionTrace>>,
 ) {
     use bevy_emerge_rng::DetRng;
@@ -867,12 +873,21 @@ fn decide_activities(
     // are read once and shared by reference.
     let snapshot = cell.0.clone();
     // Plane positions of everything a destination can name, gathered once: `Commands` cannot read
-    // the world while a plan is being written.
-    let mut positions: Vec<(Entity, Vec2)> = transforms
+    // the world while a plan is being written. The places query carries their `Transform`, and a
+    // person's position comes from `Perception`, so no separate transform query is needed — which is
+    // also what keeps this system inside Bevy's sixteen-parameter limit.
+    let mut positions: Vec<(Entity, Vec2)> = place_views
         .iter()
-        .map(|(entity, transform): (Entity, &Transform)| {
-            (entity, settings.plane.project(transform.translation))
-        })
+        .map(|view| (view.entity, view.position))
+        .chain(
+            index
+                .sorted
+                .iter()
+                .enumerate()
+                .filter_map(|(slot, (_, entity))| {
+                    perception.pos.get(slot).map(|at| (*entity, *at))
+                }),
+        )
         .collect();
     positions.sort_by_key(|(e, _)| e.to_bits());
     let position_of = |entity: Entity| {
@@ -898,8 +913,9 @@ fn decide_activities(
         let Ok(view) = people.get(person) else {
             continue;
         };
-        let (ties, needs, personality, mood, emotions, home) = (
+        let (ties, memberships, needs, personality, mood, emotions, home) = (
             view.ties,
+            view.memberships,
             view.needs,
             view.personality,
             view.mood,
@@ -934,8 +950,10 @@ fn decide_activities(
             .map(|view| (view.entity, view.position))
             .collect();
         let close = ties.close_targets(now as f32, tuning, settings.close_ties);
+        let own_factions = memberships.0.clone();
         let decision = Decision {
-            place_positions,
+            own_factions: own_factions.clone(),
+            place_positions: place_positions.clone(),
             position,
             needs: needs.0.clone(),
             personality: *personality,
@@ -983,6 +1001,8 @@ fn decide_activities(
                 &near,
                 &place_views,
                 home.map(|h| h.0),
+                &own_factions,
+                fields.as_deref(),
                 &mut rng.0,
             );
             // **One candidate per activity, not per target.** Dill's weight-based draw is over
@@ -1020,6 +1040,7 @@ fn decide_activities(
                     target,
                     i as u16,
                     script_ref.as_ref(),
+                    fields.as_deref(),
                 );
                 if score <= 0.0 {
                     continue;
@@ -1105,8 +1126,8 @@ fn decide_activities(
                     .targets
                     .iter()
                     .min_by(|a, b| {
-                        let da = place_distance(**a, position, &transforms, settings.plane);
-                        let db = place_distance(**b, position, &transforms, settings.plane);
+                        let da = place_distance(**a, position, &place_positions);
+                        let db = place_distance(**b, position, &place_positions);
                         da.partial_cmp(&db).unwrap_or(std::cmp::Ordering::Equal)
                     })
                     .copied()
@@ -1265,12 +1286,15 @@ impl ScriptContext<'_> {
 ///
 /// `Wander` draws its point here, from the two `unit()` draws the SPEC names: radius · √u₁ at angle
 /// 2πu₂, which is uniform over the disc rather than bunched at its centre.
+#[allow(clippy::too_many_arguments)]
 fn targets_for(
     target: &ActivityTarget,
     position: Vec2,
     near: &[(Entity, Vec2)],
     places: &[PlaceView],
     home: Option<Entity>,
+    own_factions: &[crate::FactionId],
+    fields: Option<&FieldGrids>,
     rng: &mut rand_chacha::ChaCha8Rng,
 ) -> Vec<DoingTarget> {
     use bevy_emerge_rng::DetRng;
@@ -1290,24 +1314,68 @@ fn targets_for(
             .map(|place| DoingTarget::Place(place.entity))
             .collect(),
         ActivityTarget::Person => near.iter().map(|(e, _)| DoingTarget::Person(*e)).collect(),
-        // A gradient target needs the social-field grids, which only the `fields` feature builds.
-        ActivityTarget::Gradient(..) => Vec::new(),
+        // A gradient target walks toward the slope of the named field. Without the `fields` feature, or
+        // before the grid exists on the first tick, there is no slope and the option has no target —
+        // which is the honest answer, and what the startup warning is about when the feature is off.
+        ActivityTarget::Gradient(input, toward) => fields
+            .and_then(|grids| grids.gradient_target(*input, own_factions, position, *toward))
+            .map_or_else(Vec::new, |point| vec![DoingTarget::Point(point)]),
     }
 }
 
+/// The social-field grids, when the `fields` feature is on.
+///
+/// With the feature off this is an empty resource, so the decision keeps one shape and `Signal::Field`
+/// still has an arm to read — a zero, because no grid exists. That is what the startup warning tells
+/// the host about, rather than a compile error for a definition file the crate already accepts.
+#[cfg(feature = "fields")]
+type FieldGrids = crate::SocialFields;
+/// An empty stand-in for [`crate::SocialFields`] when the `fields` feature is off.
+///
+/// It answers the two calls the decision makes, with the only honest values: no cell, no slope. A
+/// definition that reads a field therefore scores `0` and is never chosen, which is exactly what the
+/// startup warning says will happen — rather than a compile error for a definition file the crate
+/// accepts in either configuration.
+#[cfg(not(feature = "fields"))]
+#[derive(bevy::prelude::Resource, Default)]
+pub struct NoFields;
+
+#[cfg(not(feature = "fields"))]
+impl NoFields {
+    fn world_to_cell(&self, _at: Vec2) -> bevy::math::IVec2 {
+        bevy::math::IVec2::ZERO
+    }
+
+    fn field_value(
+        &self,
+        _input: crate::FieldInput,
+        _own: &[crate::FactionId],
+        _cell: bevy::math::IVec2,
+    ) -> f32 {
+        0.0
+    }
+
+    fn gradient_target(
+        &self,
+        _input: crate::FieldInput,
+        _own: &[crate::FactionId],
+        _pos: Vec2,
+        _toward: bool,
+    ) -> Option<Vec2> {
+        None
+    }
+}
+#[cfg(not(feature = "fields"))]
+type FieldGrids = NoFields;
+
 /// How far a target is from `from`, on the society plane. `Person` and `Itself` report zero, because a
 /// person target's position is not what a `Place` tie is choosing between.
-fn place_distance(
-    target: DoingTarget,
-    from: Vec2,
-    transforms: &Query<(Entity, &Transform)>,
-    plane: crate::SocietyPlane,
-) -> f32 {
+fn place_distance(target: DoingTarget, from: Vec2, places: &[(Entity, Vec2)]) -> f32 {
     let of = |entity: Entity| {
-        transforms
-            .get(entity)
-            .ok()
-            .map(|(_, transform)| plane.project(transform.translation))
+        places
+            .iter()
+            .find(|(place, _)| *place == entity)
+            .map(|(_, at)| *at)
     };
     match target {
         DoingTarget::Place(place) => of(place).map_or(f32::MAX, |at| from.distance(at)),
@@ -1327,6 +1395,7 @@ fn score_option(
     target: DoingTarget,
     activity: u16,
     scripts: Option<&ScriptContext<'_>>,
+    fields: Option<&FieldGrids>,
 ) -> f32 {
     let n = considerations.len();
     if n == 0 {
@@ -1340,6 +1409,7 @@ fn score_option(
             target,
             activity,
             scripts,
+            fields,
         ));
         let compensated = s + (1.0 - s) * (1.0 - 1.0 / n as f32) * s;
         product *= compensated;
@@ -1364,6 +1434,7 @@ fn signal_value(
     target: DoingTarget,
     activity: u16,
     scripts: Option<&ScriptContext<'_>>,
+    fields: Option<&FieldGrids>,
 ) -> f32 {
     let tie = match target {
         DoingTarget::Person(other) => decision.ties.iter().find(|t| t.target == other).copied(),
@@ -1436,8 +1507,16 @@ fn signal_value(
             // the same answer a failed script gives.
             None => 0.0,
         },
-        // A field input needs the stigmergy grids, which only the `fields` feature builds.
-        Signal::Field(_) => 0.0,
+        // A field input reads the stigmergy grid at the actor's own cell. Without the `fields` feature
+        // there is no grid and the honest answer is 0 — but with it the value is real, and returning a
+        // constant here made every `Field` definition dead while the definitions file accepted it.
+        Signal::Field(input) => match fields {
+            Some(grids) => {
+                let cell = grids.world_to_cell(decision.position);
+                grids.field_value(input, &decision.own_factions, cell)
+            }
+            None => 0.0,
+        },
     };
     value.clamp(0.0, 1.0)
 }

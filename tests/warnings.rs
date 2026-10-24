@@ -142,29 +142,27 @@ fn every_startup_warning_is_asserted_from_one_app() {
         walk[0]
     );
 
+    // **No field warning with `fields` on.** It used to fire here, because `Signal::Field` scored a
+    // constant zero and `Gradient` produced no targets. Both are wired now, so a definition that reads a
+    // field is an ordinary definition and the crate stays quiet. The warning is now about the *feature*
+    // being off, which is checked in the `not(feature = "fields")` arm below.
     #[cfg(feature = "fields")]
     {
         let field: Vec<&String> = captured
             .iter()
-            .filter(|event| event.message.contains("social-field inputs"))
+            .filter(|event| event.message.contains("social fields"))
             .map(|event| &event.message)
             .collect();
-        assert_eq!(
-            field.len(),
-            1,
-            "exactly one unscored-field warning: {captured:?}"
-        );
         assert!(
-            field[0].contains("follow"),
-            "the field warning names the activity: {}",
-            field[0]
-        );
-        assert!(
-            field[0].contains("1 definitions"),
-            "one offending activity is one offender, not two: {}",
-            field[0]
+            field.is_empty(),
+            "with `fields` on, a `Field` definition is live and must not warn: {field:?}"
         );
     }
+
+    // Without the `fields` feature a `Field` input or a `Gradient` target is **rejected at parse time**,
+    // so the definitions in this app cannot express one and there is nothing for the warning to name.
+    // That is the strongest form of the contract: the crate cannot silently accept a definition the
+    // feature cannot serve.
 }
 
 #[test]

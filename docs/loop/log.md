@@ -2185,3 +2185,58 @@ centroid. Recorded because the pattern is "reason about the picture" instead of 
 3. **Scoring is the scale curve** - `people x activities x neighbours`; sampling is the only real lever.
 4. **The cluster's 1:24 chat:gossip starvation** - a second need; a schema change.
 5. **`wander` scores 1.000 always** - pins the tier ceiling; the fix is in the cutoff policy.
+
+## 2026-11-29-01 - A documented feature could never fire
+
+**Pick.** The `fields` feature is **on by default** and the README advertises it, but `Signal::Field`
+returned a constant `0.0` and `ActivityTarget::Gradient` produced no targets. A definition using either was
+accepted by the definitions file and could never be chosen. Runner-up was `Doing`'s travelling semantics --
+a real defect at scale (**49.8%** of person-ticks are an activity not yet started) -- but that changes a
+component a host reads, so it stays a decision.
+
+**Three causes, and the decision file had already failed once.**
+
+1. **The probe's crowd had no slope.** Nine people in **one cell** is a plateau: `field_value` divides by the
+   channel's *peak*, so every cell in the hottest region reads 1.0 and `gradient_target` correctly returns
+   `None`. Every earlier attempt "always had a crowd" -- and the crowd was in one place, which is what hid it.
+2. **The fallback outlasted the probe.** `idle` is 1 game-hour; a tick at 240 s/day is 0.0016, so one fallback
+   holds **640 ticks**. The original ran 60, two of mine ran 400.
+3. **The wiring**, which also needed `Decision::own_factions` -- `OwnFaction`/`OtherFactions` are
+   faction-relative.
+
+**Before / after.**
+
+| | before | after |
+|---|---|---|
+| field read by the decision | **0.0** (constant) | **0.120** |
+| `Gradient` target | none | `Some(Vec2(-2.0, 0.0))` |
+| `Field`-only activity, 2 400 ticks | **0** | **6** |
+| `village-evening` series rows | 67 199 | **67 199 identical** |
+
+**The warning changed meaning.** It now fires only when the `fields` feature is **off**, and only compiles
+into that build -- and with the feature off the definitions file *rejects* `Field` and `Gradient` at parse
+time, so a host cannot write one that silently does nothing.
+
+**Evidence.** `runs/2026-11-29-01/evidence/field-wiring.png` (a flat zero against the real cell reading; dead
+then live).
+
+**Verdicts.** Behavior GREAT (minimal case, written red first). Zoom GREAT (the plot is the defect in two
+bars; 6-in-2400 checked against the 640-tick fallback rather than accepted). Fresh eyes GREAT (two feature
+sets, not two seeds: live and silent with `fields` on, rejected at parse time with it off).
+
+**Dead-code delta.** Minus two: the `Field` and `Gradient` arms are reachable and asserted.
+
+**What I got wrong.** Twice I concluded the feature was broken when the probe was: a crowd in one place has no
+slope, and 400 ticks is less than one 1-hour fallback. "The feature is dead" and "my probe is too short" look
+identical from a red assertion.
+
+**Commit** `pending`.
+
+**Top 5 remaining.**
+
+1. **`Doing` names the target activity while travelling** - 49.8% of person-ticks; changes a host-facing
+   component, so escalated.
+2. **The clock decision** - the largest behavioural lever (15 points), escalated.
+3. **`rumor-crosses-a-cluster`** - 0.333 against the 40% it asserts, at both clocks.
+4. **The cluster's 1:24 chat:gossip starvation** - a second need; a schema change.
+5. **Scoring is the scale curve** - `people x activities x neighbours`; sampling is the only real lever.

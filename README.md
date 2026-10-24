@@ -24,6 +24,7 @@ One evening in a village of twenty-four people: Bram steals bread, the watch see
 - **Opinions** — bounded-confidence influence, stubborn anchors and conformity to a clear group majority. [opinion-dynamics](docs/research/opinion-dynamics.md)
 - **Rumors and reputation** — gossip with the Daley–Kendall stifling rule, belief scaled by trust, witnesses who judge deeds and hold grudges. [rumor-and-reputation](docs/research/rumor-and-reputation.md)
 - **Factions and status** — in-group affinity, standing as conferred respect, contests and intergroup contact. [groups-and-status](docs/research/groups-and-status.md)
+- **Crowd fields** — a stigmergy grid of presence and commotion per cell, readable as a `Field(Crowd)` consideration and walkable as a `Gradient` target, so an activity can be "join the crowd" without naming a place. [needs-and-utility](docs/research/needs-and-utility.md)
 - **Scripts** — Rhai triggers over a per-tick snapshot, with a `ctx` reader and an `fx` writer that cannot see its own writes. [scripting](docs/guide/scripting.md)
 - **Dialogue** — barks and conversations through `bevy_speech_bubbles`. [dialogue](docs/guide/dialogue.md)
 
