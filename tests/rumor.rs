@@ -185,3 +185,77 @@ fn a_planted_rumor_spreads_through_gossip() {
         "reach is known_by over living persons"
     );
 }
+
+#[test]
+fn ctx_tellable_reports_whether_a_person_has_a_rumor_to_spread() {
+    // The gap this closes: `ctx.knows` needs a rumor id, which an authored definitions file has no
+    // way to name, so no script could ask "does this person have anything to tell?".
+    use bevy_society::{DefsFile, SocietyDefs, SocietySettings};
+
+    let defs = SocietyDefs::from_ron(
+        r#"(
+            topics: [(id: "honesty")],
+            deeds: [(id: "steal", topic: "honesty", harm: -0.7)],
+            activities: [
+                (
+                    id: "tell",
+                    target: Person,
+                    duration_hours: 0.3,
+                    rank: 1,
+                    considerations: [(
+                        input: Script("if ctx.tellable(actor) { 1.0 } else { 0.0 }"),
+                        curve: Linear(1.0, 0.0),
+                    )],
+                ),
+                (
+                    id: "doze",
+                    target: Itself,
+                    duration_hours: 1.0,
+                    rank: 0,
+                    considerations: [],
+                ),
+            ],
+        )"#,
+    )
+    .expect("a tellable consideration compiles");
+    let mut settings = settings();
+    settings.seconds_per_day = 1.0;
+    let mut app = headless(defs, settings);
+    let a = spawn_person(&mut app, "A", Vec2::ZERO);
+    let b = spawn_person(&mut app, "B", Vec2::new(1.0, 0.0));
+    for person in [a, b] {
+        app.world_mut()
+            .entity_mut(person)
+            .insert(bevy_society::Autonomous);
+    }
+    run(&mut app, 2);
+
+    // With no rumor, the tellable-gated activity must not be chosen.
+    let before = app
+        .world()
+        .get::<bevy_society::Doing>(a)
+        .map(|d| d.activity);
+    assert!(
+        before.is_none_or(|id| id != bevy_society::ActivityId(1)),
+        "`tell` must not be chosen when A has nothing to say: {before:?}"
+    );
+
+    plant(&mut app, a, b, "steal", true);
+    run(&mut app, 2);
+    // Clear what was chosen before the rumor arrived, so the next tick decides fresh.
+    app.world_mut()
+        .entity_mut(a)
+        .remove::<(bevy_society::Doing, bevy_society::Destination)>();
+    run(&mut app, 2);
+
+    let after = app
+        .world()
+        .get::<bevy_society::Doing>(a)
+        .map(|d| d.activity);
+    assert_eq!(
+        after,
+        Some(bevy_society::ActivityId(1)),
+        "`tell` must be chosen once A has a rumor to spread"
+    );
+    let _ = b;
+}

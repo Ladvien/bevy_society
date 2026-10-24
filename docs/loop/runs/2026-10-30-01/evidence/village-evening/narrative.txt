@@ -1,0 +1,63 @@
+# Bram's day
+
+At the end: doing Some("eat"), needs Some([0.0, 0.0, 0.33046877, 0.0]), mood P0.02 A0.02 D-0.01
+
+06h16: chat approached by Corin (accepted)
+07h07: started compliment
+07h07: finished work (interrupted)
+07h07: compliment with Fenna (refused)
+07h24: finished compliment (completed)
+13h24: chat approached by Oswin (accepted)
+15h22: chat approached by Jena (accepted)
+15h33: chat approached by Quill (refused)
+20h20: started chat
+20h20: chat with Ivo (accepted)
+20h43: finished chat (completed)
+08h26: started relax
+09h56: started compliment
+09h56: finished relax (completed)
+09h56: compliment with Fenna (accepted)
+10h13: finished compliment (completed)
+13h35: compliment approached by Alys (accepted)
+13h52: gossip approached by Alys (refused)
+02h15: finished eat (interrupted)
+12h28: compliment approached by Hilda (accepted)
+18h16: started gossip
+18h16: finished sleep (interrupted)
+18h16: gossip with Sable (refused)
+18h39: started chat
+18h39: finished gossip (completed)
+18h39: chat with Kell (accepted)
+19h01: finished chat (completed)
+15h50: started eat
+16h35: finished eat (completed)
+04h18: started chat
+04h18: chat with Corin (refused)
+04h41: finished chat (completed)
+16h13: started sleep
+00h16: started sleep
+00h16: finished sleep (completed)
+08h20: started chat
+08h20: finished sleep (completed)
+08h20: chat with Edric (refused)
+08h43: finished chat (completed)
+13h58: compliment approached by Corin (refused)
+15h56: gossip approached by Corin (refused)
+17h15: gossip approached by Corin (refused)
+07h30: started work
+11h31: finished work (completed)
+21h16: insult approached by Corin (accepted)
+12h39: compliment approached by Kell (accepted)
+14h15: gossip approached by Dena (refused)
+18h33: gossip approached by Milo (refused)
+19h58: gossip approached by Lira (accepted)
+03h33: finished work (interrupted)
+09h28: gossip approached by Milo (accepted)
+17h48: gossip approached by Nera (accepted)
+02h31: gossip approached by Wren (accepted)
+10h58: chat approached by Corin (refused)
+19h35: started chat
+19h35: finished sleep (interrupted)
+19h35: chat with Dena (accepted)
+19h58: finished chat (completed)
+00h28: started eat

@@ -259,6 +259,24 @@ impl SocietySnapshot {
     }
 
     /// `ctx.knows(a, rumor)`: whether `a` knows the rumor with that id.
+    /// `ctx.tellable(a)`: whether `a` knows a rumor it is still spreading.
+    ///
+    /// A definition can gate a gossip activity on having something to say, which nothing else in
+    /// `ctx` can express: `ctx.knows` needs a rumor id an authored file has no way to name.
+    ///
+    /// This is the *teller's* half of `rumor::gossip`'s choice, and only that half. Whether any
+    /// particular listener already knows the rumor, or is its subject, needs the rumor book and its
+    /// subject entities, which the snapshot does not carry — so a gossip can still turn out to
+    /// repeat something the listener already had, which stifles the teller exactly as `gossip` does.
+    pub(crate) fn tellable(&self, a: i64) -> Result<bool, String> {
+        Ok(self
+            .person(a)?
+            .knowledge
+            .0
+            .iter()
+            .any(|known| known.spreader))
+    }
+
     pub(crate) fn knows(&self, a: i64, rumor: i64) -> Result<bool, String> {
         let id = u32::try_from(rumor)
             .map(RumorId)

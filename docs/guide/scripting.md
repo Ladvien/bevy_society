@@ -41,6 +41,7 @@ that names it.
 | `ctx.opinion(a, topic)` | an opinion, `[-1, 1]` |
 | `ctx.trait(a, name)` | a personality trait, `[0, 1]` |
 | `ctx.knows(a, rumor)` | whether `a` knows that rumor |
+| `ctx.tellable(a)` | whether `a` knows a rumor it is still spreading (the condition a gossip gate needs) |
 | `ctx.member(a, faction)` | whether `a` belongs to that faction |
 | `ctx.faction_size(faction)` | how many persons belong to it |
 | `ctx.name(a)` | the person's `Name`, or `"someone"` |

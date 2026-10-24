@@ -560,6 +560,12 @@ fn register_ctx(engine: &mut Engine) {
         },
     );
     engine.register_fn(
+        "tellable",
+        |ctx: &mut Ctx, a: i64| -> Result<bool, Box<EvalAltResult>> {
+            ctx.0.tellable(a).map_err(boxed)
+        },
+    );
+    engine.register_fn(
         "member",
         |ctx: &mut Ctx, a: i64, faction: &str| -> Result<bool, Box<EvalAltResult>> {
             ctx.0.member(a, faction).map_err(boxed)
