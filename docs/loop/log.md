@@ -2283,7 +2283,7 @@ they disagree).
 
 **Dead-code delta.** Zero.
 
-**Commit** `pending`.
+**Commit** `a629b87`.
 
 **Top 5 remaining.**
 
