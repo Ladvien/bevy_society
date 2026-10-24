@@ -114,7 +114,7 @@
             id: "wander",
             target: Wander(6.0),
             duration_hours: 0.5,
-            weight: 0.3,
+            weight: 0.05,
             considerations: [],
             satisfies: [],
             interaction: None,
