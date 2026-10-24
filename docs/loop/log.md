@@ -965,3 +965,90 @@ Fresh eyes GREAT — a host can say why, in one sentence, from data the crate no
 4. **The village's rumor origin** — reaches 1/24; an arbitrary villager cannot be the town crier.
 5. **The trace hides the tier rule** — `why.txt` shows the scores but not that they were cut to a rank
    tier and drawn by weight; a host reading only the table misses why a lower scorer can win.
+
+## 2026-11-09-01 — Two clocks, and the crate's silence about them
+
+**Pick.** The log's #1, `need-cycle`'s rate balance — which re-measuring showed was a different defect
+than the one recorded. Beat the runner-up (`Place`/`Person` completion asymmetry) on one sentence:
+**the asymmetry's first cause is the timeout, and the crate can already prove the timeout is too
+short** — so the fix helps every host, not just this project's village.
+
+**Correction first.** The previous blocker note said a person "sleeps back to back: 29 completed 4-hour
+sleeps in 20 000 ticks" *with the shipped rates*. It does not. The starter pack's `sleep` is gated
+`Hours(22, 6)` and ranked 1 — **10 sleeps in 10.1 days**. The loop came from a test-local definition with
+no hour gate. Re-measured against the starter pack:
+
+| need | crosses < 0.35 | recovers > 0.7 | range |
+|---|---|---|---|
+| `social` | no | no | [0.364, 1.000] |
+| `rest` | no | no | [0.495, 1.000] |
+| `food` | **yes** | **yes** | [0.000, 1.000] |
+| `fun` | **yes** | **yes** | [0.000, 1.000] |
+
+The wrong note stays in `scenarios.yaml` under `superseded:`.
+
+**The defect.** Two clocks at a walk: `SocialMover::speed` is m per **real** second (0.0219 m/tick at
+1.4 m/s), `travel_timeout_hours` is **game** hours (`h · 10.7` ticks at a four-second day). Measured:
+
+| walk | ticks | 40-hour timeout allows |
+|---|---|---|
+| 8.2 m | **308** | 427 ✓ |
+| 13 m | **527** | 427 ✗ |
+
+The village's diagonal is 13 m, so its far corner always timed out. The completion counts split by
+target kind, cleanly:
+
+| activity | target | started | completed | interrupted |
+|---|---|---|---|---|
+| `chat` + `gossip` | `Person` | 152 | **152** | **0** |
+| `eat` | `Place` | 108 | 23 | **78** |
+| `sleep` | `Home` | 108 | 56 | **44** |
+
+**Change.** `warn_short_travel_reach` in `BehaviorPlugin::finish`, beside the two warnings already
+there. It computes the metres a timeout buys and warns under a 10 m floor — a warning that fires on
+every marginal layout is one hosts learn to ignore. The line it prints:
+
+```
+a travel_timeout_hours of 40 at seconds_per_day 4 allows 427 ticks, which at 1.4 m/s is only 9.3
+metres of walking — less than 10 m. … Raise travel_timeout_hours or shorten the walks.
+```
+
+The coupling itself is `needs-decision/travel-time-in-two-clocks.md` and stays open. The silence was not
+a decision the crate could defer.
+
+**Harness.** `examples/evidence.rs` set 40 hours with a comment reasoning about "the 6 m walk this
+layout asks for (274 ticks)". The diagonal is 13 m. Corrected to **55 hours** (587 ticks):
+
+| | 40 h | 55 h |
+|---|---|---|
+| `fun` at zero | 55% | **35%** |
+| `fun` mean | 0.049 | 0.057 |
+| `food` at zero | 28% | 22% |
+| `social` at zero | 4% | **11%** |
+
+`evidence/timeout.png`. The plot is honest: needs still hug zero, and `social` got *worse* as fewer
+people are stuck walking. Travel was a cause, not the cause.
+
+**A near-miss worth recording.** I spent several probes on a nine-person tavern where **nobody arrived
+at all** and nearly wrote up "capacity starves places". The real cause: my probe never inserted
+`SocialMover`, so nothing walked. What caught it was noticing the single-person probe *had* arrived
+(tick 308) with a mover and the nine-person one had not without.
+
+**Tests.** 26 → **27** binaries both feature sets. Dead-code inventory: zero — one private function and
+one private constant, both reached from `finish` and asserted by three tests.
+
+**Verdicts.** Behaviour GREAT (the crate names a timeout it can prove too short, with the arithmetic).
+Zoom GREAT (reported a marginal win as marginal; caught the mover-less probe before it shipped a wrong
+conclusion). Fresh eyes GREAT (the corrected note keeps the old one visible; the scenario stays honestly
+`pending`).
+
+**Commit.** `7611b69`.
+
+**Top 5 remaining.**
+1. **`Place`/`Person` completion asymmetry** — 78 of 108 `eat`s interrupted against 0 of 152 socials,
+   with the timeout ruled out as the first cause. This is what starves `food`, `fun` and `rest`.
+2. **Retire untellable rumors** — 93% of the book cannot spread; a 4× cost growth over 3 000 ticks.
+3. **The two-clocks decision** — now warned about and measured, but the API question is still open.
+4. **The village's rumor origin** — reaches 1/24; an arbitrary villager cannot be the town crier.
+5. **`need-cycle`'s two remaining needs** — `social` and `rest` never cross 0.35 at the shipped rates;
+   whether that is correct or too generous is unmeasured.
