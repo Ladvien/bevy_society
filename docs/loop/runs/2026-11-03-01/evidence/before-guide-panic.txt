@@ -1,0 +1,5 @@
+# The getting-started guide's "Add the plugins" block, run as written at HEAD
+# (add_plugins(SocietyPlugins) over DefaultPlugins, before the fix)
+thread 'as_written' panicked at src/dialogue.rs:86:13:
+bevy_society: DialoguePlugin needs bevy_speech_bubbles::SpeechBubblesPlugin::<YourCamera> added to the app
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace

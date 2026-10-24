@@ -1,0 +1,746 @@
+# V0's day
+
+At the end: doing Some("sleep"), needs Some([0.71875, 1.0, 0.3058617, 0.0]), mood P-0.31 A-0.04 D-0.26
+
+d1 10h09: finished work (interrupted)
+d1 12h13: finished work (interrupted)
+d1 14h16: finished work (interrupted)
+d1 14h16: chat approached by V2 (accepted)
+d1 16h09: started chat
+d1 16h09: chat with V3 (refused)
+d1 16h31: started snub
+d1 16h31: finished chat (completed)
+d1 16h31: insult with V3 (refused)
+d1 16h43: started snub
+d1 16h43: finished snub (completed)
+d1 16h43: insult with V3 (accepted)
+d1 16h54: started snub
+d1 16h54: finished snub (completed)
+d1 16h54: insult with V3 (refused)
+d1 17h05: started snub
+d1 17h05: finished snub (completed)
+d1 17h05: insult with V3 (refused)
+d1 17h16: started relax
+d1 17h16: finished snub (completed)
+d1 18h46: started snub
+d1 18h46: finished relax (completed)
+d1 18h46: insult with V3 (refused)
+d1 18h58: started snub
+d1 18h58: finished snub (completed)
+d1 18h58: insult with V3 (refused)
+d1 19h09: started compliment
+d1 19h09: finished snub (completed)
+d1 19h09: compliment with V2 (refused)
+d1 19h20: insult approached by V3 (refused)
+d1 19h26: started snub
+d1 19h26: finished compliment (completed)
+d1 19h26: insult with V3 (accepted)
+d1 19h31: insult approached by V3 (refused)
+d1 19h37: started snub
+d1 19h37: finished snub (completed)
+d1 19h37: insult with V3 (refused)
+d1 19h43: insult approached by V3 (refused)
+d1 19h48: started snub
+d1 19h48: finished snub (completed)
+d1 19h48: insult with V3 (refused)
+d1 19h54: insult approached by V3 (refused)
+d1 20h00: started snub
+d1 20h00: finished snub (completed)
+d1 20h00: insult with V3 (accepted)
+d1 20h05: insult approached by V3 (refused)
+d1 20h11: started snub
+d1 20h11: finished snub (completed)
+d1 20h11: insult with V3 (refused)
+d1 20h22: started snub
+d1 20h22: finished snub (completed)
+d1 20h22: insult with V3 (accepted)
+d1 20h33: started gossip
+d1 20h33: finished snub (completed)
+d1 20h33: gossip with V1 (accepted)
+d1 20h50: gossip approached by V2 (refused)
+d1 20h56: started snub
+d1 20h56: finished gossip (completed)
+d1 20h56: insult with V2 (refused)
+d1 21h07: started snub
+d1 21h07: finished snub (completed)
+d1 21h07: insult with V2 (refused)
+d1 21h18: started snub
+d1 21h18: finished snub (completed)
+d1 21h18: insult with V3 (refused)
+d1 21h24: gossip approached by V2 (accepted)
+d1 21h30: started gossip
+d1 21h30: finished snub (completed)
+d1 21h30: gossip with V5 (accepted)
+d1 21h30: gossip approached by V1 (refused)
+d1 21h30: gossip approached by V6 (accepted)
+d1 21h52: started snub
+d1 21h52: finished gossip (completed)
+d1 21h52: insult with V3 (refused)
+d1 22h03: started sleep
+d1 22h03: finished snub (completed)
+d2 06h07: started snub
+d2 06h07: finished sleep (completed)
+d2 06h07: insult with V3 (refused)
+d2 06h18: started gossip
+d2 06h18: finished snub (completed)
+d2 06h18: gossip with V5 (accepted)
+d2 06h41: started eat
+d2 06h41: finished gossip (completed)
+d2 07h20: insult approached by V2 (refused)
+d2 07h26: started snub
+d2 07h26: finished eat (completed)
+d2 07h26: insult with V2 (refused)
+d2 07h37: started snub
+d2 07h37: finished snub (completed)
+d2 07h37: insult with V3 (refused)
+d2 07h48: started wander
+d2 07h48: finished snub (completed)
+d2 08h22: started snub
+d2 08h22: finished wander (completed)
+d2 08h22: insult with V3 (accepted)
+d2 08h33: started gossip
+d2 08h33: finished snub (completed)
+d2 08h33: gossip with V7 (refused)
+d2 08h56: started gossip
+d2 08h56: finished gossip (completed)
+d2 08h56: gossip with V1 (refused)
+d2 09h01: gossip approached by V2 (refused)
+d2 09h18: started gossip
+d2 09h18: finished gossip (completed)
+d2 09h18: gossip with V2 (refused)
+d2 09h41: started gossip
+d2 09h41: finished gossip (completed)
+d2 09h41: gossip with V7 (accepted)
+d2 09h46: gossip approached by V7 (refused)
+d2 09h52: gossip approached by V3 (refused)
+d2 10h03: started gossip
+d2 10h03: finished gossip (completed)
+d2 10h03: gossip with V6 (accepted)
+d2 10h26: started gossip
+d2 10h26: finished gossip (completed)
+d2 10h26: gossip with V6 (accepted)
+d2 10h26: insult approached by V3 (refused)
+d2 10h43: gossip approached by V7 (accepted)
+d2 10h48: started gossip
+d2 10h48: finished gossip (completed)
+d2 10h48: gossip with V5 (refused)
+d2 11h00: insult approached by V5 (refused)
+d2 11h11: started snub
+d2 11h11: finished gossip (completed)
+d2 11h11: insult with V2 (refused)
+d2 11h22: started snub
+d2 11h22: finished snub (completed)
+d2 11h22: insult with V2 (refused)
+d2 11h33: started gossip
+d2 11h33: finished snub (completed)
+d2 11h33: gossip with V6 (refused)
+d2 11h56: started snub
+d2 11h56: finished gossip (completed)
+d2 11h56: insult with V3 (refused)
+d2 12h07: started gossip
+d2 12h07: finished snub (completed)
+d2 12h07: gossip with V6 (accepted)
+d2 12h30: started snub
+d2 12h30: finished gossip (completed)
+d2 12h30: insult with V5 (refused)
+d2 12h41: started gossip
+d2 12h41: finished snub (completed)
+d2 12h41: gossip with V6 (refused)
+d2 12h46: gossip approached by V7 (accepted)
+d2 13h03: started snub
+d2 13h03: finished gossip (completed)
+d2 13h03: insult with V2 (refused)
+d2 13h15: started snub
+d2 13h15: finished snub (completed)
+d2 13h15: insult with V7 (refused)
+d2 13h20: insult approached by V7 (refused)
+d2 13h26: started gossip
+d2 13h26: finished snub (completed)
+d2 13h26: gossip with V1 (refused)
+d2 13h48: started gossip
+d2 13h48: finished gossip (completed)
+d2 13h48: gossip with V7 (refused)
+d2 14h11: started work
+d2 14h11: finished gossip (completed)
+d2 14h28: insult approached by V6 (refused)
+d2 15h01: gossip approached by V6 (refused)
+d2 15h07: insult approached by V1 (refused)
+d2 16h43: gossip approached by V7 (accepted)
+d2 17h05: gossip approached by V7 (refused)
+d2 18h07: gossip approached by V4 (refused)
+d2 18h13: started gossip
+d2 18h13: finished work (completed)
+d2 18h13: gossip with V2 (accepted)
+d2 18h35: started snub
+d2 18h35: finished gossip (completed)
+d2 18h35: insult with V1 (accepted)
+d2 18h41: insult approached by V2 (refused)
+d2 18h46: started gossip
+d2 18h46: finished snub (completed)
+d2 18h46: gossip with V4 (refused)
+d2 19h09: started snub
+d2 19h09: finished gossip (completed)
+d2 19h09: insult with V2 (refused)
+d2 19h15: insult approached by V4 (refused)
+d2 19h20: started snub
+d2 19h20: finished snub (completed)
+d2 19h20: insult with V2 (refused)
+d2 19h20: insult approached by V3 (refused)
+d2 19h31: started snub
+d2 19h31: finished snub (completed)
+d2 19h31: insult with V7 (accepted)
+d2 19h43: started snub
+d2 19h43: finished snub (completed)
+d2 19h43: insult with V1 (refused)
+d2 19h54: started snub
+d2 19h54: finished snub (completed)
+d2 19h54: insult with V2 (accepted)
+d2 20h05: started gossip
+d2 20h05: finished snub (completed)
+d2 20h05: gossip with V2 (refused)
+d2 20h05: insult approached by V3 (refused)
+d2 20h11: insult approached by V2 (accepted)
+d2 20h28: started snub
+d2 20h28: finished gossip (completed)
+d2 20h28: insult with V1 (refused)
+d2 20h39: started gossip
+d2 20h39: finished snub (completed)
+d2 20h39: gossip with V1 (refused)
+d2 20h39: gossip approached by V7 (accepted)
+d2 21h01: started snub
+d2 21h01: finished gossip (completed)
+d2 21h01: insult with V2 (refused)
+d2 21h13: started relax
+d2 21h13: finished snub (completed)
+d2 21h35: insult approached by V7 (refused)
+d2 21h52: gossip approached by V2 (refused)
+d2 21h58: insult approached by V7 (refused)
+d2 22h43: started sleep
+d2 22h43: finished relax (completed)
+d3 06h18: insult approached by V2 (refused)
+d3 06h46: started gossip
+d3 06h46: finished sleep (completed)
+d3 06h46: gossip with V6 (accepted)
+d3 06h52: gossip approached by V1 (refused)
+d3 07h09: started gossip
+d3 07h09: finished gossip (completed)
+d3 07h09: gossip with V1 (refused)
+d3 07h31: started gossip
+d3 07h31: finished gossip (completed)
+d3 07h31: gossip with V4 (accepted)
+d3 07h43: insult approached by V7 (refused)
+d3 07h54: started gossip
+d3 07h54: finished gossip (completed)
+d3 07h54: gossip with V6 (refused)
+d3 07h54: insult approached by V7 (refused)
+d3 08h05: insult approached by V7 (refused)
+d3 08h16: started gossip
+d3 08h16: finished gossip (completed)
+d3 08h16: gossip with V3 (refused)
+d3 08h22: insult approached by V1 (refused)
+d3 08h33: insult approached by V1 (refused)
+d3 08h39: started gossip
+d3 08h39: finished gossip (completed)
+d3 08h39: gossip with V7 (refused)
+d3 08h45: gossip approached by V4 (refused)
+d3 09h01: started eat
+d3 09h01: finished gossip (completed)
+d3 09h01: gossip approached by V7 (accepted)
+d3 09h30: insult approached by V1 (refused)
+d3 09h46: started gossip
+d3 09h46: finished eat (completed)
+d3 09h46: gossip with V1 (refused)
+d3 10h09: started gossip
+d3 10h09: finished gossip (completed)
+d3 10h09: gossip with V3 (refused)
+d3 10h15: gossip approached by V1 (refused)
+d3 10h31: started work
+d3 10h31: finished gossip (completed)
+d3 13h26: gossip approached by V6 (accepted)
+d3 13h31: gossip approached by V5 (accepted)
+d3 13h54: gossip approached by V2 (refused)
+d3 14h33: started gossip
+d3 14h33: finished work (completed)
+d3 14h33: gossip with V6 (refused)
+d3 14h45: gossip approached by V5 (accepted)
+d3 14h56: started gossip
+d3 14h56: finished gossip (completed)
+d3 14h56: gossip with V4 (accepted)
+d3 15h18: started gossip
+d3 15h18: finished gossip (completed)
+d3 15h18: gossip with V4 (refused)
+d3 15h41: started gossip
+d3 15h41: finished gossip (completed)
+d3 15h41: gossip with V4 (refused)
+d3 15h58: gossip approached by V5 (refused)
+d3 16h03: started gossip
+d3 16h03: finished gossip (completed)
+d3 16h03: gossip with V7 (refused)
+d3 16h26: started gossip
+d3 16h26: finished gossip (completed)
+d3 16h26: gossip with V2 (accepted)
+d3 16h48: started gossip
+d3 16h48: finished gossip (completed)
+d3 16h48: gossip with V6 (refused)
+d3 17h11: started snub
+d3 17h11: finished gossip (completed)
+d3 17h11: insult with V7 (accepted)
+d3 17h22: started gossip
+d3 17h22: finished snub (completed)
+d3 17h22: gossip with V4 (refused)
+d3 17h45: started snub
+d3 17h45: finished gossip (completed)
+d3 17h45: insult with V4 (accepted)
+d3 17h56: started gossip
+d3 17h56: finished snub (completed)
+d3 17h56: gossip with V6 (refused)
+d3 18h13: insult approached by V7 (refused)
+d3 18h18: started gossip
+d3 18h18: finished gossip (completed)
+d3 18h18: gossip with V4 (refused)
+d3 18h41: started relax
+d3 18h41: finished gossip (completed)
+d3 19h31: gossip approached by V1 (refused)
+d3 19h31: insult approached by V4 (refused)
+d3 19h31: gossip approached by V6 (refused)
+d3 19h54: gossip approached by V7 (refused)
+d3 20h11: started gossip
+d3 20h11: finished relax (completed)
+d3 20h11: gossip with V4 (refused)
+d3 20h16: insult approached by V6 (refused)
+d3 20h33: started relax
+d3 20h33: finished gossip (completed)
+d3 20h33: gossip approached by V2 (accepted)
+d3 20h45: insult approached by V5 (accepted)
+d3 21h07: insult approached by V5 (refused)
+d3 21h35: gossip approached by V1 (refused)
+d3 21h58: gossip approached by V1 (refused)
+d3 22h03: started sleep
+d3 22h03: finished relax (completed)
+d4 06h07: started gossip
+d4 06h07: finished sleep (completed)
+d4 06h07: gossip with V4 (refused)
+d4 06h30: started gossip
+d4 06h30: finished gossip (completed)
+d4 06h30: gossip with V6 (accepted)
+d4 06h52: started gossip
+d4 06h52: finished gossip (completed)
+d4 06h52: gossip with V3 (accepted)
+d4 07h15: started gossip
+d4 07h15: finished gossip (completed)
+d4 07h15: gossip with V5 (refused)
+d4 07h37: started snub
+d4 07h37: finished gossip (completed)
+d4 07h37: insult with V1 (accepted)
+d4 07h48: started gossip
+d4 07h48: finished snub (completed)
+d4 07h48: gossip with V7 (accepted)
+d4 08h11: started snub
+d4 08h11: finished gossip (completed)
+d4 08h11: insult with V6 (refused)
+d4 08h22: started snub
+d4 08h22: finished snub (completed)
+d4 08h22: insult with V1 (refused)
+d4 08h33: started eat
+d4 08h33: finished snub (completed)
+d4 08h39: gossip approached by V7 (accepted)
+d4 09h18: started gossip
+d4 09h18: finished eat (completed)
+d4 09h18: gossip with V5 (accepted)
+d4 09h35: gossip approached by V6 (refused)
+d4 09h41: started gossip
+d4 09h41: finished gossip (completed)
+d4 09h41: gossip with V7 (refused)
+d4 10h03: started gossip
+d4 10h03: finished gossip (completed)
+d4 10h03: gossip with V7 (accepted)
+d4 10h26: started gossip
+d4 10h26: finished gossip (completed)
+d4 10h26: gossip with V3 (refused)
+d4 10h26: gossip approached by V5 (refused)
+d4 10h48: started gossip
+d4 10h48: finished gossip (completed)
+d4 10h48: gossip with V3 (refused)
+d4 11h11: started snub
+d4 11h11: finished gossip (completed)
+d4 11h11: insult with V7 (accepted)
+d4 11h22: started gossip
+d4 11h22: finished snub (completed)
+d4 11h22: gossip with V7 (accepted)
+d4 11h45: started snub
+d4 11h45: finished gossip (completed)
+d4 11h45: insult with V7 (accepted)
+d4 11h56: started work
+d4 11h56: finished snub (completed)
+d4 13h26: gossip approached by V3 (refused)
+d4 13h37: gossip approached by V7 (refused)
+d4 15h07: insult approached by V7 (accepted)
+d4 15h41: insult approached by V7 (refused)
+d4 15h52: insult approached by V1 (refused)
+d4 15h58: started snub
+d4 15h58: finished work (completed)
+d4 15h58: insult with V1 (refused)
+d4 16h09: started gossip
+d4 16h09: finished snub (completed)
+d4 16h09: gossip with V7 (refused)
+d4 16h31: started gossip
+d4 16h31: finished gossip (completed)
+d4 16h31: gossip with V2 (accepted)
+d4 16h54: started gossip
+d4 16h54: finished gossip (completed)
+d4 16h54: gossip with V4 (accepted)
+d4 16h54: insult approached by V4 (accepted)
+d4 17h16: started snub
+d4 17h16: finished gossip (completed)
+d4 17h16: insult with V6 (refused)
+d4 17h28: started snub
+d4 17h28: finished snub (completed)
+d4 17h28: insult with V5 (refused)
+d4 17h39: started snub
+d4 17h39: finished snub (completed)
+d4 17h39: insult with V7 (refused)
+d4 17h50: started snub
+d4 17h50: finished snub (completed)
+d4 17h50: insult with V1 (refused)
+d4 18h01: started gossip
+d4 18h01: finished snub (completed)
+d4 18h01: gossip with V7 (refused)
+d4 18h24: started gossip
+d4 18h24: finished gossip (completed)
+d4 18h24: gossip with V1 (refused)
+d4 18h46: started snub
+d4 18h46: finished gossip (completed)
+d4 18h46: insult with V1 (refused)
+d4 18h58: started snub
+d4 18h58: finished snub (completed)
+d4 18h58: insult with V5 (refused)
+d4 18h58: gossip approached by V4 (accepted)
+d4 19h09: started snub
+d4 19h09: finished snub (completed)
+d4 19h09: insult with V7 (refused)
+d4 19h15: insult approached by V5 (refused)
+d4 19h20: started relax
+d4 19h20: finished snub (completed)
+d4 19h37: gossip approached by V5 (refused)
+d4 20h50: started snub
+d4 20h50: finished relax (completed)
+d4 20h50: insult with V1 (refused)
+d4 20h56: insult approached by V7 (accepted)
+d4 21h01: started snub
+d4 21h01: finished snub (completed)
+d4 21h01: insult with V7 (refused)
+d4 21h13: started gossip
+d4 21h13: finished snub (completed)
+d4 21h13: gossip with V1 (refused)
+d4 21h13: gossip approached by V2 (refused)
+d4 21h35: started snub
+d4 21h35: finished gossip (completed)
+d4 21h35: insult with V4 (refused)
+d4 21h46: started gossip
+d4 21h46: finished snub (completed)
+d4 21h46: gossip with V3 (refused)
+d4 21h52: gossip approached by V3 (accepted)
+d4 21h58: insult approached by V4 (refused)
+d4 22h09: started sleep
+d4 22h09: finished gossip (completed)
+d5 06h13: started snub
+d5 06h13: finished sleep (completed)
+d5 06h13: insult with V1 (refused)
+d5 06h24: started gossip
+d5 06h24: finished snub (completed)
+d5 06h24: gossip with V3 (accepted)
+d5 06h30: gossip approached by V3 (accepted)
+d5 06h46: started gossip
+d5 06h46: finished gossip (completed)
+d5 06h46: gossip with V7 (refused)
+d5 06h46: insult approached by V4 (refused)
+d5 06h46: insult approached by V6 (refused)
+d5 07h09: started gossip
+d5 07h09: finished gossip (completed)
+d5 07h09: gossip with V3 (accepted)
+d5 07h31: started snub
+d5 07h31: finished gossip (completed)
+d5 07h31: insult with V6 (refused)
+d5 07h37: insult approached by V3 (refused)
+d5 07h43: started snub
+d5 07h43: finished snub (completed)
+d5 07h43: insult with V5 (accepted)
+d5 07h54: started gossip
+d5 07h54: finished snub (completed)
+d5 07h54: gossip with V2 (accepted)
+d5 08h00: gossip approached by V5 (accepted)
+d5 08h05: insult approached by V4 (accepted)
+d5 08h16: started gossip
+d5 08h16: finished gossip (completed)
+d5 08h16: gossip with V6 (accepted)
+d5 08h39: started gossip
+d5 08h39: finished gossip (completed)
+d5 08h39: gossip with V3 (accepted)
+d5 09h01: started eat
+d5 09h01: finished gossip (completed)
+d5 09h41: gossip approached by V2 (refused)
+d5 09h46: started gossip
+d5 09h46: finished eat (completed)
+d5 09h46: gossip with V7 (refused)
+d5 10h03: insult approached by V6 (accepted)
+d5 10h09: started snub
+d5 10h09: finished gossip (completed)
+d5 10h09: insult with V4 (accepted)
+d5 10h20: started gossip
+d5 10h20: finished snub (completed)
+d5 10h20: gossip with V3 (refused)
+d5 10h43: started snub
+d5 10h43: finished gossip (completed)
+d5 10h43: insult with V4 (accepted)
+d5 10h54: started gossip
+d5 10h54: finished snub (completed)
+d5 10h54: gossip with V7 (refused)
+d5 11h16: started gossip
+d5 11h16: finished gossip (completed)
+d5 11h16: gossip with V7 (refused)
+d5 11h39: started gossip
+d5 11h39: finished gossip (completed)
+d5 11h39: gossip with V7 (accepted)
+d5 12h01: started gossip
+d5 12h01: finished gossip (completed)
+d5 12h01: gossip with V2 (accepted)
+d5 12h24: started gossip
+d5 12h24: finished gossip (completed)
+d5 12h24: gossip with V4 (refused)
+d5 12h46: started snub
+d5 12h46: finished gossip (completed)
+d5 12h46: insult with V4 (refused)
+d5 12h58: started gossip
+d5 12h58: finished snub (completed)
+d5 12h58: gossip with V3 (refused)
+d5 13h20: started gossip
+d5 13h20: finished gossip (completed)
+d5 13h20: gossip with V4 (refused)
+d5 13h31: gossip approached by V3 (refused)
+d5 13h43: started snub
+d5 13h43: finished gossip (completed)
+d5 13h43: insult with V6 (refused)
+d5 13h54: started snub
+d5 13h54: finished snub (completed)
+d5 13h54: insult with V3 (accepted)
+d5 13h54: insult approached by V3 (refused)
+d5 14h05: started snub
+d5 14h05: finished snub (completed)
+d5 14h05: insult with V2 (accepted)
+d5 14h16: started snub
+d5 14h16: finished snub (completed)
+d5 14h16: insult with V4 (refused)
+d5 14h28: started snub
+d5 14h28: finished snub (completed)
+d5 14h28: insult with V7 (refused)
+d5 14h39: started snub
+d5 14h39: finished snub (completed)
+d5 14h39: insult with V3 (refused)
+d5 14h50: started gossip
+d5 14h50: finished snub (completed)
+d5 14h50: gossip with V7 (refused)
+d5 15h13: started snub
+d5 15h13: finished gossip (completed)
+d5 15h13: insult with V6 (refused)
+d5 15h24: started snub
+d5 15h24: finished snub (completed)
+d5 15h24: insult with V7 (accepted)
+d5 15h35: started gossip
+d5 15h35: finished snub (completed)
+d5 15h35: gossip with V2 (accepted)
+d5 15h35: gossip approached by V3 (refused)
+d5 15h58: started gossip
+d5 15h58: finished gossip (completed)
+d5 15h58: gossip with V1 (refused)
+d5 16h09: gossip approached by V3 (refused)
+d5 16h20: started snub
+d5 16h20: finished gossip (completed)
+d5 16h20: insult with V4 (accepted)
+d5 16h31: started snub
+d5 16h31: finished snub (completed)
+d5 16h31: insult with V4 (refused)
+d5 16h43: started gossip
+d5 16h43: finished snub (completed)
+d5 16h43: gossip with V1 (refused)
+d5 16h43: insult approached by V3 (refused)
+d5 17h05: started snub
+d5 17h05: finished gossip (completed)
+d5 17h05: insult with V4 (accepted)
+d5 17h16: started gossip
+d5 17h16: finished snub (completed)
+d5 17h16: gossip with V4 (refused)
+d5 17h39: started gossip
+d5 17h39: finished gossip (completed)
+d5 17h39: gossip with V1 (accepted)
+d5 17h50: insult approached by V6 (refused)
+d5 17h56: gossip approached by V5 (refused)
+d5 18h01: started gossip
+d5 18h01: finished gossip (completed)
+d5 18h01: gossip with V3 (refused)
+d5 18h01: insult approached by V6 (refused)
+d5 18h24: started gossip
+d5 18h24: finished gossip (completed)
+d5 18h24: gossip with V1 (refused)
+d5 18h24: insult approached by V6 (accepted)
+d5 18h35: gossip approached by V6 (refused)
+d5 18h46: started gossip
+d5 18h46: finished gossip (completed)
+d5 18h46: gossip with V2 (refused)
+d5 18h46: insult approached by V3 (accepted)
+d5 19h09: started gossip
+d5 19h09: finished gossip (completed)
+d5 19h09: gossip with V2 (refused)
+d5 19h31: started snub
+d5 19h31: finished gossip (completed)
+d5 19h31: insult with V4 (refused)
+d5 19h43: started gossip
+d5 19h43: finished snub (completed)
+d5 19h43: gossip with V1 (refused)
+d5 19h43: insult approached by V3 (refused)
+d5 20h05: started snub
+d5 20h05: finished gossip (completed)
+d5 20h05: insult with V4 (refused)
+d5 20h05: insult approached by V3 (refused)
+d5 20h16: started snub
+d5 20h16: finished snub (completed)
+d5 20h16: insult with V4 (refused)
+d5 20h16: insult approached by V6 (accepted)
+d5 20h22: insult approached by V5 (refused)
+d5 20h28: started snub
+d5 20h28: finished snub (completed)
+d5 20h28: insult with V3 (refused)
+d5 20h39: started snub
+d5 20h39: finished snub (completed)
+d5 20h39: insult with V5 (accepted)
+d5 20h50: started snub
+d5 20h50: finished snub (completed)
+d5 20h50: insult with V6 (refused)
+d5 21h01: started wander
+d5 21h01: finished snub (completed)
+d5 21h01: insult approached by V1 (refused)
+d5 21h07: insult approached by V7 (refused)
+d5 21h35: started snub
+d5 21h35: finished wander (completed)
+d5 21h35: insult with V4 (refused)
+d5 21h41: insult approached by V7 (accepted)
+d5 21h46: started snub
+d5 21h46: finished snub (completed)
+d5 21h46: insult with V4 (accepted)
+d5 21h58: started snub
+d5 21h58: finished snub (completed)
+d5 21h58: insult with V3 (refused)
+d5 22h09: started sleep
+d5 22h09: finished snub (completed)
+d6 06h07: insult approached by V5 (refused)
+d6 06h13: started chat
+d6 06h13: finished sleep (completed)
+d6 06h13: chat with V1 (refused)
+d6 06h35: started gossip
+d6 06h35: finished chat (completed)
+d6 06h35: gossip with V3 (refused)
+d6 06h58: started gossip
+d6 06h58: finished gossip (completed)
+d6 06h58: gossip with V7 (accepted)
+d6 06h58: gossip approached by V6 (refused)
+d6 07h15: insult approached by V7 (refused)
+d6 07h20: started snub
+d6 07h20: finished gossip (completed)
+d6 07h20: insult with V7 (refused)
+d6 07h31: started snub
+d6 07h31: finished snub (completed)
+d6 07h31: insult with V3 (refused)
+d6 07h37: insult approached by V7 (refused)
+d6 07h43: started gossip
+d6 07h43: finished snub (completed)
+d6 07h43: gossip with V6 (refused)
+d6 07h48: gossip approached by V7 (refused)
+d6 08h05: started work
+d6 08h05: finished gossip (completed)
+d6 08h05: gossip approached by V1 (refused)
+d6 08h05: gossip approached by V6 (accepted)
+d6 08h16: insult approached by V3 (refused)
+d6 08h22: gossip approached by V5 (accepted)
+d6 08h28: gossip approached by V1 (refused)
+d6 09h18: gossip approached by V5 (accepted)
+d6 09h35: gossip approached by V1 (refused)
+d6 10h03: insult approached by V7 (refused)
+d6 12h07: started gossip
+d6 12h07: finished work (completed)
+d6 12h07: gossip with V3 (refused)
+d6 12h30: started snub
+d6 12h30: finished gossip (completed)
+d6 12h30: insult with V3 (refused)
+d6 12h41: started eat
+d6 12h41: finished snub (completed)
+d6 12h52: insult approached by V4 (accepted)
+d6 13h03: insult approached by V3 (refused)
+d6 13h26: started gossip
+d6 13h26: finished eat (completed)
+d6 13h26: gossip with V3 (refused)
+d6 13h48: started gossip
+d6 13h48: finished gossip (completed)
+d6 13h48: gossip with V5 (refused)
+d6 13h48: gossip approached by V4 (refused)
+d6 14h11: started work
+d6 14h11: finished gossip (completed)
+d6 14h11: gossip approached by V1 (refused)
+d6 14h33: insult approached by V6 (refused)
+d6 14h39: insult approached by V7 (refused)
+d6 14h45: insult approached by V6 (refused)
+d6 15h18: insult approached by V3 (refused)
+d6 16h26: insult approached by V5 (accepted)
+d6 18h13: started snub
+d6 18h13: finished work (completed)
+d6 18h13: insult with V4 (accepted)
+d6 18h24: started snub
+d6 18h24: finished snub (completed)
+d6 18h24: insult with V3 (refused)
+d6 18h35: started snub
+d6 18h35: finished snub (completed)
+d6 18h35: insult with V4 (refused)
+d6 18h46: started snub
+d6 18h46: finished snub (completed)
+d6 18h46: insult with V3 (refused)
+d6 18h46: gossip approached by V4 (refused)
+d6 18h58: started gossip
+d6 18h58: finished snub (completed)
+d6 18h58: gossip with V4 (accepted)
+d6 19h09: insult approached by V4 (refused)
+d6 19h20: started snub
+d6 19h20: finished gossip (completed)
+d6 19h20: insult with V4 (refused)
+d6 19h31: started snub
+d6 19h31: finished snub (completed)
+d6 19h31: insult with V3 (refused)
+d6 19h43: started gossip
+d6 19h43: finished snub (completed)
+d6 19h43: gossip with V1 (accepted)
+d6 19h54: insult approached by V4 (refused)
+d6 20h05: started gossip
+d6 20h05: finished gossip (completed)
+d6 20h05: gossip with V1 (refused)
+d6 20h11: insult approached by V3 (refused)
+d6 20h28: started gossip
+d6 20h28: finished gossip (completed)
+d6 20h28: gossip with V7 (refused)
+d6 20h45: insult approached by V3 (refused)
+d6 20h50: started gossip
+d6 20h50: finished gossip (completed)
+d6 20h50: gossip with V7 (refused)
+d6 21h07: gossip approached by V3 (refused)
+d6 21h07: gossip approached by V7 (refused)
+d6 21h13: started snub
+d6 21h13: finished gossip (completed)
+d6 21h13: insult with V5 (accepted)
+d6 21h24: started gossip
+d6 21h24: finished snub (completed)
+d6 21h24: gossip with V6 (accepted)
+d6 21h46: started snub
+d6 21h46: finished gossip (completed)
+d6 21h46: insult with V4 (refused)
+d6 21h46: gossip approached by V6 (accepted)
+d6 21h58: started snub
+d6 21h58: finished snub (completed)
+d6 21h58: insult with V5 (accepted)
+d6 22h09: started sleep
+d6 22h09: finished snub (completed)

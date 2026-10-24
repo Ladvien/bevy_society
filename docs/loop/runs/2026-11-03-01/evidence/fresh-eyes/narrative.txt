@@ -1,0 +1,46 @@
+# Bram's day
+
+At the end: doing Some("gossip"), needs Some([0.0, 0.0, 0.0, 0.0]), mood P0.02 A0.01 D-0.04
+
+d3 07h07: started chat
+d3 07h07: finished work (interrupted)
+d3 07h07: chat with Vesna (accepted)
+d3 07h30: finished chat (completed)
+d3 15h45: gossip approached by V33 (refused)
+d3 16h13: started compliment
+d3 16h13: compliment with V29 (accepted)
+d3 16h13: compliment approached by Hilda (accepted)
+d3 16h30: finished compliment (completed)
+d4 01h07: started gossip
+d4 01h07: gossip with Sable (refused)
+d4 01h30: finished gossip (completed)
+d5 14h37: compliment approached by Corin (accepted)
+d5 17h31: finished sleep (interrupted)
+d7 09h33: finished gossip (interrupted)
+d9 01h35: finished gossip (interrupted)
+d9 18h11: gossip approached by V28 (accepted)
+d9 21h28: gossip approached by Ysolde (refused)
+d10 06h28: gossip approached by Oswin (accepted)
+d10 06h50: gossip approached by Oswin (accepted)
+d10 17h37: started gossip
+d10 17h37: finished sleep (interrupted)
+d10 17h37: gossip with V28 (accepted)
+d10 18h00: started chat
+d10 18h00: finished gossip (completed)
+d10 18h00: chat with V28 (accepted)
+d10 18h22: finished chat (completed)
+d10 22h46: gossip approached by V36 (refused)
+d12 10h24: finished gossip (interrupted)
+d14 02h26: started sleep
+d14 02h26: finished chat (interrupted)
+d14 10h30: finished sleep (completed)
+d16 02h31: started sleep
+d16 02h31: finished chat (interrupted)
+d16 10h35: started chat
+d16 10h35: finished sleep (completed)
+d16 10h35: chat with V26 (refused)
+d16 10h58: started chat
+d16 10h58: finished chat (completed)
+d16 10h58: chat with V32 (refused)
+d16 11h20: finished chat (completed)
+d17 09h28: chat approached by V35 (refused)

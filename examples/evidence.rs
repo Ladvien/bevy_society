@@ -40,7 +40,10 @@ fn main() {
             std::process::exit(1);
         }
     };
-    let settings = settings_for(&args.scenario);
+    let mut settings = settings_for(&args.scenario);
+    if let Some(seed) = args.seed {
+        settings.seed = seed;
+    }
 
     let mut app = App::new();
     app.add_plugins((
@@ -61,7 +64,7 @@ fn main() {
     app.finish();
     app.cleanup();
 
-    let world = build(&mut app, &args.scenario);
+    let world = build(&mut app, &args.scenario, args.people);
     let Some(world) = world else {
         eprintln!("evidence: unknown scenario '{}'", args.scenario);
         std::process::exit(1);
@@ -186,18 +189,21 @@ fn plant_at(scenario: &str) -> usize {
 }
 
 /// Builds a scenario. `None` when the name is not one this harness knows.
-fn build(app: &mut App, scenario: &str) -> Option<World> {
+fn build(app: &mut App, scenario: &str, people: Option<usize>) -> Option<World> {
+    let some = people.unwrap_or(8);
     match scenario {
-        "need-cycle" => Some(one_place_and_eight(app, true)),
-        "village-evening" | "village" => Some(village(app)),
+        "need-cycle" => Some(one_place_with(app, true, some)),
+        "village-evening" | "village" => Some(village_with(app, people.unwrap_or(24))),
         "rumor-crosses-a-cluster" => Some(cluster(app)),
-        "deed-draws-a-response" => Some(one_place_and_eight(app, false)),
+        "deed-draws-a-response" => Some(one_place_with(app, false, some)),
         _ => None,
     }
 }
 
 /// Eight people round a well, all autonomous: the simplest society that can show a need cycle.
-fn one_place_and_eight(app: &mut App, scatter: bool) -> World {
+/// `count` villagers round one place, so `--people` can change the population without changing the
+/// scenario's shape.
+fn one_place_with(app: &mut App, scatter: bool, count: usize) -> World {
     let well = app
         .world_mut()
         .spawn((
@@ -212,8 +218,9 @@ fn one_place_and_eight(app: &mut App, scatter: bool) -> World {
         ))
         .id();
     let mut villagers = Vec::new();
-    for i in 0..8 {
-        let angle = i as f32 * std::f32::consts::TAU / 8.0;
+    let count = count.max(1);
+    for i in 0..count {
+        let angle = i as f32 * std::f32::consts::TAU / count as f32;
         let radius = if scatter { 2.0 } else { 0.5 };
         let entity = app
             .world_mut()
@@ -240,7 +247,7 @@ fn one_place_and_eight(app: &mut App, scatter: bool) -> World {
 }
 
 /// The F1 village: four places, 24 villagers in three factions of eight.
-fn village(app: &mut App) -> World {
+fn village_with(app: &mut App, people: usize) -> World {
     let places: Vec<Entity> = [
         ("well", Vec2::new(0.0, 0.0), vec!["gathering"], 6u32),
         (
@@ -256,7 +263,7 @@ fn village(app: &mut App) -> World {
     .map(|(name, pos, tags, capacity)| {
         app.world_mut()
             .spawn((
-                Name::new(*name),
+                Name::new(name.to_owned()),
                 Place {
                     capacity: *capacity,
                 },
@@ -270,17 +277,27 @@ fn village(app: &mut App) -> World {
 
     let defs = app.world().resource::<SocietyDefs>().clone();
     let mut villagers = Vec::new();
-    for (i, name) in [
+    // The 24 names the village was authored with; `--people` beyond 24 gets `V25`, `V26`, ... so a
+    // fresh-eyes run with a bigger population still works.
+    const NAMES: [&str; 24] = [
         "Bram", "Alys", "Corin", "Dena", "Edric", "Fenna", "Garet", "Hilda", "Ivo", "Jena", "Kell",
         "Lira", "Milo", "Nera", "Oswin", "Perrin", "Quill", "Rhea", "Sable", "Tomas", "Ulric",
         "Vesna", "Wren", "Ysolde",
-    ]
-    .iter()
-    .enumerate()
-    {
+    ];
+    let count = people.max(1);
+    for i in 0..count {
+        let owned;
+        let name: &str = match NAMES.get(i) {
+            Some(name) => name,
+            None => {
+                owned = format!("V{}", i + 1);
+                &owned
+            }
+        };
         let column = i / 8;
         let row = i % 8;
-        let faction = ["millers", "weavers", "watch"][column];
+        // Three factions of eight; a population past 24 wraps round them rather than panicking.
+        let faction = ["millers", "weavers", "watch"][column % 3];
         let honesty = if faction == "watch" {
             0.7
         } else {
@@ -298,7 +315,7 @@ fn village(app: &mut App) -> World {
             .spawn((
                 Person,
                 Autonomous,
-                Name::new(*name),
+                Name::new(name.to_owned()),
                 Home(home),
                 // 2.5 m spacing: a walk to a neighbour is ~110 ticks, not 640. The village is small
                 // enough that its people can actually reach each other inside a run.
@@ -607,9 +624,12 @@ fn write_narrative(app: &mut App, tracked: Option<Entity>, lines: &[String], out
     }
 }
 
+/// `d2 08h26` — the day matters: without it a multi-day narrative reads as though the clock ran
+/// backwards at midnight (`20h43` followed by `08h26`), which is exactly how a reader first met it.
 fn clock_label(clock: &SocietyClock) -> String {
+    let day = clock.now_days.floor() as u32 + 1;
     format!(
-        "{:02}h{:02}",
+        "d{day} {:02}h{:02}",
         clock.hour() as u32,
         (clock.hour().fract() * 60.0) as u32
     )
@@ -703,10 +723,14 @@ fn summary(app: &mut App, world: &World, out: &Path) {
 // Flags
 // -------------------------------------------------------------------------------------------------
 
-/// `--scenario <name>`, `--out <dir>`.
+/// `--scenario <name>`, `--out <dir>`, `--seed <n>`, `--people <n>`.
 struct Args {
     scenario: String,
     out: String,
+    /// Overrides the scenario's seed, so the same scenario can be re-read with different people.
+    seed: Option<u64>,
+    /// Overrides the scenario's population.
+    people: Option<usize>,
 }
 
 impl Args {
@@ -714,12 +738,16 @@ impl Args {
         let mut args = Self {
             scenario: "village-evening".to_owned(),
             out: "docs/loop/evidence".to_owned(),
+            seed: None,
+            people: None,
         };
         let mut argv = std::env::args().skip(1);
         while let Some(flag) = argv.next() {
             match flag.as_str() {
                 "--scenario" => args.scenario = argv.next().unwrap_or_default(),
                 "--out" => args.out = argv.next().unwrap_or_default(),
+                "--seed" => args.seed = argv.next().and_then(|v| v.parse().ok()),
+                "--people" => args.people = argv.next().and_then(|v| v.parse().ok()),
                 other => {
                     eprintln!("evidence: unknown argument {other}");
                     std::process::exit(1);

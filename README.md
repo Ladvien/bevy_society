@@ -28,33 +28,43 @@ Every formula traces to a paper; every rate is a named field on `Tuning`; every 
 bevy_society = { git = "https://github.com/Ladvien/bevy_society" }
 ```
 
-```rust,ignore
+```rust,no_run
 use bevy::prelude::*;
 use bevy_society::{
-    Autonomous, Home, InteractionResolved, Person, Place, PlaceTags, SocietyDefs, SocietyPlugins,
+    Autonomous, Home, Person, Place, PlaceTags, SocietyClock, SocietyDefs, SocietyPlugins,
     SocietySettings,
 };
 
-fn main() {
-    let defs = SocietyDefs::starter().expect("the starter pack is valid");
-    let mut app = App::new();
-    app.add_plugins((MinimalPlugins, TransformPlugin))
-        .insert_resource(SocietySettings::default())
-        .insert_resource(defs)
-        .add_plugins(SocietyPlugins);
+let defs = SocietyDefs::starter().expect("the starter pack is valid");
+// A headless app has no frame clock, so `Time<Fixed>` never advances on its own. Without this the
+// society takes zero ticks however many updates you run.
+let step = std::time::Duration::from_secs_f64(1.0 / 64.0);
 
-    let well = app
-        .world_mut()
-        .spawn((Name::new("well"), Place { capacity: 6 }, PlaceTags(vec!["gathering".into()])))
-        .id();
-    for name in ["Bram", "Alys", "Corin"] {
-        app.world_mut().spawn((Person, Autonomous, Name::new(name), Home(well), Transform::default()));
-    }
+let mut app = App::new();
+app.add_plugins((MinimalPlugins, TransformPlugin))
+    .insert_resource(bevy::time::TimeUpdateStrategy::ManualDuration(step))
+    .insert_resource(SocietySettings::default())
+    .insert_resource(defs);
+// `DialoguePlugin` needs a speech-bubbles plugin over a camera, which this snippet has not.
+let plugins = SocietyPlugins.build();
+#[cfg(feature = "dialogue")]
+let plugins = plugins.disable::<bevy_society::DialoguePlugin>();
+app.add_plugins(plugins);
 
-    for _ in 0..600 {
-        app.update();
-    }
+let well = app
+    .world_mut()
+    .spawn((Name::new("well"), Place { capacity: 6 }, PlaceTags(vec!["gathering".into()]), Transform::default()))
+    .id();
+for name in ["Bram", "Alys", "Corin"] {
+    app.world_mut()
+        .spawn((Person, Autonomous, Name::new(name), Home(well), Transform::default()));
 }
+
+for _ in 0..600 {
+    app.update();
+}
+// The society advanced: this line is what proves the fixed step was pinned.
+assert!(app.world().resource::<SocietyClock>().tick > 0);
 ```
 
 Run it headlessly with `cargo run --example quickstart`, which is this code. On a real run it reports

@@ -4,6 +4,10 @@ All notable changes to bevy_society. The format follows [Keep a Changelog](https
 
 ## [Unreleased]
 
+### Fixed
+
+- **The quick start now works, and is compiled.** Two documents that tell a host how to begin were wrong: `README.md`'s quick start took **0 society ticks in 600 updates** (a headless app has no frame clock, so `Time<Fixed>` never advances without `TimeUpdateStrategy::ManualDuration`), and `docs/guide/getting-started.md`'s first block panicked in `DialoguePlugin::finish` without a speech-bubbles camera. Both fixed. The quick start is now a **running doctest** in `src/lib.rs` — `cargo test --doc` executes it and asserts `tick > 0` — and `tests/readme.rs` asserts the README's block is byte-equal to it, so they cannot drift. That doctest immediately caught a hand-written repair naming a `TimeUpdateStrategy` that Bevy 0.20 does not re-export in its prelude.
+
 ### Added
 
 - **Startup warnings are now asserted, not read by hand.** `tests/common/capture.rs` is a `LogPlugin` layer that records every event into a resource, so a test can assert a `warn!`. Building it immediately found a defect in the previous iteration's warning: an activity with both a `Field` consideration and a `Gradient` target was counted twice, so one offending definition was reported as `2 definitions … — follow, follow`. Now one. Note the constraint: the `tracing` subscriber is process-global and settable once, so a test binary may build only one capturing app.

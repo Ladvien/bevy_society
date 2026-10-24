@@ -19,23 +19,31 @@ bevy_society = { git = "https://github.com/Ladvien/bevy_society", rev = "<commit
 
 ## Add the plugins
 
-```rust,ignore
+```rust,no_run
 use bevy::prelude::*;
 use bevy_society::{SocietyDefs, SocietyPlugins, SocietySettings};
 
 fn main() {
-    App::new()
-        .add_plugins(DefaultPlugins)
+    let mut app = App::new();
+    app.add_plugins(DefaultPlugins)
         .insert_resource(SocietySettings::default())
-        .insert_resource(SocietyDefs::starter().expect("the starter pack is valid"))
-        .add_plugins(SocietyPlugins)
-        .run();
+        .insert_resource(SocietyDefs::starter().expect("the starter pack is valid"));
+    // `DialoguePlugin` needs a speech-bubbles plugin over a camera (see
+    // `docs/guide/dialogue.md`). Until the app has one, leave it out:
+    let plugins = SocietyPlugins.build();
+    #[cfg(feature = "dialogue")]
+    let plugins = plugins.disable::<bevy_society::DialoguePlugin>();
+    app.add_plugins(plugins).run();
 }
 ```
 
 `SocietySettings` and `SocietyDefs` must be inserted **before** `SocietyPlugins`. The group installs
 every plugin the crate has; each one also works alone after `SocietyCorePlugin`, so a host that wants
 only opinions and rumors can take those two.
+
+`SocietyPlugins` includes `DialoguePlugin`, which **panics in `finish`** without
+`bevy_speech_bubbles::SpeechBubblesPlugin::<YourCamera>`. Either disable it as above until the app has
+a camera, or add the speech-bubbles plugin first; see `docs/guide/dialogue.md`.
 
 ## Spawn people and a place
 

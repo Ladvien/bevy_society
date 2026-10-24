@@ -1,0 +1,3 @@
+# git show HEAD:README.md, its rust,ignore block extracted verbatim and run.
+# 600 app.update() calls; the snippet's own loop. Reported by the extracted program.
+BEFORE_TICKS=0
