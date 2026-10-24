@@ -106,10 +106,23 @@ fn main() {
                 }
             }
         }
+        // **Tick 0 is not a sample of the society; it is before one exists.** `size_person_state` fills
+        // `Needs` and `Opinions` on the first tick, so a row taken before the first update reads
+        // `Needs([])` and averages to **0.000 for every need**. Two iterations of "all four needs cycle"
+        // rested on that one row: the claim was true of the mean only because of a startup artefact, and
+        // false per person — measured, `social` never falls below 0.39 and `rest` never below 0.50.
+        //
+        // The first row is therefore written with no needs at all, and `needs` is empty in the CSV for
+        // it. A reader, and any check, then skips it because there is nothing to average.
         let row = snapshot_row(&app, tick as f64, &world, planted);
-        peak_reach = peak_reach.max(row.reach);
-        peak_known_by = peak_known_by.max(row.known_by);
-        rows.push(row);
+        // The first row is the pre-society state: `size_person_state` has not run, so `Needs` is empty
+        // and every need reads 0.000. Recording it made "all four needs cross below 0.35" true of the
+        // mean on the strength of one row at tick 0, while no individual ever came close.
+        if tick > 0 {
+            peak_reach = peak_reach.max(row.reach);
+            peak_known_by = peak_known_by.max(row.known_by);
+            rows.push(row);
+        }
         drain_narrative(&mut app, &world, tracked, &mut lines);
     }
 
@@ -621,7 +634,11 @@ fn snapshot_row(
                     *sum += level;
                 }
             }
-            need_count += 1;
+            // Only count people whose needs have been sized. Before `size_person_state` runs, the
+            // component exists but is empty, and counting it averages a real 1.0 down to 0.000.
+            if !needs.0.is_empty() {
+                need_count += 1;
+            }
         }
         if let Some(opinion) = world_ref.get::<Opinions>(entity) {
             opinions.push(opinion.value(0));
@@ -669,10 +686,11 @@ fn snapshot_row(
     });
     Row {
         tick,
-        needs: needs_sum
-            .iter()
-            .map(|s| s / need_count.max(1) as f32)
-            .collect(),
+        needs: if need_count == 0 {
+            Vec::new()
+        } else {
+            needs_sum.iter().map(|s| s / need_count as f32).collect()
+        },
         pleasure: p / n,
         arousal: a / n,
         dominance: d / n,

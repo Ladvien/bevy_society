@@ -19,16 +19,20 @@ scenarios:
     population: 8
     settings: { seconds_per_day: 64.0, start_hour: 7.0 }
     ticks: 5000
-    status: measured
+    status: pending
     test: tests/need_cycle.rs
     observable: >
       Every person's `rest` and `food` needs fall and rise again over a game-day: each crosses below
       0.35 at least once and recovers above 0.7 at least once. A need that only ever falls means no
       activity ever satisfies it.
-      (Re-derived 2026-11-17 at this scenario's own settings — 64 s/day, 80 000 ticks, 19.8 game-days.
-      All four needs cycle: means [0.86, 0.81, 0.58, 0.79], each crossing below 0.35 and recovering
-      past 0.7. The `pending` this replaced was earned at a four-second day length the file never
-      declared; see the log for 2026-11-16.)
+      (Corrected 2026-11-18. The previous note claimed "all four needs cycle", citing means
+      [0.86, 0.81, 0.58, 0.79]. That was false, and it was false for a mechanical reason: the evidence
+      series recorded a row at **tick 0**, before `size_person_state` fills `Needs`, so every need read
+      0.000 once. That single row made "crosses below 0.35" true of the mean while **no individual ever
+      came close**. Measured per person over 80 000 ticks, and again from the series with tick 0 removed:
+      `social` bottoms at 0.61, `rest` at 0.54, `fun` at 0.56 — none crosses 0.35 — and only `food`
+      cycles, once a day, 0.22 → 1.00. That is correct behaviour: those three needs are met well enough
+      that they never run low, which is a fact about the rates, not a defect.)
 
   - name: rumor-crosses-a-cluster
     kind: cluster
