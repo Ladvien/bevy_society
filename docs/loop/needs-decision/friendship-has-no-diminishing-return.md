@@ -1,5 +1,11 @@
 # Should forty-five conversations make you friends?
 
+> **Option 1 was tested on 2026-12-10 and does not work.** Saturating the gain — the recommendation below —
+> leaves the clique intact: with a contact exchange at 3 h, friends are **260** under saturation against
+> **267** without it, and rivals are **0** in both. Saturation only slows the *approach* to affinity 1; it does
+> not lower the ceiling, and 45 exchanges cross `0.4` on either curve. The recommendation is retracted; see
+> "Why saturation fails" at the end.
+
 ## The problem, measured
 
 `village-evening`, seed 7, 24 people, 17 game-days:
@@ -105,3 +111,38 @@ Zajonc supplies only the mechanism. The doc now states the equilibrium (`0.833` 
 three sweeps that show exposure is *not* what sets the friend count, and the measured 45-interaction result.
 
 No rate was changed. The crate is at friends 22 / rivals 33.
+
+## Why saturation fails, measured
+
+`affinity ← affinity + gain · (1 − |affinity|)` was the recommendation. Built and measured on
+`village-evening`:
+
+| configuration | friends | rivals |
+|---|---|---|
+| shipped (no saturation, no contact talk) | **22** | **33** |
+| saturation alone | 22 | 38 |
+| shipped + contact talk at 3 h | **267** | **0** |
+| **saturation + contact talk at 3 h** | **260** | **0** |
+
+Saturation alone is nearly neutral (22 → 22), which looked promising. It does not survive contact: **260 against
+267** is the same clique.
+
+The reason is arithmetic. Saturation makes affinity approach 1 asymptotically rather than linearly, but both
+curves pass `0.4`, and both pass it well within 45 exchanges. A saturating gain changes *when* the threshold is
+crossed, not *whether*. To stop a clique the model needs something that keeps affinity **below** the threshold
+for most pairs — a lower asymptote, a threshold above the asymptote, or a gate that contact cannot satisfy.
+
+## Options that remain
+
+1. **A lower asymptote for interaction affinity.** `affinity ← affinity + gain · (K − |affinity|)` with
+   `K < 0.4`, so no number of exchanges with one person is enough on its own; the threshold then needs a second
+   input (trust, respect, or a shared faction). Untested.
+2. **A higher threshold, gated on something contact cannot supply.** `Friend` at affinity `0.4` *and* trust
+   `0.6`, say. Trust moves far more slowly than affinity, so it would bound friendship without touching the
+   affinity curve.
+3. **Accept the clique and bound the count.** `trim` already exists at `max_ties = 150`; a village of 24 would
+   need a far lower cap, which changes what Dunbar's number means here.
+
+**Option 2 is the one to try next**, because it uses a quantity the crate already models and already moves
+slowly. Saturation was the cheapest fix and it is now known not to work, which is worth having measured rather
+than assumed.

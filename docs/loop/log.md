@@ -2787,3 +2787,49 @@ recommending saturation, which the crate already uses for exposure). What did sh
 3. **`Doing` names the target activity while travelling** - 49.8% of person-ticks; host-facing, escalated.
 4. **The clock decision** - 5.4-hour walks against 0.75-hour activities.
 5. **Mood is still negative at every seed** (-0.046 to -0.054).
+
+## 2026-12-10-01 - The recommended fix does not work
+
+**Pick.** Last iteration's own recommendation: saturate interaction affinity. A model change to how every tie
+forms should be measured before it ships, so I built it and measured it in two configurations. Runner-up was
+`Doing`'s travelling semantics, escalated.
+
+**Citation first.** The saturating shape has **no source in the corpus**. The closest paper — Reiter et al. 2023
+on attenuated gains of trust — is about developmental trajectories, not per-exchange diminishing returns. So it
+is a design default, and testing it was the right order.
+
+| configuration | friends | rivals |
+|---|---|---|
+| shipped | **22** | **33** |
+| saturation alone | **22** | 38 |
+| contact talk at 3 h | **267** | **0** |
+| **saturation + contact talk at 3 h** | **260** | **0** |
+
+**Saturation alone is neutral; it does not survive contact.** 260 against 267 is the same clique. Both curves
+pass the `0.4` Friend threshold within 45 exchanges, so a saturating gain changes **when** friendship happens,
+not **whether**.
+
+**Reverted.** The decision file's recommendation is retracted, with three untested shapes ranked — recommending a
+**trust gate** next, because trust already exists and moves far more slowly than affinity, which is the only
+property that can bound a friendship contact would otherwise create.
+
+**Three mechanisms have now failed on this problem**: a `help` activity (rivals 44 -> 0), a contact exchange
+(friends 22 -> 267), and saturation (260). All plausible, all measured, none working. That pattern is the most
+informative thing in the log, and it says the threshold and its inputs are the lever, not the gain.
+
+**Verdicts.** Pass 1 **FAIL** (the claim is false). Pass 2 GREAT (the arithmetic explains it). Pass 3 GREAT (not
+shipping a model change sold as a fix that leaves 260 friend pairs).
+
+**Dead-code delta.** Zero. **Village unchanged:** friends 22 / rivals 33.
+
+**Commit** `pending`.
+
+**Top 5 remaining.**
+
+1. **Friend at 0.4 affinity is reachable by any amount of contact.** The threshold and its inputs are the lever.
+   Untested: a lower asymptote, or a gate on trust (recommended), or a lower `max_ties`.
+2. **Meeting and befriending share one verb.** Still open, and blocked behind (1): a bark on contact is safe
+   only once contact cannot create a friendship by itself.
+3. **`Doing` names the target activity while travelling** - 49.8% of person-ticks; host-facing, escalated.
+4. **The clock decision** - 5.4-hour walks against 0.75-hour activities.
+5. **Mood is still negative at every seed** (-0.046 to -0.054).
