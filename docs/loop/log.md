@@ -3004,7 +3004,7 @@ prediction and the asymmetric clamp.
 
 **Dead-code delta.** Zero. **Tests:** 52 binaries. **Village unchanged:** friends 22 / rivals 33.
 
-**Commit** `pending`.
+**Commit** `e9acc2c`.
 
 **Top 5 remaining.**
 
