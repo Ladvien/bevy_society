@@ -3059,7 +3059,7 @@ corrected by runs). Fresh eyes GREAT (a host's first move is to copy one of thes
 
 **Dead-code delta.** Zero. **Tests:** 53 binaries, three new.
 
-**Commit** `pending`.
+**Commit** `d58477f`.
 
 **Top 5 remaining.**
 
