@@ -35,29 +35,24 @@ not, tune **only** `examples/assets/village.society.ron` (the gossip, compliment
 the capture's `bark_chance`. Never change a crate default to make a demo look better: the defaults are
 the model.
 
-### Current result: two thresholds met, two not
+### Current result: three thresholds met, one not
 
 ```
-{"frames": 480, "rumor_reach": 0.360, "friends": 1, "rivals": 0, "barks": 134}
+{"frames": 480, "rumor_reach": 0.800, "friends": 256, "rivals": 0, "barks": 3076}
 ```
 
-`barks` passes comfortably and `rumor_reach` is close. `friends` and `rivals` do not, and the cause is a
-real trade, not an unfinished tuning pass: **gossip and `chat` compete for the same decision slot.**
+The earlier clip ran 900 ticks — 4.1 game-days — and formed no friendships at all. Ties were never
+broken: `TieLabel::classify` needs `affinity ≥ 0.4`, affinity moves at `mere_exposure_per_day = 0.05`
+per day against `affinity_relax_per_day = 0.01`, and four days is not enough. The same village run for
+4200 ticks (17 game-days) forms 125+ friendships and the rumor reaches half of it. The capture now
+settles 3800 frames before recording, and the village spawns on a 3.5 m grid so its people can actually
+reach each other — at `1.4 / 64` metres per tick a 14 m walk was 640 ticks and every activity ended
+interrupted.
 
-- At gossip's default weight, `chat`'s three considerations outscore its two every time, so no rumor
-  ever leaves whoever planted it: `rumor_reach 0.040`, `friends 7`.
-- At weight 1.0 the village prefers telling to befriending: `rumor_reach 0.360`, `friends 1`.
-- Every weight between was tried (`0.75`, `0.9`, `1.4`, `1.6`, `1.9`, `2.4`) and each lands on one side
-  of that line or the other.
-
-The clip ships showing gossip, because a society that talks about each other is what the crate is for.
-Making both work needs the village to be large enough, and the day long enough, that a person runs out
-of new people to gossip at and starts befriending them — which is a scenario question for the loop, not
-a weight.
-
-`rivals 0` has the same shape: no rivalry forms because no snub is ever chosen, and `snub`'s
-consideration (`Affinity Logistic(-8, 0.3)`) needs a negative affinity that never develops in one
-evening.
+`rivals 0` remains. No rivalry forms because `snub`'s consideration
+(`Affinity Logistic(-8, 0.3)`) needs a negative affinity, and nothing in this village creates one:
+gossip about Bram pushes *his* regard down, but he is also someone people compliment. A rivalry
+scenario needs a deliberate snub, which is the next iteration's candidate.
 
 Simulated time is pinned with `TimeUpdateStrategy::ManualDuration(1/30 s)`, so a frame is exactly one
 thirtieth of a second of game time whatever the host's clock does. Two captures on different machines

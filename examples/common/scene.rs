@@ -15,9 +15,9 @@ pub const GROUND_HALF: f32 = 20.0;
 /// One village place: name, plane position, tags and how many may use it at once.
 pub const PLACES: &[(&str, Vec2, &[&str], u32)] = &[
     ("well", Vec2::new(0.0, 0.0), &["gathering"], 6),
-    ("tavern", Vec2::new(8.0, -6.0), &["gathering", "food"], 10),
-    ("market", Vec2::new(-8.0, -6.0), &["food", "work"], 8),
-    ("workshop", Vec2::new(8.0, 8.0), &["work"], 6),
+    ("tavern", Vec2::new(6.5, -5.0), &["gathering", "food"], 10),
+    ("market", Vec2::new(-6.5, -5.0), &["food", "work"], 8),
+    ("workshop", Vec2::new(6.5, 5.0), &["work"], 6),
 ];
 
 /// The three factions, one per column of villagers.
@@ -139,7 +139,9 @@ pub fn spawn_villagers(
         let row = i % VILLAGERS_PER_FACTION;
         let (faction, _) = FACTIONS[column];
         let material = materials.get(column).cloned().unwrap_or_default();
-        let pos = Vec2::new(-14.0 + 14.0 * column as f32, -14.0 + 4.0 * row as f32);
+        // 2.5 m spacing. A walker covers `speed / 64` metres per tick, so a 14 m village put every
+        // place 640 ticks away and nobody ever arrived; at this spacing a neighbour walk is ~110.
+        let pos = Vec2::new(-5.25 + 3.5 * column as f32, -5.25 + 3.5 * row as f32);
         let honesty = if faction == "watch" {
             0.7
         } else {

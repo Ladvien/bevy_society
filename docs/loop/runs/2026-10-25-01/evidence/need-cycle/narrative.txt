@@ -1,0 +1,2183 @@
+# V0's day
+
+At the end: doing Some("compliment"), needs Some([0.984375, 0.6499996, 0.0, 0.2750007]), mood P0.07 A0.03 D-0.07
+
+10h37: finished gossip (interrupted)
+12h52: finished gossip (interrupted)
+13h15: gossip approached by V1 (refused)
+15h07: started gossip
+15h07: finished gossip (interrupted)
+15h07: gossip with V7 (accepted)
+15h07: chat approached by V6 (accepted)
+15h30: finished gossip (completed)
+16h15: gossip approached by V1 (accepted)
+17h45: started gossip
+17h45: finished work (interrupted)
+17h45: gossip with V2 (refused)
+18h07: finished gossip (completed)
+20h22: started gossip
+20h22: finished gossip (interrupted)
+20h22: gossip with V6 (refused)
+20h45: started gossip
+20h45: finished gossip (completed)
+20h45: gossip with V7 (refused)
+21h07: finished gossip (completed)
+23h22: finished gossip (interrupted)
+01h37: finished sleep (interrupted)
+03h52: finished sleep (interrupted)
+05h45: started sleep
+09h30: chat approached by V6 (refused)
+09h52: gossip approached by V1 (accepted)
+09h52: chat approached by V7 (refused)
+11h45: gossip approached by V6 (refused)
+14h00: started chat
+14h00: finished sleep (completed)
+14h00: chat with V2 (refused)
+14h22: finished chat (completed)
+16h37: started eat
+16h37: finished gossip (interrupted)
+17h22: finished eat (completed)
+18h07: gossip approached by V3 (accepted)
+18h52: gossip approached by V7 (accepted)
+19h37: started relax
+19h37: finished chat (interrupted)
+20h00: gossip approached by V7 (refused)
+20h22: chat approached by V1 (refused)
+20h45: gossip approached by V1 (refused)
+20h45: gossip approached by V2 (accepted)
+21h07: finished relax (completed)
+21h52: started chat
+21h52: chat with V5 (accepted)
+22h15: started sleep
+22h15: finished chat (completed)
+06h30: started chat
+06h30: finished sleep (completed)
+06h30: chat with V6 (accepted)
+06h52: finished chat (completed)
+09h07: started chat
+09h07: finished chat (interrupted)
+09h07: chat with V1 (accepted)
+09h30: started compliment
+09h30: finished chat (completed)
+09h30: compliment with V6 (accepted)
+09h30: gossip approached by V5 (accepted)
+09h52: started work
+09h52: finished compliment (completed)
+13h15: gossip approached by V7 (refused)
+14h00: started chat
+14h00: finished work (completed)
+14h00: chat with V6 (refused)
+14h22: started gossip
+14h22: finished chat (completed)
+14h22: gossip with V2 (accepted)
+14h45: started gossip
+14h45: finished gossip (completed)
+14h45: gossip with V1 (refused)
+15h07: started compliment
+15h07: finished gossip (completed)
+15h07: compliment with V5 (accepted)
+15h07: gossip approached by V5 (accepted)
+15h30: started gossip
+15h30: finished compliment (completed)
+15h30: gossip with V1 (refused)
+15h52: started eat
+15h52: finished gossip (completed)
+15h52: gossip approached by V7 (refused)
+16h15: compliment approached by V5 (accepted)
+16h37: started gossip
+16h37: finished eat (completed)
+16h37: gossip with V6 (accepted)
+17h00: started gossip
+17h00: finished gossip (completed)
+17h00: gossip with V5 (refused)
+17h00: gossip approached by V2 (refused)
+17h22: started gossip
+17h22: finished gossip (completed)
+17h22: gossip with V6 (refused)
+17h45: started gossip
+17h45: finished gossip (completed)
+17h45: gossip with V7 (refused)
+18h07: started gossip
+18h07: finished gossip (completed)
+18h07: gossip with V3 (accepted)
+18h30: started gossip
+18h30: finished gossip (completed)
+18h30: gossip with V1 (accepted)
+18h52: started relax
+18h52: finished gossip (completed)
+19h15: gossip approached by V2 (refused)
+20h22: started gossip
+20h22: finished relax (completed)
+20h22: gossip with V6 (accepted)
+20h22: gossip approached by V7 (accepted)
+20h45: started gossip
+20h45: finished gossip (completed)
+20h45: gossip with V7 (accepted)
+20h45: gossip approached by V7 (refused)
+21h07: started gossip
+21h07: finished gossip (completed)
+21h07: gossip with V7 (refused)
+21h07: gossip approached by V6 (accepted)
+21h30: started relax
+21h30: finished gossip (completed)
+21h52: gossip approached by V5 (refused)
+23h00: started sleep
+23h00: finished relax (completed)
+06h52: compliment approached by V3 (accepted)
+07h15: started gossip
+07h15: finished sleep (completed)
+07h15: gossip with V7 (refused)
+07h37: started eat
+07h37: finished gossip (completed)
+08h22: started compliment
+08h22: finished eat (completed)
+08h22: compliment with V3 (refused)
+08h45: started compliment
+08h45: finished compliment (completed)
+08h45: compliment with V5 (accepted)
+09h07: started gossip
+09h07: finished compliment (completed)
+09h07: gossip with V7 (refused)
+09h30: started chat
+09h30: finished gossip (completed)
+09h30: chat with V5 (accepted)
+09h52: started gossip
+09h52: finished chat (completed)
+09h52: gossip with V5 (accepted)
+09h52: gossip approached by V6 (refused)
+10h15: started compliment
+10h15: finished gossip (completed)
+10h15: compliment with V5 (accepted)
+10h37: started compliment
+10h37: finished compliment (completed)
+10h37: compliment with V6 (accepted)
+11h00: started gossip
+11h00: finished compliment (completed)
+11h00: gossip with V7 (refused)
+11h22: started compliment
+11h22: finished gossip (completed)
+11h22: compliment with V5 (accepted)
+11h45: started chat
+11h45: finished compliment (completed)
+11h45: chat with V1 (accepted)
+12h07: started gossip
+12h07: finished chat (completed)
+12h07: gossip with V5 (refused)
+12h30: started gossip
+12h30: finished gossip (completed)
+12h30: gossip with V1 (accepted)
+12h30: compliment approached by V5 (accepted)
+12h52: started compliment
+12h52: finished gossip (completed)
+12h52: compliment with V6 (accepted)
+13h15: finished compliment (completed)
+13h15: compliment approached by V5 (accepted)
+13h37: gossip approached by V1 (accepted)
+14h00: gossip approached by V1 (accepted)
+14h22: compliment approached by V1 (refused)
+14h45: compliment approached by V1 (accepted)
+15h30: started gossip
+15h30: finished gossip (interrupted)
+15h30: gossip with V7 (refused)
+15h52: started compliment
+15h52: finished gossip (completed)
+15h52: compliment with V5 (accepted)
+16h15: started gossip
+16h15: finished compliment (completed)
+16h15: gossip with V1 (accepted)
+16h37: started compliment
+16h37: finished gossip (completed)
+16h37: compliment with V5 (accepted)
+17h00: started gossip
+17h00: finished compliment (completed)
+17h00: gossip with V2 (accepted)
+17h00: gossip approached by V6 (refused)
+17h22: started compliment
+17h22: finished gossip (completed)
+17h22: compliment with V5 (refused)
+17h45: started compliment
+17h45: finished compliment (completed)
+17h45: compliment with V5 (accepted)
+18h07: started gossip
+18h07: finished compliment (completed)
+18h07: gossip with V6 (refused)
+18h07: gossip approached by V6 (accepted)
+18h30: started gossip
+18h30: finished gossip (completed)
+18h30: gossip with V6 (accepted)
+18h52: finished gossip (completed)
+18h52: gossip approached by V2 (accepted)
+19h15: gossip approached by V7 (accepted)
+19h37: started gossip
+19h37: gossip with V4 (refused)
+19h37: gossip approached by V4 (refused)
+20h00: started compliment
+20h00: finished gossip (completed)
+20h00: compliment with V5 (accepted)
+20h22: started gossip
+20h22: finished compliment (completed)
+20h22: gossip with V1 (accepted)
+20h45: started compliment
+20h45: finished gossip (completed)
+20h45: compliment with V5 (accepted)
+20h45: gossip approached by V5 (accepted)
+21h07: started gossip
+21h07: finished compliment (completed)
+21h07: gossip with V1 (refused)
+21h30: started compliment
+21h30: finished gossip (completed)
+21h30: compliment with V5 (refused)
+21h30: gossip approached by V5 (accepted)
+21h52: started compliment
+21h52: finished compliment (completed)
+21h52: compliment with V6 (accepted)
+22h15: started sleep
+22h15: finished compliment (completed)
+06h30: started eat
+06h30: finished sleep (completed)
+06h30: chat approached by V6 (accepted)
+06h52: chat approached by V1 (refused)
+06h52: gossip approached by V6 (accepted)
+07h15: started gossip
+07h15: finished eat (completed)
+07h15: gossip with V5 (refused)
+07h15: chat approached by V2 (refused)
+07h15: compliment approached by V3 (accepted)
+07h37: started compliment
+07h37: finished gossip (completed)
+07h37: compliment with V6 (accepted)
+07h37: chat approached by V2 (accepted)
+08h00: started compliment
+08h00: finished compliment (completed)
+08h00: compliment with V3 (accepted)
+08h22: started compliment
+08h22: finished compliment (completed)
+08h22: compliment with V6 (accepted)
+08h22: gossip approached by V2 (refused)
+08h45: started compliment
+08h45: finished compliment (completed)
+08h45: compliment with V3 (accepted)
+09h07: started gossip
+09h07: finished compliment (completed)
+09h07: gossip with V1 (refused)
+09h07: gossip approached by V7 (refused)
+09h30: started compliment
+09h30: finished gossip (completed)
+09h30: compliment with V3 (refused)
+09h30: compliment approached by V2 (accepted)
+09h30: gossip approached by V3 (accepted)
+09h52: started gossip
+09h52: finished compliment (completed)
+09h52: gossip with V7 (refused)
+10h15: started gossip
+10h15: finished gossip (completed)
+10h15: gossip with V2 (refused)
+10h37: started compliment
+10h37: finished gossip (completed)
+10h37: compliment with V5 (accepted)
+11h00: started work
+11h00: finished compliment (completed)
+11h00: compliment approached by V3 (refused)
+11h45: compliment approached by V3 (refused)
+12h30: gossip approached by V1 (accepted)
+15h07: started gossip
+15h07: finished work (completed)
+15h07: gossip with V5 (refused)
+15h07: compliment approached by V4 (refused)
+15h30: started compliment
+15h30: finished gossip (completed)
+15h30: compliment with V3 (refused)
+15h52: started gossip
+15h52: finished compliment (completed)
+15h52: gossip with V7 (accepted)
+16h15: started gossip
+16h15: finished gossip (completed)
+16h15: gossip with V1 (refused)
+16h37: started work
+16h37: finished gossip (completed)
+18h30: compliment approached by V2 (refused)
+19h37: compliment approached by V3 (accepted)
+19h37: gossip approached by V6 (accepted)
+20h45: started relax
+20h45: finished work (completed)
+20h45: gossip approached by V2 (accepted)
+20h45: compliment approached by V5 (refused)
+21h30: gossip approached by V4 (accepted)
+22h15: started sleep
+22h15: finished relax (completed)
+06h30: started eat
+06h30: finished sleep (completed)
+06h52: compliment approached by V3 (accepted)
+07h15: started chat
+07h15: finished eat (completed)
+07h15: chat with V5 (accepted)
+07h15: compliment approached by V3 (accepted)
+07h37: started chat
+07h37: finished chat (completed)
+07h37: chat with V5 (accepted)
+07h37: compliment approached by V5 (accepted)
+08h00: started gossip
+08h00: finished chat (completed)
+08h00: gossip with V5 (accepted)
+08h22: started compliment
+08h22: finished gossip (completed)
+08h22: compliment with V6 (accepted)
+08h45: started gossip
+08h45: finished compliment (completed)
+08h45: gossip with V2 (accepted)
+08h45: gossip approached by V1 (accepted)
+09h07: started gossip
+09h07: finished gossip (completed)
+09h07: gossip with V6 (refused)
+09h30: started compliment
+09h30: finished gossip (completed)
+09h30: compliment with V5 (accepted)
+09h52: started gossip
+09h52: finished compliment (completed)
+09h52: gossip with V6 (accepted)
+10h15: started gossip
+10h15: finished gossip (completed)
+10h15: gossip with V5 (accepted)
+10h37: started compliment
+10h37: finished gossip (completed)
+10h37: compliment with V1 (accepted)
+10h37: gossip approached by V2 (accepted)
+11h00: started gossip
+11h00: finished compliment (completed)
+11h00: gossip with V6 (accepted)
+11h00: compliment approached by V3 (accepted)
+11h22: started gossip
+11h22: finished gossip (completed)
+11h22: gossip with V4 (accepted)
+11h45: started gossip
+11h45: finished gossip (completed)
+11h45: gossip with V1 (accepted)
+11h45: compliment approached by V2 (refused)
+12h07: started gossip
+12h07: finished gossip (completed)
+12h07: gossip with V7 (refused)
+12h30: started compliment
+12h30: finished gossip (completed)
+12h30: compliment with V2 (accepted)
+12h52: started compliment
+12h52: finished compliment (completed)
+12h52: compliment with V3 (refused)
+13h15: started compliment
+13h15: finished compliment (completed)
+13h15: compliment with V2 (refused)
+13h15: gossip approached by V2 (accepted)
+13h37: started compliment
+13h37: finished compliment (completed)
+13h37: compliment with V4 (accepted)
+14h00: started gossip
+14h00: finished compliment (completed)
+14h00: gossip with V2 (accepted)
+14h00: gossip approached by V5 (accepted)
+14h22: started work
+14h22: finished gossip (completed)
+14h45: compliment approached by V2 (accepted)
+14h45: compliment approached by V5 (accepted)
+15h07: compliment approached by V2 (accepted)
+15h52: compliment approached by V2 (accepted)
+18h30: started gossip
+18h30: finished work (completed)
+18h30: gossip with V2 (accepted)
+18h52: started compliment
+18h52: finished gossip (completed)
+18h52: compliment with V2 (accepted)
+19h15: started gossip
+19h15: finished compliment (completed)
+19h15: gossip with V1 (refused)
+19h37: started compliment
+19h37: finished gossip (completed)
+19h37: compliment with V6 (accepted)
+20h00: started compliment
+20h00: finished compliment (completed)
+20h00: compliment with V1 (accepted)
+20h00: compliment approached by V6 (accepted)
+20h22: started gossip
+20h22: finished compliment (completed)
+20h22: gossip with V3 (accepted)
+20h45: started gossip
+20h45: finished gossip (completed)
+20h45: gossip with V4 (refused)
+20h45: compliment approached by V3 (accepted)
+21h07: started gossip
+21h07: finished gossip (completed)
+21h07: gossip with V4 (accepted)
+21h30: started compliment
+21h30: finished gossip (completed)
+21h30: compliment with V5 (accepted)
+21h52: started gossip
+21h52: finished compliment (completed)
+21h52: gossip with V7 (accepted)
+22h15: started sleep
+22h15: finished gossip (completed)
+06h30: started chat
+06h30: finished sleep (completed)
+06h30: chat with V6 (refused)
+06h30: gossip approached by V5 (accepted)
+06h52: started compliment
+06h52: finished chat (completed)
+06h52: compliment with V5 (accepted)
+07h15: started compliment
+07h15: finished compliment (completed)
+07h15: compliment with V4 (accepted)
+07h15: compliment approached by V5 (accepted)
+07h37: started gossip
+07h37: finished compliment (completed)
+07h37: gossip with V5 (accepted)
+07h37: gossip approached by V3 (accepted)
+08h00: started gossip
+08h00: finished gossip (completed)
+08h00: gossip with V1 (refused)
+08h00: compliment approached by V2 (accepted)
+08h22: started compliment
+08h22: finished gossip (completed)
+08h22: compliment with V4 (refused)
+08h45: started gossip
+08h45: finished compliment (completed)
+08h45: gossip with V2 (accepted)
+09h07: started gossip
+09h07: finished gossip (completed)
+09h07: gossip with V3 (accepted)
+09h30: started compliment
+09h30: finished gossip (completed)
+09h30: compliment with V2 (accepted)
+09h30: compliment approached by V4 (accepted)
+09h52: started gossip
+09h52: finished compliment (completed)
+09h52: gossip with V4 (refused)
+10h15: started gossip
+10h15: finished gossip (completed)
+10h15: gossip with V2 (accepted)
+10h37: started compliment
+10h37: finished gossip (completed)
+10h37: compliment with V3 (accepted)
+11h00: started gossip
+11h00: finished compliment (completed)
+11h00: gossip with V2 (accepted)
+11h22: started compliment
+11h22: finished gossip (completed)
+11h22: compliment with V3 (accepted)
+11h45: started gossip
+11h45: finished compliment (completed)
+11h45: gossip with V5 (accepted)
+11h45: gossip approached by V4 (refused)
+12h07: started work
+12h07: finished gossip (completed)
+13h37: compliment approached by V5 (accepted)
+14h00: gossip approached by V7 (accepted)
+15h07: compliment approached by V5 (refused)
+16h15: started work
+16h15: finished work (completed)
+16h15: compliment approached by V1 (accepted)
+16h15: compliment approached by V5 (accepted)
+16h37: gossip approached by V1 (accepted)
+16h37: compliment approached by V6 (accepted)
+17h22: gossip approached by V6 (accepted)
+17h45: gossip approached by V4 (accepted)
+17h45: compliment approached by V5 (accepted)
+19h15: gossip approached by V1 (refused)
+19h15: gossip approached by V4 (accepted)
+20h00: compliment approached by V6 (accepted)
+20h22: started eat
+20h22: finished work (completed)
+20h45: compliment approached by V3 (accepted)
+21h07: started compliment
+21h07: finished eat (completed)
+21h07: compliment with V2 (refused)
+21h07: gossip approached by V2 (accepted)
+21h30: started gossip
+21h30: finished compliment (completed)
+21h30: gossip with V6 (accepted)
+21h30: compliment approached by V6 (refused)
+21h52: started compliment
+21h52: finished gossip (completed)
+21h52: compliment with V4 (refused)
+21h52: gossip approached by V6 (refused)
+22h15: started sleep
+22h15: finished compliment (completed)
+06h30: started gossip
+06h30: finished sleep (completed)
+06h30: gossip with V4 (accepted)
+06h52: started chat
+06h52: finished gossip (completed)
+06h52: chat with V1 (accepted)
+06h52: gossip approached by V6 (accepted)
+07h15: started compliment
+07h15: finished chat (completed)
+07h15: compliment with V3 (accepted)
+07h15: compliment approached by V4 (accepted)
+07h37: started compliment
+07h37: finished compliment (completed)
+07h37: compliment with V1 (accepted)
+07h37: gossip approached by V1 (accepted)
+08h00: started gossip
+08h00: finished compliment (completed)
+08h00: gossip with V6 (accepted)
+08h22: started compliment
+08h22: finished gossip (completed)
+08h22: compliment with V3 (accepted)
+08h45: started gossip
+08h45: finished compliment (completed)
+08h45: gossip with V5 (accepted)
+08h45: compliment approached by V1 (accepted)
+08h45: gossip approached by V2 (accepted)
+09h07: started gossip
+09h07: finished gossip (completed)
+09h07: gossip with V3 (accepted)
+09h30: started compliment
+09h30: finished gossip (completed)
+09h30: compliment with V2 (refused)
+09h30: compliment approached by V3 (accepted)
+09h30: compliment approached by V6 (refused)
+09h52: started gossip
+09h52: finished compliment (completed)
+09h52: gossip with V1 (accepted)
+09h52: compliment approached by V2 (refused)
+09h52: gossip approached by V4 (refused)
+10h15: started gossip
+10h15: finished gossip (completed)
+10h15: gossip with V4 (accepted)
+10h15: compliment approached by V2 (accepted)
+10h37: started gossip
+10h37: finished gossip (completed)
+10h37: gossip with V7 (accepted)
+11h00: started work
+11h00: finished gossip (completed)
+12h30: gossip approached by V6 (accepted)
+14h22: compliment approached by V1 (accepted)
+14h22: compliment approached by V6 (accepted)
+15h07: started compliment
+15h07: finished work (completed)
+15h07: compliment with V3 (accepted)
+15h07: gossip approached by V1 (accepted)
+15h30: started compliment
+15h30: finished compliment (completed)
+15h30: compliment with V6 (accepted)
+15h30: compliment approached by V1 (refused)
+15h52: started gossip
+15h52: finished compliment (completed)
+15h52: gossip with V3 (accepted)
+15h52: compliment approached by V1 (accepted)
+16h15: started compliment
+16h15: finished gossip (completed)
+16h15: compliment with V4 (refused)
+16h37: started compliment
+16h37: finished compliment (completed)
+16h37: compliment with V5 (accepted)
+17h00: started gossip
+17h00: finished compliment (completed)
+17h00: gossip with V6 (accepted)
+17h22: started compliment
+17h22: finished gossip (completed)
+17h22: compliment with V1 (accepted)
+17h45: started compliment
+17h45: finished compliment (completed)
+17h45: compliment with V1 (accepted)
+17h45: gossip approached by V5 (refused)
+18h07: started compliment
+18h07: finished compliment (completed)
+18h07: compliment with V6 (accepted)
+18h30: started compliment
+18h30: finished compliment (completed)
+18h30: compliment with V1 (accepted)
+18h52: started compliment
+18h52: finished compliment (completed)
+18h52: compliment with V1 (accepted)
+19h15: started gossip
+19h15: finished compliment (completed)
+19h15: gossip with V4 (refused)
+19h37: started eat
+19h37: finished gossip (completed)
+20h00: compliment approached by V2 (accepted)
+20h00: compliment approached by V5 (accepted)
+20h00: gossip approached by V6 (accepted)
+20h22: started compliment
+20h22: finished eat (completed)
+20h22: compliment with V3 (accepted)
+20h45: started relax
+20h45: finished compliment (completed)
+21h07: compliment approached by V3 (accepted)
+21h52: gossip approached by V4 (accepted)
+21h52: gossip approached by V5 (accepted)
+22h15: started sleep
+22h15: finished relax (completed)
+06h30: started chat
+06h30: finished sleep (completed)
+06h30: chat with V7 (accepted)
+06h52: started gossip
+06h52: finished chat (completed)
+06h52: gossip with V4 (accepted)
+06h52: compliment approached by V2 (accepted)
+06h52: gossip approached by V3 (accepted)
+07h15: started gossip
+07h15: finished gossip (completed)
+07h15: gossip with V2 (accepted)
+07h37: started gossip
+07h37: finished gossip (completed)
+07h37: gossip with V6 (accepted)
+08h00: started work
+08h00: finished gossip (completed)
+09h07: compliment approached by V5 (accepted)
+10h37: compliment approached by V4 (accepted)
+11h00: compliment approached by V2 (accepted)
+11h22: compliment approached by V2 (accepted)
+12h07: started compliment
+12h07: finished work (completed)
+12h07: compliment with V3 (accepted)
+12h30: started compliment
+12h30: finished compliment (completed)
+12h30: compliment with V3 (accepted)
+12h52: started compliment
+12h52: finished compliment (completed)
+12h52: compliment with V5 (accepted)
+13h15: started compliment
+13h15: finished compliment (completed)
+13h15: compliment with V7 (accepted)
+13h37: started chat
+13h37: finished compliment (completed)
+13h37: chat with V1 (accepted)
+14h00: started gossip
+14h00: finished chat (completed)
+14h00: gossip with V2 (accepted)
+14h00: compliment approached by V7 (accepted)
+14h22: started gossip
+14h22: finished gossip (completed)
+14h22: gossip with V3 (accepted)
+14h45: started compliment
+14h45: finished gossip (completed)
+14h45: compliment with V1 (accepted)
+15h07: started compliment
+15h07: finished compliment (completed)
+15h07: compliment with V1 (accepted)
+15h07: compliment approached by V7 (accepted)
+15h30: started gossip
+15h30: finished compliment (completed)
+15h30: gossip with V5 (accepted)
+15h52: started gossip
+15h52: finished gossip (completed)
+15h52: gossip with V5 (accepted)
+15h52: gossip approached by V1 (accepted)
+16h15: started gossip
+16h15: finished gossip (completed)
+16h15: gossip with V4 (accepted)
+16h37: started compliment
+16h37: finished gossip (completed)
+16h37: compliment with V1 (accepted)
+17h00: started eat
+17h00: finished compliment (completed)
+17h22: compliment approached by V7 (accepted)
+17h45: started gossip
+17h45: finished eat (completed)
+17h45: gossip with V1 (accepted)
+18h07: started compliment
+18h07: finished gossip (completed)
+18h07: compliment with V1 (accepted)
+18h07: gossip approached by V3 (accepted)
+18h30: started compliment
+18h30: finished compliment (completed)
+18h30: compliment with V2 (accepted)
+18h52: started compliment
+18h52: finished compliment (completed)
+18h52: compliment with V2 (accepted)
+19h15: started compliment
+19h15: finished compliment (completed)
+19h15: compliment with V2 (accepted)
+19h37: started compliment
+19h37: finished compliment (completed)
+19h37: compliment with V3 (accepted)
+20h00: started gossip
+20h00: finished compliment (completed)
+20h00: gossip with V6 (accepted)
+20h00: compliment approached by V1 (refused)
+20h00: gossip approached by V3 (accepted)
+20h00: gossip approached by V7 (refused)
+20h22: started gossip
+20h22: finished gossip (completed)
+20h22: gossip with V3 (accepted)
+20h22: compliment approached by V4 (refused)
+20h22: gossip approached by V6 (accepted)
+20h22: compliment approached by V7 (refused)
+20h45: started relax
+20h45: finished gossip (completed)
+21h30: compliment approached by V7 (refused)
+22h15: started sleep
+22h15: finished relax (completed)
+06h30: started gossip
+06h30: finished sleep (completed)
+06h30: gossip with V3 (accepted)
+06h52: started gossip
+06h52: finished gossip (completed)
+06h52: gossip with V2 (accepted)
+06h52: gossip approached by V1 (accepted)
+06h52: chat approached by V4 (accepted)
+07h15: started compliment
+07h15: finished gossip (completed)
+07h15: compliment with V4 (accepted)
+07h15: compliment approached by V1 (accepted)
+07h15: gossip approached by V6 (accepted)
+07h37: started compliment
+07h37: finished compliment (completed)
+07h37: compliment with V2 (accepted)
+07h37: gossip approached by V3 (accepted)
+08h00: started compliment
+08h00: finished compliment (completed)
+08h00: compliment with V2 (accepted)
+08h00: gossip approached by V1 (refused)
+08h22: started compliment
+08h22: finished compliment (completed)
+08h22: compliment with V2 (accepted)
+08h22: gossip approached by V7 (accepted)
+08h45: started compliment
+08h45: finished compliment (completed)
+08h45: compliment with V1 (accepted)
+09h07: started gossip
+09h07: finished compliment (completed)
+09h07: gossip with V6 (accepted)
+09h30: started compliment
+09h30: finished gossip (completed)
+09h30: compliment with V7 (accepted)
+09h30: compliment approached by V1 (accepted)
+09h30: compliment approached by V6 (accepted)
+09h52: started compliment
+09h52: finished compliment (completed)
+09h52: compliment with V1 (refused)
+09h52: compliment approached by V5 (accepted)
+10h15: started compliment
+10h15: finished compliment (completed)
+10h15: compliment with V5 (accepted)
+10h15: compliment approached by V1 (accepted)
+10h37: started gossip
+10h37: finished compliment (completed)
+10h37: gossip with V5 (accepted)
+11h00: started compliment
+11h00: finished gossip (completed)
+11h00: compliment with V7 (refused)
+11h00: gossip approached by V2 (refused)
+11h22: started compliment
+11h22: finished compliment (completed)
+11h22: compliment with V7 (accepted)
+11h22: compliment approached by V5 (refused)
+11h22: compliment approached by V7 (accepted)
+11h45: started compliment
+11h45: finished compliment (completed)
+11h45: compliment with V1 (refused)
+11h45: gossip approached by V3 (accepted)
+12h07: started work
+12h07: finished compliment (completed)
+12h52: compliment approached by V7 (accepted)
+15h07: gossip approached by V7 (refused)
+15h52: compliment approached by V4 (accepted)
+16h15: started eat
+16h15: finished work (completed)
+17h00: started compliment
+17h00: finished eat (completed)
+17h00: compliment with V5 (accepted)
+17h00: compliment approached by V5 (refused)
+17h22: started chat
+17h22: finished compliment (completed)
+17h22: chat with V7 (accepted)
+17h45: started compliment
+17h45: finished chat (completed)
+17h45: compliment with V4 (accepted)
+18h07: started relax
+18h07: finished compliment (completed)
+18h07: compliment approached by V2 (accepted)
+18h30: compliment approached by V1 (refused)
+19h15: compliment approached by V3 (refused)
+19h37: started gossip
+19h37: finished relax (completed)
+19h37: gossip with V2 (refused)
+20h00: started gossip
+20h00: finished gossip (completed)
+20h00: gossip with V5 (accepted)
+20h22: started compliment
+20h22: finished gossip (completed)
+20h22: compliment with V6 (accepted)
+20h45: started compliment
+20h45: finished compliment (completed)
+20h45: compliment with V2 (accepted)
+20h45: compliment approached by V6 (accepted)
+21h07: started compliment
+21h07: finished compliment (completed)
+21h07: compliment with V5 (accepted)
+21h07: compliment approached by V4 (accepted)
+21h30: started gossip
+21h30: finished compliment (completed)
+21h30: gossip with V1 (accepted)
+21h52: started compliment
+21h52: finished gossip (completed)
+21h52: compliment with V6 (accepted)
+22h15: started sleep
+22h15: finished compliment (completed)
+06h30: started gossip
+06h30: finished sleep (completed)
+06h30: gossip with V3 (accepted)
+06h30: gossip approached by V3 (accepted)
+06h52: started gossip
+06h52: finished gossip (completed)
+06h52: gossip with V1 (refused)
+06h52: compliment approached by V5 (accepted)
+06h52: gossip approached by V7 (accepted)
+07h15: started gossip
+07h15: finished gossip (completed)
+07h15: gossip with V5 (accepted)
+07h15: compliment approached by V3 (refused)
+07h37: started gossip
+07h37: finished gossip (completed)
+07h37: gossip with V6 (accepted)
+07h37: gossip approached by V1 (accepted)
+07h37: compliment approached by V6 (accepted)
+08h00: started compliment
+08h00: finished gossip (completed)
+08h00: compliment with V2 (accepted)
+08h22: started compliment
+08h22: finished compliment (completed)
+08h22: compliment with V7 (accepted)
+08h22: compliment approached by V5 (accepted)
+08h45: started compliment
+08h45: finished compliment (completed)
+08h45: compliment with V6 (accepted)
+08h45: compliment approached by V2 (refused)
+09h07: started work
+09h07: finished compliment (completed)
+09h30: gossip approached by V1 (accepted)
+11h22: compliment approached by V6 (accepted)
+11h45: compliment approached by V1 (accepted)
+11h45: compliment approached by V7 (accepted)
+13h15: started compliment
+13h15: finished work (completed)
+13h15: compliment with V1 (accepted)
+13h37: started gossip
+13h37: finished compliment (completed)
+13h37: gossip with V1 (accepted)
+14h00: started compliment
+14h00: finished gossip (completed)
+14h00: compliment with V2 (accepted)
+14h22: started gossip
+14h22: finished compliment (completed)
+14h22: gossip with V5 (refused)
+14h22: compliment approached by V6 (accepted)
+14h45: started compliment
+14h45: finished gossip (completed)
+14h45: compliment with V4 (accepted)
+14h45: compliment approached by V6 (accepted)
+14h45: gossip approached by V7 (accepted)
+15h07: started gossip
+15h07: finished compliment (completed)
+15h07: gossip with V3 (refused)
+15h30: started compliment
+15h30: finished gossip (completed)
+15h30: compliment with V6 (refused)
+15h52: started gossip
+15h52: finished compliment (completed)
+15h52: gossip with V7 (refused)
+16h15: started compliment
+16h15: finished gossip (completed)
+16h15: compliment with V3 (accepted)
+16h37: started gossip
+16h37: finished compliment (completed)
+16h37: gossip with V7 (refused)
+16h37: compliment approached by V6 (accepted)
+17h00: started compliment
+17h00: finished gossip (completed)
+17h00: compliment with V7 (accepted)
+17h00: compliment approached by V7 (accepted)
+17h22: started eat
+17h22: finished compliment (completed)
+18h07: started compliment
+18h07: finished eat (completed)
+18h07: compliment with V2 (refused)
+18h30: started compliment
+18h30: finished compliment (completed)
+18h30: compliment with V6 (accepted)
+18h30: compliment approached by V4 (refused)
+18h52: started compliment
+18h52: finished compliment (completed)
+18h52: compliment with V5 (accepted)
+19h15: started gossip
+19h15: finished compliment (completed)
+19h15: gossip with V3 (accepted)
+19h37: started gossip
+19h37: finished gossip (completed)
+19h37: gossip with V7 (accepted)
+20h00: started gossip
+20h00: finished gossip (completed)
+20h00: gossip with V7 (accepted)
+20h00: compliment approached by V5 (accepted)
+20h22: started compliment
+20h22: finished gossip (completed)
+20h22: compliment with V3 (accepted)
+20h45: started gossip
+20h45: finished compliment (completed)
+20h45: gossip with V6 (accepted)
+20h45: gossip approached by V6 (accepted)
+21h07: started relax
+21h07: finished gossip (completed)
+21h07: gossip approached by V5 (accepted)
+21h07: compliment approached by V7 (accepted)
+21h30: gossip approached by V4 (refused)
+21h30: compliment approached by V5 (accepted)
+22h37: started sleep
+22h37: finished relax (completed)
+06h52: started gossip
+06h52: finished sleep (completed)
+06h52: gossip with V2 (accepted)
+06h52: compliment approached by V2 (refused)
+07h15: started compliment
+07h15: finished gossip (completed)
+07h15: compliment with V2 (accepted)
+07h37: started compliment
+07h37: finished compliment (completed)
+07h37: compliment with V2 (refused)
+07h37: compliment approached by V6 (accepted)
+08h00: started gossip
+08h00: finished compliment (completed)
+08h00: gossip with V3 (refused)
+08h22: started wander
+08h22: finished gossip (completed)
+08h45: gossip approached by V4 (accepted)
+09h07: started compliment
+09h07: finished wander (completed)
+09h07: compliment with V6 (accepted)
+09h30: started compliment
+09h30: finished compliment (completed)
+09h30: compliment with V7 (accepted)
+09h30: compliment approached by V7 (refused)
+09h52: started chat
+09h52: finished compliment (completed)
+09h52: chat with V6 (accepted)
+09h52: compliment approached by V5 (accepted)
+10h15: started compliment
+10h15: finished chat (completed)
+10h15: compliment with V4 (accepted)
+10h15: compliment approached by V3 (refused)
+10h37: started compliment
+10h37: finished compliment (completed)
+10h37: compliment with V4 (accepted)
+10h37: gossip approached by V5 (refused)
+11h00: started compliment
+11h00: finished compliment (completed)
+11h00: compliment with V3 (accepted)
+11h00: gossip approached by V3 (accepted)
+11h22: started gossip
+11h22: finished compliment (completed)
+11h22: gossip with V2 (refused)
+11h22: gossip approached by V3 (accepted)
+11h45: started compliment
+11h45: finished gossip (completed)
+11h45: compliment with V7 (accepted)
+12h07: started compliment
+12h07: finished compliment (completed)
+12h07: compliment with V1 (accepted)
+12h30: started compliment
+12h30: finished compliment (completed)
+12h30: compliment with V5 (accepted)
+12h52: started compliment
+12h52: finished compliment (completed)
+12h52: compliment with V7 (accepted)
+12h52: compliment approached by V2 (accepted)
+13h15: started compliment
+13h15: finished compliment (completed)
+13h15: compliment with V7 (accepted)
+13h37: started compliment
+13h37: finished compliment (completed)
+13h37: compliment with V4 (accepted)
+14h00: started compliment
+14h00: finished compliment (completed)
+14h00: compliment with V7 (accepted)
+14h22: started gossip
+14h22: finished compliment (completed)
+14h22: gossip with V3 (accepted)
+14h22: compliment approached by V1 (refused)
+14h45: started compliment
+14h45: finished gossip (completed)
+14h45: compliment with V2 (refused)
+15h07: started compliment
+15h07: finished compliment (completed)
+15h07: compliment with V1 (accepted)
+15h30: started compliment
+15h30: finished compliment (completed)
+15h30: compliment with V5 (accepted)
+15h52: started compliment
+15h52: finished compliment (completed)
+15h52: compliment with V4 (accepted)
+16h15: started gossip
+16h15: finished compliment (completed)
+16h15: gossip with V7 (accepted)
+16h15: compliment approached by V3 (refused)
+16h37: started compliment
+16h37: finished gossip (completed)
+16h37: compliment with V3 (accepted)
+17h00: started gossip
+17h00: finished compliment (completed)
+17h00: gossip with V5 (accepted)
+17h22: started compliment
+17h22: finished gossip (completed)
+17h22: compliment with V6 (accepted)
+17h22: gossip approached by V3 (accepted)
+17h45: started compliment
+17h45: finished compliment (completed)
+17h45: compliment with V4 (accepted)
+18h07: started gossip
+18h07: finished compliment (completed)
+18h07: gossip with V1 (accepted)
+18h30: started gossip
+18h30: finished gossip (completed)
+18h30: gossip with V3 (accepted)
+18h52: started eat
+18h52: finished gossip (completed)
+19h15: compliment approached by V5 (refused)
+19h37: started gossip
+19h37: finished eat (completed)
+19h37: gossip with V6 (accepted)
+20h00: started wander
+20h00: finished gossip (completed)
+20h00: gossip approached by V1 (refused)
+20h45: started compliment
+20h45: finished wander (completed)
+20h45: compliment with V3 (refused)
+20h45: compliment approached by V3 (accepted)
+21h07: started compliment
+21h07: finished compliment (completed)
+21h07: compliment with V5 (accepted)
+21h30: started gossip
+21h30: finished compliment (completed)
+21h30: gossip with V6 (refused)
+21h30: compliment approached by V7 (refused)
+21h52: started relax
+21h52: finished gossip (completed)
+21h52: compliment approached by V3 (accepted)
+23h22: started sleep
+23h22: finished relax (completed)
+06h30: chat approached by V6 (accepted)
+07h15: gossip approached by V1 (accepted)
+07h37: started compliment
+07h37: finished sleep (completed)
+07h37: compliment with V1 (accepted)
+07h37: gossip approached by V2 (accepted)
+08h00: started compliment
+08h00: finished compliment (completed)
+08h00: compliment with V2 (accepted)
+08h00: gossip approached by V3 (accepted)
+08h00: compliment approached by V5 (accepted)
+08h22: started gossip
+08h22: finished compliment (completed)
+08h22: gossip with V2 (accepted)
+08h45: started gossip
+08h45: finished gossip (completed)
+08h45: gossip with V3 (accepted)
+08h45: gossip approached by V3 (accepted)
+09h07: started compliment
+09h07: finished gossip (completed)
+09h07: compliment with V5 (accepted)
+09h30: started gossip
+09h30: finished compliment (completed)
+09h30: gossip with V1 (refused)
+09h52: started compliment
+09h52: finished gossip (completed)
+09h52: compliment with V5 (accepted)
+09h52: gossip approached by V2 (refused)
+10h15: started compliment
+10h15: finished compliment (completed)
+10h15: compliment with V2 (accepted)
+10h15: gossip approached by V2 (accepted)
+10h15: compliment approached by V6 (accepted)
+10h37: started compliment
+10h37: finished compliment (completed)
+10h37: compliment with V2 (refused)
+10h37: compliment approached by V5 (refused)
+11h00: started compliment
+11h00: finished compliment (completed)
+11h00: compliment with V4 (accepted)
+11h00: compliment approached by V2 (accepted)
+11h22: started compliment
+11h22: finished compliment (completed)
+11h22: compliment with V7 (accepted)
+11h45: started work
+11h45: finished compliment (completed)
+12h07: gossip approached by V5 (accepted)
+12h30: compliment approached by V5 (accepted)
+13h37: gossip approached by V1 (accepted)
+14h45: compliment approached by V1 (accepted)
+15h30: compliment approached by V6 (accepted)
+15h30: gossip approached by V7 (accepted)
+15h52: started gossip
+15h52: finished work (completed)
+15h52: gossip with V6 (accepted)
+15h52: gossip approached by V1 (accepted)
+15h52: compliment approached by V2 (accepted)
+15h52: gossip approached by V7 (accepted)
+16h15: started gossip
+16h15: finished gossip (completed)
+16h15: gossip with V1 (accepted)
+16h15: compliment approached by V7 (accepted)
+16h37: started compliment
+16h37: finished gossip (completed)
+16h37: compliment with V3 (accepted)
+17h00: started wander
+17h00: finished compliment (completed)
+17h45: started compliment
+17h45: finished wander (completed)
+17h45: compliment with V5 (accepted)
+17h45: compliment approached by V1 (accepted)
+17h45: compliment approached by V4 (accepted)
+18h07: started compliment
+18h07: finished compliment (completed)
+18h07: compliment with V1 (accepted)
+18h30: started compliment
+18h30: finished compliment (completed)
+18h30: compliment with V6 (accepted)
+18h52: started compliment
+18h52: finished compliment (completed)
+18h52: compliment with V6 (accepted)
+18h52: gossip approached by V3 (accepted)
+19h15: started compliment
+19h15: finished compliment (completed)
+19h15: compliment with V5 (refused)
+19h15: chat approached by V4 (refused)
+19h15: gossip approached by V5 (accepted)
+19h37: started gossip
+19h37: finished compliment (completed)
+19h37: gossip with V7 (accepted)
+19h37: gossip approached by V5 (accepted)
+20h00: started compliment
+20h00: finished gossip (completed)
+20h00: compliment with V1 (accepted)
+20h22: started gossip
+20h22: finished compliment (completed)
+20h22: gossip with V1 (accepted)
+20h45: started compliment
+20h45: finished gossip (completed)
+20h45: compliment with V4 (accepted)
+21h07: started compliment
+21h07: finished compliment (completed)
+21h07: compliment with V3 (accepted)
+21h07: gossip approached by V2 (accepted)
+21h30: started compliment
+21h30: finished compliment (completed)
+21h30: compliment with V3 (accepted)
+21h30: compliment approached by V2 (accepted)
+21h52: started eat
+21h52: finished compliment (completed)
+22h37: started sleep
+22h37: finished eat (completed)
+06h30: gossip approached by V5 (accepted)
+06h52: started compliment
+06h52: finished sleep (completed)
+06h52: compliment with V6 (accepted)
+07h15: started compliment
+07h15: finished compliment (completed)
+07h15: compliment with V5 (accepted)
+07h15: gossip approached by V3 (accepted)
+07h37: started compliment
+07h37: finished compliment (completed)
+07h37: compliment with V4 (accepted)
+07h37: gossip approached by V2 (accepted)
+07h37: compliment approached by V7 (accepted)
+08h00: started gossip
+08h00: finished compliment (completed)
+08h00: gossip with V5 (accepted)
+08h22: started compliment
+08h22: finished gossip (completed)
+08h22: compliment with V4 (refused)
+08h45: started gossip
+08h45: finished compliment (completed)
+08h45: gossip with V6 (accepted)
+09h07: started work
+09h07: finished gossip (completed)
+09h07: compliment approached by V2 (accepted)
+09h07: compliment approached by V3 (accepted)
+09h07: gossip approached by V7 (accepted)
+09h30: gossip approached by V4 (accepted)
+09h52: gossip approached by V1 (refused)
+10h37: compliment approached by V3 (accepted)
+11h45: gossip approached by V2 (refused)
+11h45: compliment approached by V4 (accepted)
+12h30: gossip approached by V3 (accepted)
+12h52: compliment approached by V2 (refused)
+13h15: started compliment
+13h15: finished work (completed)
+13h15: compliment with V2 (accepted)
+13h37: started compliment
+13h37: finished compliment (completed)
+13h37: compliment with V6 (accepted)
+14h00: started compliment
+14h00: finished compliment (completed)
+14h00: compliment with V5 (accepted)
+14h22: started compliment
+14h22: finished compliment (completed)
+14h22: compliment with V5 (refused)
+14h45: started compliment
+14h45: finished compliment (completed)
+14h45: compliment with V1 (refused)
+14h45: compliment approached by V1 (accepted)
+14h45: gossip approached by V3 (accepted)
+14h45: compliment approached by V4 (refused)
+15h07: started compliment
+15h07: finished compliment (completed)
+15h07: compliment with V7 (accepted)
+15h07: compliment approached by V2 (accepted)
+15h30: started gossip
+15h30: finished compliment (completed)
+15h30: gossip with V1 (accepted)
+15h52: started gossip
+15h52: finished gossip (completed)
+15h52: gossip with V6 (accepted)
+16h15: started work
+16h15: finished gossip (completed)
+16h15: compliment approached by V2 (accepted)
+18h52: gossip approached by V2 (refused)
+19h15: gossip approached by V4 (accepted)
+20h22: started compliment
+20h22: finished work (completed)
+20h22: compliment with V1 (accepted)
+20h45: started gossip
+20h45: finished compliment (completed)
+20h45: gossip with V6 (refused)
+21h07: started compliment
+21h07: finished gossip (completed)
+21h07: compliment with V3 (accepted)
+21h07: compliment approached by V2 (accepted)
+21h07: gossip approached by V5 (accepted)
+21h30: started compliment
+21h30: finished compliment (completed)
+21h30: compliment with V3 (accepted)
+21h52: started eat
+21h52: finished compliment (completed)
+21h52: gossip approached by V6 (accepted)
+22h37: started sleep
+22h37: finished eat (completed)
+06h30: gossip approached by V4 (accepted)
+06h52: started gossip
+06h52: finished sleep (completed)
+06h52: gossip with V2 (refused)
+07h15: started gossip
+07h15: finished gossip (completed)
+07h15: gossip with V1 (accepted)
+07h15: gossip approached by V2 (accepted)
+07h37: started compliment
+07h37: finished gossip (completed)
+07h37: compliment with V6 (refused)
+07h37: gossip approached by V3 (accepted)
+08h00: started compliment
+08h00: finished compliment (completed)
+08h00: compliment with V5 (accepted)
+08h00: compliment approached by V2 (accepted)
+08h22: started compliment
+08h22: finished compliment (completed)
+08h22: compliment with V2 (refused)
+08h45: started compliment
+08h45: finished compliment (completed)
+08h45: compliment with V7 (accepted)
+09h07: started gossip
+09h07: finished compliment (completed)
+09h07: gossip with V3 (accepted)
+09h07: compliment approached by V1 (accepted)
+09h07: gossip approached by V4 (accepted)
+09h30: started gossip
+09h30: finished gossip (completed)
+09h30: gossip with V5 (accepted)
+09h30: compliment approached by V6 (accepted)
+09h52: started compliment
+09h52: finished gossip (completed)
+09h52: compliment with V5 (accepted)
+10h15: started compliment
+10h15: finished compliment (completed)
+10h15: compliment with V2 (accepted)
+10h15: compliment approached by V6 (refused)
+10h37: started compliment
+10h37: finished compliment (completed)
+10h37: compliment with V3 (accepted)
+10h37: compliment approached by V5 (accepted)
+11h00: started gossip
+11h00: finished compliment (completed)
+11h00: gossip with V5 (accepted)
+11h00: compliment approached by V7 (refused)
+11h22: started compliment
+11h22: finished gossip (completed)
+11h22: compliment with V3 (accepted)
+11h45: started compliment
+11h45: finished compliment (completed)
+11h45: compliment with V6 (accepted)
+11h45: compliment approached by V5 (accepted)
+12h07: started gossip
+12h07: finished compliment (completed)
+12h07: gossip with V4 (accepted)
+12h30: started work
+12h30: finished gossip (completed)
+12h30: gossip approached by V4 (accepted)
+12h52: compliment approached by V3 (accepted)
+13h15: gossip approached by V5 (accepted)
+14h22: compliment approached by V3 (accepted)
+15h07: compliment approached by V4 (accepted)
+16h37: started work
+16h37: finished work (completed)
+17h45: gossip approached by V7 (accepted)
+18h52: compliment approached by V7 (accepted)
+19h15: compliment approached by V4 (accepted)
+19h37: compliment approached by V7 (accepted)
+20h45: started gossip
+20h45: finished work (completed)
+20h45: gossip with V4 (accepted)
+20h45: gossip approached by V5 (accepted)
+20h45: gossip approached by V7 (refused)
+21h07: started compliment
+21h07: finished gossip (completed)
+21h07: compliment with V2 (accepted)
+21h30: started compliment
+21h30: finished compliment (completed)
+21h30: compliment with V3 (accepted)
+21h30: compliment approached by V5 (accepted)
+21h52: started eat
+21h52: finished compliment (completed)
+22h37: started sleep
+22h37: finished eat (completed)
+06h30: compliment approached by V5 (accepted)
+06h52: started gossip
+06h52: finished sleep (completed)
+06h52: gossip with V2 (refused)
+06h52: chat approached by V4 (accepted)
+07h15: started compliment
+07h15: finished gossip (completed)
+07h15: compliment with V7 (accepted)
+07h15: compliment approached by V2 (refused)
+07h15: chat approached by V5 (accepted)
+07h37: started compliment
+07h37: finished compliment (completed)
+07h37: compliment with V6 (accepted)
+08h00: started compliment
+08h00: finished compliment (completed)
+08h00: compliment with V6 (accepted)
+08h22: started compliment
+08h22: finished compliment (completed)
+08h22: compliment with V1 (accepted)
+08h45: started compliment
+08h45: finished compliment (completed)
+08h45: compliment with V1 (accepted)
+08h45: chat approached by V1 (refused)
+09h07: started compliment
+09h07: finished compliment (completed)
+09h07: compliment with V2 (refused)
+09h07: compliment approached by V5 (accepted)
+09h30: started compliment
+09h30: finished compliment (completed)
+09h30: compliment with V2 (refused)
+09h52: started compliment
+09h52: finished compliment (completed)
+09h52: compliment with V7 (refused)
+10h15: started eat
+10h15: finished compliment (completed)
+10h37: gossip approached by V2 (accepted)
+10h37: compliment approached by V5 (accepted)
+11h00: started compliment
+11h00: finished eat (completed)
+11h00: compliment with V5 (accepted)
+11h00: compliment approached by V2 (accepted)
+11h22: started work
+11h22: finished compliment (completed)
+12h07: compliment approached by V1 (accepted)
+12h07: gossip approached by V3 (accepted)
+12h30: gossip approached by V3 (accepted)
+13h15: compliment approached by V3 (accepted)
+13h15: chat approached by V7 (accepted)
+14h22: compliment approached by V4 (accepted)
+14h22: compliment approached by V6 (refused)
+15h07: compliment approached by V6 (accepted)
+15h07: compliment approached by V7 (accepted)
+15h30: started gossip
+15h30: finished work (completed)
+15h30: gossip with V5 (accepted)
+15h52: started gossip
+15h52: finished gossip (completed)
+15h52: gossip with V6 (accepted)
+16h15: started work
+16h15: finished gossip (completed)
+16h37: gossip approached by V7 (accepted)
+17h00: gossip approached by V7 (accepted)
+17h22: compliment approached by V6 (accepted)
+18h30: compliment approached by V2 (accepted)
+18h52: compliment approached by V1 (accepted)
+18h52: compliment approached by V6 (refused)
+20h00: compliment approached by V6 (accepted)
+20h22: started compliment
+20h22: finished work (completed)
+20h22: compliment with V3 (accepted)
+20h45: started compliment
+20h45: finished compliment (completed)
+20h45: compliment with V2 (accepted)
+21h07: started gossip
+21h07: finished compliment (completed)
+21h07: gossip with V3 (accepted)
+21h07: compliment approached by V1 (accepted)
+21h07: gossip approached by V2 (accepted)
+21h30: started compliment
+21h30: finished gossip (completed)
+21h30: compliment with V6 (accepted)
+21h52: started compliment
+21h52: finished compliment (completed)
+21h52: compliment with V6 (accepted)
+22h15: started sleep
+22h15: finished compliment (completed)
+06h30: started compliment
+06h30: finished sleep (completed)
+06h30: compliment with V4 (accepted)
+06h30: gossip approached by V3 (refused)
+06h52: started chat
+06h52: finished compliment (completed)
+06h52: chat with V3 (accepted)
+07h15: started gossip
+07h15: finished chat (completed)
+07h15: gossip with V5 (refused)
+07h37: started compliment
+07h37: finished gossip (completed)
+07h37: compliment with V3 (accepted)
+07h37: compliment approached by V3 (accepted)
+08h00: started gossip
+08h00: finished compliment (completed)
+08h00: gossip with V7 (accepted)
+08h22: started gossip
+08h22: finished gossip (completed)
+08h22: gossip with V2 (accepted)
+08h45: started compliment
+08h45: finished gossip (completed)
+08h45: compliment with V1 (accepted)
+09h07: started gossip
+09h07: finished compliment (completed)
+09h07: gossip with V7 (accepted)
+09h07: compliment approached by V2 (accepted)
+09h30: started compliment
+09h30: finished gossip (completed)
+09h30: compliment with V1 (accepted)
+09h52: started work
+09h52: finished compliment (completed)
+10h15: compliment approached by V5 (accepted)
+11h22: compliment approached by V7 (accepted)
+12h07: compliment approached by V5 (accepted)
+12h52: compliment approached by V4 (accepted)
+12h52: compliment approached by V7 (accepted)
+13h37: compliment approached by V7 (accepted)
+14h00: started compliment
+14h00: finished work (completed)
+14h00: compliment with V7 (accepted)
+14h22: started compliment
+14h22: finished compliment (completed)
+14h22: compliment with V5 (refused)
+14h22: chat approached by V1 (accepted)
+14h45: started work
+14h45: finished compliment (completed)
+15h07: compliment approached by V4 (refused)
+15h30: gossip approached by V4 (accepted)
+15h52: compliment approached by V1 (accepted)
+17h45: gossip approached by V2 (accepted)
+18h52: started compliment
+18h52: finished work (completed)
+18h52: compliment with V1 (accepted)
+19h15: started compliment
+19h15: finished compliment (completed)
+19h15: compliment with V6 (accepted)
+19h15: gossip approached by V5 (accepted)
+19h37: started gossip
+19h37: finished compliment (completed)
+19h37: gossip with V6 (accepted)
+19h37: gossip approached by V2 (accepted)
+20h00: started eat
+20h00: finished gossip (completed)
+20h00: gossip approached by V3 (accepted)
+20h45: started compliment
+20h45: finished eat (completed)
+20h45: compliment with V5 (accepted)
+20h45: gossip approached by V5 (accepted)
+21h07: started gossip
+21h07: finished compliment (completed)
+21h07: gossip with V7 (accepted)
+21h07: compliment approached by V1 (accepted)
+21h07: compliment approached by V2 (refused)
+21h30: started relax
+21h30: finished gossip (completed)
+21h30: compliment approached by V5 (accepted)
+21h52: compliment approached by V1 (accepted)
+23h00: started sleep
+23h00: finished relax (completed)
+06h52: compliment approached by V4 (accepted)
+07h15: started compliment
+07h15: finished sleep (completed)
+07h15: compliment with V5 (accepted)
+07h37: started chat
+07h37: finished compliment (completed)
+07h37: chat with V7 (accepted)
+08h00: started compliment
+08h00: finished chat (completed)
+08h00: compliment with V1 (accepted)
+08h00: gossip approached by V4 (refused)
+08h00: compliment approached by V5 (accepted)
+08h22: started chat
+08h22: finished compliment (completed)
+08h22: chat with V2 (accepted)
+08h22: gossip approached by V1 (accepted)
+08h45: started gossip
+08h45: finished chat (completed)
+08h45: gossip with V6 (accepted)
+09h07: started compliment
+09h07: finished gossip (completed)
+09h07: compliment with V4 (accepted)
+09h07: gossip approached by V1 (accepted)
+09h30: started compliment
+09h30: finished compliment (completed)
+09h30: compliment with V3 (refused)
+09h30: gossip approached by V3 (accepted)
+09h52: started work
+09h52: finished compliment (completed)
+09h52: compliment approached by V2 (accepted)
+09h52: compliment approached by V6 (refused)
+10h15: compliment approached by V2 (refused)
+11h00: compliment approached by V1 (accepted)
+11h45: compliment approached by V1 (accepted)
+11h45: gossip approached by V7 (accepted)
+12h07: compliment approached by V2 (accepted)
+13h15: compliment approached by V1 (accepted)
+14h00: started compliment
+14h00: finished work (completed)
+14h00: compliment with V6 (accepted)
+14h00: compliment approached by V3 (accepted)
+14h22: started compliment
+14h22: finished compliment (completed)
+14h22: compliment with V7 (refused)
+14h45: started gossip
+14h45: finished compliment (completed)
+14h45: gossip with V1 (refused)
+15h07: started compliment
+15h07: finished gossip (completed)
+15h07: compliment with V5 (accepted)
+15h30: started gossip
+15h30: finished compliment (completed)
+15h30: gossip with V3 (accepted)
+15h52: started compliment
+15h52: finished gossip (completed)
+15h52: compliment with V4 (accepted)
+16h15: started compliment
+16h15: finished compliment (completed)
+16h15: compliment with V7 (refused)
+16h37: started gossip
+16h37: finished compliment (completed)
+16h37: gossip with V5 (accepted)
+16h37: gossip approached by V3 (refused)
+17h00: started relax
+17h00: finished gossip (completed)
+17h22: compliment approached by V5 (refused)
+17h45: compliment approached by V3 (accepted)
+18h30: started compliment
+18h30: finished relax (completed)
+18h30: compliment with V6 (accepted)
+18h52: started gossip
+18h52: finished compliment (completed)
+18h52: gossip with V3 (accepted)
+19h15: started gossip
+19h15: finished gossip (completed)
+19h15: gossip with V4 (refused)
+19h37: started compliment
+19h37: finished gossip (completed)
+19h37: compliment with V3 (refused)
+20h00: started compliment
+20h00: finished compliment (completed)
+20h00: compliment with V7 (accepted)
+20h00: gossip approached by V7 (accepted)
+20h22: started gossip
+20h22: finished compliment (completed)
+20h22: gossip with V6 (refused)
+20h45: started eat
+20h45: finished gossip (completed)
+21h30: started compliment
+21h30: finished eat (completed)
+21h30: compliment with V4 (refused)
+21h30: gossip approached by V2 (refused)
+21h52: started compliment
+21h52: finished compliment (completed)
+21h52: compliment with V6 (accepted)
+22h15: started sleep
+22h15: finished compliment (completed)
+06h30: started gossip
+06h30: finished sleep (completed)
+06h30: gossip with V2 (accepted)
+06h30: compliment approached by V4 (accepted)
+06h52: started gossip
+06h52: finished gossip (completed)
+06h52: gossip with V4 (accepted)
+06h52: compliment approached by V5 (accepted)
+07h15: started compliment
+07h15: finished gossip (completed)
+07h15: compliment with V7 (refused)
+07h15: compliment approached by V5 (accepted)
+07h37: started gossip
+07h37: finished compliment (completed)
+07h37: gossip with V2 (accepted)
+07h37: gossip approached by V6 (accepted)
+08h00: started gossip
+08h00: finished gossip (completed)
+08h00: gossip with V2 (accepted)
+08h22: started gossip
+08h22: finished gossip (completed)
+08h22: gossip with V5 (accepted)
+08h45: started gossip
+08h45: finished gossip (completed)
+08h45: gossip with V1 (refused)
+09h07: started gossip
+09h07: finished gossip (completed)
+09h07: gossip with V4 (accepted)
+09h07: compliment approached by V4 (accepted)
+09h30: started gossip
+09h30: finished gossip (completed)
+09h30: gossip with V4 (accepted)
+09h52: started gossip
+09h52: finished gossip (completed)
+09h52: gossip with V7 (accepted)
+10h15: started gossip
+10h15: finished gossip (completed)
+10h15: gossip with V5 (accepted)
+10h37: started gossip
+10h37: finished gossip (completed)
+10h37: gossip with V3 (accepted)
+11h00: started gossip
+11h00: finished gossip (completed)
+11h00: gossip with V7 (accepted)
+11h22: started compliment
+11h22: finished gossip (completed)
+11h22: compliment with V1 (accepted)
+11h45: started compliment
+11h45: finished compliment (completed)
+11h45: compliment with V3 (accepted)
+12h07: started compliment
+12h07: finished compliment (completed)
+12h07: compliment with V5 (accepted)
+12h30: started gossip
+12h30: finished compliment (completed)
+12h30: gossip with V3 (accepted)
+12h52: started compliment
+12h52: finished gossip (completed)
+12h52: compliment with V2 (accepted)
+12h52: gossip approached by V3 (refused)
+12h52: gossip approached by V7 (accepted)
+13h15: started compliment
+13h15: finished compliment (completed)
+13h15: compliment with V1 (accepted)
+13h15: gossip approached by V1 (accepted)
+13h15: compliment approached by V3 (accepted)
+13h15: compliment approached by V7 (accepted)
+13h37: started compliment
+13h37: finished compliment (completed)
+13h37: compliment with V5 (accepted)
+13h37: compliment approached by V7 (accepted)
+14h00: started gossip
+14h00: finished compliment (completed)
+14h00: gossip with V4 (accepted)
+14h00: compliment approached by V3 (accepted)
+14h22: started work
+14h22: finished gossip (completed)
+14h22: compliment approached by V5 (refused)
+14h45: compliment approached by V1 (accepted)
+15h07: compliment approached by V1 (accepted)
+15h52: compliment approached by V3 (accepted)
+16h15: gossip approached by V5 (accepted)
+16h15: compliment approached by V7 (refused)
+16h37: compliment approached by V3 (accepted)
+16h37: compliment approached by V4 (accepted)
+17h22: compliment approached by V5 (refused)
+18h30: started compliment
+18h30: finished work (completed)
+18h30: compliment with V3 (accepted)
+18h52: started gossip
+18h52: finished compliment (completed)
+18h52: gossip with V4 (accepted)
+18h52: gossip approached by V5 (accepted)
+18h52: compliment approached by V6 (accepted)
+19h15: started compliment
+19h15: finished gossip (completed)
+19h15: compliment with V5 (accepted)
+19h37: started gossip
+19h37: finished compliment (completed)
+19h37: gossip with V7 (accepted)
+20h00: started compliment
+20h00: finished gossip (completed)
+20h00: compliment with V5 (accepted)
+20h00: compliment approached by V1 (accepted)
+20h22: started compliment
+20h22: finished compliment (completed)
+20h22: compliment with V3 (refused)
+20h22: compliment approached by V5 (refused)
+20h45: started gossip
+20h45: finished compliment (completed)
+20h45: gossip with V4 (accepted)
+21h07: started gossip
+21h07: finished gossip (completed)
+21h07: gossip with V6 (accepted)
+21h30: started compliment
+21h30: finished gossip (completed)
+21h30: compliment with V7 (refused)
+21h30: compliment approached by V2 (accepted)
+21h52: started gossip
+21h52: finished compliment (completed)
+21h52: gossip with V2 (accepted)
+21h52: gossip approached by V5 (accepted)
+22h15: started sleep
+22h15: finished gossip (completed)
+06h30: started gossip
+06h30: finished sleep (completed)
+06h30: gossip with V3 (accepted)
+06h52: started gossip
+06h52: finished gossip (completed)
+06h52: gossip with V5 (accepted)
+06h52: compliment approached by V6 (accepted)
+07h15: started compliment
+07h15: finished gossip (completed)
+07h15: compliment with V3 (accepted)
+07h37: started compliment
+07h37: finished compliment (completed)
+07h37: compliment with V4 (accepted)
+08h00: started gossip
+08h00: finished compliment (completed)
+08h00: gossip with V4 (refused)
+08h00: compliment approached by V6 (accepted)
+08h22: started compliment
+08h22: finished gossip (completed)
+08h22: compliment with V4 (accepted)
+08h22: compliment approached by V1 (accepted)
+08h45: started compliment
+08h45: finished compliment (completed)
+08h45: compliment with V2 (accepted)
+08h45: gossip approached by V2 (accepted)
+09h07: started compliment
+09h07: finished compliment (completed)
+09h07: compliment with V3 (accepted)
+09h30: started work
+09h30: finished compliment (completed)
+09h30: compliment approached by V7 (accepted)
+10h37: gossip approached by V7 (accepted)
+11h22: compliment approached by V2 (refused)
+13h37: started compliment
+13h37: finished work (completed)
+13h37: compliment with V6 (accepted)
+14h00: started gossip
+14h00: finished compliment (completed)
+14h00: gossip with V6 (refused)
+14h00: gossip approached by V5 (accepted)
+14h22: started compliment
+14h22: finished gossip (completed)
+14h22: compliment with V1 (accepted)
+14h22: compliment approached by V5 (accepted)
+14h45: started compliment
+14h45: finished compliment (completed)
+14h45: compliment with V1 (accepted)
+15h07: started compliment
+15h07: finished compliment (completed)
+15h07: compliment with V4 (accepted)
+15h30: started eat
+15h30: finished compliment (completed)
+15h30: compliment approached by V4 (refused)
+16h15: started compliment
+16h15: finished eat (completed)
+16h15: compliment with V4 (accepted)
+16h15: gossip approached by V1 (accepted)
+16h37: started work
+16h37: finished compliment (completed)
+17h00: compliment approached by V1 (accepted)
+18h07: compliment approached by V2 (refused)
+18h07: compliment approached by V3 (accepted)
+19h15: compliment approached by V3 (accepted)
+19h37: gossip approached by V7 (accepted)
+20h00: compliment approached by V4 (accepted)
+20h22: gossip approached by V2 (accepted)
+20h22: compliment approached by V4 (refused)
+20h45: started compliment
+20h45: finished work (completed)
+20h45: compliment with V2 (accepted)
+20h45: compliment approached by V7 (accepted)
+21h07: started gossip
+21h07: finished compliment (completed)
+21h07: gossip with V7 (accepted)
+21h07: gossip approached by V1 (accepted)
+21h30: started compliment
+21h30: finished gossip (completed)
+21h30: compliment with V2 (refused)
+21h30: compliment approached by V6 (accepted)
+21h52: started gossip
+21h52: finished compliment (completed)
+21h52: gossip with V3 (refused)
+22h15: started sleep
+22h15: finished gossip (completed)
+06h30: started compliment
+06h30: finished sleep (completed)
+06h30: compliment with V3 (accepted)
+06h52: started gossip
+06h52: finished compliment (completed)
+06h52: gossip with V1 (refused)
+07h15: started compliment
+07h15: finished gossip (completed)
+07h15: compliment with V7 (accepted)
+07h15: gossip approached by V2 (accepted)
+07h37: started compliment
+07h37: finished compliment (completed)
+07h37: compliment with V3 (accepted)
+08h00: started chat
+08h00: finished compliment (completed)
+08h00: chat with V6 (accepted)
+08h22: started compliment
+08h22: finished chat (completed)
+08h22: compliment with V3 (accepted)
+08h22: compliment approached by V2 (accepted)
+08h22: gossip approached by V7 (accepted)
+08h45: started gossip
+08h45: finished compliment (completed)
+08h45: gossip with V4 (accepted)
+08h45: compliment approached by V1 (refused)
+09h07: started compliment
+09h07: finished gossip (completed)
+09h07: compliment with V4 (accepted)
+09h07: compliment approached by V2 (accepted)
+09h30: started eat
+09h30: finished compliment (completed)
+09h52: compliment approached by V3 (accepted)
+10h15: started gossip
+10h15: finished eat (completed)
+10h15: gossip with V3 (accepted)
+10h37: started gossip
+10h37: finished gossip (completed)
+10h37: gossip with V7 (accepted)
+11h00: started compliment
+11h00: finished gossip (completed)
+11h00: compliment with V7 (accepted)
+11h22: started gossip
+11h22: finished compliment (completed)
+11h22: gossip with V1 (accepted)
+11h45: started compliment
+11h45: finished gossip (completed)
+11h45: compliment with V7 (accepted)
+12h07: started gossip
+12h07: finished compliment (completed)
+12h07: gossip with V5 (accepted)
+12h07: compliment approached by V6 (accepted)
+12h30: started work
+12h30: finished gossip (completed)
+14h45: gossip approached by V1 (accepted)
+14h45: gossip approached by V5 (refused)
+14h45: compliment approached by V7 (accepted)
+15h07: compliment approached by V1 (accepted)
+15h07: compliment approached by V4 (refused)
+15h30: gossip approached by V2 (accepted)
+16h15: compliment approached by V1 (accepted)
+16h37: started gossip
+16h37: finished work (completed)
+16h37: gossip with V3 (accepted)
+17h00: started gossip
+17h00: finished gossip (completed)
+17h00: gossip with V4 (accepted)
+17h00: gossip approached by V7 (accepted)
+17h22: started compliment
+17h22: finished gossip (completed)
+17h22: compliment with V1 (refused)
+17h45: started compliment
+17h45: finished compliment (completed)
+17h45: compliment with V2 (accepted)
+17h45: gossip approached by V6 (accepted)
+17h45: compliment approached by V7 (accepted)
+18h07: started compliment
+18h07: finished compliment (completed)
+18h07: compliment with V1 (accepted)
+18h30: started compliment
+18h30: finished compliment (completed)
+18h30: compliment with V4 (accepted)
+18h30: gossip approached by V5 (refused)
+18h30: compliment approached by V7 (accepted)
+18h52: started compliment
+18h52: finished compliment (completed)
+18h52: compliment with V5 (accepted)
+18h52: compliment approached by V6 (accepted)
+19h15: started compliment
+19h15: finished compliment (completed)
+19h15: compliment with V4 (accepted)
+19h37: started compliment
+19h37: finished compliment (completed)
+19h37: compliment with V1 (accepted)
+19h37: gossip approached by V1 (accepted)
+19h37: compliment approached by V6 (accepted)
+20h00: started compliment
+20h00: finished compliment (completed)
+20h00: compliment with V3 (accepted)
+20h22: started gossip
+20h22: finished compliment (completed)
+20h22: gossip with V5 (accepted)
+20h22: gossip approached by V2 (accepted)
+20h22: gossip approached by V6 (accepted)
+20h45: started compliment
+20h45: finished gossip (completed)
+20h45: compliment with V4 (accepted)
+20h45: gossip approached by V6 (refused)
+20h45: gossip approached by V7 (accepted)
+21h07: started gossip
+21h07: finished compliment (completed)
+21h07: gossip with V3 (accepted)
+21h07: compliment approached by V4 (accepted)
+21h30: started gossip
+21h30: finished gossip (completed)
+21h30: gossip with V4 (refused)
+21h52: started compliment
+21h52: finished gossip (completed)
+21h52: compliment with V1 (accepted)
+22h15: started sleep
+22h15: finished compliment (completed)
+06h30: started compliment
+06h30: finished sleep (completed)
+06h30: compliment with V7 (refused)
+06h52: started gossip
+06h52: finished compliment (completed)
+06h52: gossip with V3 (accepted)
+07h15: started gossip
+07h15: finished gossip (completed)
+07h15: gossip with V4 (accepted)
+07h15: gossip approached by V3 (accepted)
+07h37: started compliment
+07h37: finished gossip (completed)
+07h37: compliment with V7 (accepted)
+08h00: started gossip
+08h00: finished compliment (completed)
+08h00: gossip with V7 (accepted)
+08h22: started eat
+08h22: finished gossip (completed)
+08h22: gossip approached by V7 (refused)
+08h45: gossip approached by V7 (accepted)
+09h07: started compliment
+09h07: finished eat (completed)
+09h07: compliment with V2 (accepted)
+09h07: compliment approached by V5 (accepted)
+09h30: started gossip
+09h30: finished compliment (completed)
+09h30: gossip with V3 (accepted)
+09h52: started gossip
+09h52: finished gossip (completed)
+09h52: gossip with V1 (accepted)
+09h52: gossip approached by V5 (accepted)
+10h15: started compliment
+10h15: finished gossip (completed)
+10h15: compliment with V5 (accepted)
+10h15: compliment approached by V6 (accepted)
+10h37: started gossip
+10h37: finished compliment (completed)
+10h37: gossip with V7 (refused)
+10h37: gossip approached by V1 (accepted)
+10h37: gossip approached by V5 (accepted)
+11h00: started compliment
+11h00: finished gossip (completed)
+11h00: compliment with V4 (accepted)
+11h22: started gossip
+11h22: finished compliment (completed)
+11h22: gossip with V5 (accepted)
+11h45: started compliment
+11h45: finished gossip (completed)
+11h45: compliment with V3 (accepted)
+12h07: started gossip
+12h07: finished compliment (completed)
+12h07: gossip with V5 (accepted)
+12h30: started compliment
+12h30: finished gossip (completed)
+12h30: compliment with V7 (accepted)
+12h52: started compliment
+12h52: finished compliment (completed)
+12h52: compliment with V6 (accepted)
+12h52: compliment approached by V1 (accepted)
+12h52: compliment approached by V4 (refused)
+12h52: gossip approached by V6 (accepted)
+13h15: started work
+13h15: finished compliment (completed)
+13h37: compliment approached by V3 (accepted)
+13h37: chat approached by V7 (accepted)
+14h22: compliment approached by V7 (accepted)
+16h15: compliment approached by V1 (accepted)
+16h37: compliment approached by V1 (refused)
+16h37: gossip approached by V7 (refused)
+17h00: gossip approached by V7 (accepted)
+17h22: started compliment
+17h22: finished work (completed)
+17h22: compliment with V5 (accepted)
+17h45: started compliment
+17h45: finished compliment (completed)
+17h45: compliment with V5 (accepted)
+18h07: started compliment
+18h07: finished compliment (completed)
+18h07: compliment with V5 (accepted)
+18h30: started compliment
+18h30: finished compliment (completed)
+18h30: compliment with V1 (accepted)
+18h52: started gossip
+18h52: finished compliment (completed)
+18h52: gossip with V7 (accepted)
+18h52: compliment approached by V5 (refused)
+19h15: started gossip
+19h15: finished gossip (completed)
+19h15: gossip with V7 (accepted)
+19h15: gossip approached by V1 (accepted)
+19h37: started compliment
+19h37: finished gossip (completed)
+19h37: compliment with V5 (accepted)
+20h00: started gossip
+20h00: finished compliment (completed)
+20h00: gossip with V7 (accepted)
+20h22: started compliment
+20h22: finished gossip (completed)
+20h22: compliment with V5 (refused)
+20h45: started compliment
+20h45: finished compliment (completed)
+20h45: compliment with V4 (accepted)
+21h07: started compliment
+21h07: finished compliment (completed)
+21h07: compliment with V1 (accepted)
+21h07: compliment approached by V2 (refused)
+21h30: started gossip
+21h30: finished compliment (completed)
+21h30: gossip with V1 (accepted)
+21h52: started compliment
+21h52: finished gossip (completed)
+21h52: compliment with V6 (accepted)
+22h15: started sleep
+22h15: finished compliment (completed)
+06h30: started compliment
+06h30: finished sleep (completed)
+06h30: compliment with V1 (accepted)
+06h30: compliment approached by V1 (accepted)
+06h30: compliment approached by V3 (accepted)
+06h52: started compliment
+06h52: finished compliment (completed)
+06h52: compliment with V6 (accepted)
+07h15: started gossip
+07h15: finished compliment (completed)
+07h15: gossip with V1 (accepted)
+07h37: started chat
+07h37: finished gossip (completed)
+07h37: chat with V4 (accepted)
+08h00: started gossip
+08h00: finished chat (completed)
+08h00: gossip with V1 (accepted)
+08h00: compliment approached by V1 (accepted)
+08h00: gossip approached by V6 (accepted)
+08h00: gossip approached by V7 (accepted)
+08h22: started work
+08h22: finished gossip (completed)
+08h22: compliment approached by V2 (accepted)
+08h22: gossip approached by V7 (accepted)
+09h07: compliment approached by V2 (refused)
+09h30: gossip approached by V1 (accepted)
+09h52: compliment approached by V1 (refused)
+12h30: started compliment
+12h30: finished work (completed)
+12h30: compliment with V3 (refused)
+12h52: started gossip
+12h52: finished compliment (completed)
+12h52: gossip with V1 (accepted)
+13h15: started gossip
+13h15: finished gossip (completed)
+13h15: gossip with V7 (accepted)
+13h37: started compliment
+13h37: finished gossip (completed)
+13h37: compliment with V3 (accepted)
+14h00: started compliment
+14h00: finished compliment (completed)
+14h00: compliment with V5 (accepted)
+14h22: started compliment
+14h22: finished compliment (completed)
+14h22: compliment with V2 (accepted)
+14h22: compliment approached by V3 (accepted)
+14h22: compliment approached by V7 (accepted)
+14h45: started eat
+14h45: finished compliment (completed)
+15h30: started gossip
+15h30: finished eat (completed)
+15h30: gossip with V4 (accepted)
+15h52: started gossip
+15h52: finished gossip (completed)
+15h52: gossip with V5 (accepted)
+16h15: started compliment
+16h15: finished gossip (completed)
+16h15: compliment with V1 (accepted)
+16h15: gossip approached by V7 (accepted)
+16h37: started compliment
+16h37: finished compliment (completed)
+16h37: compliment with V3 (accepted)
+17h00: started gossip
+17h00: finished compliment (completed)
+17h00: gossip with V1 (accepted)
+17h22: started gossip
+17h22: finished gossip (completed)
+17h22: gossip with V5 (accepted)
+17h45: started relax
+17h45: finished gossip (completed)
+18h52: compliment approached by V6 (refused)
+19h15: started relax
+19h15: finished relax (completed)
+19h37: compliment approached by V7 (refused)
+20h22: gossip approached by V1 (accepted)
+20h45: started compliment
+20h45: finished relax (completed)
+20h45: compliment with V4 (accepted)
+20h45: compliment approached by V2 (accepted)
+21h07: started compliment
+21h07: finished compliment (completed)
+21h07: compliment with V6 (accepted)
+21h30: started gossip
+21h30: finished compliment (completed)
+21h30: gossip with V3 (refused)
+21h52: started compliment
+21h52: finished gossip (completed)
+21h52: compliment with V1 (accepted)
+22h15: started sleep
+22h15: finished compliment (completed)
+06h30: started gossip
+06h30: finished sleep (completed)
+06h30: gossip with V3 (accepted)
+06h30: gossip approached by V6 (accepted)
+06h52: started gossip
+06h52: finished gossip (completed)
+06h52: gossip with V7 (accepted)
+06h52: compliment approached by V1 (accepted)
+07h15: started compliment
+07h15: finished gossip (completed)
+07h15: compliment with V7 (accepted)
+07h15: chat approached by V3 (refused)
+07h15: gossip approached by V5 (accepted)
+07h37: started compliment
+07h37: finished compliment (completed)
+07h37: compliment with V7 (accepted)
+07h37: gossip approached by V6 (refused)
+08h00: started compliment
+08h00: finished compliment (completed)
+08h00: compliment with V6 (refused)
+08h22: started compliment
+08h22: finished compliment (completed)
+08h22: compliment with V3 (refused)
+08h45: started work
+08h45: finished compliment (completed)
+09h07: gossip approached by V2 (accepted)
+12h52: started gossip
+12h52: finished work (completed)
+12h52: gossip with V5 (refused)
+12h52: compliment approached by V4 (accepted)
+13h15: started work
+13h15: finished gossip (completed)
+14h00: chat approached by V1 (accepted)
+14h22: gossip approached by V1 (accepted)
+14h45: compliment approached by V1 (accepted)
+14h45: gossip approached by V2 (accepted)
+15h07: compliment approached by V1 (accepted)
+16h15: gossip approached by V1 (accepted)
+17h00: gossip approached by V1 (refused)
+17h00: gossip approached by V5 (accepted)
+17h22: started compliment
+17h22: finished work (completed)
+17h22: compliment with V3 (accepted)
+17h22: compliment approached by V2 (accepted)
+17h45: started gossip
+17h45: finished compliment (completed)
+17h45: gossip with V7 (accepted)
+17h45: gossip approached by V7 (refused)
+18h07: started compliment
+18h07: finished gossip (completed)
+18h07: compliment with V4 (accepted)

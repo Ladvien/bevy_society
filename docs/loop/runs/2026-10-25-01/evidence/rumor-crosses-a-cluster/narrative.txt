@@ -1,0 +1,4487 @@
+# G00's day
+
+At the end: doing Some("gossip"), needs Some([1.0, 0.0, 0.0, 0.0]), mood P-0.29 A-0.07 D-0.30
+
+08h22: started gossip
+08h22: gossip with G05 (refused)
+08h45: started gossip
+08h45: finished gossip (completed)
+08h45: gossip with G01 (refused)
+09h07: started gossip
+09h07: finished gossip (completed)
+09h07: gossip with G01 (refused)
+09h30: started gossip
+09h30: finished gossip (completed)
+09h30: gossip with G01 (refused)
+09h52: started gossip
+09h52: finished gossip (completed)
+09h52: gossip with G05 (refused)
+10h15: started gossip
+10h15: finished gossip (completed)
+10h15: gossip with G01 (refused)
+10h37: finished gossip (completed)
+12h52: started gossip
+12h52: finished gossip (interrupted)
+12h52: gossip with G01 (refused)
+13h15: started snub
+13h15: finished gossip (completed)
+13h15: insult with G01 (accepted)
+13h37: finished snub (completed)
+15h07: gossip approached by G05 (refused)
+15h52: started gossip
+15h52: finished gossip (interrupted)
+15h52: gossip with G05 (accepted)
+16h15: finished gossip (completed)
+18h30: started snub
+18h30: finished gossip (interrupted)
+18h30: insult with G01 (refused)
+18h52: finished snub (completed)
+21h07: finished gossip (interrupted)
+22h37: gossip approached by G05 (refused)
+23h22: started chat
+23h22: finished gossip (interrupted)
+23h22: chat with G05 (accepted)
+23h45: started chat
+23h45: finished chat (completed)
+23h45: chat with G01 (accepted)
+00h07: finished chat (completed)
+01h37: gossip approached by G01 (refused)
+02h22: started gossip
+02h22: finished gossip (interrupted)
+02h22: gossip with G01 (refused)
+02h22: gossip approached by G01 (refused)
+02h22: gossip approached by G05 (refused)
+02h45: finished gossip (completed)
+05h00: started gossip
+05h00: finished chat (interrupted)
+05h00: gossip with G01 (accepted)
+05h22: started snub
+05h22: finished gossip (completed)
+05h22: insult with G01 (refused)
+05h22: gossip approached by G01 (accepted)
+05h45: started gossip
+05h45: finished snub (completed)
+05h45: gossip with G01 (accepted)
+06h07: started gossip
+06h07: finished gossip (completed)
+06h07: gossip with G01 (refused)
+06h07: gossip approached by G04 (refused)
+06h30: started gossip
+06h30: finished gossip (completed)
+06h30: gossip with G01 (accepted)
+06h52: started gossip
+06h52: finished gossip (completed)
+06h52: gossip with G04 (refused)
+07h15: started gossip
+07h15: finished gossip (completed)
+07h15: gossip with G05 (accepted)
+07h15: gossip approached by G04 (refused)
+07h37: finished gossip (completed)
+07h37: gossip approached by G04 (refused)
+07h37: gossip approached by G05 (accepted)
+08h00: gossip approached by G01 (refused)
+08h45: gossip approached by G04 (refused)
+09h52: started gossip
+09h52: finished gossip (interrupted)
+09h52: gossip with G01 (refused)
+10h15: started gossip
+10h15: finished gossip (completed)
+10h15: gossip with G04 (refused)
+10h37: started gossip
+10h37: finished gossip (completed)
+10h37: gossip with G05 (accepted)
+11h00: started gossip
+11h00: finished gossip (completed)
+11h00: gossip with G05 (refused)
+11h22: finished gossip (completed)
+12h07: insult approached by G04 (accepted)
+12h30: gossip approached by G05 (refused)
+12h52: insult approached by G04 (accepted)
+13h15: gossip approached by G02 (accepted)
+13h37: started gossip
+13h37: finished gossip (interrupted)
+13h37: gossip with G05 (accepted)
+13h37: gossip approached by G02 (accepted)
+14h00: started snub
+14h00: finished gossip (completed)
+14h00: insult with G01 (accepted)
+14h22: started snub
+14h22: finished snub (completed)
+14h22: insult with G01 (refused)
+14h45: started gossip
+14h45: finished snub (completed)
+14h45: gossip with G05 (refused)
+14h45: gossip approached by G01 (refused)
+14h45: gossip approached by G02 (refused)
+14h45: gossip approached by G05 (accepted)
+15h07: started gossip
+15h07: finished gossip (completed)
+15h07: gossip with G05 (accepted)
+15h30: finished gossip (completed)
+15h30: gossip approached by G01 (accepted)
+15h30: gossip approached by G02 (accepted)
+15h30: insult approached by G04 (refused)
+15h52: compliment approached by G05 (refused)
+16h15: gossip approached by G02 (refused)
+16h15: insult approached by G04 (refused)
+17h22: gossip approached by G01 (accepted)
+17h22: gossip approached by G05 (refused)
+17h45: finished gossip (interrupted)
+17h45: gossip approached by G02 (accepted)
+18h07: gossip approached by G02 (accepted)
+18h30: gossip approached by G01 (refused)
+18h52: started gossip
+18h52: gossip with G03 (refused)
+18h52: gossip approached by G03 (accepted)
+19h15: started gossip
+19h15: finished gossip (completed)
+19h15: gossip with G01 (refused)
+19h15: gossip approached by G04 (refused)
+19h37: started gossip
+19h37: finished gossip (completed)
+19h37: gossip with G03 (accepted)
+20h00: started gossip
+20h00: finished gossip (completed)
+20h00: gossip with G05 (accepted)
+20h22: started gossip
+20h22: finished gossip (completed)
+20h22: gossip with G05 (accepted)
+20h45: started gossip
+20h45: finished gossip (completed)
+20h45: gossip with G04 (accepted)
+20h45: gossip approached by G03 (accepted)
+20h45: insult approached by G04 (accepted)
+21h07: started compliment
+21h07: finished gossip (completed)
+21h07: compliment with G05 (refused)
+21h07: gossip approached by G02 (refused)
+21h07: insult approached by G04 (accepted)
+21h07: gossip approached by G05 (refused)
+21h30: started gossip
+21h30: finished compliment (completed)
+21h30: gossip with G05 (accepted)
+21h30: insult approached by G04 (refused)
+21h52: started compliment
+21h52: finished gossip (completed)
+21h52: compliment with G02 (accepted)
+21h52: gossip approached by G03 (refused)
+22h15: started gossip
+22h15: finished compliment (completed)
+22h15: gossip with G02 (accepted)
+22h15: insult approached by G04 (accepted)
+22h37: started snub
+22h37: finished gossip (completed)
+22h37: insult with G01 (accepted)
+23h00: started gossip
+23h00: finished snub (completed)
+23h00: gossip with G05 (accepted)
+23h00: gossip approached by G01 (refused)
+23h00: gossip approached by G05 (refused)
+23h22: started gossip
+23h22: finished gossip (completed)
+23h22: gossip with G02 (accepted)
+23h45: started gossip
+23h45: finished gossip (completed)
+23h45: gossip with G03 (accepted)
+00h07: started gossip
+00h07: finished gossip (completed)
+00h07: gossip with G04 (refused)
+00h30: started compliment
+00h30: finished gossip (completed)
+00h30: compliment with G02 (accepted)
+00h30: gossip approached by G01 (accepted)
+00h52: started gossip
+00h52: finished compliment (completed)
+00h52: gossip with G03 (refused)
+00h52: compliment approached by G02 (refused)
+01h15: started snub
+01h15: finished gossip (completed)
+01h15: insult with G01 (accepted)
+01h15: gossip approached by G01 (refused)
+01h15: gossip approached by G03 (refused)
+01h15: insult approached by G04 (accepted)
+01h37: started gossip
+01h37: finished snub (completed)
+01h37: gossip with G04 (refused)
+02h00: started gossip
+02h00: finished gossip (completed)
+02h00: gossip with G03 (refused)
+02h00: gossip approached by G01 (refused)
+02h00: gossip approached by G02 (refused)
+02h22: started compliment
+02h22: finished gossip (completed)
+02h22: compliment with G02 (accepted)
+02h22: gossip approached by G01 (refused)
+02h22: gossip approached by G02 (refused)
+02h45: started gossip
+02h45: finished compliment (completed)
+02h45: gossip with G02 (accepted)
+03h07: started gossip
+03h07: finished gossip (completed)
+03h07: gossip with G05 (accepted)
+03h07: compliment approached by G02 (refused)
+03h30: started gossip
+03h30: finished gossip (completed)
+03h30: gossip with G04 (accepted)
+03h30: insult approached by G04 (refused)
+03h52: started gossip
+03h52: finished gossip (completed)
+03h52: gossip with G04 (refused)
+04h15: started gossip
+04h15: finished gossip (completed)
+04h15: gossip with G04 (refused)
+04h15: insult approached by G04 (refused)
+04h37: started gossip
+04h37: finished gossip (completed)
+04h37: gossip with G03 (refused)
+04h37: insult approached by G04 (accepted)
+05h00: started gossip
+05h00: finished gossip (completed)
+05h00: gossip with G01 (accepted)
+05h00: compliment approached by G02 (accepted)
+05h00: gossip approached by G05 (accepted)
+05h22: started gossip
+05h22: finished gossip (completed)
+05h22: gossip with G03 (refused)
+05h22: insult approached by G04 (refused)
+05h22: gossip approached by G05 (refused)
+05h45: started gossip
+05h45: finished gossip (completed)
+05h45: gossip with G05 (accepted)
+05h45: compliment approached by G02 (accepted)
+06h07: started gossip
+06h07: finished gossip (completed)
+06h07: gossip with G01 (refused)
+06h07: compliment approached by G02 (refused)
+06h07: insult approached by G04 (refused)
+06h30: started gossip
+06h30: finished gossip (completed)
+06h30: gossip with G03 (refused)
+06h30: gossip approached by G04 (refused)
+06h52: started snub
+06h52: finished gossip (completed)
+06h52: insult with G03 (refused)
+07h15: started gossip
+07h15: finished snub (completed)
+07h15: gossip with G04 (accepted)
+07h15: gossip approached by G01 (refused)
+07h37: started compliment
+07h37: finished gossip (completed)
+07h37: compliment with G02 (accepted)
+07h37: compliment approached by G02 (refused)
+07h37: insult approached by G04 (refused)
+08h00: started snub
+08h00: finished compliment (completed)
+08h00: insult with G04 (refused)
+08h00: gossip approached by G05 (refused)
+08h22: started gossip
+08h22: finished snub (completed)
+08h22: gossip with G01 (accepted)
+08h45: started gossip
+08h45: finished gossip (completed)
+08h45: gossip with G02 (accepted)
+09h07: started snub
+09h07: finished gossip (completed)
+09h07: insult with G04 (accepted)
+09h07: gossip approached by G01 (accepted)
+09h30: started compliment
+09h30: finished snub (completed)
+09h30: compliment with G02 (refused)
+09h30: gossip approached by G02 (refused)
+09h52: started snub
+09h52: finished compliment (completed)
+09h52: insult with G03 (refused)
+10h15: started snub
+10h15: finished snub (completed)
+10h15: insult with G03 (refused)
+10h15: gossip approached by G01 (accepted)
+10h15: gossip approached by G02 (refused)
+10h15: insult approached by G04 (refused)
+10h37: started gossip
+10h37: finished snub (completed)
+10h37: gossip with G04 (accepted)
+10h37: gossip approached by G03 (accepted)
+10h37: gossip approached by G05 (refused)
+11h00: started gossip
+11h00: finished gossip (completed)
+11h00: gossip with G02 (accepted)
+11h22: started gossip
+11h22: finished gossip (completed)
+11h22: gossip with G04 (refused)
+11h45: started gossip
+11h45: finished gossip (completed)
+11h45: gossip with G01 (accepted)
+11h45: gossip approached by G05 (refused)
+12h07: started gossip
+12h07: finished gossip (completed)
+12h07: gossip with G03 (accepted)
+12h30: started gossip
+12h30: finished gossip (completed)
+12h30: gossip with G01 (refused)
+12h30: gossip approached by G04 (refused)
+12h52: started gossip
+12h52: finished gossip (completed)
+12h52: gossip with G05 (accepted)
+12h52: gossip approached by G04 (refused)
+12h52: gossip approached by G05 (accepted)
+13h15: started snub
+13h15: finished gossip (completed)
+13h15: insult with G04 (refused)
+13h15: gossip approached by G03 (refused)
+13h15: gossip approached by G05 (refused)
+13h37: started gossip
+13h37: finished snub (completed)
+13h37: gossip with G01 (refused)
+13h37: gossip approached by G02 (refused)
+14h00: started gossip
+14h00: finished gossip (completed)
+14h00: gossip with G02 (refused)
+14h00: gossip approached by G01 (accepted)
+14h00: gossip approached by G05 (refused)
+14h22: started gossip
+14h22: finished gossip (completed)
+14h22: gossip with G03 (refused)
+14h22: insult approached by G04 (refused)
+14h45: started gossip
+14h45: finished gossip (completed)
+14h45: gossip with G02 (refused)
+14h45: insult approached by G05 (refused)
+15h07: started gossip
+15h07: finished gossip (completed)
+15h07: gossip with G05 (accepted)
+15h30: started snub
+15h30: finished gossip (completed)
+15h30: insult with G03 (refused)
+15h52: started snub
+15h52: finished snub (completed)
+15h52: insult with G03 (refused)
+16h15: started gossip
+16h15: finished snub (completed)
+16h15: gossip with G02 (accepted)
+16h15: gossip approached by G01 (accepted)
+16h37: started gossip
+16h37: finished gossip (completed)
+16h37: gossip with G05 (refused)
+16h37: gossip approached by G03 (refused)
+17h00: started compliment
+17h00: finished gossip (completed)
+17h00: compliment with G05 (accepted)
+17h00: gossip approached by G02 (accepted)
+17h22: started gossip
+17h22: finished compliment (completed)
+17h22: gossip with G01 (accepted)
+17h22: gossip approached by G03 (refused)
+17h45: started snub
+17h45: finished gossip (completed)
+17h45: insult with G04 (refused)
+17h45: compliment approached by G02 (accepted)
+17h45: gossip approached by G03 (accepted)
+17h45: gossip approached by G04 (accepted)
+18h07: started compliment
+18h07: finished snub (completed)
+18h07: compliment with G05 (accepted)
+18h30: started gossip
+18h30: finished compliment (completed)
+18h30: gossip with G04 (refused)
+18h52: started gossip
+18h52: finished gossip (completed)
+18h52: gossip with G01 (accepted)
+18h52: compliment approached by G02 (accepted)
+19h15: started snub
+19h15: finished gossip (completed)
+19h15: insult with G03 (refused)
+19h15: gossip approached by G03 (accepted)
+19h37: started compliment
+19h37: finished snub (completed)
+19h37: compliment with G05 (refused)
+19h37: gossip approached by G04 (refused)
+20h00: started snub
+20h00: finished compliment (completed)
+20h00: insult with G03 (refused)
+20h22: started gossip
+20h22: finished snub (completed)
+20h22: gossip with G03 (refused)
+20h22: gossip approached by G05 (accepted)
+20h45: started gossip
+20h45: finished gossip (completed)
+20h45: gossip with G03 (refused)
+21h07: started gossip
+21h07: finished gossip (completed)
+21h07: gossip with G05 (refused)
+21h07: compliment approached by G02 (refused)
+21h07: insult approached by G04 (refused)
+21h30: started compliment
+21h30: finished gossip (completed)
+21h30: compliment with G05 (accepted)
+21h30: gossip approached by G03 (accepted)
+21h30: gossip approached by G04 (refused)
+21h52: started gossip
+21h52: finished compliment (completed)
+21h52: gossip with G05 (accepted)
+22h15: started gossip
+22h15: finished gossip (completed)
+22h15: gossip with G02 (accepted)
+22h15: gossip approached by G03 (accepted)
+22h15: insult approached by G04 (accepted)
+22h15: compliment approached by G05 (refused)
+22h37: started gossip
+22h37: finished gossip (completed)
+22h37: gossip with G03 (refused)
+22h37: gossip approached by G02 (refused)
+23h00: started gossip
+23h00: finished gossip (completed)
+23h00: gossip with G01 (accepted)
+23h00: gossip approached by G04 (refused)
+23h00: gossip approached by G05 (refused)
+23h22: started compliment
+23h22: finished gossip (completed)
+23h22: compliment with G02 (accepted)
+23h45: started gossip
+23h45: finished compliment (completed)
+23h45: gossip with G02 (refused)
+00h07: started snub
+00h07: finished gossip (completed)
+00h07: insult with G03 (refused)
+00h07: gossip approached by G05 (refused)
+00h30: started gossip
+00h30: finished snub (completed)
+00h30: gossip with G03 (refused)
+00h52: started gossip
+00h52: finished gossip (completed)
+00h52: gossip with G05 (refused)
+00h52: insult approached by G04 (refused)
+01h15: started gossip
+01h15: finished gossip (completed)
+01h15: gossip with G03 (accepted)
+01h15: gossip approached by G02 (accepted)
+01h37: started compliment
+01h37: finished gossip (completed)
+01h37: compliment with G02 (accepted)
+01h37: insult approached by G04 (refused)
+02h00: started snub
+02h00: finished compliment (completed)
+02h00: insult with G04 (refused)
+02h22: started snub
+02h22: finished snub (completed)
+02h22: insult with G01 (refused)
+02h22: compliment approached by G02 (refused)
+02h22: insult approached by G04 (refused)
+02h22: gossip approached by G05 (accepted)
+02h45: started gossip
+02h45: finished snub (completed)
+02h45: gossip with G02 (accepted)
+03h07: started compliment
+03h07: finished gossip (completed)
+03h07: compliment with G02 (accepted)
+03h07: compliment approached by G05 (refused)
+03h30: started gossip
+03h30: finished compliment (completed)
+03h30: gossip with G04 (refused)
+03h30: gossip approached by G01 (accepted)
+03h30: gossip approached by G02 (accepted)
+03h30: gossip approached by G03 (refused)
+03h30: gossip approached by G04 (refused)
+03h30: gossip approached by G05 (accepted)
+03h52: started snub
+03h52: finished gossip (completed)
+03h52: insult with G01 (refused)
+04h15: started snub
+04h15: finished snub (completed)
+04h15: insult with G04 (refused)
+04h15: gossip approached by G05 (accepted)
+04h37: started compliment
+04h37: finished snub (completed)
+04h37: compliment with G02 (accepted)
+04h37: gossip approached by G02 (refused)
+04h37: insult approached by G04 (accepted)
+05h00: started snub
+05h00: finished compliment (completed)
+05h00: insult with G04 (refused)
+05h00: compliment approached by G05 (refused)
+05h22: started gossip
+05h22: finished snub (completed)
+05h22: gossip with G04 (accepted)
+05h22: insult approached by G04 (refused)
+05h45: started gossip
+05h45: finished gossip (completed)
+05h45: gossip with G02 (accepted)
+06h07: started snub
+06h07: finished gossip (completed)
+06h07: insult with G04 (refused)
+06h07: insult approached by G04 (refused)
+06h30: started gossip
+06h30: finished snub (completed)
+06h30: gossip with G01 (refused)
+06h30: gossip approached by G02 (accepted)
+06h30: insult approached by G04 (refused)
+06h30: gossip approached by G05 (refused)
+06h52: started gossip
+06h52: finished gossip (completed)
+06h52: gossip with G01 (refused)
+07h15: started compliment
+07h15: finished gossip (completed)
+07h15: compliment with G02 (accepted)
+07h15: compliment approached by G02 (accepted)
+07h37: started gossip
+07h37: finished compliment (completed)
+07h37: gossip with G03 (refused)
+07h37: compliment approached by G02 (accepted)
+08h00: started snub
+08h00: finished gossip (completed)
+08h00: insult with G03 (refused)
+08h22: started gossip
+08h22: finished snub (completed)
+08h22: gossip with G03 (accepted)
+08h22: gossip approached by G02 (refused)
+08h45: started snub
+08h45: finished gossip (completed)
+08h45: insult with G01 (accepted)
+08h45: compliment approached by G02 (refused)
+08h45: insult approached by G04 (accepted)
+09h07: started snub
+09h07: finished snub (completed)
+09h07: insult with G03 (refused)
+09h07: gossip approached by G02 (accepted)
+09h30: started snub
+09h30: finished snub (completed)
+09h30: insult with G04 (refused)
+09h30: gossip approached by G05 (accepted)
+09h52: started gossip
+09h52: finished snub (completed)
+09h52: gossip with G02 (accepted)
+09h52: compliment approached by G02 (accepted)
+10h15: started gossip
+10h15: finished gossip (completed)
+10h15: gossip with G03 (accepted)
+10h15: gossip approached by G03 (accepted)
+10h15: gossip approached by G05 (accepted)
+10h37: started gossip
+10h37: finished gossip (completed)
+10h37: gossip with G02 (accepted)
+10h37: gossip approached by G05 (refused)
+11h00: started gossip
+11h00: finished gossip (completed)
+11h00: gossip with G01 (refused)
+11h22: started snub
+11h22: finished gossip (completed)
+11h22: insult with G04 (refused)
+11h22: gossip approached by G04 (refused)
+11h45: started snub
+11h45: finished snub (completed)
+11h45: insult with G01 (accepted)
+11h45: gossip approached by G04 (refused)
+11h45: gossip approached by G05 (accepted)
+12h07: started gossip
+12h07: finished snub (completed)
+12h07: gossip with G02 (accepted)
+12h07: gossip approached by G02 (accepted)
+12h30: started snub
+12h30: finished gossip (completed)
+12h30: insult with G03 (refused)
+12h52: started snub
+12h52: finished snub (completed)
+12h52: insult with G04 (refused)
+12h52: gossip approached by G03 (refused)
+12h52: insult approached by G04 (refused)
+13h15: started compliment
+13h15: finished snub (completed)
+13h15: compliment with G05 (refused)
+13h15: insult approached by G04 (accepted)
+13h37: started compliment
+13h37: finished compliment (completed)
+13h37: compliment with G02 (accepted)
+13h37: gossip approached by G03 (refused)
+13h37: gossip approached by G04 (refused)
+14h00: started gossip
+14h00: finished compliment (completed)
+14h00: gossip with G03 (accepted)
+14h22: started snub
+14h22: finished gossip (completed)
+14h22: insult with G03 (accepted)
+14h22: compliment approached by G02 (accepted)
+14h22: insult approached by G04 (refused)
+14h45: started compliment
+14h45: finished snub (completed)
+14h45: compliment with G02 (accepted)
+15h07: started gossip
+15h07: finished compliment (completed)
+15h07: gossip with G01 (accepted)
+15h07: chat approached by G01 (refused)
+15h30: started gossip
+15h30: finished gossip (completed)
+15h30: gossip with G02 (refused)
+15h52: started gossip
+15h52: finished gossip (completed)
+15h52: gossip with G05 (refused)
+16h15: started gossip
+16h15: finished gossip (completed)
+16h15: gossip with G05 (refused)
+16h15: gossip approached by G01 (refused)
+16h15: insult approached by G04 (refused)
+16h37: started gossip
+16h37: finished gossip (completed)
+16h37: gossip with G02 (accepted)
+16h37: insult approached by G04 (refused)
+17h00: started compliment
+17h00: finished gossip (completed)
+17h00: compliment with G05 (refused)
+17h00: gossip approached by G03 (refused)
+17h22: started gossip
+17h22: finished compliment (completed)
+17h22: gossip with G05 (refused)
+17h45: started gossip
+17h45: finished gossip (completed)
+17h45: gossip with G04 (refused)
+18h07: started wander
+18h07: finished gossip (completed)
+18h30: gossip approached by G04 (refused)
+18h52: started gossip
+18h52: finished wander (completed)
+18h52: gossip with G04 (refused)
+18h52: insult approached by G04 (refused)
+19h15: started snub
+19h15: finished gossip (completed)
+19h15: insult with G03 (refused)
+19h15: gossip approached by G01 (refused)
+19h37: started gossip
+19h37: finished snub (completed)
+19h37: gossip with G03 (refused)
+20h00: started gossip
+20h00: finished gossip (completed)
+20h00: gossip with G02 (accepted)
+20h22: started gossip
+20h22: finished gossip (completed)
+20h22: gossip with G05 (accepted)
+20h22: compliment approached by G02 (accepted)
+20h45: started snub
+20h45: finished gossip (completed)
+20h45: insult with G04 (refused)
+20h45: compliment approached by G02 (accepted)
+20h45: gossip approached by G03 (refused)
+21h07: started gossip
+21h07: finished snub (completed)
+21h07: gossip with G04 (refused)
+21h07: compliment approached by G02 (accepted)
+21h30: started compliment
+21h30: finished gossip (completed)
+21h30: compliment with G02 (accepted)
+21h52: started snub
+21h52: finished compliment (completed)
+21h52: insult with G01 (refused)
+21h52: compliment approached by G02 (accepted)
+21h52: gossip approached by G04 (refused)
+22h15: started snub
+22h15: finished snub (completed)
+22h15: insult with G03 (refused)
+22h15: compliment approached by G02 (refused)
+22h15: gossip approached by G05 (refused)
+22h37: started snub
+22h37: finished snub (completed)
+22h37: insult with G03 (refused)
+22h37: insult approached by G04 (refused)
+23h00: started snub
+23h00: finished snub (completed)
+23h00: insult with G03 (refused)
+23h00: insult approached by G04 (refused)
+23h22: started compliment
+23h22: finished snub (completed)
+23h22: compliment with G02 (refused)
+23h22: gossip approached by G03 (refused)
+23h22: insult approached by G04 (refused)
+23h45: started gossip
+23h45: finished compliment (completed)
+23h45: gossip with G05 (refused)
+00h07: started snub
+00h07: finished gossip (completed)
+00h07: insult with G04 (refused)
+00h30: started gossip
+00h30: finished snub (completed)
+00h30: gossip with G02 (accepted)
+00h30: gossip approached by G03 (refused)
+00h30: insult approached by G04 (refused)
+00h52: started gossip
+00h52: finished gossip (completed)
+00h52: gossip with G05 (refused)
+00h52: compliment approached by G02 (accepted)
+01h15: started snub
+01h15: finished gossip (completed)
+01h15: insult with G03 (refused)
+01h37: started compliment
+01h37: finished snub (completed)
+01h37: compliment with G02 (accepted)
+01h37: gossip approached by G01 (accepted)
+01h37: gossip approached by G05 (refused)
+02h00: started snub
+02h00: finished compliment (completed)
+02h00: insult with G04 (refused)
+02h22: started snub
+02h22: finished snub (completed)
+02h22: insult with G01 (refused)
+02h22: compliment approached by G02 (refused)
+02h45: started gossip
+02h45: finished snub (completed)
+02h45: gossip with G03 (refused)
+02h45: compliment approached by G02 (accepted)
+03h07: started gossip
+03h07: finished gossip (completed)
+03h07: gossip with G03 (accepted)
+03h30: started snub
+03h30: finished gossip (completed)
+03h30: insult with G01 (accepted)
+03h30: gossip approached by G02 (accepted)
+03h52: started gossip
+03h52: finished snub (completed)
+03h52: gossip with G01 (refused)
+03h52: gossip approached by G03 (refused)
+04h15: started snub
+04h15: finished gossip (completed)
+04h15: insult with G03 (refused)
+04h15: insult approached by G04 (refused)
+04h37: started gossip
+04h37: finished snub (completed)
+04h37: gossip with G03 (refused)
+05h00: started snub
+05h00: finished gossip (completed)
+05h00: insult with G04 (refused)
+05h22: started snub
+05h22: finished snub (completed)
+05h22: insult with G01 (accepted)
+05h45: started snub
+05h45: finished snub (completed)
+05h45: insult with G03 (refused)
+05h45: compliment approached by G02 (accepted)
+05h45: insult approached by G04 (refused)
+06h07: started snub
+06h07: finished snub (completed)
+06h07: insult with G04 (refused)
+06h30: started compliment
+06h30: finished snub (completed)
+06h30: compliment with G02 (accepted)
+06h30: gossip approached by G03 (refused)
+06h52: started gossip
+06h52: finished compliment (completed)
+06h52: gossip with G02 (accepted)
+07h15: started gossip
+07h15: finished gossip (completed)
+07h15: gossip with G02 (accepted)
+07h15: insult approached by G04 (refused)
+07h37: started gossip
+07h37: finished gossip (completed)
+07h37: gossip with G03 (accepted)
+07h37: compliment approached by G02 (refused)
+08h00: started gossip
+08h00: finished gossip (completed)
+08h00: gossip with G01 (accepted)
+08h22: started gossip
+08h22: finished gossip (completed)
+08h22: gossip with G04 (refused)
+08h45: started compliment
+08h45: finished gossip (completed)
+08h45: compliment with G02 (accepted)
+08h45: gossip approached by G03 (accepted)
+09h07: started snub
+09h07: finished compliment (completed)
+09h07: insult with G01 (accepted)
+09h30: started gossip
+09h30: finished snub (completed)
+09h30: gossip with G03 (accepted)
+09h30: gossip approached by G04 (refused)
+09h52: started snub
+09h52: finished gossip (completed)
+09h52: insult with G03 (refused)
+09h52: compliment approached by G02 (accepted)
+10h15: started snub
+10h15: finished snub (completed)
+10h15: insult with G03 (accepted)
+10h15: compliment approached by G02 (accepted)
+10h37: started snub
+10h37: finished snub (completed)
+10h37: insult with G03 (refused)
+11h00: started gossip
+11h00: finished snub (completed)
+11h00: gossip with G01 (refused)
+11h00: insult approached by G04 (refused)
+11h00: gossip approached by G05 (accepted)
+11h22: started gossip
+11h22: finished gossip (completed)
+11h22: gossip with G01 (accepted)
+11h45: started compliment
+11h45: finished gossip (completed)
+11h45: compliment with G02 (accepted)
+11h45: gossip approached by G02 (refused)
+11h45: insult approached by G04 (refused)
+12h07: started snub
+12h07: finished compliment (completed)
+12h07: insult with G01 (refused)
+12h07: compliment approached by G02 (refused)
+12h30: started gossip
+12h30: finished snub (completed)
+12h30: gossip with G05 (refused)
+12h30: compliment approached by G02 (accepted)
+12h52: started snub
+12h52: finished gossip (completed)
+12h52: insult with G04 (refused)
+12h52: insult approached by G04 (refused)
+13h15: started compliment
+13h15: finished snub (completed)
+13h15: compliment with G02 (refused)
+13h37: started snub
+13h37: finished compliment (completed)
+13h37: insult with G01 (refused)
+14h00: started gossip
+14h00: finished snub (completed)
+14h00: gossip with G05 (refused)
+14h00: gossip approached by G01 (refused)
+14h22: started snub
+14h22: finished gossip (completed)
+14h22: insult with G04 (refused)
+14h22: gossip approached by G03 (refused)
+14h22: insult approached by G04 (refused)
+14h45: started gossip
+14h45: finished snub (completed)
+14h45: gossip with G05 (refused)
+14h45: compliment approached by G02 (accepted)
+15h07: started gossip
+15h07: finished gossip (completed)
+15h07: gossip with G02 (accepted)
+15h07: compliment approached by G02 (accepted)
+15h07: gossip approached by G05 (accepted)
+15h30: started snub
+15h30: finished gossip (completed)
+15h30: insult with G04 (refused)
+15h30: compliment approached by G02 (refused)
+15h52: started compliment
+15h52: finished snub (completed)
+15h52: compliment with G02 (accepted)
+15h52: compliment approached by G02 (accepted)
+15h52: gossip approached by G05 (accepted)
+16h15: started gossip
+16h15: finished compliment (completed)
+16h15: gossip with G03 (accepted)
+16h37: started gossip
+16h37: finished gossip (completed)
+16h37: gossip with G01 (refused)
+17h00: started gossip
+17h00: finished gossip (completed)
+17h00: gossip with G05 (refused)
+17h00: gossip approached by G04 (refused)
+17h22: started compliment
+17h22: finished gossip (completed)
+17h22: compliment with G02 (refused)
+17h22: insult approached by G04 (refused)
+17h45: started gossip
+17h45: finished compliment (completed)
+17h45: gossip with G01 (refused)
+17h45: gossip approached by G01 (refused)
+17h45: gossip approached by G04 (refused)
+17h45: gossip approached by G05 (accepted)
+18h07: started snub
+18h07: finished gossip (completed)
+18h07: insult with G04 (refused)
+18h07: gossip approached by G01 (refused)
+18h07: gossip approached by G04 (refused)
+18h30: started gossip
+18h30: finished snub (completed)
+18h30: gossip with G01 (refused)
+18h52: started snub
+18h52: finished gossip (completed)
+18h52: insult with G03 (refused)
+18h52: gossip approached by G05 (refused)
+19h15: started snub
+19h15: finished snub (completed)
+19h15: insult with G01 (refused)
+19h15: gossip approached by G04 (refused)
+19h37: started gossip
+19h37: finished snub (completed)
+19h37: gossip with G02 (refused)
+20h00: started snub
+20h00: finished gossip (completed)
+20h00: insult with G01 (refused)
+20h00: gossip approached by G02 (accepted)
+20h00: gossip approached by G05 (accepted)
+20h22: started gossip
+20h22: finished snub (completed)
+20h22: gossip with G04 (refused)
+20h22: gossip approached by G03 (refused)
+20h45: started gossip
+20h45: finished gossip (completed)
+20h45: gossip with G04 (refused)
+21h07: started snub
+21h07: finished gossip (completed)
+21h07: insult with G03 (refused)
+21h07: gossip approached by G04 (refused)
+21h30: started snub
+21h30: finished snub (completed)
+21h30: insult with G01 (refused)
+21h30: gossip approached by G01 (refused)
+21h30: gossip approached by G05 (refused)
+21h52: started gossip
+21h52: finished snub (completed)
+21h52: gossip with G02 (refused)
+22h15: started gossip
+22h15: finished gossip (completed)
+22h15: gossip with G04 (refused)
+22h15: gossip approached by G02 (refused)
+22h37: started compliment
+22h37: finished gossip (completed)
+22h37: compliment with G02 (accepted)
+23h00: started gossip
+23h00: finished compliment (completed)
+23h00: gossip with G02 (refused)
+23h22: started compliment
+23h22: finished gossip (completed)
+23h22: compliment with G02 (accepted)
+23h22: compliment approached by G02 (refused)
+23h45: started gossip
+23h45: finished compliment (completed)
+23h45: gossip with G03 (refused)
+23h45: gossip approached by G04 (refused)
+23h45: gossip approached by G05 (refused)
+00h07: started gossip
+00h07: finished gossip (completed)
+00h07: gossip with G02 (accepted)
+00h30: started snub
+00h30: finished gossip (completed)
+00h30: insult with G01 (refused)
+00h30: gossip approached by G01 (refused)
+00h30: compliment approached by G02 (accepted)
+00h52: started gossip
+00h52: finished snub (completed)
+00h52: gossip with G02 (accepted)
+01h15: started snub
+01h15: finished gossip (completed)
+01h15: insult with G03 (refused)
+01h37: started snub
+01h37: finished snub (completed)
+01h37: insult with G04 (refused)
+01h37: insult approached by G04 (refused)
+02h00: started gossip
+02h00: finished snub (completed)
+02h00: gossip with G01 (refused)
+02h00: insult approached by G04 (refused)
+02h00: gossip approached by G05 (refused)
+02h22: started snub
+02h22: finished gossip (completed)
+02h22: insult with G01 (accepted)
+02h22: gossip approached by G04 (refused)
+02h45: started gossip
+02h45: finished snub (completed)
+02h45: gossip with G03 (refused)
+02h45: gossip approached by G04 (refused)
+03h07: started snub
+03h07: finished gossip (completed)
+03h07: insult with G03 (refused)
+03h07: compliment approached by G02 (accepted)
+03h30: started gossip
+03h30: finished snub (completed)
+03h30: gossip with G01 (accepted)
+03h30: insult approached by G04 (refused)
+03h52: started gossip
+03h52: finished gossip (completed)
+03h52: gossip with G01 (refused)
+03h52: compliment approached by G02 (accepted)
+03h52: gossip approached by G05 (refused)
+04h15: started compliment
+04h15: finished gossip (completed)
+04h15: compliment with G02 (accepted)
+04h15: gossip approached by G04 (refused)
+04h15: chat approached by G05 (accepted)
+04h37: started snub
+04h37: finished compliment (completed)
+04h37: insult with G01 (accepted)
+04h37: gossip approached by G04 (refused)
+05h00: started compliment
+05h00: finished snub (completed)
+05h00: compliment with G05 (refused)
+05h22: started gossip
+05h22: finished compliment (completed)
+05h22: gossip with G02 (accepted)
+05h45: started snub
+05h45: finished gossip (completed)
+05h45: insult with G01 (accepted)
+06h07: started gossip
+06h07: finished snub (completed)
+06h07: gossip with G01 (refused)
+06h30: started snub
+06h30: finished gossip (completed)
+06h30: insult with G01 (accepted)
+06h30: insult approached by G01 (refused)
+06h52: started gossip
+06h52: finished snub (completed)
+06h52: gossip with G04 (refused)
+06h52: compliment approached by G02 (refused)
+07h15: started gossip
+07h15: finished gossip (completed)
+07h15: gossip with G02 (accepted)
+07h37: started gossip
+07h37: finished gossip (completed)
+07h37: gossip with G05 (accepted)
+07h37: gossip approached by G04 (refused)
+08h00: started snub
+08h00: finished gossip (completed)
+08h00: insult with G03 (refused)
+08h00: insult approached by G01 (refused)
+08h22: started gossip
+08h22: finished snub (completed)
+08h22: gossip with G05 (refused)
+08h22: gossip approached by G03 (refused)
+08h45: started snub
+08h45: finished gossip (completed)
+08h45: insult with G04 (refused)
+08h45: insult approached by G01 (refused)
+08h45: compliment approached by G02 (accepted)
+09h07: started snub
+09h07: finished snub (completed)
+09h07: insult with G01 (refused)
+09h30: started gossip
+09h30: finished snub (completed)
+09h30: gossip with G03 (refused)
+09h52: started snub
+09h52: finished gossip (completed)
+09h52: insult with G04 (accepted)
+09h52: gossip approached by G01 (refused)
+09h52: compliment approached by G02 (accepted)
+09h52: insult approached by G03 (refused)
+09h52: gossip approached by G04 (refused)
+10h15: started gossip
+10h15: finished snub (completed)
+10h15: gossip with G03 (accepted)
+10h15: gossip approached by G03 (accepted)
+10h37: started gossip
+10h37: finished gossip (completed)
+10h37: gossip with G02 (accepted)
+10h37: gossip approached by G02 (accepted)
+11h00: started compliment
+11h00: finished gossip (completed)
+11h00: compliment with G02 (accepted)
+11h00: compliment approached by G02 (refused)
+11h22: started gossip
+11h22: finished compliment (completed)
+11h22: gossip with G01 (refused)
+11h45: started snub
+11h45: finished gossip (completed)
+11h45: insult with G03 (refused)
+11h45: compliment approached by G02 (accepted)
+11h45: gossip approached by G04 (refused)
+11h45: gossip approached by G05 (refused)
+12h07: started gossip
+12h07: finished snub (completed)
+12h07: gossip with G05 (refused)
+12h07: gossip approached by G03 (refused)
+12h07: gossip approached by G04 (refused)
+12h30: started snub
+12h30: finished gossip (completed)
+12h30: insult with G01 (refused)
+12h30: compliment approached by G02 (refused)
+12h52: started gossip
+12h52: finished snub (completed)
+12h52: gossip with G05 (accepted)
+12h52: insult approached by G01 (refused)
+12h52: gossip approached by G02 (accepted)
+12h52: insult approached by G03 (accepted)
+12h52: gossip approached by G05 (refused)
+13h15: started gossip
+13h15: finished gossip (completed)
+13h15: gossip with G05 (accepted)
+13h15: gossip approached by G02 (accepted)
+13h15: insult approached by G04 (refused)
+13h37: started snub
+13h37: finished gossip (completed)
+13h37: insult with G01 (refused)
+13h37: gossip approached by G01 (refused)
+13h37: gossip approached by G04 (accepted)
+14h00: started snub
+14h00: finished snub (completed)
+14h00: insult with G03 (accepted)
+14h00: gossip approached by G04 (refused)
+14h00: gossip approached by G05 (accepted)
+14h22: started gossip
+14h22: finished snub (completed)
+14h22: gossip with G02 (accepted)
+14h45: started gossip
+14h45: finished gossip (completed)
+14h45: gossip with G02 (refused)
+15h07: started snub
+15h07: finished gossip (completed)
+15h07: insult with G01 (refused)
+15h30: started gossip
+15h30: finished snub (completed)
+15h30: gossip with G05 (accepted)
+15h52: started gossip
+15h52: finished gossip (completed)
+15h52: gossip with G02 (accepted)
+16h15: started snub
+16h15: finished gossip (completed)
+16h15: insult with G01 (accepted)
+16h37: started compliment
+16h37: finished snub (completed)
+16h37: compliment with G02 (accepted)
+17h00: started gossip
+17h00: finished compliment (completed)
+17h00: gossip with G04 (refused)
+17h00: insult approached by G04 (refused)
+17h22: started gossip
+17h22: finished gossip (completed)
+17h22: gossip with G03 (refused)
+17h22: compliment approached by G02 (accepted)
+17h22: insult approached by G04 (refused)
+17h45: started gossip
+17h45: finished gossip (completed)
+17h45: gossip with G05 (refused)
+17h45: compliment approached by G02 (refused)
+17h45: insult approached by G03 (refused)
+18h07: started gossip
+18h07: finished gossip (completed)
+18h07: gossip with G01 (accepted)
+18h30: started snub
+18h30: finished gossip (completed)
+18h30: insult with G04 (refused)
+18h30: insult approached by G01 (refused)
+18h30: gossip approached by G03 (refused)
+18h52: started gossip
+18h52: finished snub (completed)
+18h52: gossip with G01 (refused)
+18h52: gossip approached by G02 (refused)
+19h15: started gossip
+19h15: finished gossip (completed)
+19h15: gossip with G04 (refused)
+19h37: started gossip
+19h37: finished gossip (completed)
+19h37: gossip with G05 (accepted)
+19h37: insult approached by G01 (refused)
+20h00: started gossip
+20h00: finished gossip (completed)
+20h00: gossip with G03 (refused)
+20h00: insult approached by G01 (refused)
+20h00: compliment approached by G02 (refused)
+20h22: started gossip
+20h22: finished gossip (completed)
+20h22: gossip with G03 (refused)
+20h22: compliment approached by G02 (accepted)
+20h22: gossip approached by G05 (refused)
+20h45: started wander
+20h45: finished gossip (completed)
+20h45: gossip approached by G04 (refused)
+21h30: started compliment
+21h30: finished wander (completed)
+21h30: compliment with G02 (accepted)
+21h30: gossip approached by G01 (refused)
+21h52: started gossip
+21h52: finished compliment (completed)
+21h52: gossip with G05 (refused)
+21h52: insult approached by G03 (refused)
+22h15: started snub
+22h15: finished gossip (completed)
+22h15: insult with G03 (accepted)
+22h37: started gossip
+22h37: finished snub (completed)
+22h37: gossip with G05 (refused)
+22h37: insult approached by G04 (refused)
+23h00: started snub
+23h00: finished gossip (completed)
+23h00: insult with G04 (refused)
+23h00: insult approached by G01 (accepted)
+23h22: started snub
+23h22: finished snub (completed)
+23h22: insult with G01 (accepted)
+23h45: started gossip
+23h45: finished snub (completed)
+23h45: gossip with G01 (refused)
+00h07: started gossip
+00h07: finished gossip (completed)
+00h07: gossip with G04 (refused)
+00h07: insult approached by G04 (refused)
+00h30: started compliment
+00h30: finished gossip (completed)
+00h30: compliment with G02 (accepted)
+00h52: started gossip
+00h52: finished compliment (completed)
+00h52: gossip with G05 (refused)
+01h15: started snub
+01h15: finished gossip (completed)
+01h15: insult with G04 (refused)
+01h15: insult approached by G01 (refused)
+01h37: started compliment
+01h37: finished snub (completed)
+01h37: compliment with G02 (accepted)
+02h00: started snub
+02h00: finished compliment (completed)
+02h00: insult with G01 (refused)
+02h22: started snub
+02h22: finished snub (completed)
+02h22: insult with G01 (accepted)
+02h22: gossip approached by G02 (refused)
+02h22: gossip approached by G04 (refused)
+02h45: started compliment
+02h45: finished snub (completed)
+02h45: compliment with G02 (accepted)
+02h45: compliment approached by G02 (refused)
+02h45: insult approached by G04 (refused)
+03h07: started chat
+03h07: finished compliment (completed)
+03h07: chat with G02 (accepted)
+03h30: started snub
+03h30: finished chat (completed)
+03h30: insult with G01 (refused)
+03h30: gossip approached by G01 (refused)
+03h52: started snub
+03h52: finished snub (completed)
+03h52: insult with G03 (refused)
+03h52: compliment approached by G02 (accepted)
+03h52: gossip approached by G03 (refused)
+03h52: gossip approached by G04 (refused)
+04h15: started gossip
+04h15: finished snub (completed)
+04h15: gossip with G03 (refused)
+04h15: insult approached by G01 (refused)
+04h15: gossip approached by G05 (refused)
+04h37: started snub
+04h37: finished gossip (completed)
+04h37: insult with G04 (refused)
+04h37: insult approached by G01 (refused)
+05h00: started compliment
+05h00: finished snub (completed)
+05h00: compliment with G02 (accepted)
+05h00: gossip approached by G05 (accepted)
+05h22: started gossip
+05h22: finished compliment (completed)
+05h22: gossip with G05 (refused)
+05h22: insult approached by G01 (refused)
+05h22: gossip approached by G03 (accepted)
+05h45: started gossip
+05h45: finished gossip (completed)
+05h45: gossip with G01 (refused)
+05h45: gossip approached by G03 (refused)
+05h45: insult approached by G04 (accepted)
+06h07: started gossip
+06h07: finished gossip (completed)
+06h07: gossip with G05 (accepted)
+06h07: gossip approached by G03 (accepted)
+06h07: insult approached by G04 (refused)
+06h30: started gossip
+06h30: finished gossip (completed)
+06h30: gossip with G04 (accepted)
+06h52: started gossip
+06h52: finished gossip (completed)
+06h52: gossip with G04 (accepted)
+06h52: insult approached by G01 (refused)
+06h52: compliment approached by G02 (accepted)
+07h15: started gossip
+07h15: finished gossip (completed)
+07h15: gossip with G01 (refused)
+07h15: compliment approached by G02 (accepted)
+07h37: started snub
+07h37: finished gossip (completed)
+07h37: insult with G03 (refused)
+08h00: started compliment
+08h00: finished snub (completed)
+08h00: compliment with G02 (accepted)
+08h22: started snub
+08h22: finished compliment (completed)
+08h22: insult with G03 (accepted)
+08h45: started compliment
+08h45: finished snub (completed)
+08h45: compliment with G02 (accepted)
+08h45: insult approached by G03 (refused)
+09h07: started snub
+09h07: finished compliment (completed)
+09h07: insult with G04 (refused)
+09h07: gossip approached by G04 (refused)
+09h30: started gossip
+09h30: finished snub (completed)
+09h30: gossip with G04 (refused)
+09h30: insult approached by G01 (refused)
+09h52: started gossip
+09h52: finished gossip (completed)
+09h52: gossip with G02 (accepted)
+09h52: gossip approached by G01 (refused)
+09h52: gossip approached by G02 (accepted)
+10h15: started snub
+10h15: finished gossip (completed)
+10h15: insult with G04 (refused)
+10h37: started snub
+10h37: finished snub (completed)
+10h37: insult with G03 (refused)
+10h37: insult approached by G03 (refused)
+11h00: started gossip
+11h00: finished snub (completed)
+11h00: gossip with G02 (accepted)
+11h00: insult approached by G01 (refused)
+11h22: started snub
+11h22: finished gossip (completed)
+11h22: insult with G04 (refused)
+11h22: gossip approached by G01 (refused)
+11h22: insult approached by G03 (refused)
+11h22: gossip approached by G05 (accepted)
+11h45: started gossip
+11h45: finished snub (completed)
+11h45: gossip with G04 (refused)
+12h07: started gossip
+12h07: finished gossip (completed)
+12h07: gossip with G01 (refused)
+12h07: gossip approached by G05 (accepted)
+12h30: started snub
+12h30: finished gossip (completed)
+12h30: insult with G03 (refused)
+12h30: insult approached by G04 (refused)
+12h52: started gossip
+12h52: finished snub (completed)
+12h52: gossip with G05 (refused)
+12h52: insult approached by G01 (refused)
+12h52: insult approached by G03 (refused)
+13h15: started snub
+13h15: finished gossip (completed)
+13h15: insult with G04 (refused)
+13h15: gossip approached by G03 (refused)
+13h37: started snub
+13h37: finished snub (completed)
+13h37: insult with G03 (refused)
+13h37: gossip approached by G01 (refused)
+14h00: started snub
+14h00: finished snub (completed)
+14h00: insult with G03 (refused)
+14h00: insult approached by G01 (refused)
+14h00: insult approached by G04 (refused)
+14h22: started gossip
+14h22: finished snub (completed)
+14h22: gossip with G05 (refused)
+14h22: gossip approached by G05 (refused)
+14h45: started gossip
+14h45: finished gossip (completed)
+14h45: gossip with G01 (refused)
+14h45: insult approached by G01 (refused)
+15h07: started gossip
+15h07: finished gossip (completed)
+15h07: gossip with G05 (refused)
+15h30: started gossip
+15h30: finished gossip (completed)
+15h30: gossip with G03 (refused)
+15h30: insult approached by G01 (refused)
+15h30: insult approached by G04 (refused)
+15h52: started snub
+15h52: finished gossip (completed)
+15h52: insult with G01 (refused)
+15h52: gossip approached by G02 (accepted)
+15h52: gossip approached by G03 (refused)
+16h15: started compliment
+16h15: finished snub (completed)
+16h15: compliment with G02 (accepted)
+16h15: insult approached by G03 (refused)
+16h15: gossip approached by G04 (refused)
+16h37: started gossip
+16h37: finished compliment (completed)
+16h37: gossip with G03 (refused)
+16h37: insult approached by G03 (refused)
+17h00: started snub
+17h00: finished gossip (completed)
+17h00: insult with G04 (refused)
+17h22: started snub
+17h22: finished snub (completed)
+17h22: insult with G01 (refused)
+17h45: started snub
+17h45: finished snub (completed)
+17h45: insult with G04 (refused)
+18h07: started gossip
+18h07: finished snub (completed)
+18h07: gossip with G04 (refused)
+18h07: insult approached by G01 (accepted)
+18h30: started gossip
+18h30: finished gossip (completed)
+18h30: gossip with G05 (refused)
+18h30: insult approached by G03 (refused)
+18h30: gossip approached by G05 (accepted)
+18h52: started gossip
+18h52: finished gossip (completed)
+18h52: gossip with G01 (refused)
+18h52: insult approached by G04 (refused)
+19h15: started snub
+19h15: finished gossip (completed)
+19h15: insult with G01 (refused)
+19h15: insult approached by G03 (accepted)
+19h37: started gossip
+19h37: finished snub (completed)
+19h37: gossip with G01 (refused)
+20h00: started snub
+20h00: finished gossip (completed)
+20h00: insult with G04 (refused)
+20h00: insult approached by G03 (refused)
+20h22: started gossip
+20h22: finished snub (completed)
+20h22: gossip with G05 (accepted)
+20h22: insult approached by G04 (accepted)
+20h45: started compliment
+20h45: finished gossip (completed)
+20h45: compliment with G02 (refused)
+20h45: gossip approached by G01 (refused)
+21h07: started compliment
+21h07: finished compliment (completed)
+21h07: compliment with G02 (accepted)
+21h07: compliment approached by G02 (accepted)
+21h07: insult approached by G04 (refused)
+21h30: started gossip
+21h30: finished compliment (completed)
+21h30: gossip with G04 (refused)
+21h30: gossip approached by G01 (refused)
+21h30: compliment approached by G02 (refused)
+21h30: insult approached by G04 (accepted)
+21h52: started snub
+21h52: finished gossip (completed)
+21h52: insult with G04 (refused)
+22h15: started snub
+22h15: finished snub (completed)
+22h15: insult with G04 (refused)
+22h15: gossip approached by G01 (refused)
+22h37: started snub
+22h37: finished snub (completed)
+22h37: insult with G04 (refused)
+22h37: insult approached by G03 (refused)
+23h00: started gossip
+23h00: finished snub (completed)
+23h00: gossip with G04 (refused)
+23h00: insult approached by G04 (refused)
+23h22: started gossip
+23h22: finished gossip (completed)
+23h22: gossip with G02 (accepted)
+23h22: gossip approached by G04 (refused)
+23h45: started compliment
+23h45: finished gossip (completed)
+23h45: compliment with G02 (accepted)
+00h07: started snub
+00h07: finished compliment (completed)
+00h07: insult with G01 (refused)
+00h07: insult approached by G04 (refused)
+00h30: started compliment
+00h30: finished snub (completed)
+00h30: compliment with G02 (accepted)
+00h30: gossip approached by G01 (refused)
+00h30: gossip approached by G02 (accepted)
+00h30: gossip approached by G03 (accepted)
+00h52: started gossip
+00h52: finished compliment (completed)
+00h52: gossip with G04 (refused)
+00h52: insult approached by G03 (accepted)
+01h15: started snub
+01h15: finished gossip (completed)
+01h15: insult with G01 (refused)
+01h15: gossip approached by G01 (refused)
+01h37: started snub
+01h37: finished snub (completed)
+01h37: insult with G01 (refused)
+02h00: started compliment
+02h00: finished snub (completed)
+02h00: compliment with G02 (accepted)
+02h00: insult approached by G01 (refused)
+02h22: started gossip
+02h22: finished compliment (completed)
+02h22: gossip with G01 (refused)
+02h45: started snub
+02h45: finished gossip (completed)
+02h45: insult with G01 (refused)
+02h45: insult approached by G01 (refused)
+03h07: started gossip
+03h07: finished snub (completed)
+03h07: gossip with G03 (refused)
+03h30: started snub
+03h30: finished gossip (completed)
+03h30: insult with G01 (refused)
+03h52: started gossip
+03h52: finished snub (completed)
+03h52: gossip with G01 (refused)
+04h15: started gossip
+04h15: finished gossip (completed)
+04h15: gossip with G01 (accepted)
+04h37: started gossip
+04h37: finished gossip (completed)
+04h37: gossip with G04 (refused)
+04h37: insult approached by G01 (refused)
+04h37: compliment approached by G02 (accepted)
+05h00: started compliment
+05h00: finished gossip (completed)
+05h00: compliment with G02 (refused)
+05h00: gossip approached by G04 (refused)
+05h22: started snub
+05h22: finished compliment (completed)
+05h22: insult with G03 (refused)
+05h22: gossip approached by G02 (refused)
+05h45: started snub
+05h45: finished snub (completed)
+05h45: insult with G04 (refused)
+05h45: compliment approached by G02 (accepted)
+06h07: started gossip
+06h07: finished snub (completed)
+06h07: gossip with G05 (accepted)
+06h07: insult approached by G03 (refused)
+06h07: gossip approached by G04 (refused)
+06h30: started snub
+06h30: finished gossip (completed)
+06h30: insult with G03 (refused)
+06h30: gossip approached by G04 (refused)
+06h52: started gossip
+06h52: finished snub (completed)
+06h52: gossip with G01 (refused)
+06h52: insult approached by G04 (refused)
+07h15: started compliment
+07h15: finished gossip (completed)
+07h15: compliment with G02 (refused)
+07h15: gossip approached by G03 (accepted)
+07h15: gossip approached by G05 (accepted)
+07h37: started compliment
+07h37: finished compliment (completed)
+07h37: compliment with G02 (refused)
+07h37: insult approached by G04 (refused)
+08h00: started snub
+08h00: finished compliment (completed)
+08h00: insult with G04 (refused)
+08h22: started gossip
+08h22: finished snub (completed)
+08h22: gossip with G02 (accepted)
+08h45: started snub
+08h45: finished gossip (completed)
+08h45: insult with G04 (refused)
+08h45: gossip approached by G01 (refused)
+09h07: started gossip
+09h07: finished snub (completed)
+09h07: gossip with G02 (accepted)
+09h07: insult approached by G04 (accepted)
+09h30: started compliment
+09h30: finished gossip (completed)
+09h30: compliment with G02 (accepted)
+09h30: gossip approached by G02 (accepted)
+09h52: started snub
+09h52: finished compliment (completed)
+09h52: insult with G04 (refused)
+09h52: insult approached by G03 (refused)
+09h52: insult approached by G04 (refused)
+10h15: started snub
+10h15: finished snub (completed)
+10h15: insult with G03 (refused)
+10h15: gossip approached by G02 (refused)
+10h15: compliment approached by G05 (refused)
+10h37: started snub
+10h37: finished snub (completed)
+10h37: insult with G03 (refused)
+11h00: started gossip
+11h00: finished snub (completed)
+11h00: gossip with G02 (accepted)
+11h22: started gossip
+11h22: finished gossip (completed)
+11h22: gossip with G01 (refused)
+11h22: gossip approached by G05 (accepted)
+11h45: started gossip
+11h45: finished gossip (completed)
+11h45: gossip with G03 (refused)
+12h07: started gossip
+12h07: finished gossip (completed)
+12h07: gossip with G05 (accepted)
+12h30: started snub
+12h30: finished gossip (completed)
+12h30: insult with G04 (refused)
+12h30: insult approached by G03 (refused)
+12h52: started snub
+12h52: finished snub (completed)
+12h52: insult with G04 (refused)
+12h52: insult approached by G03 (refused)
+13h15: started snub
+13h15: finished snub (completed)
+13h15: insult with G01 (refused)
+13h15: insult approached by G03 (refused)
+13h37: started snub
+13h37: finished snub (completed)
+13h37: insult with G01 (refused)
+14h00: started compliment
+14h00: finished snub (completed)
+14h00: compliment with G02 (refused)
+14h22: started gossip
+14h22: finished compliment (completed)
+14h22: gossip with G04 (refused)
+14h45: started compliment
+14h45: finished gossip (completed)
+14h45: compliment with G02 (accepted)
+14h45: gossip approached by G01 (refused)
+14h45: insult approached by G04 (refused)
+15h07: started compliment
+15h07: finished compliment (completed)
+15h07: compliment with G02 (accepted)
+15h30: started snub
+15h30: finished compliment (completed)
+15h30: insult with G04 (refused)
+15h30: gossip approached by G01 (accepted)
+15h30: insult approached by G03 (refused)
+15h30: gossip approached by G05 (accepted)
+15h52: started snub
+15h52: finished snub (completed)
+15h52: insult with G04 (refused)
+15h52: compliment approached by G05 (accepted)
+16h15: started compliment
+16h15: finished snub (completed)
+16h15: compliment with G02 (accepted)
+16h15: insult approached by G03 (refused)
+16h37: started snub
+16h37: finished compliment (completed)
+16h37: insult with G01 (refused)
+16h37: compliment approached by G02 (accepted)
+16h37: compliment approached by G05 (accepted)
+17h00: started gossip
+17h00: finished snub (completed)
+17h00: gossip with G05 (refused)
+17h00: gossip approached by G05 (accepted)
+17h22: started snub
+17h22: finished gossip (completed)
+17h22: insult with G03 (accepted)
+17h45: started snub
+17h45: finished snub (completed)
+17h45: insult with G03 (refused)
+17h45: gossip approached by G05 (refused)
+18h07: started snub
+18h07: finished snub (completed)
+18h07: insult with G04 (accepted)
+18h30: started gossip
+18h30: finished snub (completed)
+18h30: gossip with G05 (accepted)
+18h30: gossip approached by G05 (accepted)
+18h52: started gossip
+18h52: finished gossip (completed)
+18h52: gossip with G02 (accepted)
+19h15: started wander
+19h15: finished gossip (completed)
+19h15: gossip approached by G01 (refused)
+19h15: insult approached by G03 (refused)
+20h00: started compliment
+20h00: finished wander (completed)
+20h00: compliment with G02 (accepted)
+20h00: insult approached by G01 (refused)
+20h22: started gossip
+20h22: finished compliment (completed)
+20h22: gossip with G01 (refused)
+20h45: started gossip
+20h45: finished gossip (completed)
+20h45: gossip with G03 (accepted)
+20h45: compliment approached by G02 (accepted)
+21h07: started snub
+21h07: finished gossip (completed)
+21h07: insult with G03 (refused)
+21h30: started wander
+21h30: finished snub (completed)
+21h30: insult approached by G01 (refused)
+21h52: gossip approached by G02 (refused)
+22h15: started gossip
+22h15: finished wander (completed)
+22h15: gossip with G04 (refused)
+22h15: insult approached by G01 (refused)
+22h37: started snub
+22h37: finished gossip (completed)
+22h37: insult with G03 (refused)
+22h37: insult approached by G01 (refused)
+22h37: insult approached by G03 (refused)
+22h37: insult approached by G04 (refused)
+23h00: started snub
+23h00: finished snub (completed)
+23h00: insult with G03 (accepted)
+23h00: insult approached by G01 (accepted)
+23h00: compliment approached by G05 (refused)
+23h22: started compliment
+23h22: finished snub (completed)
+23h22: compliment with G02 (refused)
+23h22: compliment approached by G02 (refused)
+23h22: gossip approached by G04 (refused)
+23h45: started compliment
+23h45: finished compliment (completed)
+23h45: compliment with G05 (accepted)
+23h45: insult approached by G01 (refused)
+23h45: insult approached by G04 (refused)
+23h45: gossip approached by G05 (refused)
+00h07: started snub
+00h07: finished compliment (completed)
+00h07: insult with G01 (refused)
+00h07: gossip approached by G01 (refused)
+00h07: gossip approached by G03 (refused)
+00h30: started gossip
+00h30: finished snub (completed)
+00h30: gossip with G01 (refused)
+00h30: compliment approached by G05 (accepted)
+00h52: started snub
+00h52: finished gossip (completed)
+00h52: insult with G01 (refused)
+00h52: insult approached by G01 (refused)
+01h15: started compliment
+01h15: finished snub (completed)
+01h15: compliment with G02 (accepted)
+01h37: started compliment
+01h37: finished compliment (completed)
+01h37: compliment with G05 (accepted)
+01h37: compliment approached by G02 (accepted)
+01h37: gossip approached by G05 (accepted)
+02h00: started snub
+02h00: finished compliment (completed)
+02h00: insult with G04 (refused)
+02h22: started gossip
+02h22: finished snub (completed)
+02h22: gossip with G02 (refused)
+02h45: started snub
+02h45: finished gossip (completed)
+02h45: insult with G04 (refused)
+02h45: gossip approached by G01 (refused)
+03h07: started gossip
+03h07: finished snub (completed)
+03h07: gossip with G01 (refused)
+03h30: started snub
+03h30: finished gossip (completed)
+03h30: insult with G01 (refused)
+03h30: gossip approached by G05 (accepted)
+03h52: started gossip
+03h52: finished snub (completed)
+03h52: gossip with G05 (accepted)
+03h52: insult approached by G01 (refused)
+03h52: gossip approached by G04 (refused)
+03h52: gossip approached by G05 (refused)
+04h15: started snub
+04h15: finished gossip (completed)
+04h15: insult with G01 (refused)
+04h37: started snub
+04h37: finished snub (completed)
+04h37: insult with G04 (refused)
+04h37: compliment approached by G05 (accepted)
+05h00: started snub
+05h00: finished snub (completed)
+05h00: insult with G01 (refused)
+05h00: compliment approached by G02 (accepted)
+05h22: started gossip
+05h22: finished snub (completed)
+05h22: gossip with G04 (refused)
+05h22: gossip approached by G04 (refused)
+05h45: started gossip
+05h45: finished gossip (completed)
+05h45: gossip with G05 (refused)
+05h45: compliment approached by G02 (accepted)
+05h45: insult approached by G04 (refused)
+05h45: gossip approached by G05 (refused)
+06h07: started snub
+06h07: finished gossip (completed)
+06h07: insult with G04 (refused)
+06h07: gossip approached by G01 (refused)
+06h30: started gossip
+06h30: finished snub (completed)
+06h30: gossip with G03 (refused)
+06h52: started snub
+06h52: finished gossip (completed)
+06h52: insult with G04 (refused)
+06h52: gossip approached by G01 (refused)
+07h15: started gossip
+07h15: finished snub (completed)
+07h15: gossip with G05 (accepted)
+07h37: started snub
+07h37: finished gossip (completed)
+07h37: insult with G04 (accepted)
+07h37: compliment approached by G05 (accepted)
+08h00: started snub
+08h00: finished snub (completed)
+08h00: insult with G03 (refused)
+08h00: insult approached by G01 (accepted)
+08h22: started snub
+08h22: finished snub (completed)
+08h22: insult with G01 (refused)
+08h22: gossip approached by G01 (refused)
+08h22: gossip approached by G04 (refused)
+08h45: started gossip
+08h45: finished snub (completed)
+08h45: gossip with G05 (refused)
+08h45: gossip approached by G01 (refused)
+09h07: started compliment
+09h07: finished gossip (completed)
+09h07: compliment with G05 (refused)
+09h07: insult approached by G04 (refused)
+09h30: started gossip
+09h30: finished compliment (completed)
+09h30: gossip with G02 (accepted)
+09h30: insult approached by G01 (refused)
+09h52: started snub
+09h52: finished gossip (completed)
+09h52: insult with G03 (refused)
+09h52: gossip approached by G01 (refused)
+09h52: insult approached by G04 (refused)
+10h15: started snub
+10h15: finished snub (completed)
+10h15: insult with G03 (refused)
+10h15: insult approached by G04 (refused)
+10h37: started gossip
+10h37: finished snub (completed)
+10h37: gossip with G03 (refused)
+11h00: started gossip
+11h00: finished gossip (completed)
+11h00: gossip with G02 (refused)
+11h00: insult approached by G03 (refused)
+11h22: started snub
+11h22: finished gossip (completed)
+11h22: insult with G04 (accepted)
+11h22: gossip approached by G01 (refused)
+11h22: compliment approached by G02 (accepted)
+11h22: gossip approached by G05 (accepted)
+11h45: started snub
+11h45: finished snub (completed)
+11h45: insult with G03 (accepted)
+11h45: gossip approached by G02 (refused)
+11h45: insult approached by G03 (refused)
+12h07: started gossip
+12h07: finished snub (completed)
+12h07: gossip with G01 (accepted)
+12h07: insult approached by G04 (refused)
+12h30: started compliment
+12h30: finished gossip (completed)
+12h30: compliment with G02 (accepted)
+12h30: gossip approached by G03 (refused)
+12h52: started snub
+12h52: finished compliment (completed)
+12h52: insult with G03 (refused)
+13h15: started compliment
+13h15: finished snub (completed)
+13h15: compliment with G02 (accepted)
+13h15: insult approached by G01 (refused)
+13h37: started compliment
+13h37: finished compliment (completed)
+13h37: compliment with G05 (refused)
+14h00: started snub
+14h00: finished compliment (completed)
+14h00: insult with G01 (refused)
+14h22: started gossip
+14h22: finished snub (completed)
+14h22: gossip with G05 (refused)
+14h22: gossip approached by G01 (refused)
+14h45: started compliment
+14h45: finished gossip (completed)
+14h45: compliment with G05 (refused)
+14h45: gossip approached by G01 (refused)
+14h45: insult approached by G03 (refused)
+15h07: started gossip
+15h07: finished compliment (completed)
+15h07: gossip with G01 (refused)
+15h07: gossip approached by G01 (refused)
+15h30: started gossip
+15h30: finished gossip (completed)
+15h30: gossip with G05 (refused)
+15h30: gossip approached by G02 (accepted)
+15h52: started snub
+15h52: finished gossip (completed)
+15h52: insult with G04 (refused)
+16h15: started gossip
+16h15: finished snub (completed)
+16h15: gossip with G03 (refused)
+16h37: started compliment
+16h37: finished gossip (completed)
+16h37: compliment with G02 (accepted)
+16h37: insult approached by G01 (refused)
+16h37: insult approached by G03 (refused)
+17h00: started compliment
+17h00: finished compliment (completed)
+17h00: compliment with G02 (refused)
+17h00: insult approached by G01 (refused)
+17h22: started gossip
+17h22: finished compliment (completed)
+17h22: gossip with G04 (refused)
+17h45: started snub
+17h45: finished gossip (completed)
+17h45: insult with G04 (refused)
+17h45: insult approached by G01 (refused)
+18h07: started snub
+18h07: finished snub (completed)
+18h07: insult with G04 (refused)
+18h07: insult approached by G04 (refused)
+18h30: started gossip
+18h30: finished snub (completed)
+18h30: gossip with G01 (accepted)
+18h52: started snub
+18h52: finished gossip (completed)
+18h52: insult with G03 (accepted)
+18h52: compliment approached by G02 (refused)
+19h15: started snub
+19h15: finished snub (completed)
+19h15: insult with G01 (refused)
+19h37: started snub
+19h37: finished snub (completed)
+19h37: insult with G03 (refused)
+20h00: started compliment
+20h00: finished snub (completed)
+20h00: compliment with G05 (refused)
+20h22: started gossip
+20h22: finished compliment (completed)
+20h22: gossip with G05 (accepted)
+20h22: compliment approached by G05 (accepted)
+20h45: started snub
+20h45: finished gossip (completed)
+20h45: insult with G01 (refused)
+20h45: gossip approached by G01 (refused)
+20h45: gossip approached by G02 (refused)
+20h45: insult approached by G03 (refused)
+20h45: insult approached by G04 (refused)
+21h07: started snub
+21h07: finished snub (completed)
+21h07: insult with G01 (refused)
+21h30: started gossip
+21h30: finished snub (completed)
+21h30: gossip with G03 (refused)
+21h30: gossip approached by G05 (refused)
+21h52: started gossip
+21h52: finished gossip (completed)
+21h52: gossip with G03 (refused)
+21h52: insult approached by G01 (refused)
+21h52: insult approached by G03 (refused)
+21h52: compliment approached by G05 (accepted)
+22h15: started compliment
+22h15: finished gossip (completed)
+22h15: compliment with G05 (refused)
+22h15: insult approached by G01 (refused)
+22h15: compliment approached by G05 (refused)
+22h37: started gossip
+22h37: finished compliment (completed)
+22h37: gossip with G05 (accepted)
+22h37: gossip approached by G02 (accepted)
+22h37: gossip approached by G04 (refused)
+23h00: started gossip
+23h00: finished gossip (completed)
+23h00: gossip with G03 (refused)
+23h22: started gossip
+23h22: finished gossip (completed)
+23h22: gossip with G05 (refused)
+23h45: started compliment
+23h45: finished gossip (completed)
+23h45: compliment with G02 (refused)
+23h45: compliment approached by G05 (refused)
+00h07: started gossip
+00h07: finished compliment (completed)
+00h07: gossip with G04 (refused)
+00h30: started gossip
+00h30: finished gossip (completed)
+00h30: gossip with G02 (accepted)
+00h30: insult approached by G01 (refused)
+00h30: compliment approached by G02 (refused)
+00h52: started snub
+00h52: finished gossip (completed)
+00h52: insult with G04 (refused)
+01h15: started snub
+01h15: finished snub (completed)
+01h15: insult with G04 (refused)
+01h15: gossip approached by G01 (refused)
+01h15: gossip approached by G03 (accepted)
+01h15: gossip approached by G05 (accepted)
+01h37: started snub
+01h37: finished snub (completed)
+01h37: insult with G01 (refused)
+01h37: gossip approached by G03 (refused)
+01h37: insult approached by G04 (refused)
+02h00: started compliment
+02h00: finished snub (completed)
+02h00: compliment with G02 (refused)
+02h00: insult approached by G01 (refused)
+02h22: started snub
+02h22: finished compliment (completed)
+02h22: insult with G04 (refused)
+02h22: insult approached by G01 (refused)
+02h45: started snub
+02h45: finished snub (completed)
+02h45: insult with G03 (refused)
+03h07: started snub
+03h07: finished snub (completed)
+03h07: insult with G01 (accepted)
+03h07: compliment approached by G05 (accepted)
+03h30: started snub
+03h30: finished snub (completed)
+03h30: insult with G01 (refused)
+03h30: insult approached by G03 (accepted)
+03h52: started compliment
+03h52: finished snub (completed)
+03h52: compliment with G02 (accepted)
+03h52: gossip approached by G01 (refused)
+03h52: gossip approached by G04 (refused)
+04h15: started snub
+04h15: finished compliment (completed)
+04h15: insult with G04 (refused)
+04h15: gossip approached by G01 (refused)
+04h15: gossip approached by G05 (accepted)
+04h37: started compliment
+04h37: finished snub (completed)
+04h37: compliment with G05 (refused)
+04h37: insult approached by G04 (refused)
+05h00: started compliment
+05h00: finished compliment (completed)
+05h00: compliment with G05 (accepted)
+05h22: started compliment
+05h22: finished compliment (completed)
+05h22: compliment with G02 (accepted)
+05h22: gossip approached by G03 (refused)
+05h45: started wander
+05h45: finished compliment (completed)
+05h45: insult approached by G01 (refused)
+05h45: gossip approached by G02 (accepted)
+05h45: gossip approached by G03 (refused)
+06h07: gossip approached by G03 (refused)
+06h07: gossip approached by G05 (accepted)
+06h30: started gossip
+06h30: finished wander (completed)
+06h30: gossip with G01 (refused)
+06h30: gossip approached by G01 (refused)
+06h30: gossip approached by G05 (accepted)
+06h52: started snub
+06h52: finished gossip (completed)
+06h52: insult with G01 (refused)
+06h52: insult approached by G04 (refused)
+06h52: compliment approached by G05 (refused)
+07h15: started snub
+07h15: finished snub (completed)
+07h15: insult with G03 (refused)
+07h37: started gossip
+07h37: finished snub (completed)
+07h37: gossip with G04 (refused)
+08h00: started snub
+08h00: finished gossip (completed)
+08h00: insult with G01 (refused)
+08h00: gossip approached by G01 (refused)
+08h00: insult approached by G03 (refused)
+08h00: insult approached by G04 (refused)
+08h00: gossip approached by G05 (accepted)
+08h22: started gossip
+08h22: finished snub (completed)
+08h22: gossip with G04 (refused)
+08h22: insult approached by G04 (refused)
+08h45: started snub
+08h45: finished gossip (completed)
+08h45: insult with G04 (accepted)
+08h45: insult approached by G01 (refused)
+08h45: insult approached by G04 (refused)
+08h45: gossip approached by G05 (accepted)
+09h07: started snub
+09h07: finished snub (completed)
+09h07: insult with G03 (refused)
+09h07: insult approached by G03 (refused)
+09h07: gossip approached by G04 (refused)
+09h30: started compliment
+09h30: finished snub (completed)
+09h30: compliment with G05 (accepted)
+09h52: started snub
+09h52: finished compliment (completed)
+09h52: insult with G01 (refused)
+09h52: gossip approached by G05 (accepted)
+10h15: started snub
+10h15: finished snub (completed)
+10h15: insult with G04 (refused)
+10h37: started gossip
+10h37: finished snub (completed)
+10h37: gossip with G01 (refused)
+10h37: gossip approached by G05 (accepted)
+11h00: started gossip
+11h00: finished gossip (completed)
+11h00: gossip with G04 (refused)
+11h22: started gossip
+11h22: finished gossip (completed)
+11h22: gossip with G04 (accepted)
+11h22: insult approached by G04 (refused)
+11h45: started snub
+11h45: finished gossip (completed)
+11h45: insult with G01 (refused)
+11h45: insult approached by G04 (refused)
+12h07: started gossip
+12h07: finished snub (completed)
+12h07: gossip with G05 (refused)
+12h07: gossip approached by G01 (refused)
+12h30: started gossip
+12h30: finished gossip (completed)
+12h30: gossip with G04 (refused)
+12h30: insult approached by G04 (refused)
+12h52: started compliment
+12h52: finished gossip (completed)
+12h52: compliment with G02 (accepted)
+13h15: started gossip
+13h15: finished compliment (completed)
+13h15: gossip with G05 (refused)
+13h37: started compliment
+13h37: finished gossip (completed)
+13h37: compliment with G02 (refused)
+13h37: insult approached by G03 (refused)
+13h37: gossip approached by G05 (refused)
+14h00: started compliment
+14h00: finished compliment (completed)
+14h00: compliment with G05 (accepted)
+14h22: started compliment
+14h22: finished compliment (completed)
+14h22: compliment with G02 (accepted)
+14h22: compliment approached by G02 (accepted)
+14h22: gossip approached by G03 (refused)
+14h22: gossip approached by G04 (refused)
+14h45: started snub
+14h45: finished compliment (completed)
+14h45: insult with G03 (refused)
+14h45: gossip approached by G01 (refused)
+14h45: compliment approached by G05 (accepted)
+15h07: started gossip
+15h07: finished snub (completed)
+15h07: gossip with G04 (refused)
+15h07: gossip approached by G02 (accepted)
+15h07: gossip approached by G03 (refused)
+15h07: gossip approached by G04 (refused)
+15h30: started snub
+15h30: finished gossip (completed)
+15h30: insult with G01 (refused)
+15h30: insult approached by G03 (refused)
+15h30: insult approached by G04 (refused)
+15h52: started compliment
+15h52: finished snub (completed)
+15h52: compliment with G02 (accepted)
+16h15: started snub
+16h15: finished compliment (completed)
+16h15: insult with G04 (refused)
+16h15: insult approached by G01 (refused)
+16h15: gossip approached by G03 (refused)
+16h37: started snub
+16h37: finished snub (completed)
+16h37: insult with G04 (refused)
+16h37: insult approached by G03 (refused)
+16h37: gossip approached by G04 (refused)
+17h00: started snub
+17h00: finished snub (completed)
+17h00: insult with G03 (refused)
+17h00: insult approached by G01 (refused)
+17h00: compliment approached by G02 (refused)
+17h22: started gossip
+17h22: finished snub (completed)
+17h22: gossip with G03 (refused)
+17h45: started gossip
+17h45: finished gossip (completed)
+17h45: gossip with G03 (refused)
+17h45: compliment approached by G05 (accepted)
+18h07: started compliment
+18h07: finished gossip (completed)
+18h07: compliment with G02 (accepted)
+18h07: insult approached by G03 (refused)
+18h07: insult approached by G04 (refused)
+18h30: started snub
+18h30: finished compliment (completed)
+18h30: insult with G03 (refused)
+18h30: gossip approached by G03 (refused)
+18h52: started snub
+18h52: finished snub (completed)
+18h52: insult with G03 (refused)
+19h15: started gossip
+19h15: finished snub (completed)
+19h15: gossip with G03 (refused)
+19h15: insult approached by G01 (refused)
+19h15: gossip approached by G05 (refused)
+19h37: started gossip
+19h37: finished gossip (completed)
+19h37: gossip with G05 (accepted)
+19h37: compliment approached by G02 (accepted)
+19h37: insult approached by G03 (refused)
+20h00: started compliment
+20h00: finished gossip (completed)
+20h00: compliment with G02 (accepted)
+20h00: compliment approached by G02 (accepted)
+20h22: started snub
+20h22: finished compliment (completed)
+20h22: insult with G04 (refused)
+20h45: started compliment
+20h45: finished snub (completed)
+20h45: compliment with G05 (accepted)
+21h07: started gossip
+21h07: finished compliment (completed)
+21h07: gossip with G05 (accepted)
+21h07: compliment approached by G02 (accepted)
+21h07: gossip approached by G03 (refused)
+21h30: started gossip
+21h30: finished gossip (completed)
+21h30: gossip with G03 (refused)
+21h30: insult approached by G01 (refused)
+21h30: gossip approached by G04 (refused)
+21h52: started gossip
+21h52: finished gossip (completed)
+21h52: gossip with G01 (refused)
+22h15: started snub
+22h15: finished gossip (completed)
+22h15: insult with G01 (refused)
+22h15: insult approached by G03 (refused)
+22h37: started compliment
+22h37: finished snub (completed)
+22h37: compliment with G05 (accepted)
+22h37: gossip approached by G01 (refused)
+23h00: started snub
+23h00: finished compliment (completed)
+23h00: insult with G04 (refused)
+23h00: compliment approached by G05 (accepted)
+23h22: started compliment
+23h22: finished snub (completed)
+23h22: compliment with G05 (accepted)
+23h22: gossip approached by G02 (accepted)
+23h22: gossip approached by G05 (refused)
+23h45: started snub
+23h45: finished compliment (completed)
+23h45: insult with G04 (refused)
+23h45: insult approached by G01 (refused)
+00h07: started gossip
+00h07: finished snub (completed)
+00h07: gossip with G04 (refused)
+00h07: compliment approached by G05 (refused)
+00h30: started gossip
+00h30: finished gossip (completed)
+00h30: gossip with G04 (refused)
+00h30: gossip approached by G02 (accepted)
+00h52: started gossip
+00h52: finished gossip (completed)
+00h52: gossip with G03 (refused)
+01h15: started gossip
+01h15: finished gossip (completed)
+01h15: gossip with G03 (refused)
+01h37: started gossip
+01h37: finished gossip (completed)
+01h37: gossip with G05 (accepted)
+01h37: gossip approached by G04 (refused)
+02h00: started compliment
+02h00: finished gossip (completed)
+02h00: compliment with G05 (accepted)
+02h22: started snub
+02h22: finished compliment (completed)
+02h22: insult with G01 (refused)
+02h45: started compliment
+02h45: finished snub (completed)
+02h45: compliment with G05 (accepted)
+02h45: gossip approached by G01 (refused)
+03h07: started compliment
+03h07: finished compliment (completed)
+03h07: compliment with G02 (accepted)
+03h30: started gossip
+03h30: finished compliment (completed)
+03h30: gossip with G02 (refused)
+03h52: started gossip
+03h52: finished gossip (completed)
+03h52: gossip with G03 (refused)
+03h52: gossip approached by G03 (refused)
+04h15: started compliment
+04h15: finished gossip (completed)
+04h15: compliment with G02 (refused)
+04h15: insult approached by G01 (refused)
+04h15: insult approached by G04 (refused)
+04h37: started compliment
+04h37: finished compliment (completed)
+04h37: compliment with G02 (accepted)
+04h37: gossip approached by G02 (accepted)
+05h00: started compliment
+05h00: finished compliment (completed)
+05h00: compliment with G05 (accepted)
+05h00: compliment approached by G02 (refused)
+05h22: started gossip
+05h22: finished compliment (completed)
+05h22: gossip with G01 (refused)
+05h45: started snub
+05h45: finished gossip (completed)
+05h45: insult with G01 (refused)
+06h07: started compliment
+06h07: finished snub (completed)
+06h07: compliment with G05 (refused)
+06h07: insult approached by G04 (refused)
+06h30: started gossip
+06h30: finished compliment (completed)
+06h30: gossip with G01 (refused)
+06h52: started snub
+06h52: finished gossip (completed)
+06h52: insult with G03 (refused)
+06h52: compliment approached by G02 (accepted)
+06h52: gossip approached by G05 (refused)
+07h15: started gossip
+07h15: finished snub (completed)
+07h15: gossip with G05 (accepted)
+07h15: insult approached by G01 (refused)
+07h15: gossip approached by G05 (accepted)
+07h37: started snub
+07h37: finished gossip (completed)
+07h37: insult with G03 (refused)
+07h37: compliment approached by G02 (accepted)
+08h00: started gossip
+08h00: finished snub (completed)
+08h00: gossip with G01 (refused)
+08h00: gossip approached by G01 (refused)
+08h00: insult approached by G04 (refused)
+08h22: started gossip
+08h22: finished gossip (completed)
+08h22: gossip with G04 (refused)
+08h45: started snub
+08h45: finished gossip (completed)
+08h45: insult with G03 (refused)
+08h45: gossip approached by G02 (accepted)
+09h07: started gossip
+09h07: finished snub (completed)
+09h07: gossip with G05 (refused)
+09h07: compliment approached by G02 (accepted)
+09h07: gossip approached by G03 (refused)
+09h07: gossip approached by G04 (refused)
+09h30: started snub
+09h30: finished gossip (completed)
+09h30: insult with G03 (refused)
+09h30: insult approached by G01 (refused)
+09h30: compliment approached by G05 (accepted)
+09h52: started snub
+09h52: finished snub (completed)
+09h52: insult with G04 (refused)
+10h15: started snub
+10h15: finished snub (completed)
+10h15: insult with G03 (refused)
+10h37: started snub
+10h37: finished snub (completed)
+10h37: insult with G04 (refused)
+10h37: insult approached by G03 (refused)
+10h37: gossip approached by G05 (accepted)
+11h00: started snub
+11h00: finished snub (completed)
+11h00: insult with G03 (accepted)
+11h22: started snub
+11h22: finished snub (completed)
+11h22: insult with G01 (refused)
+11h45: started snub
+11h45: finished snub (completed)
+11h45: insult with G01 (refused)
+11h45: compliment approached by G02 (accepted)
+12h07: started gossip
+12h07: finished snub (completed)
+12h07: gossip with G04 (refused)
+12h30: started gossip
+12h30: finished gossip (completed)
+12h30: gossip with G02 (accepted)
+12h52: started gossip
+12h52: finished gossip (completed)
+12h52: gossip with G03 (refused)
+12h52: compliment approached by G02 (accepted)
+13h15: started gossip
+13h15: finished gossip (completed)
+13h15: gossip with G04 (refused)
+13h37: started gossip
+13h37: finished gossip (completed)
+13h37: gossip with G04 (refused)
+14h00: started snub
+14h00: finished gossip (completed)
+14h00: insult with G04 (refused)
+14h22: started gossip
+14h22: finished snub (completed)
+14h22: gossip with G01 (refused)
+14h22: gossip approached by G02 (accepted)
+14h45: started gossip
+14h45: finished gossip (completed)
+14h45: gossip with G02 (accepted)
+14h45: insult approached by G01 (refused)
+14h45: compliment approached by G02 (refused)
+15h07: started gossip
+15h07: finished gossip (completed)
+15h07: gossip with G05 (refused)
+15h07: insult approached by G03 (refused)
+15h30: started snub
+15h30: finished gossip (completed)
+15h30: insult with G01 (refused)
+15h52: started snub
+15h52: finished snub (completed)
+15h52: insult with G01 (refused)
+16h15: started gossip
+16h15: finished snub (completed)
+16h15: gossip with G05 (refused)
+16h15: gossip approached by G01 (refused)
+16h15: insult approached by G04 (refused)
+16h37: started gossip
+16h37: finished gossip (completed)
+16h37: gossip with G04 (refused)
+17h00: started gossip
+17h00: finished gossip (completed)
+17h00: gossip with G04 (accepted)
+17h00: gossip approached by G05 (accepted)
+17h22: started gossip
+17h22: finished gossip (completed)
+17h22: gossip with G03 (refused)
+17h22: gossip approached by G01 (refused)
+17h45: started gossip
+17h45: finished gossip (completed)
+17h45: gossip with G04 (accepted)
+18h07: started compliment
+18h07: finished gossip (completed)
+18h07: compliment with G05 (accepted)
+18h30: started gossip
+18h30: finished compliment (completed)
+18h30: gossip with G02 (refused)
+18h30: gossip approached by G01 (refused)
+18h52: started snub
+18h52: finished gossip (completed)
+18h52: insult with G03 (refused)
+19h15: started gossip
+19h15: finished snub (completed)
+19h15: gossip with G02 (accepted)
+19h37: started gossip
+19h37: finished gossip (completed)
+19h37: gossip with G04 (accepted)
+19h37: gossip approached by G05 (refused)
+20h00: started gossip
+20h00: finished gossip (completed)
+20h00: gossip with G01 (refused)
+20h22: started compliment
+20h22: finished gossip (completed)
+20h22: compliment with G05 (accepted)
+20h22: compliment approached by G02 (accepted)
+20h22: gossip approached by G05 (accepted)
+20h45: started compliment
+20h45: finished compliment (completed)
+20h45: compliment with G05 (accepted)
+21h07: started gossip
+21h07: finished compliment (completed)
+21h07: gossip with G05 (refused)
+21h30: started snub
+21h30: finished gossip (completed)
+21h30: insult with G01 (accepted)
+21h52: started snub
+21h52: finished snub (completed)
+21h52: insult with G03 (refused)
+21h52: insult approached by G03 (refused)
+22h15: started snub
+22h15: finished snub (completed)
+22h15: insult with G03 (refused)
+22h15: gossip approached by G03 (refused)
+22h15: gossip approached by G04 (refused)
+22h15: gossip approached by G05 (accepted)
+22h37: started snub
+22h37: finished snub (completed)
+22h37: insult with G04 (refused)
+23h00: started snub
+23h00: finished snub (completed)
+23h00: insult with G03 (refused)
+23h00: insult approached by G01 (refused)
+23h00: insult approached by G03 (refused)
+23h00: gossip approached by G05 (accepted)
+23h22: started snub
+23h22: finished snub (completed)
+23h22: insult with G04 (refused)
+23h22: gossip approached by G02 (refused)
+23h22: compliment approached by G05 (accepted)
+23h45: started gossip
+23h45: finished snub (completed)
+23h45: gossip with G05 (refused)
+00h07: started gossip
+00h07: finished gossip (completed)
+00h07: gossip with G01 (refused)
+00h30: started gossip
+00h30: finished gossip (completed)
+00h30: gossip with G03 (refused)
+00h30: compliment approached by G02 (accepted)
+00h52: started compliment
+00h52: finished gossip (completed)
+00h52: compliment with G02 (refused)
+00h52: insult approached by G01 (refused)
+00h52: compliment approached by G05 (accepted)
+01h15: started compliment
+01h15: finished compliment (completed)
+01h15: compliment with G02 (refused)
+01h15: insult approached by G01 (refused)
+01h15: insult approached by G03 (refused)
+01h15: compliment approached by G05 (accepted)
+01h37: started snub
+01h37: finished compliment (completed)
+01h37: insult with G04 (refused)
+01h37: gossip approached by G02 (accepted)
+02h00: started snub
+02h00: finished snub (completed)
+02h00: insult with G01 (refused)
+02h22: started snub
+02h22: finished snub (completed)
+02h22: insult with G03 (refused)
+02h45: started gossip
+02h45: finished snub (completed)
+02h45: gossip with G03 (refused)
+02h45: insult approached by G01 (accepted)
+03h07: started snub
+03h07: finished gossip (completed)
+03h07: insult with G03 (refused)
+03h30: started snub
+03h30: finished snub (completed)
+03h30: insult with G03 (refused)
+03h30: insult approached by G04 (refused)
+03h52: started compliment
+03h52: finished snub (completed)
+03h52: compliment with G05 (accepted)
+03h52: gossip approached by G02 (accepted)
+03h52: insult approached by G03 (refused)
+04h15: started gossip
+04h15: finished compliment (completed)
+04h15: gossip with G05 (refused)
+04h15: compliment approached by G05 (accepted)
+04h37: started snub
+04h37: finished gossip (completed)
+04h37: insult with G04 (refused)
+05h00: started snub
+05h00: finished snub (completed)
+05h00: insult with G04 (refused)
+05h22: started compliment
+05h22: finished snub (completed)
+05h22: compliment with G05 (accepted)
+05h22: insult approached by G01 (refused)
+05h22: compliment approached by G02 (accepted)
+05h45: started snub
+05h45: finished compliment (completed)
+05h45: insult with G04 (refused)
+05h45: insult approached by G03 (refused)
+06h07: started compliment
+06h07: finished snub (completed)
+06h07: compliment with G05 (accepted)
+06h07: insult approached by G04 (refused)
+06h07: gossip approached by G05 (accepted)
+06h30: started snub
+06h30: finished compliment (completed)
+06h30: insult with G03 (refused)
+06h30: insult approached by G04 (accepted)
+06h52: started compliment
+06h52: finished snub (completed)
+06h52: compliment with G02 (accepted)
+07h15: started compliment
+07h15: finished compliment (completed)
+07h15: compliment with G02 (refused)
+07h15: insult approached by G03 (refused)
+07h37: started gossip
+07h37: finished compliment (completed)
+07h37: gossip with G01 (accepted)
+07h37: compliment approached by G02 (accepted)
+07h37: compliment approached by G05 (accepted)
+08h00: started compliment
+08h00: finished gossip (completed)
+08h00: compliment with G05 (refused)
+08h00: compliment approached by G02 (accepted)
+08h22: started snub
+08h22: finished compliment (completed)
+08h22: insult with G04 (refused)
+08h45: started snub
+08h45: finished snub (completed)
+08h45: insult with G01 (refused)
+08h45: gossip approached by G03 (refused)
+09h07: started snub
+09h07: finished snub (completed)
+09h07: insult with G03 (refused)
+09h07: insult approached by G03 (refused)
+09h07: gossip approached by G05 (accepted)
+09h30: started gossip
+09h30: finished snub (completed)
+09h30: gossip with G01 (refused)
+09h52: started snub
+09h52: finished gossip (completed)
+09h52: insult with G03 (refused)
+10h15: started compliment
+10h15: finished snub (completed)
+10h15: compliment with G05 (accepted)
+10h15: compliment approached by G02 (refused)
+10h15: insult approached by G04 (accepted)
+10h37: started gossip
+10h37: finished compliment (completed)
+10h37: gossip with G02 (accepted)
+11h00: started snub
+11h00: finished gossip (completed)
+11h00: insult with G04 (accepted)
+11h00: insult approached by G01 (refused)
+11h00: gossip approached by G02 (accepted)
+11h22: started gossip
+11h22: finished snub (completed)
+11h22: gossip with G03 (refused)
+11h22: insult approached by G03 (refused)
+11h22: compliment approached by G05 (accepted)
+11h45: started snub
+11h45: finished gossip (completed)
+11h45: insult with G04 (refused)
+11h45: compliment approached by G05 (refused)
+12h07: started gossip
+12h07: finished snub (completed)
+12h07: gossip with G02 (refused)
+12h07: gossip approached by G02 (accepted)
+12h07: gossip approached by G04 (refused)
+12h30: started snub
+12h30: finished gossip (completed)
+12h30: insult with G04 (refused)
+12h30: compliment approached by G05 (refused)
+12h52: started compliment
+12h52: finished snub (completed)
+12h52: compliment with G02 (accepted)
+13h15: started snub
+13h15: finished compliment (completed)
+13h15: insult with G01 (refused)
+13h15: gossip approached by G03 (refused)
+13h37: started snub
+13h37: finished snub (completed)
+13h37: insult with G01 (refused)
+14h00: started snub
+14h00: finished snub (completed)
+14h00: insult with G03 (refused)
+14h00: gossip approached by G01 (refused)
+14h22: started gossip
+14h22: finished snub (completed)
+14h22: gossip with G04 (refused)
+14h22: insult approached by G03 (refused)
+14h45: started snub
+14h45: finished gossip (completed)
+14h45: insult with G01 (refused)
+15h07: started snub
+15h07: finished snub (completed)
+15h07: insult with G03 (refused)
+15h07: gossip approached by G02 (refused)
+15h30: started snub
+15h30: finished snub (completed)
+15h30: insult with G04 (refused)
+15h30: gossip approached by G01 (refused)
+15h30: compliment approached by G02 (accepted)
+15h30: insult approached by G04 (refused)
+15h52: started gossip
+15h52: finished snub (completed)
+15h52: gossip with G02 (accepted)
+16h15: started gossip
+16h15: finished gossip (completed)
+16h15: gossip with G04 (refused)
+16h37: started gossip
+16h37: finished gossip (completed)
+16h37: gossip with G02 (accepted)
+16h37: insult approached by G01 (refused)
+17h00: started compliment
+17h00: finished gossip (completed)
+17h00: compliment with G05 (refused)
+17h00: insult approached by G01 (refused)
+17h22: started snub
+17h22: finished compliment (completed)
+17h22: insult with G03 (accepted)
+17h22: chat approached by G05 (accepted)
+17h45: started compliment
+17h45: finished snub (completed)
+17h45: compliment with G02 (accepted)
+17h45: insult approached by G03 (refused)
+17h45: insult approached by G04 (refused)
+18h07: started compliment
+18h07: finished compliment (completed)
+18h07: compliment with G02 (refused)
+18h07: insult approached by G01 (refused)
+18h07: compliment approached by G05 (accepted)
+18h30: started wander
+18h30: finished compliment (completed)
+18h30: insult approached by G04 (refused)
+18h52: gossip approached by G03 (refused)
+19h15: started snub
+19h15: finished wander (completed)
+19h15: insult with G04 (refused)
+19h37: started gossip
+19h37: finished snub (completed)
+19h37: gossip with G01 (refused)
+20h00: started snub
+20h00: finished gossip (completed)
+20h00: insult with G01 (refused)
+20h00: insult approached by G04 (refused)
+20h22: started snub
+20h22: finished snub (completed)
+20h22: insult with G03 (refused)
+20h22: gossip approached by G01 (refused)
+20h22: insult approached by G04 (refused)
+20h22: compliment approached by G05 (refused)
+20h45: started compliment
+20h45: finished snub (completed)
+20h45: compliment with G02 (accepted)
+20h45: insult approached by G04 (refused)
+20h45: compliment approached by G05 (accepted)
+21h07: started gossip
+21h07: finished compliment (completed)
+21h07: gossip with G01 (refused)
+21h07: compliment approached by G05 (refused)
+21h30: started snub
+21h30: finished gossip (completed)
+21h30: insult with G01 (refused)
+21h30: gossip approached by G03 (refused)
+21h52: started compliment
+21h52: finished snub (completed)
+21h52: compliment with G05 (refused)
+22h15: started compliment
+22h15: finished compliment (completed)
+22h15: compliment with G02 (accepted)
+22h15: gossip approached by G05 (accepted)
+22h37: started snub
+22h37: finished compliment (completed)
+22h37: insult with G01 (refused)
+22h37: gossip approached by G02 (accepted)
+22h37: insult approached by G03 (refused)
+23h00: started snub
+23h00: finished snub (completed)
+23h00: insult with G01 (refused)
+23h00: insult approached by G04 (refused)
+23h22: started gossip
+23h22: finished snub (completed)
+23h22: gossip with G04 (refused)
+23h45: started snub
+23h45: finished gossip (completed)
+23h45: insult with G04 (refused)
+23h45: insult approached by G03 (refused)
+23h45: compliment approached by G05 (accepted)
+00h07: started gossip
+00h07: finished snub (completed)
+00h07: gossip with G02 (accepted)
+00h07: compliment approached by G02 (accepted)
+00h07: gossip approached by G05 (accepted)
+00h30: started compliment
+00h30: finished gossip (completed)
+00h30: compliment with G05 (accepted)
+00h52: started compliment
+00h52: finished compliment (completed)
+00h52: compliment with G02 (refused)
+00h52: insult approached by G01 (refused)
+01h15: started snub
+01h15: finished compliment (completed)
+01h15: insult with G04 (refused)
+01h15: gossip approached by G05 (accepted)
+01h37: started snub
+01h37: finished snub (completed)
+01h37: insult with G04 (refused)
+02h00: started gossip
+02h00: finished snub (completed)
+02h00: gossip with G02 (refused)
+02h22: started gossip
+02h22: finished gossip (completed)
+02h22: gossip with G02 (accepted)
+02h45: started gossip
+02h45: finished gossip (completed)
+02h45: gossip with G04 (refused)
+02h45: insult approached by G04 (refused)
+03h07: started gossip
+03h07: finished gossip (completed)
+03h07: gossip with G03 (refused)
+03h07: gossip approached by G03 (refused)
+03h30: started gossip
+03h30: finished gossip (completed)
+03h30: gossip with G03 (refused)
+03h30: insult approached by G04 (refused)
+03h52: started gossip
+03h52: finished gossip (completed)
+03h52: gossip with G04 (refused)
+03h52: insult approached by G03 (accepted)
+04h15: started snub
+04h15: finished gossip (completed)
+04h15: insult with G04 (refused)
+04h15: insult approached by G03 (refused)
+04h37: started gossip
+04h37: finished snub (completed)
+04h37: gossip with G04 (accepted)
+05h00: started gossip
+05h00: finished gossip (completed)
+05h00: gossip with G04 (refused)
+05h00: insult approached by G01 (refused)
+05h22: started gossip
+05h22: finished gossip (completed)
+05h22: gossip with G01 (refused)
+05h45: started snub
+05h45: finished gossip (completed)
+05h45: insult with G04 (refused)
+06h07: started compliment
+06h07: finished snub (completed)
+06h07: compliment with G02 (refused)
+06h07: insult approached by G01 (refused)
+06h07: gossip approached by G03 (refused)
+06h30: started compliment
+06h30: finished compliment (completed)
+06h30: compliment with G02 (accepted)
+06h30: gossip approached by G01 (refused)
+06h52: started snub
+06h52: finished compliment (completed)
+06h52: insult with G01 (refused)
+07h15: started snub
+07h15: finished snub (completed)
+07h15: insult with G04 (refused)
+07h37: started gossip
+07h37: finished snub (completed)
+07h37: gossip with G01 (refused)
+08h00: started snub
+08h00: finished gossip (completed)
+08h00: insult with G04 (refused)
+08h00: insult approached by G01 (refused)
+08h22: started compliment
+08h22: finished snub (completed)
+08h22: compliment with G02 (refused)
+08h45: started snub
+08h45: finished compliment (completed)
+08h45: insult with G03 (refused)
+08h45: gossip approached by G02 (refused)
+09h07: started snub
+09h07: finished snub (completed)
+09h07: insult with G04 (refused)
+09h30: started snub
+09h30: finished snub (completed)
+09h30: insult with G03 (refused)
+09h30: compliment approached by G05 (accepted)
+09h52: started chat
+09h52: finished snub (completed)
+09h52: chat with G02 (accepted)
+10h15: started gossip
+10h15: finished chat (completed)
+10h15: gossip with G02 (accepted)
+10h37: started gossip
+10h37: finished gossip (completed)
+10h37: gossip with G04 (refused)
+10h37: gossip approached by G05 (accepted)
+11h00: started gossip
+11h00: finished gossip (completed)
+11h00: gossip with G04 (refused)
+11h22: started snub
+11h22: finished gossip (completed)
+11h22: insult with G03 (refused)
+11h45: started gossip
+11h45: finished snub (completed)
+11h45: gossip with G04 (refused)
+11h45: gossip approached by G01 (refused)
+12h07: started snub
+12h07: finished gossip (completed)
+12h07: insult with G01 (accepted)
+12h07: insult approached by G01 (refused)
+12h07: gossip approached by G03 (refused)
+12h07: compliment approached by G05 (accepted)
+12h30: started compliment
+12h30: finished snub (completed)
+12h30: compliment with G02 (refused)
+12h30: insult approached by G01 (refused)
+12h52: started snub
+12h52: finished compliment (completed)
+12h52: insult with G03 (refused)
+13h15: started gossip
+13h15: finished snub (completed)
+13h15: gossip with G04 (refused)
+13h15: insult approached by G01 (refused)
+13h15: compliment approached by G02 (accepted)
+13h15: insult approached by G03 (refused)
+13h37: started snub
+13h37: finished gossip (completed)
+13h37: insult with G01 (refused)
+13h37: gossip approached by G05 (refused)
+14h00: started gossip
+14h00: finished snub (completed)
+14h00: gossip with G02 (refused)
+14h00: gossip approached by G01 (refused)
+14h22: started gossip
+14h22: finished gossip (completed)
+14h22: gossip with G01 (refused)
+14h45: started gossip
+14h45: finished gossip (completed)
+14h45: gossip with G03 (refused)
+14h45: insult approached by G01 (refused)
+15h07: started snub
+15h07: finished gossip (completed)
+15h07: insult with G04 (refused)
+15h07: compliment approached by G05 (refused)
+15h30: started gossip
+15h30: finished snub (completed)
+15h30: gossip with G01 (refused)
+15h30: insult approached by G01 (refused)
+15h52: started gossip
+15h52: finished gossip (completed)
+15h52: gossip with G01 (refused)
+15h52: compliment approached by G02 (accepted)
+16h15: started gossip
+16h15: finished gossip (completed)
+16h15: gossip with G01 (refused)
+16h15: insult approached by G03 (refused)
+16h37: started compliment
+16h37: finished gossip (completed)
+16h37: compliment with G02 (refused)
+17h00: started gossip
+17h00: finished compliment (completed)
+17h00: gossip with G05 (accepted)
+17h00: compliment approached by G05 (accepted)
+17h22: started gossip
+17h22: finished gossip (completed)
+17h22: gossip with G04 (refused)
+17h22: insult approached by G01 (refused)
+17h22: gossip approached by G03 (refused)
+17h22: gossip approached by G05 (accepted)
+17h45: started snub
+17h45: finished gossip (completed)
+17h45: insult with G03 (refused)
+17h45: insult approached by G03 (refused)
+18h07: started gossip
+18h07: finished snub (completed)
+18h07: gossip with G02 (accepted)
+18h07: insult approached by G04 (refused)
+18h30: started gossip
+18h30: finished gossip (completed)
+18h30: gossip with G02 (refused)
+18h30: insult approached by G03 (refused)
+18h52: started snub
+18h52: finished gossip (completed)
+18h52: insult with G04 (refused)
+19h15: started gossip
+19h15: finished snub (completed)
+19h15: gossip with G02 (accepted)
+19h15: insult approached by G04 (refused)
+19h37: started snub
+19h37: finished gossip (completed)
+19h37: insult with G01 (refused)
+19h37: compliment approached by G02 (accepted)
+20h00: started compliment
+20h00: finished snub (completed)
+20h00: compliment with G02 (accepted)
+20h00: insult approached by G03 (refused)
+20h22: started compliment
+20h22: finished compliment (completed)
+20h22: compliment with G05 (accepted)
+20h22: compliment approached by G05 (accepted)
+20h45: started gossip
+20h45: finished compliment (completed)
+20h45: gossip with G03 (refused)
+20h45: insult approached by G04 (refused)
+20h45: gossip approached by G05 (refused)
+21h07: started gossip
+21h07: finished gossip (completed)
+21h07: gossip with G05 (accepted)
+21h07: gossip approached by G05 (accepted)
+21h30: started gossip
+21h30: finished gossip (completed)
+21h30: gossip with G02 (refused)
+21h30: compliment approached by G02 (refused)
+21h52: started compliment
+21h52: finished gossip (completed)
+21h52: compliment with G02 (accepted)
+22h15: started snub
+22h15: finished compliment (completed)
+22h15: insult with G03 (refused)
+22h15: compliment approached by G02 (accepted)
+22h37: started snub
+22h37: finished snub (completed)
+22h37: insult with G04 (refused)
+22h37: insult approached by G04 (refused)
+23h00: started snub
+23h00: finished snub (completed)
+23h00: insult with G03 (refused)
+23h00: gossip approached by G01 (refused)
+23h00: insult approached by G04 (refused)
+23h22: started gossip
+23h22: finished snub (completed)
+23h22: gossip with G05 (accepted)
+23h45: started snub
+23h45: finished gossip (completed)
+23h45: insult with G04 (refused)
+23h45: insult approached by G01 (refused)
+23h45: gossip approached by G02 (accepted)
+00h07: started gossip
+00h07: finished snub (completed)
+00h07: gossip with G03 (refused)
+00h07: gossip approached by G01 (refused)
+00h07: gossip approached by G03 (accepted)
+00h30: started compliment
+00h30: finished gossip (completed)
+00h30: compliment with G05 (accepted)
+00h52: started compliment
+00h52: finished compliment (completed)
+00h52: compliment with G05 (accepted)
+00h52: gossip approached by G01 (refused)
+01h15: started snub
+01h15: finished compliment (completed)
+01h15: insult with G04 (refused)
+01h15: gossip approached by G04 (refused)
+01h37: started snub
+01h37: finished snub (completed)
+01h37: insult with G03 (refused)
+01h37: gossip approached by G04 (refused)
+02h00: started compliment
+02h00: finished snub (completed)
+02h00: compliment with G02 (accepted)
+02h00: gossip approached by G05 (accepted)
+02h22: started compliment
+02h22: finished compliment (completed)
+02h22: compliment with G02 (accepted)
+02h22: compliment approached by G02 (refused)
+02h45: started snub
+02h45: finished compliment (completed)
+02h45: insult with G01 (refused)
+02h45: compliment approached by G05 (accepted)
+03h07: started gossip
+03h07: finished snub (completed)
+03h07: gossip with G02 (refused)
+03h30: started snub
+03h30: finished gossip (completed)
+03h30: insult with G03 (refused)
+03h30: gossip approached by G01 (refused)
+03h30: insult approached by G03 (refused)
+03h52: started snub
+03h52: finished snub (completed)
+03h52: insult with G03 (refused)
+03h52: insult approached by G01 (refused)
+04h15: started gossip
+04h15: finished snub (completed)
+04h15: gossip with G04 (refused)
+04h15: insult approached by G04 (refused)
+04h37: started snub
+04h37: finished gossip (completed)
+04h37: insult with G01 (refused)
+04h37: insult approached by G04 (accepted)
+05h00: started snub
+05h00: finished snub (completed)
+05h00: insult with G04 (refused)
+05h00: insult approached by G01 (refused)
+05h00: insult approached by G04 (refused)
+05h00: compliment approached by G05 (accepted)
+05h22: started snub
+05h22: finished snub (completed)
+05h22: insult with G01 (refused)
+05h22: insult approached by G03 (refused)
+05h22: compliment approached by G05 (accepted)
+05h45: started snub
+05h45: finished snub (completed)
+05h45: insult with G03 (refused)
+05h45: compliment approached by G05 (accepted)
+06h07: started snub
+06h07: finished snub (completed)
+06h07: insult with G01 (refused)
+06h07: insult approached by G04 (refused)
+06h30: started compliment
+06h30: finished snub (completed)
+06h30: compliment with G02 (accepted)
+06h30: insult approached by G01 (refused)
+06h30: gossip approached by G03 (refused)
+06h30: gossip approached by G04 (refused)
+06h52: started snub
+06h52: finished compliment (completed)
+06h52: insult with G01 (refused)
+06h52: gossip approached by G02 (accepted)
+07h15: started gossip
+07h15: finished snub (completed)
+07h15: gossip with G01 (refused)
+07h15: compliment approached by G02 (refused)
+07h37: started gossip
+07h37: finished gossip (completed)
+07h37: gossip with G05 (accepted)
+08h00: started compliment
+08h00: finished gossip (completed)
+08h00: compliment with G05 (accepted)
+08h22: started snub
+08h22: finished compliment (completed)
+08h22: insult with G04 (refused)
+08h22: gossip approached by G04 (refused)
+08h45: started compliment
+08h45: finished snub (completed)
+08h45: compliment with G05 (accepted)
+08h45: gossip approached by G01 (accepted)
+09h07: started compliment
+09h07: finished compliment (completed)
+09h07: compliment with G05 (accepted)
+09h30: started snub
+09h30: finished compliment (completed)
+09h30: insult with G03 (refused)
+09h30: insult approached by G03 (refused)
+09h52: started snub
+09h52: finished snub (completed)
+09h52: insult with G03 (refused)
+10h15: started snub
+10h15: finished snub (completed)
+10h15: insult with G04 (refused)
+10h37: started gossip
+10h37: finished snub (completed)
+10h37: gossip with G05 (accepted)
+11h00: started gossip
+11h00: finished gossip (completed)
+11h00: gossip with G01 (refused)
+11h22: started snub
+11h22: finished gossip (completed)
+11h22: insult with G04 (refused)
+11h22: gossip approached by G02 (accepted)
+11h22: compliment approached by G05 (refused)
+11h45: started snub
+11h45: finished snub (completed)
+11h45: insult with G04 (refused)
+11h45: gossip approached by G01 (refused)
+12h07: started snub
+12h07: finished snub (completed)
+12h07: insult with G03 (refused)
+12h07: insult approached by G04 (refused)
+12h30: started compliment
+12h30: finished snub (completed)
+12h30: compliment with G05 (accepted)
+12h52: started gossip
+12h52: finished compliment (completed)
+12h52: gossip with G03 (refused)
+13h15: started gossip
+13h15: finished gossip (completed)
+13h15: gossip with G03 (refused)
+13h37: started compliment
+13h37: finished gossip (completed)
+13h37: compliment with G02 (accepted)
+14h00: started gossip
+14h00: finished compliment (completed)
+14h00: gossip with G05 (refused)
+14h00: compliment approached by G02 (accepted)
+14h00: insult approached by G03 (refused)
+14h00: insult approached by G04 (refused)
+14h22: started snub
+14h22: finished gossip (completed)
+14h22: insult with G01 (refused)
+14h22: gossip approached by G04 (refused)
+14h45: started snub
+14h45: finished snub (completed)
+14h45: insult with G01 (refused)
+14h45: insult approached by G01 (refused)
+15h07: started snub
+15h07: finished snub (completed)
+15h07: insult with G04 (refused)
+15h30: started snub
+15h30: finished snub (completed)
+15h30: insult with G04 (refused)
+15h30: compliment approached by G02 (refused)
+15h52: started gossip
+15h52: finished snub (completed)
+15h52: gossip with G05 (accepted)
+15h52: insult approached by G04 (refused)
+16h15: started gossip
+16h15: finished gossip (completed)
+16h15: gossip with G03 (refused)
+16h15: compliment approached by G02 (accepted)
+16h37: started gossip
+16h37: finished gossip (completed)
+16h37: gossip with G01 (refused)
+16h37: gossip approached by G01 (refused)
+16h37: compliment approached by G02 (accepted)
+16h37: gossip approached by G03 (refused)
+17h00: started compliment
+17h00: finished gossip (completed)
+17h00: compliment with G05 (accepted)
+17h00: compliment approached by G05 (refused)
+17h22: started snub
+17h22: finished compliment (completed)
+17h22: insult with G04 (refused)
+17h22: insult approached by G04 (refused)
+17h45: started snub
+17h45: finished snub (completed)
+17h45: insult with G03 (refused)
+17h45: compliment approached by G02 (accepted)
+17h45: insult approached by G04 (refused)
+18h07: started snub
+18h07: finished snub (completed)
+18h07: insult with G03 (refused)
+18h07: gossip approached by G05 (accepted)
+18h30: started snub
+18h30: finished snub (completed)
+18h30: insult with G01 (refused)
+18h30: gossip approached by G02 (accepted)
+18h30: gossip approached by G03 (refused)
+18h52: started snub
+18h52: finished snub (completed)
+18h52: insult with G03 (refused)
+18h52: insult approached by G04 (refused)
+19h15: started compliment
+19h15: finished snub (completed)
+19h15: compliment with G02 (refused)
+19h37: started snub
+19h37: finished compliment (completed)
+19h37: insult with G01 (accepted)
+20h00: started gossip
+20h00: finished snub (completed)
+20h00: gossip with G02 (accepted)
+20h00: compliment approached by G05 (accepted)
+20h22: started snub
+20h22: finished gossip (completed)
+20h22: insult with G01 (refused)
+20h22: insult approached by G01 (refused)
+20h22: compliment approached by G02 (accepted)
+20h45: started compliment
+20h45: finished snub (completed)
+20h45: compliment with G02 (accepted)
+20h45: gossip approached by G04 (refused)
+21h07: started compliment
+21h07: finished compliment (completed)
+21h07: compliment with G02 (refused)
+21h30: started gossip
+21h30: finished compliment (completed)
+21h30: gossip with G01 (refused)
+21h52: started gossip
+21h52: finished gossip (completed)
+21h52: gossip with G03 (refused)
+21h52: insult approached by G01 (refused)
+21h52: compliment approached by G02 (refused)
+22h15: started gossip
+22h15: finished gossip (completed)
+22h15: gossip with G04 (refused)
+22h15: insult approached by G04 (refused)
+22h37: started gossip
+22h37: finished gossip (completed)
+22h37: gossip with G03 (refused)
+23h00: started snub
+23h00: finished gossip (completed)
+23h00: insult with G04 (refused)
+23h00: gossip approached by G05 (accepted)
+23h22: started compliment
+23h22: finished snub (completed)
+23h22: compliment with G02 (accepted)
+23h22: gossip approached by G01 (refused)
+23h45: started gossip
+23h45: finished compliment (completed)
+23h45: gossip with G04 (refused)
+23h45: compliment approached by G05 (accepted)
+00h07: started snub
+00h07: finished gossip (completed)
+00h07: insult with G01 (refused)
+00h07: compliment approached by G02 (accepted)
+00h07: insult approached by G04 (refused)
+00h30: started snub
+00h30: finished snub (completed)
+00h30: insult with G03 (refused)
+00h52: started compliment
+00h52: finished snub (completed)
+00h52: compliment with G05 (accepted)
+01h15: started compliment
+01h15: finished compliment (completed)
+01h15: compliment with G05 (refused)
+01h37: started gossip
+01h37: finished compliment (completed)
+01h37: gossip with G01 (refused)
+01h37: insult approached by G04 (refused)
+02h00: started snub
+02h00: finished gossip (completed)
+02h00: insult with G04 (refused)
+02h00: insult approached by G01 (refused)
+02h00: insult approached by G03 (refused)
+02h22: started snub
+02h22: finished snub (completed)
+02h22: insult with G01 (refused)
+02h22: gossip approached by G05 (accepted)
+02h45: started gossip
+02h45: finished snub (completed)
+02h45: gossip with G03 (refused)
+02h45: gossip approached by G02 (accepted)
+03h07: started gossip
+03h07: finished gossip (completed)
+03h07: gossip with G03 (refused)
+03h07: insult approached by G03 (refused)
+03h07: compliment approached by G05 (accepted)
+03h30: started gossip
+03h30: finished gossip (completed)
+03h30: gossip with G05 (refused)
+03h30: insult approached by G04 (refused)
+03h52: started gossip
+03h52: finished gossip (completed)
+03h52: gossip with G03 (refused)
+03h52: gossip approached by G05 (accepted)
+04h15: started snub
+04h15: finished gossip (completed)
+04h15: insult with G04 (refused)
+04h15: compliment approached by G02 (accepted)
+04h37: started gossip
+04h37: finished snub (completed)
+04h37: gossip with G04 (refused)
+04h37: insult approached by G01 (refused)
+04h37: insult approached by G03 (refused)
+05h00: started snub
+05h00: finished gossip (completed)
+05h00: insult with G04 (refused)
+05h00: compliment approached by G05 (refused)
+05h22: started compliment
+05h22: finished snub (completed)
+05h22: compliment with G02 (accepted)
+05h45: started gossip
+05h45: finished compliment (completed)
+05h45: gossip with G05 (accepted)
+05h45: gossip approached by G04 (refused)
+05h45: gossip approached by G05 (refused)
+06h07: started gossip
+06h07: finished gossip (completed)
+06h07: gossip with G01 (refused)
+06h07: gossip approached by G04 (refused)
+06h30: started compliment
+06h30: finished gossip (completed)
+06h30: compliment with G02 (accepted)
+06h52: started gossip
+06h52: finished compliment (completed)
+06h52: gossip with G04 (refused)
+06h52: insult approached by G04 (refused)
+07h15: started compliment
+07h15: finished gossip (completed)
+07h15: compliment with G05 (accepted)
+07h15: compliment approached by G02 (accepted)
+07h15: insult approached by G03 (refused)
+07h37: started gossip
+07h37: finished compliment (completed)
+07h37: gossip with G05 (accepted)
+07h37: gossip approached by G03 (refused)
+08h00: started compliment
+08h00: finished gossip (completed)
+08h00: compliment with G02 (refused)
+08h00: gossip approached by G01 (refused)
+08h00: gossip approached by G03 (refused)
+08h00: gossip approached by G04 (refused)
+08h22: started compliment
+08h22: finished compliment (completed)
+08h22: compliment with G02 (accepted)
+08h45: started gossip
+08h45: finished compliment (completed)
+08h45: gossip with G01 (refused)
+09h07: started snub
+09h07: finished gossip (completed)
+09h07: insult with G03 (refused)
+09h30: started compliment
+09h30: finished snub (completed)
+09h30: compliment with G05 (refused)
+09h52: started compliment
+09h52: finished compliment (completed)
+09h52: compliment with G05 (accepted)
+10h15: started compliment
+10h15: finished compliment (completed)
+10h15: compliment with G02 (accepted)
+10h15: gossip approached by G02 (accepted)
+10h37: started gossip
+10h37: finished compliment (completed)
+10h37: gossip with G02 (accepted)
+10h37: insult approached by G04 (refused)
+10h37: compliment approached by G05 (refused)
+11h00: started compliment
+11h00: finished gossip (completed)
+11h00: compliment with G05 (accepted)
+11h22: started snub
+11h22: finished compliment (completed)
+11h22: insult with G03 (refused)
+11h22: insult approached by G01 (refused)
+11h22: insult approached by G03 (refused)
+11h22: insult approached by G04 (refused)
+11h45: started snub
+11h45: finished snub (completed)
+11h45: insult with G03 (refused)
+12h07: started compliment
+12h07: finished snub (completed)
+12h07: compliment with G05 (accepted)
+12h07: insult approached by G01 (accepted)
+12h07: insult approached by G03 (refused)
+12h30: started snub
+12h30: finished compliment (completed)
+12h30: insult with G01 (refused)
+12h52: started snub
+12h52: finished snub (completed)
+12h52: insult with G03 (refused)
+13h15: started gossip
+13h15: finished snub (completed)
+13h15: gossip with G01 (refused)
+13h37: started gossip
+13h37: finished gossip (completed)
+13h37: gossip with G05 (refused)
+13h37: compliment approached by G02 (accepted)
+13h37: insult approached by G03 (refused)
+14h00: started gossip
+14h00: finished gossip (completed)
+14h00: gossip with G03 (refused)
+14h00: gossip approached by G03 (refused)
+14h00: insult approached by G04 (refused)
+14h22: started gossip
+14h22: finished gossip (completed)
+14h22: gossip with G04 (refused)
+14h22: chat approached by G05 (accepted)
+14h45: started gossip
+14h45: finished gossip (completed)
+14h45: gossip with G04 (accepted)
+15h07: started gossip
+15h07: finished gossip (completed)
+15h07: gossip with G02 (accepted)
+15h07: gossip approached by G02 (refused)
+15h07: insult approached by G03 (refused)
+15h07: gossip approached by G04 (refused)
+15h30: started gossip
+15h30: finished gossip (completed)
+15h30: gossip with G05 (refused)
+15h30: gossip approached by G03 (refused)
+15h30: compliment approached by G05 (refused)
+15h52: started gossip
+15h52: finished gossip (completed)
+15h52: gossip with G03 (refused)
+15h52: compliment approached by G02 (accepted)
+15h52: gossip approached by G03 (refused)
+15h52: gossip approached by G04 (refused)
+16h15: started snub
+16h15: finished gossip (completed)
+16h15: insult with G04 (refused)
+16h37: started gossip
+16h37: finished snub (completed)
+16h37: gossip with G05 (accepted)
+17h00: started gossip
+17h00: finished gossip (completed)
+17h00: gossip with G04 (refused)
+17h22: started gossip
+17h22: finished gossip (completed)
+17h22: gossip with G04 (refused)
+17h45: started snub
+17h45: finished gossip (completed)
+17h45: insult with G03 (refused)
+18h07: started snub
+18h07: finished snub (completed)
+18h07: insult with G03 (refused)
+18h30: started gossip
+18h30: finished snub (completed)
+18h30: gossip with G03 (refused)
+18h30: compliment approached by G02 (accepted)
+18h30: compliment approached by G05 (accepted)
+18h52: started compliment
+18h52: finished gossip (completed)
+18h52: compliment with G02 (refused)
+19h15: started snub
+19h15: finished compliment (completed)
+19h15: insult with G04 (refused)
+19h15: gossip approached by G02 (accepted)
+19h15: gossip approached by G04 (refused)
+19h37: started compliment
+19h37: finished snub (completed)
+19h37: compliment with G05 (refused)
+19h37: insult approached by G01 (refused)
+19h37: compliment approached by G05 (accepted)
+20h00: started snub
+20h00: finished compliment (completed)
+20h00: insult with G01 (refused)
+20h00: insult approached by G01 (refused)
+20h00: insult approached by G04 (refused)
+20h22: started snub
+20h22: finished snub (completed)
+20h22: insult with G04 (refused)
+20h45: started snub
+20h45: finished snub (completed)
+20h45: insult with G04 (refused)
+20h45: insult approached by G01 (refused)
+20h45: compliment approached by G02 (accepted)
+20h45: insult approached by G03 (refused)
+21h07: started gossip
+21h07: finished snub (completed)
+21h07: gossip with G05 (accepted)
+21h07: compliment approached by G05 (accepted)
+21h30: started compliment
+21h30: finished gossip (completed)
+21h30: compliment with G02 (accepted)
+21h30: insult approached by G03 (refused)
+21h52: started compliment
+21h52: finished compliment (completed)
+21h52: compliment with G02 (accepted)
+22h15: started compliment
+22h15: finished compliment (completed)
+22h15: compliment with G05 (accepted)
+22h37: started gossip
+22h37: finished compliment (completed)
+22h37: gossip with G02 (refused)
+22h37: gossip approached by G04 (refused)
+23h00: started snub
+23h00: finished gossip (completed)
+23h00: insult with G03 (refused)
+23h22: started gossip
+23h22: finished snub (completed)
+23h22: gossip with G03 (refused)
+23h45: started wander
+23h45: finished gossip (completed)
+00h30: started gossip
+00h30: finished wander (completed)
+00h30: gossip with G01 (refused)
+00h52: started compliment
+00h52: finished gossip (completed)
+00h52: compliment with G05 (refused)
+00h52: compliment approached by G05 (accepted)
+01h15: started snub
+01h15: finished compliment (completed)
+01h15: insult with G03 (refused)
+01h15: insult approached by G01 (refused)
+01h37: started gossip
+01h37: finished snub (completed)
+01h37: gossip with G03 (refused)
+02h00: started compliment
+02h00: finished gossip (completed)
+02h00: compliment with G02 (refused)
+02h22: started snub
+02h22: finished compliment (completed)
+02h22: insult with G03 (accepted)
+02h22: compliment approached by G02 (refused)
+02h45: started gossip
+02h45: finished snub (completed)
+02h45: gossip with G01 (refused)
+02h45: gossip approached by G04 (refused)
+02h45: compliment approached by G05 (refused)
+03h07: started chat
+03h07: finished gossip (completed)
+03h07: chat with G02 (accepted)
+03h07: compliment approached by G05 (accepted)
+03h30: started snub
+03h30: finished chat (completed)
+03h30: insult with G04 (refused)
+03h30: insult approached by G01 (accepted)
+03h30: compliment approached by G02 (accepted)
+03h52: started compliment
+03h52: finished snub (completed)
+03h52: compliment with G05 (accepted)
+03h52: gossip approached by G02 (accepted)
+03h52: insult approached by G04 (accepted)
+04h15: started gossip
+04h15: finished compliment (completed)
+04h15: gossip with G01 (refused)
+04h37: started gossip
+04h37: finished gossip (completed)
+04h37: gossip with G05 (accepted)
+04h37: insult approached by G03 (refused)
+05h00: started snub
+05h00: finished gossip (completed)
+05h00: insult with G04 (refused)
+05h22: started gossip
+05h22: finished snub (completed)
+05h22: gossip with G05 (refused)
+05h22: insult approached by G01 (refused)
+05h45: started compliment
+05h45: finished gossip (completed)
+05h45: compliment with G05 (accepted)
+05h45: gossip approached by G03 (refused)
+06h07: started gossip
+06h07: finished compliment (completed)
+06h07: gossip with G01 (refused)
+06h07: insult approached by G03 (refused)
+06h30: started snub
+06h30: finished gossip (completed)
+06h30: insult with G04 (refused)
+06h30: gossip approached by G02 (accepted)
+06h30: insult approached by G03 (refused)
+06h52: started snub
+06h52: finished snub (completed)
+06h52: insult with G03 (refused)
+06h52: gossip approached by G01 (refused)
+06h52: compliment approached by G02 (accepted)
+06h52: gossip approached by G05 (refused)
+07h15: started compliment
+07h15: finished snub (completed)
+07h15: compliment with G02 (accepted)
+07h15: compliment approached by G02 (accepted)
+07h37: started snub
+07h37: finished compliment (completed)
+07h37: insult with G01 (refused)
+07h37: gossip approached by G02 (refused)
+08h00: started compliment
+08h00: finished snub (completed)
+08h00: compliment with G02 (accepted)
+08h00: gossip approached by G03 (accepted)
+08h22: started gossip
+08h22: finished compliment (completed)
+08h22: gossip with G02 (accepted)
+08h22: gossip approached by G02 (accepted)
+08h45: started snub
+08h45: finished gossip (completed)
+08h45: insult with G04 (refused)
+08h45: insult approached by G03 (refused)
+08h45: compliment approached by G05 (accepted)
+09h07: started compliment
+09h07: finished snub (completed)
+09h07: compliment with G05 (accepted)
+09h07: insult approached by G01 (refused)
+09h30: started snub
+09h30: finished compliment (completed)
+09h30: insult with G01 (refused)
+09h52: started snub
+09h52: finished snub (completed)
+09h52: insult with G01 (refused)
+09h52: compliment approached by G02 (accepted)
+09h52: insult approached by G04 (accepted)
+09h52: compliment approached by G05 (refused)
+10h15: started compliment
+10h15: finished snub (completed)
+10h15: compliment with G05 (accepted)
+10h15: compliment approached by G02 (refused)
+10h37: started compliment
+10h37: finished compliment (completed)
+10h37: compliment with G02 (accepted)
+11h00: started gossip
+11h00: finished compliment (completed)
+11h00: gossip with G01 (refused)
+11h00: compliment approached by G02 (refused)
+11h22: started gossip
+11h22: finished gossip (completed)
+11h22: gossip with G01 (refused)
+11h45: started gossip
+11h45: finished gossip (completed)
+11h45: gossip with G02 (accepted)
+11h45: insult approached by G01 (refused)
+11h45: insult approached by G03 (refused)
+12h07: started compliment
+12h07: finished gossip (completed)
+12h07: compliment with G05 (accepted)
+12h30: started gossip
+12h30: finished compliment (completed)
+12h30: gossip with G01 (refused)
+12h30: gossip approached by G02 (refused)
+12h52: started snub
+12h52: finished gossip (completed)
+12h52: insult with G03 (refused)
+13h15: started snub
+13h15: finished snub (completed)
+13h15: insult with G03 (refused)
+13h15: gossip approached by G02 (accepted)
+13h37: started compliment
+13h37: finished snub (completed)
+13h37: compliment with G05 (accepted)
+13h37: gossip approached by G03 (refused)
+13h37: insult approached by G04 (refused)
+14h00: started snub
+14h00: finished compliment (completed)
+14h00: insult with G03 (refused)
+14h22: started snub
+14h22: finished snub (completed)
+14h22: insult with G01 (refused)
+14h22: gossip approached by G02 (refused)
+14h45: started compliment
+14h45: finished snub (completed)
+14h45: compliment with G05 (accepted)
+15h07: started gossip
+15h07: finished compliment (completed)
+15h07: gossip with G04 (refused)
+15h07: compliment approached by G02 (refused)
+15h07: compliment approached by G05 (accepted)
+15h30: started snub
+15h30: finished gossip (completed)
+15h30: insult with G04 (refused)
+15h30: gossip approached by G02 (refused)
+15h52: started gossip
+15h52: finished snub (completed)
+15h52: gossip with G01 (refused)
+15h52: gossip approached by G01 (refused)
+16h15: started gossip
+16h15: finished gossip (completed)
+16h15: gossip with G01 (refused)
+16h15: insult approached by G01 (refused)
+16h37: started snub
+16h37: finished gossip (completed)
+16h37: insult with G03 (refused)
+16h37: compliment approached by G02 (accepted)
+16h37: gossip approached by G05 (refused)
+17h00: started gossip
+17h00: finished snub (completed)
+17h00: gossip with G04 (refused)
+17h22: started compliment
+17h22: finished gossip (completed)
+17h22: compliment with G05 (refused)
+17h45: started snub
+17h45: finished compliment (completed)
+17h45: insult with G04 (refused)
+17h45: compliment approached by G02 (accepted)
+18h07: started gossip
+18h07: finished snub (completed)
+18h07: gossip with G04 (refused)
+18h07: insult approached by G03 (refused)
+18h07: gossip approached by G04 (accepted)
+18h30: started compliment
+18h30: finished gossip (completed)
+18h30: compliment with G05 (refused)
+18h30: compliment approached by G05 (accepted)
+18h52: started gossip
+18h52: finished compliment (completed)
+18h52: gossip with G03 (refused)
+18h52: gossip approached by G02 (refused)
+18h52: insult approached by G03 (refused)
+19h15: started compliment
+19h15: finished gossip (completed)
+19h15: compliment with G05 (refused)
+19h37: started gossip
+19h37: finished compliment (completed)
+19h37: gossip with G05 (refused)
+19h37: compliment approached by G02 (accepted)
+20h00: started gossip
+20h00: finished gossip (completed)
+20h00: gossip with G04 (accepted)
+20h00: gossip approached by G02 (accepted)
+20h22: started snub
+20h22: finished gossip (completed)
+20h22: insult with G04 (refused)
+20h45: started gossip
+20h45: finished snub (completed)
+20h45: gossip with G02 (refused)
+21h07: started snub
+21h07: finished gossip (completed)
+21h07: insult with G04 (refused)
+21h07: gossip approached by G05 (accepted)
+21h30: started snub
+21h30: finished snub (completed)
+21h30: insult with G04 (refused)
+21h30: gossip approached by G05 (refused)
+21h52: started gossip
+21h52: finished snub (completed)
+21h52: gossip with G05 (accepted)
+21h52: insult approached by G01 (accepted)
+21h52: gossip approached by G02 (accepted)
+21h52: gossip approached by G05 (accepted)
+22h15: started compliment
+22h15: finished gossip (completed)
+22h15: compliment with G05 (refused)
+22h15: compliment approached by G02 (accepted)
+22h37: started snub
+22h37: finished compliment (completed)
+22h37: insult with G01 (refused)
+23h00: started snub
+23h00: finished snub (completed)
+23h00: insult with G04 (accepted)
+23h00: compliment approached by G05 (accepted)
+23h22: started compliment
+23h22: finished snub (completed)
+23h22: compliment with G05 (refused)
+23h22: gossip approached by G05 (refused)
+23h45: started snub
+23h45: finished compliment (completed)
+23h45: insult with G04 (refused)
+23h45: insult approached by G04 (refused)
+23h45: compliment approached by G05 (accepted)
+00h07: started snub
+00h07: finished snub (completed)
+00h07: insult with G03 (refused)
+00h07: compliment approached by G02 (accepted)
+00h30: started snub
+00h30: finished snub (completed)
+00h30: insult with G03 (refused)
+00h30: compliment approached by G05 (refused)
+00h52: started gossip
+00h52: finished snub (completed)
+00h52: gossip with G04 (refused)
+00h52: gossip approached by G02 (accepted)
+00h52: gossip approached by G04 (refused)
+01h15: started snub
+01h15: finished gossip (completed)
+01h15: insult with G03 (refused)
+01h15: compliment approached by G02 (refused)
+01h37: started snub
+01h37: finished snub (completed)
+01h37: insult with G01 (refused)
+01h37: gossip approached by G03 (refused)
+02h00: started snub
+02h00: finished snub (completed)
+02h00: insult with G03 (refused)
+02h22: started gossip
+02h22: finished snub (completed)
+02h22: gossip with G04 (refused)
+02h22: gossip approached by G04 (refused)
+02h45: started compliment
+02h45: finished gossip (completed)
+02h45: compliment with G02 (accepted)
+02h45: insult approached by G01 (refused)
+03h07: started gossip
+03h07: finished compliment (completed)
+03h07: gossip with G04 (refused)
+03h30: started snub
+03h30: finished gossip (completed)
+03h30: insult with G04 (refused)
+03h30: compliment approached by G05 (refused)
+03h52: started snub
+03h52: finished snub (completed)
+03h52: insult with G04 (refused)
+04h15: started snub
+04h15: finished snub (completed)
+04h15: insult with G01 (refused)
+04h15: gossip approached by G03 (refused)
+04h37: started gossip
+04h37: finished snub (completed)
+04h37: gossip with G02 (accepted)
+04h37: compliment approached by G02 (accepted)
+04h37: gossip approached by G05 (accepted)
+05h00: started gossip
+05h00: finished gossip (completed)
+05h00: gossip with G01 (refused)
+05h00: insult approached by G03 (refused)
+05h22: started compliment
+05h22: finished gossip (completed)
+05h22: compliment with G02 (refused)
+05h22: compliment approached by G05 (accepted)
+05h45: started snub
+05h45: finished compliment (completed)
+05h45: insult with G01 (refused)
+05h45: insult approached by G03 (refused)
+05h45: compliment approached by G05 (accepted)
+06h07: started gossip
+06h07: finished snub (completed)
+06h07: gossip with G05 (accepted)
+06h07: compliment approached by G05 (refused)
+06h30: started gossip
+06h30: finished gossip (completed)
+06h30: gossip with G05 (accepted)
+06h30: gossip approached by G05 (accepted)
+06h52: started snub
+06h52: finished gossip (completed)
+06h52: insult with G04 (refused)
+06h52: compliment approached by G05 (accepted)
+07h15: started compliment
+07h15: finished snub (completed)
+07h15: compliment with G02 (accepted)
+07h15: compliment approached by G02 (accepted)
+07h37: started snub
+07h37: finished compliment (completed)
+07h37: insult with G01 (refused)
+08h00: started wander
+08h00: finished snub (completed)
+08h00: insult approached by G01 (accepted)
+08h00: gossip approached by G02 (refused)
+08h00: insult approached by G03 (refused)
+08h45: started snub
+08h45: finished wander (completed)
+08h45: insult with G04 (refused)
+08h45: compliment approached by G05 (accepted)
+09h07: started gossip
+09h07: finished snub (completed)
+09h07: gossip with G04 (refused)
+09h07: gossip approached by G05 (refused)
+09h30: started compliment
+09h30: finished gossip (completed)
+09h30: compliment with G05 (accepted)
+09h30: gossip approached by G01 (refused)
+09h30: gossip approached by G05 (accepted)
+09h52: started snub
+09h52: finished compliment (completed)
+09h52: insult with G01 (refused)
+09h52: compliment approached by G02 (accepted)
+10h15: started snub
+10h15: finished snub (completed)
+10h15: insult with G01 (accepted)
+10h15: insult approached by G01 (refused)
+10h15: gossip approached by G03 (refused)
+10h15: insult approached by G04 (refused)
+10h37: started snub
+10h37: finished snub (completed)
+10h37: insult with G04 (refused)
+10h37: gossip approached by G04 (accepted)
+11h00: started snub
+11h00: finished snub (completed)
+11h00: insult with G03 (refused)
+11h00: insult approached by G01 (refused)
+11h22: started gossip
+11h22: finished snub (completed)
+11h22: gossip with G01 (accepted)
+11h22: gossip approached by G01 (refused)
+11h22: compliment approached by G02 (accepted)
+11h22: compliment approached by G05 (accepted)
+11h45: started snub
+11h45: finished gossip (completed)
+11h45: insult with G01 (refused)
+11h45: gossip approached by G02 (refused)
+11h45: insult approached by G04 (refused)
+12h07: started snub
+12h07: finished snub (completed)
+12h07: insult with G03 (refused)
+12h07: gossip approached by G02 (accepted)
+12h07: gossip approached by G03 (refused)
+12h30: started gossip
+12h30: finished snub (completed)
+12h30: gossip with G01 (refused)
+12h30: insult approached by G03 (refused)
+12h52: started gossip
+12h52: finished gossip (completed)
+12h52: gossip with G05 (accepted)
+13h15: started compliment
+13h15: finished gossip (completed)
+13h15: compliment with G02 (refused)
+13h37: started gossip
+13h37: finished compliment (completed)
+13h37: gossip with G05 (accepted)
+14h00: started gossip
+14h00: finished gossip (completed)
+14h00: gossip with G04 (refused)
+14h22: started gossip
+14h22: finished gossip (completed)
+14h22: gossip with G05 (accepted)
+14h22: insult approached by G04 (refused)
+14h45: started compliment
+14h45: finished gossip (completed)
+14h45: compliment with G05 (accepted)
+14h45: insult approached by G03 (refused)
+14h45: gossip approached by G04 (refused)
+15h07: started gossip
+15h07: finished compliment (completed)
+15h07: gossip with G01 (refused)
+15h07: gossip approached by G01 (refused)
+15h30: started compliment
+15h30: finished gossip (completed)
+15h30: compliment with G02 (accepted)
+15h30: gossip approached by G02 (accepted)
+15h30: insult approached by G03 (refused)
+15h30: insult approached by G04 (refused)
+15h52: started compliment
+15h52: finished compliment (completed)
+15h52: compliment with G02 (accepted)
+16h15: started snub
+16h15: finished compliment (completed)
+16h15: insult with G01 (refused)
+16h15: gossip approached by G04 (refused)
+16h37: started gossip
+16h37: finished snub (completed)
+16h37: gossip with G05 (refused)
+16h37: gossip approached by G05 (refused)
+17h00: started gossip
+17h00: finished gossip (completed)
+17h00: gossip with G02 (accepted)
+17h00: insult approached by G01 (refused)
+17h00: gossip approached by G03 (refused)
+17h22: started compliment
+17h22: finished gossip (completed)
+17h22: compliment with G05 (accepted)
+17h22: gossip approached by G01 (accepted)
+17h45: started gossip
+17h45: finished compliment (completed)
+17h45: gossip with G04 (refused)
+18h07: started snub
+18h07: finished gossip (completed)
+18h07: insult with G03 (refused)
+18h07: gossip approached by G02 (accepted)
+18h30: started snub
+18h30: finished snub (completed)
+18h30: insult with G01 (refused)
+18h52: started snub
+18h52: finished snub (completed)
+18h52: insult with G01 (refused)
+18h52: compliment approached by G05 (refused)
+19h15: started snub
+19h15: finished snub (completed)
+19h15: insult with G01 (refused)
+19h15: gossip approached by G03 (refused)
+19h37: started gossip
+19h37: finished snub (completed)
+19h37: gossip with G05 (accepted)
+20h00: started gossip
+20h00: finished gossip (completed)
+20h00: gossip with G01 (refused)
+20h22: started gossip
+20h22: finished gossip (completed)
+20h22: gossip with G04 (refused)
+20h22: compliment approached by G02 (accepted)
+20h22: gossip approached by G03 (refused)
+20h45: started gossip
+20h45: finished gossip (completed)
+20h45: gossip with G04 (refused)
+21h07: started gossip
+21h07: finished gossip (completed)
+21h07: gossip with G05 (refused)
+21h30: started gossip
+21h30: finished gossip (completed)
+21h30: gossip with G03 (refused)
+21h30: compliment approached by G02 (accepted)
+21h30: insult approached by G04 (refused)
+21h52: started gossip
+21h52: finished gossip (completed)
+21h52: gossip with G01 (refused)
+21h52: insult approached by G01 (refused)
+21h52: insult approached by G03 (refused)
+22h15: started gossip
+22h15: finished gossip (completed)
+22h15: gossip with G04 (refused)
+22h15: compliment approached by G05 (accepted)
+22h37: started gossip
+22h37: finished gossip (completed)
+22h37: gossip with G05 (accepted)
+22h37: insult approached by G03 (refused)
+23h00: started snub
+23h00: finished gossip (completed)
+23h00: insult with G04 (accepted)
+23h00: gossip approached by G01 (refused)
+23h00: insult approached by G04 (refused)
+23h22: started snub
+23h22: finished snub (completed)
+23h22: insult with G01 (refused)
+23h45: started compliment
+23h45: finished snub (completed)
+23h45: compliment with G05 (accepted)
+23h45: insult approached by G01 (refused)
+00h07: started gossip
+00h07: finished compliment (completed)
+00h07: gossip with G05 (refused)
+00h30: started compliment
+00h30: finished gossip (completed)
+00h30: compliment with G05 (accepted)
+00h30: compliment approached by G02 (accepted)
+00h52: started snub
+00h52: finished compliment (completed)
+00h52: insult with G01 (refused)
+00h52: gossip approached by G01 (refused)
+00h52: compliment approached by G05 (accepted)
+01h15: started gossip
+01h15: finished snub (completed)
+01h15: gossip with G02 (accepted)
+01h15: insult approached by G01 (refused)
+01h15: gossip approached by G05 (accepted)
+01h37: started compliment
+01h37: finished gossip (completed)
+01h37: compliment with G02 (accepted)
+01h37: compliment approached by G02 (accepted)
+01h37: gossip approached by G05 (refused)
+02h00: started snub
+02h00: finished compliment (completed)
+02h00: insult with G01 (refused)
+02h00: compliment approached by G02 (accepted)
+02h00: insult approached by G03 (refused)
+02h22: started gossip
+02h22: finished snub (completed)
+02h22: gossip with G04 (refused)
+02h45: started gossip
+02h45: finished gossip (completed)
+02h45: gossip with G02 (accepted)
+03h07: started compliment
+03h07: finished gossip (completed)
+03h07: compliment with G02 (accepted)
+03h30: started snub
+03h30: finished compliment (completed)
+03h30: insult with G01 (refused)
+03h30: gossip approached by G02 (accepted)
+03h52: started snub
+03h52: finished snub (completed)
+03h52: insult with G04 (refused)
+03h52: compliment approached by G05 (accepted)
+04h15: started gossip
+04h15: finished snub (completed)
+04h15: gossip with G02 (accepted)
+04h15: compliment approached by G02 (accepted)
+04h37: started compliment
+04h37: finished gossip (completed)
+04h37: compliment with G02 (refused)
+05h00: started gossip
+05h00: finished compliment (completed)
+05h00: gossip with G04 (refused)
+05h00: gossip approached by G03 (refused)
+05h22: started gossip
+05h22: finished gossip (completed)
+05h22: gossip with G04 (refused)
+05h22: gossip approached by G03 (refused)
+05h22: gossip approached by G05 (refused)
+05h45: started compliment
+05h45: finished gossip (completed)
+05h45: compliment with G02 (refused)
+05h45: gossip approached by G02 (accepted)
+05h45: gossip approached by G05 (accepted)
+06h07: started snub
+06h07: finished compliment (completed)
+06h07: insult with G03 (refused)
+06h07: gossip approached by G05 (accepted)
+06h30: started snub
+06h30: finished snub (completed)
+06h30: insult with G04 (refused)
+06h30: gossip approached by G05 (accepted)
+06h52: started compliment
+06h52: finished snub (completed)
+06h52: compliment with G02 (refused)
+06h52: gossip approached by G02 (refused)
+07h15: started gossip
+07h15: finished compliment (completed)
+07h15: gossip with G04 (refused)
+07h15: insult approached by G01 (refused)
+07h15: compliment approached by G02 (accepted)
+07h37: started compliment
+07h37: finished gossip (completed)
+07h37: compliment with G02 (accepted)
+07h37: insult approached by G01 (refused)
+08h00: started gossip
+08h00: finished compliment (completed)
+08h00: gossip with G03 (refused)
+08h00: gossip approached by G01 (refused)
+08h22: started gossip
+08h22: finished gossip (completed)
+08h22: gossip with G04 (refused)
+08h45: started compliment
+08h45: finished gossip (completed)
+08h45: compliment with G05 (accepted)
+08h45: gossip approached by G01 (refused)
+08h45: compliment approached by G02 (accepted)
+09h07: started gossip
+09h07: finished compliment (completed)
+09h07: gossip with G01 (refused)
+09h07: insult approached by G04 (refused)
+09h30: started gossip
+09h30: finished gossip (completed)
+09h30: gossip with G05 (accepted)
+09h30: insult approached by G03 (refused)
+09h52: started compliment
+09h52: finished gossip (completed)
+09h52: compliment with G02 (accepted)
+10h15: started snub
+10h15: finished compliment (completed)
+10h15: insult with G01 (accepted)
+10h15: gossip approached by G04 (refused)
+10h37: started compliment
+10h37: finished snub (completed)
+10h37: compliment with G05 (accepted)
+10h37: gossip approached by G03 (refused)
+11h00: started compliment
+11h00: finished compliment (completed)
+11h00: compliment with G05 (accepted)
+11h00: gossip approached by G01 (refused)
+11h00: gossip approached by G04 (accepted)
+11h22: started gossip
+11h22: finished compliment (completed)
+11h22: gossip with G03 (refused)
+11h22: gossip approached by G04 (refused)
+11h45: started snub
+11h45: finished gossip (completed)
+11h45: insult with G04 (refused)
+12h07: started snub
+12h07: finished snub (completed)
+12h07: insult with G01 (refused)
+12h30: started gossip
+12h30: finished snub (completed)
+12h30: gossip with G04 (refused)
+12h30: insult approached by G01 (refused)
+12h30: insult approached by G03 (refused)
+12h52: started snub
+12h52: finished gossip (completed)
+12h52: insult with G03 (refused)
+12h52: insult approached by G04 (refused)
+12h52: gossip approached by G05 (refused)
+13h15: started gossip
+13h15: finished snub (completed)
+13h15: gossip with G05 (accepted)
+13h37: started gossip
+13h37: finished gossip (completed)
+13h37: gossip with G01 (refused)
+13h37: compliment approached by G05 (accepted)
+14h00: started gossip
+14h00: finished gossip (completed)
+14h00: gossip with G01 (refused)
+14h00: gossip approached by G04 (refused)
+14h22: started gossip
+14h22: finished gossip (completed)
+14h22: gossip with G01 (refused)
+14h45: started gossip
+14h45: finished gossip (completed)
+14h45: gossip with G05 (refused)
+14h45: insult approached by G04 (accepted)
+14h45: compliment approached by G05 (accepted)
+15h07: started compliment
+15h07: finished gossip (completed)
+15h07: compliment with G02 (accepted)
+15h07: compliment approached by G02 (accepted)
+15h30: started snub
+15h30: finished compliment (completed)
+15h30: insult with G01 (refused)
+15h30: gossip approached by G04 (refused)
+15h52: started gossip
+15h52: finished snub (completed)
+15h52: gossip with G05 (accepted)
+15h52: gossip approached by G02 (accepted)
+15h52: compliment approached by G05 (accepted)
+16h15: started gossip
+16h15: finished gossip (completed)
+16h15: gossip with G04 (refused)
+16h15: gossip approached by G01 (accepted)
+16h37: started compliment
+16h37: finished gossip (completed)
+16h37: compliment with G05 (accepted)
+16h37: compliment approached by G02 (accepted)
+16h37: insult approached by G03 (refused)
+17h00: started snub
+17h00: finished compliment (completed)
+17h00: insult with G01 (refused)
+17h00: compliment approached by G02 (accepted)
+17h22: started gossip
+17h22: finished snub (completed)
+17h22: gossip with G01 (refused)
+17h45: started snub
+17h45: finished gossip (completed)
+17h45: insult with G04 (refused)
+17h45: insult approached by G04 (accepted)
+18h07: started compliment
+18h07: finished snub (completed)
+18h07: compliment with G02 (refused)
+18h07: gossip approached by G03 (refused)
+18h07: compliment approached by G05 (accepted)
+18h30: started compliment
+18h30: finished compliment (completed)
+18h30: compliment with G05 (refused)
+18h30: insult approached by G03 (refused)
+18h52: started snub
+18h52: finished compliment (completed)
+18h52: insult with G01 (refused)
+18h52: compliment approached by G02 (refused)
+18h52: gossip approached by G04 (refused)
+19h15: started snub
+19h15: finished snub (completed)
+19h15: insult with G04 (accepted)
+19h15: insult approached by G03 (refused)
+19h37: started compliment
+19h37: finished snub (completed)
+19h37: compliment with G05 (accepted)
+20h00: started snub
+20h00: finished compliment (completed)
+20h00: insult with G04 (refused)
+20h00: gossip approached by G05 (accepted)
+20h22: started compliment
+20h22: finished snub (completed)
+20h22: compliment with G05 (refused)
+20h22: insult approached by G04 (refused)
+20h45: started snub
+20h45: finished compliment (completed)
+20h45: insult with G03 (refused)
+20h45: gossip approached by G01 (refused)
+20h45: insult approached by G03 (refused)
+20h45: compliment approached by G05 (accepted)
+21h07: started gossip
+21h07: finished snub (completed)
+21h07: gossip with G03 (refused)
+21h30: started snub
+21h30: finished gossip (completed)
+21h30: insult with G04 (refused)
+21h30: compliment approached by G02 (accepted)
+21h30: gossip approached by G05 (accepted)
+21h52: started snub
+21h52: finished snub (completed)
+21h52: insult with G01 (refused)
+22h15: started snub
+22h15: finished snub (completed)
+22h15: insult with G04 (refused)
+22h37: started snub
+22h37: finished snub (completed)
+22h37: insult with G04 (refused)
+22h37: insult approached by G04 (refused)
+23h00: started gossip
+23h00: finished snub (completed)
+23h00: gossip with G01 (refused)
+23h00: insult approached by G04 (refused)
+23h22: started compliment
+23h22: finished gossip (completed)
+23h22: compliment with G02 (accepted)
+23h22: insult approached by G01 (refused)
+23h22: gossip approached by G02 (refused)
+23h45: started snub
+23h45: finished compliment (completed)
+23h45: insult with G01 (refused)
+23h45: gossip approached by G04 (refused)
+00h07: started snub
+00h07: finished snub (completed)
+00h07: insult with G04 (refused)
+00h07: insult approached by G03 (refused)
+00h07: insult approached by G04 (accepted)
+00h30: started gossip
+00h30: finished snub (completed)
+00h30: gossip with G03 (accepted)
+00h52: started gossip
+00h52: finished gossip (completed)
+00h52: gossip with G02 (refused)
+00h52: insult approached by G04 (refused)
+00h52: compliment approached by G05 (accepted)
+01h15: started snub
+01h15: finished gossip (completed)
+01h15: insult with G01 (refused)
+01h37: started compliment
+01h37: finished snub (completed)
+01h37: compliment with G02 (accepted)
+02h00: started compliment
+02h00: finished compliment (completed)
+02h00: compliment with G02 (accepted)
+02h00: insult approached by G04 (refused)
+02h22: started wander
+02h22: finished compliment (completed)
+02h22: compliment approached by G05 (accepted)
+02h45: gossip approached by G03 (refused)
+03h07: started gossip
+03h07: finished wander (completed)
+03h07: gossip with G01 (refused)
+03h07: insult approached by G04 (refused)
+03h30: started gossip
+03h30: finished gossip (completed)
+03h30: gossip with G01 (refused)
+03h52: started snub
+03h52: finished gossip (completed)
+03h52: insult with G03 (refused)
+04h15: started snub
+04h15: finished snub (completed)
+04h15: insult with G01 (refused)
+04h15: gossip approached by G01 (accepted)
+04h37: started snub
+04h37: finished snub (completed)
+04h37: insult with G03 (refused)
+04h37: gossip approached by G04 (refused)
+05h00: started gossip
+05h00: finished snub (completed)
+05h00: gossip with G04 (refused)
+05h00: insult approached by G03 (refused)
+05h22: started gossip
+05h22: finished gossip (completed)
+05h22: gossip with G02 (refused)
+05h45: started snub
+05h45: finished gossip (completed)
+05h45: insult with G03 (refused)
+05h45: insult approached by G03 (refused)
+06h07: started wander
+06h07: finished snub (completed)
+06h30: gossip approached by G02 (refused)
+06h52: started snub
+06h52: finished wander (completed)
+06h52: insult with G01 (refused)
+06h52: insult approached by G03 (refused)
+07h15: started compliment
+07h15: finished snub (completed)
+07h15: compliment with G02 (refused)
+07h15: gossip approached by G02 (accepted)
+07h15: insult approached by G04 (refused)
+07h37: started compliment
+07h37: finished compliment (completed)
+07h37: compliment with G02 (accepted)
+07h37: insult approached by G03 (refused)
+08h00: started gossip
+08h00: finished compliment (completed)
+08h00: gossip with G01 (refused)
+08h00: insult approached by G01 (refused)
+08h00: compliment approached by G02 (refused)
+08h22: started snub
+08h22: finished gossip (completed)
+08h22: insult with G04 (refused)
+08h22: insult approached by G03 (refused)
+08h45: started gossip
+08h45: finished snub (completed)
+08h45: gossip with G05 (accepted)
+09h07: started gossip
+09h07: finished gossip (completed)
+09h07: gossip with G05 (refused)
+09h07: insult approached by G04 (refused)
+09h30: started compliment
+09h30: finished gossip (completed)
+09h30: compliment with G05 (accepted)
+09h52: started snub
+09h52: finished compliment (completed)
+09h52: insult with G04 (refused)
+09h52: insult approached by G04 (refused)
+10h15: started gossip
+10h15: finished snub (completed)
+10h15: gossip with G03 (refused)
+10h15: insult approached by G03 (refused)
+10h37: started gossip
+10h37: finished gossip (completed)
+10h37: gossip with G03 (refused)
+10h37: compliment approached by G05 (refused)
+11h00: started gossip
+11h00: finished gossip (completed)
+11h00: gossip with G02 (refused)
+11h22: started gossip
+11h22: finished gossip (completed)
+11h22: gossip with G01 (refused)
+11h45: started gossip
+11h45: finished gossip (completed)
+11h45: gossip with G03 (accepted)
+11h45: insult approached by G03 (refused)
+11h45: gossip approached by G04 (refused)
+12h07: started compliment
+12h07: finished gossip (completed)
+12h07: compliment with G02 (accepted)
+12h07: insult approached by G04 (refused)
+12h30: started snub
+12h30: finished compliment (completed)
+12h30: insult with G01 (refused)
+12h52: started compliment
+12h52: finished snub (completed)
+12h52: compliment with G02 (accepted)
+13h15: started gossip
+13h15: finished compliment (completed)
+13h15: gossip with G04 (refused)
+13h37: started gossip
+13h37: finished gossip (completed)
+13h37: gossip with G04 (refused)
+13h37: compliment approached by G02 (accepted)
+14h00: started snub
+14h00: finished gossip (completed)
+14h00: insult with G01 (refused)
+14h22: started compliment
+14h22: finished snub (completed)
+14h22: compliment with G02 (accepted)
+14h22: insult approached by G03 (refused)
+14h45: started gossip
+14h45: finished compliment (completed)
+14h45: gossip with G03 (refused)
+14h45: insult approached by G01 (refused)
+15h07: started snub
+15h07: finished gossip (completed)
+15h07: insult with G01 (refused)
+15h07: gossip approached by G03 (refused)
+15h30: started snub
+15h30: finished snub (completed)
+15h30: insult with G01 (accepted)
+15h30: gossip approached by G03 (refused)
+15h52: started gossip
+15h52: finished snub (completed)
+15h52: gossip with G02 (refused)
+16h15: started gossip
+16h15: finished gossip (completed)
+16h15: gossip with G01 (refused)
+16h37: started snub
+16h37: finished gossip (completed)
+16h37: insult with G01 (refused)
+16h37: insult approached by G01 (refused)
+16h37: gossip approached by G03 (refused)
+16h37: insult approached by G04 (refused)
+17h00: started gossip
+17h00: finished snub (completed)
+17h00: gossip with G05 (refused)
+17h00: insult approached by G01 (refused)
+17h22: started compliment
+17h22: finished gossip (completed)
+17h22: compliment with G05 (refused)
+17h45: started compliment
+17h45: finished compliment (completed)
+17h45: compliment with G02 (accepted)
+17h45: gossip approached by G01 (refused)
+18h07: started gossip
+18h07: finished compliment (completed)
+18h07: gossip with G02 (accepted)
+18h07: gossip approached by G01 (refused)
+18h07: gossip approached by G02 (accepted)
+18h07: insult approached by G04 (refused)
+18h30: started gossip
+18h30: finished gossip (completed)
+18h30: gossip with G03 (refused)
+18h30: insult approached by G03 (refused)
+18h52: started gossip
+18h52: finished gossip (completed)
+18h52: gossip with G01 (refused)
+18h52: gossip approached by G04 (refused)
+18h52: compliment approached by G05 (refused)
+19h15: started compliment
+19h15: finished gossip (completed)
+19h15: compliment with G02 (accepted)
+19h15: insult approached by G01 (refused)
+19h37: started gossip
+19h37: finished compliment (completed)
+19h37: gossip with G01 (refused)
+20h00: started gossip
+20h00: finished gossip (completed)
+20h00: gossip with G02 (accepted)
+20h00: insult approached by G01 (accepted)
+20h00: gossip approached by G02 (refused)
+20h22: started compliment
+20h22: finished gossip (completed)
+20h22: compliment with G02 (accepted)
+20h22: insult approached by G01 (refused)
+20h45: started snub
+20h45: finished compliment (completed)
+20h45: insult with G01 (refused)
+21h07: started gossip
+21h07: finished snub (completed)
+21h07: gossip with G01 (refused)
+21h07: insult approached by G03 (refused)
+21h30: started gossip
+21h30: finished gossip (completed)
+21h30: gossip with G04 (refused)
+21h30: insult approached by G01 (refused)
+21h52: started gossip
+21h52: finished gossip (completed)
+21h52: gossip with G03 (refused)
+21h52: gossip approached by G01 (refused)
+22h15: started gossip
+22h15: finished gossip (completed)
+22h15: gossip with G01 (refused)
+22h15: compliment approached by G05 (refused)
+22h37: started gossip
+22h37: finished gossip (completed)
+22h37: gossip with G01 (refused)
+22h37: gossip approached by G05 (refused)
+23h00: started gossip
+23h00: finished gossip (completed)
+23h00: gossip with G04 (refused)
+23h00: compliment approached by G05 (accepted)
+23h22: started snub
+23h22: finished gossip (completed)
+23h22: insult with G04 (refused)
+23h22: gossip approached by G01 (refused)
+23h22: insult approached by G03 (refused)
+23h22: compliment approached by G05 (refused)
+23h45: started snub
+23h45: finished snub (completed)
+23h45: insult with G03 (accepted)
+23h45: gossip approached by G01 (refused)
+23h45: compliment approached by G05 (refused)
+00h07: started compliment
+00h07: finished snub (completed)
+00h07: compliment with G02 (refused)
+00h07: gossip approached by G05 (accepted)
+00h30: started snub
+00h30: finished compliment (completed)
+00h30: insult with G04 (refused)
+00h30: gossip approached by G03 (refused)
+00h30: gossip approached by G04 (refused)
+00h52: started snub
+00h52: finished snub (completed)
+00h52: insult with G01 (refused)
+01h15: started gossip
+01h15: finished snub (completed)
+01h15: gossip with G05 (accepted)
+01h15: gossip approached by G01 (refused)
+01h15: gossip approached by G03 (refused)
+01h15: compliment approached by G05 (refused)
+01h37: started gossip
+01h37: finished gossip (completed)
+01h37: gossip with G02 (accepted)
+01h37: compliment approached by G05 (accepted)

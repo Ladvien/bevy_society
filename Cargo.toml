@@ -28,6 +28,10 @@ bevy_stigmergy = { git = "https://github.com/Ladvien/bevy_stigmergy", rev = "9d1
 bevy_speech_bubbles = { git = "https://github.com/Ladvien/bevy_speech_bubbles", rev = "7cdd67b830bf35238cd22e0a88154b8063df61f0", optional = true }  # https://github.com/Ladvien/bevy_speech_bubbles — barks and conversations (dialogue feature)
 
 [[example]]
+name = "evidence"
+path = "examples/evidence.rs"
+
+[[example]]
 name = "quickstart"
 path = "examples/quickstart.rs"
 

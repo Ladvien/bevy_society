@@ -26,7 +26,7 @@ use common::visuals::{
 /// The recorded frame at which the rumor is planted.
 const PLANT_FRAME: u32 = 30;
 /// Unrecorded frames before recording, so ties have formed and the village is not a static field.
-const SETTLE_STEPS: u32 = 600;
+const SETTLE_STEPS: u32 = 3800;
 /// Frames drawn and discarded, so the first *recorded* frame is not the blank still a GIF shows.
 const WARM_UP: u32 = 3;
 /// Frame width and height of the recording.
@@ -91,7 +91,7 @@ fn main() {
     // that Bevy will not accept another plugin.
     let Some(mut rec) = Recorder::new_with(WIDTH, HEIGHT, orbit(0.0), &args.out, move |app| {
         app.insert_resource(SocietySettings {
-            seconds_per_day: 64.0,
+            seconds_per_day: 8.0,
             tick_secs: 0.1,
             start_hour: 15.0,
             ..SocietySettings::default()
@@ -231,7 +231,9 @@ fn stats(world: &mut World, village: &scene::Village) -> (f32, u32, u32) {
 fn orbit(fraction: f32) -> Transform {
     let degrees = 20.0 + 30.0 * fraction;
     let angle = degrees.to_radians();
-    Transform::from_xyz(24.0 * angle.sin(), 16.0, 24.0 * angle.cos())
+    // Closer and lower than the F1 recipe's 24 m / 16 m: the village is now a 12 m square, so a
+    // wide orbit framed mostly empty ground.
+    Transform::from_xyz(19.0 * angle.sin(), 13.5, 19.0 * angle.cos())
         .looking_at(Vec3::new(0.0, 1.0, 0.0), Vec3::Y)
 }
 
