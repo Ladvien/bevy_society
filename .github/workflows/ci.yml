@@ -34,5 +34,9 @@ jobs:
       - run: cargo build --no-default-features
       - run: cargo test
       - run: cargo test --no-default-features
+      # `tests/rumor_book.rs` is release-only: it lives in a village for twenty-two game-days with 200
+      # people, which is 4 m 26 s in a debug build and 33 s optimised. It measures a performance
+      # property, so an optimised build is also the only build where the measurement means anything.
+      - run: cargo test --release --test rumor_book
       # Examples need a font at run time, so building them is the check that fits in CI.
       - run: cargo build --examples

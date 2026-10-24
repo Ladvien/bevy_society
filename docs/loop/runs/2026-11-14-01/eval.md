@@ -26,8 +26,13 @@ semantic change; 5 MiB over a long large run does not.
 | `the_book_accumulates_rumors_nobody_can_tell` | `2250 rumors, 2250 alive, 301 still tellable` |
 | `the_book_costs_memory_not_ticks` | `3000 ticks: 2250 (~105 KiB); 6000: 4865 (~228 KiB)` |
 
-Both are slow — about 36 s together, because a village has to live twelve and twenty-two game-days to
-have a book at all. That is the price of the measurement being real.
+Both are slow — 33 s in release, because a village has to live twelve and twenty-two game-days to have a
+book at all. That is the price of the measurement being real.
+
+**In debug they take 4 m 26 s**, more than doubling the whole suite, so the file is
+`#![cfg(not(debug_assertions))]` and CI gained an explicit `cargo test --release --test rumor_book` step.
+That is the right shape for it anyway: it measures a performance property, and an optimised build is the
+only build where the measurement means anything.
 
 ## A first draft that measured nothing
 
@@ -39,8 +44,9 @@ passed on nothing. The helper now sets `seconds_per_day = 4.0` with a comment sa
 
 | Command | Result |
 |---|---|
-| `cargo test` | **31** binaries (30 + `rumor_book`) |
+| `cargo test` | **31** binaries, `rumor_book` skipped in debug (2.3 s, was 4 m 26 s) |
 | `cargo test --no-default-features` | 31 binaries |
+| `cargo test --release --test rumor_book` | 2 pass in 33 s |
 | `cargo clippy --all-targets --all-features -- -D warnings` | clean |
 | `cargo fmt --check` | clean |
 

@@ -32,7 +32,9 @@ defect).
 
 ## Touched
 
-- `tests/rumor_book.rs` (new).
+- `tests/rumor_book.rs` (new, `#![cfg(not(debug_assertions))]`).
+- `.github/workflows/ci.yml` — a `cargo test --release --test rumor_book` step, because CI otherwise
+  never runs a release build and the test would be skipped everywhere.
 - `docs/loop/needs-decision/retiring-untellable-rumors.md` — the 4× claim replaced with the measurement.
 - `docs/loop/log.md`, `CHANGELOG.md`.
 

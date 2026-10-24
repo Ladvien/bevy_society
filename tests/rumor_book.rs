@@ -22,6 +22,11 @@
 //!
 //! What the book *does* cost is memory, and this test pins that instead: roughly 48 bytes a rumor, so
 //! **200 KiB** at 200 people over 22 game-days and about **5 MiB** at 5 000.
+//! **Run this file in release.** It lives in a village for twelve and twenty-two game-days with 200
+//! people; in a debug build that is **4 m 26 s**, more than doubling the whole suite. `cargo test`
+//! skips it in debug and CI runs it with `--release`, where it takes about 36 s.
+#![cfg(not(debug_assertions))]
+
 mod common;
 
 use bevy::prelude::*;
