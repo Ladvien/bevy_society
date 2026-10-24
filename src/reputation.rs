@@ -180,6 +180,7 @@ pub(crate) fn spread_witnessed_rumor(
     harm: f32,
     now_days: f32,
     truth: bool,
+    knowledge_capacity: usize,
 ) -> Option<RumorId> {
     let (origin, rest) = witnesses.split_first_mut()?;
     let id = plant_rumor(
@@ -192,14 +193,19 @@ pub(crate) fn spread_witnessed_rumor(
         harm,
         now_days,
         truth,
+        knowledge_capacity,
     );
     for (_, knowledge) in rest.iter_mut() {
-        knowledge.insert(crate::beliefs::Known {
-            rumor: id,
-            belief: 1.0,
-            spreader: true,
-            heard_day: now_days,
-        });
+        knowledge.insert(
+            crate::beliefs::Known {
+                rumor: id,
+                belief: 1.0,
+                spreader: true,
+                heard_day: now_days,
+            },
+            knowledge_capacity,
+            now_days,
+        );
     }
     if let Some(rumor) = book.get_mut(id) {
         rumor.known_by += rest.len() as u32;

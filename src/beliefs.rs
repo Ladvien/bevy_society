@@ -155,12 +155,57 @@ impl Knowledge {
         self.search(rumor).is_ok()
     }
 
-    /// Inserts `known` in sorted position, replacing any entry for the same rumor.
-    pub fn insert(&mut self, known: Known) {
+    /// Inserts `known` in sorted position, replacing any entry for the same rumor, and forgets the
+    /// least useful entry when the list is at `capacity`.
+    ///
+    /// The eviction rule is the crate's own telling weight without the valence it cannot see here:
+    /// `belief · 0.995^(hours since heard)`. So a person forgets what it believes least and heard
+    /// longest ago, which is the rumour it would have been least likely to tell. `capacity == 0`
+    /// keeps nothing, mirroring `Memories::record`.
+    ///
+    /// Bounding this matters twice over: `best_telling` scans every entry on every gossip, so an
+    /// unbounded list made gossip cost grow with the length of the run, and the list itself is the
+    /// largest per-person allocation. Measured before the cap: 344 entries per person after 4 000
+    /// ticks on 12 people.
+    pub fn insert(&mut self, known: Known, capacity: usize, now_days: f32) {
+        if capacity == 0 {
+            self.0.clear();
+            return;
+        }
         match self.search(known.rumor) {
-            Ok(i) => self.0[i] = known,
+            Ok(i) => {
+                self.0[i] = known;
+                return;
+            }
             Err(i) => self.0.insert(i, known),
         }
+        while self.0.len() > capacity {
+            let worst = self
+                .0
+                .iter()
+                .enumerate()
+                .map(|(i, k)| (i, Self::retention(k, now_days)))
+                .fold(None::<(usize, f32)>, |acc, (i, w)| match acc {
+                    // Ties go to the higher index, i.e. the higher `RumorId`, so the oldest id is
+                    // kept and the result does not depend on insertion order.
+                    Some((_, best)) if best <= w => acc,
+                    _ => Some((i, w)),
+                });
+            match worst {
+                Some((i, _)) => {
+                    self.0.remove(i);
+                }
+                None => break,
+            }
+        }
+    }
+
+    /// How strongly this person would still tell `known`: `belief · 0.995^(hours since heard)`,
+    /// the telling weight of [`rumor_dk::telling_weight`] without the valence `Knowledge` cannot
+    /// see.
+    fn retention(known: &Known, now_days: f32) -> f32 {
+        let hours = (now_days - known.heard_day).max(0.0) * 24.0;
+        known.belief * 0.995_f32.powf(hours)
     }
 
     /// Mutable access to the entry for `rumor`, if known.
@@ -297,6 +342,7 @@ impl Plugin for BeliefsPlugin {
 fn apply_planted_rumors(
     mut reader: MessageReader<PlantRumor>,
     defs: Res<SocietyDefs>,
+    settings: Res<SocietySettings>,
     clock: Res<SocietyClock>,
     mut book: ResMut<RumorBook>,
     mut knowledge: Query<&mut Knowledge>,
@@ -329,6 +375,7 @@ fn apply_planted_rumors(
             spec.harm,
             clock.now_days as f32,
             msg.truth,
+            settings.knowledge_capacity,
         );
     }
 }
@@ -477,12 +524,16 @@ mod tests {
     fn knowledge_stays_sorted_and_tells_the_heaviest_rumor() {
         let mut k = Knowledge::default();
         for (id, belief) in [(3u32, 0.4f32), (1, 0.9), (2, 0.9)] {
-            k.insert(Known {
-                rumor: RumorId(id),
-                belief,
-                spreader: true,
-                heard_day: 0.0,
-            });
+            k.insert(
+                Known {
+                    rumor: RumorId(id),
+                    belief,
+                    spreader: true,
+                    heard_day: 0.0,
+                },
+                usize::MAX,
+                0.0,
+            );
         }
         let ids: Vec<u32> = k.0.iter().map(|x| x.rumor.0).collect();
         assert_eq!(ids, vec![1, 2, 3]);

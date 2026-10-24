@@ -216,6 +216,13 @@ pub struct SocietySettings {
     /// Memories kept per person before eviction. Design default (no source paper gives this
     /// number).
     pub memory_capacity: usize,
+    /// Rumors one person keeps before the least useful is forgotten. Design default, on the same
+    /// footing as [`Self::memory_capacity`]: a person cannot hold every rumor the world ever
+    /// planted, and `Knowledge::best_telling` scans all of them on every gossip, so an unbounded
+    /// list made gossip cost grow with the length of the run. Measured: 344 entries per person after
+    /// 4 000 ticks on 12 people. Dunbar 2004 (DOI 10.1037/1089-2680.8.2.100) is the mechanism for
+    /// bounded social memory generally.
+    pub knowledge_capacity: usize,
     /// Assessment norm used when a witness judges a deed.
     pub assessment: AssessmentNorm,
     /// Probability that an interaction or activity produces a bark.
@@ -238,6 +245,7 @@ impl Default for SocietySettings {
             max_ties: 150,
             close_ties: 15,
             memory_capacity: 64,
+            knowledge_capacity: 64,
             assessment: AssessmentNorm::Standing,
             bark_chance: 0.35,
             tuning: Tuning::default(),

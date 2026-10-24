@@ -1677,6 +1677,9 @@ fn witness(
             deed_spec.harm,
             now as f32,
             true,
+            world
+                .get_resource::<crate::core::SocietySettings>()
+                .map_or(64, |s| s.knowledge_capacity),
         );
         for (watcher, knowledge) in known {
             if let Some(mut slot) = world.get_mut::<crate::Knowledge>(watcher) {

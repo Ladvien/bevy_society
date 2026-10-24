@@ -129,6 +129,7 @@ pub(crate) fn plant_rumor(
     harm: f32,
     now_days: f32,
     truth: bool,
+    knowledge_capacity: usize,
 ) -> RumorId {
     let id = book.add(Rumor {
         deed,
@@ -141,12 +142,16 @@ pub(crate) fn plant_rumor(
         known_by: 1,
         alive: true,
     });
-    origin_knowledge.insert(Known {
-        rumor: id,
-        belief: 1.0,
-        spreader: true,
-        heard_day: now_days,
-    });
+    origin_knowledge.insert(
+        Known {
+            rumor: id,
+            belief: 1.0,
+            spreader: true,
+            heard_day: now_days,
+        },
+        knowledge_capacity,
+        now_days,
+    );
     id
 }
 
@@ -220,12 +225,16 @@ pub(crate) fn gossip(
     }
 
     let belief = belief_after_hearing(teller_belief, listener_trust_in_teller);
-    listener_knowledge.insert(Known {
-        rumor,
-        belief,
-        spreader: true,
-        heard_day: now_days,
-    });
+    listener_knowledge.insert(
+        Known {
+            rumor,
+            belief,
+            spreader: true,
+            heard_day: now_days,
+        },
+        settings.knowledge_capacity,
+        now_days,
+    );
     if let Some(entry) = book.get_mut(rumor) {
         entry.known_by += 1;
     }

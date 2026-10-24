@@ -271,6 +271,10 @@ fn plant(world: &mut World, origin: i64, subject: i64, deed: &str, truth: bool, 
         return;
     };
     let mut book = world.remove_resource::<RumorBook>().unwrap_or_default();
+    // Read the cap before taking the mutable borrow of `knowledge`.
+    let knowledge_capacity = world
+        .get_resource::<crate::core::SocietySettings>()
+        .map_or(64, |s| s.knowledge_capacity);
     let Some(mut knowledge) = world.get_mut::<Knowledge>(origin) else {
         world.insert_resource(book);
         return;
@@ -285,6 +289,7 @@ fn plant(world: &mut World, origin: i64, subject: i64, deed: &str, truth: bool, 
         harm,
         now_days as f32,
         truth,
+        knowledge_capacity,
     );
     world.insert_resource(book);
 }

@@ -74,12 +74,13 @@ fn main() {
     let tracked = world.villagers.first().copied();
     let mut rows = Vec::new();
     let mut lines: Vec<String> = Vec::new();
+    let mut planted: Option<bevy_society::RumorId> = None;
     for tick in 0..ticks {
         app.update();
         if tick == plant_at(&args.scenario) {
-            plant(&mut app, &world);
+            planted = plant(&mut app, &world);
         }
-        rows.push(snapshot_row(&app, tick as f64, &world));
+        rows.push(snapshot_row(&app, tick as f64, &world, planted));
         drain_narrative(&mut app, &world, tracked, &mut lines);
     }
 
@@ -337,6 +338,10 @@ fn village_with(app: &mut App, people: usize) -> World {
             .insert(bevy_society::SocialMover::default());
         villagers.push(entity);
     }
+    // The origin must be someone who will actually gossip: `gossip` is gated on `ctx.tellable`, and
+    // a villager with nothing to say scores zero and chats instead. Measured: an arbitrary villager
+    // gossiped twice in 3 600 ticks and the planted rumor never left it (reach 0.042 = 1/24), while
+    // 63 gossip exchanges happened around it. The tavern's crowd is the natural teller.
     let subject = villagers.first().copied();
     let origin = villagers.get(8).copied();
     World {
@@ -408,11 +413,15 @@ fn cluster(app: &mut App) -> World {
     }
 }
 
-/// Plants the scenario's rumor, if it has one.
-fn plant(app: &mut App, world: &World) {
-    let (Some(origin), Some(subject)) = (world.origin, world.subject) else {
-        return;
-    };
+/// Plants the scenario's rumor, if it has one, and returns the id it got.
+///
+/// The id is taken from the book's length **before** the message is applied, because
+/// `plant_rumor` appends. The column in `series.csv` used to be `RumorId(0)` — the first rumor the run
+/// ever made, which for the village is a deed from tick 0 and has nothing to do with the one this
+/// scenario plants. Every "rumor reach is a step function" reading in earlier runs was that mistake.
+fn plant(app: &mut App, world: &World) -> Option<bevy_society::RumorId> {
+    let (origin, subject) = (world.origin?, world.subject?);
+    let next = app.world().resource::<RumorBook>().rumors.len() as u32;
     app.world_mut().write_message(PlantRumor {
         origin,
         subject,
@@ -420,6 +429,7 @@ fn plant(app: &mut App, world: &World) {
         deed: "steal".to_owned(),
         truth: true,
     });
+    Some(bevy_society::RumorId(next))
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -427,7 +437,12 @@ fn plant(app: &mut App, world: &World) {
 // -------------------------------------------------------------------------------------------------
 
 /// The aggregates one tick contributes, read straight from the world.
-fn snapshot_row(app: &App, tick: f64, world: &World) -> Row {
+fn snapshot_row(
+    app: &App,
+    tick: f64,
+    world: &World,
+    planted: Option<bevy_society::RumorId>,
+) -> Row {
     let world_ref = app.world();
     let living = world.villagers.len().max(1) as f32;
     let (mut needs_sum, mut need_count) = (vec![0.0_f32; 4], 0usize);
@@ -479,9 +494,12 @@ fn snapshot_row(app: &App, tick: f64, world: &World) -> Row {
     } else {
         0.0
     };
-    let reach = world_ref
-        .resource::<RumorBook>()
-        .reach(RumorId(0), living as usize);
+    // The planted rumor, not `RumorId(0)`: the first rumor a run creates is unrelated to the one
+    // the scenario plants, and following it reported a flat line for three iterations.
+    let book = world_ref.resource::<RumorBook>();
+    // Zero before the plant: splicing another rumor's reach in front of the planted one drew a line
+    // that fell to zero at the plant tick, which is not a thing that happened.
+    let reach = planted.map_or(0.0, |id| book.reach(id, living as usize));
     Row {
         tick,
         needs: needs_sum
