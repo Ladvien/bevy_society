@@ -2822,7 +2822,7 @@ shipping a model change sold as a fix that leaves 260 friend pairs).
 
 **Dead-code delta.** Zero. **Village unchanged:** friends 22 / rivals 33.
 
-**Commit** `pending`.
+**Commit** `3405c84`.
 
 **Top 5 remaining.**
 
