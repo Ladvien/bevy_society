@@ -4,6 +4,10 @@ All notable changes to bevy_society. The format follows [Keep a Changelog](https
 
 ## [Unreleased]
 
+### Added
+
+- **A villager spends 62.5% of its life walking, and the harness was hiding it.** The evidence harness tallied `Doing.activity` with no distinction for whether the person had arrived, so a person walking to bed was counted as sleeping. It now reports `travelling:<activity>` separately, which reveals that **only 14.7% of person-ticks are actually asleep** — below the 33.3% one 8-hour sleep a day allows — while **62.5% are travel**. The cause is arithmetic: at 64 s/day a crossing walk in the 8.2 m village is **375 ticks**, and eight starter activities are shorter than that (`snub` 17, `compliment` 34, `chat` 51, `gossip` 51, `play` 85, `wander` 85, `eat` 128, `relax` 256), **five of which do not score `Distance` at all**. `needs-decision/travel-cost-is-not-scored.md` records the measured fix — `Distance` on `eat`, `relax` and `compliment` takes travelling to **50.5%** — and recommends a crate-level consideration instead of a host-file edit.
+
 ### Fixed
 
 - **The travel timeout is fitted to the layout, and the village stops being asleep half the time.** `travel_timeout_hours` was **20 game-hours** — **74.7 m** of walking at 64 s/day — in a village **8.2 m** across whose longest walk is 2.2 hours. A person who could not reach its bed was therefore reported asleep for two and a half times the length of the sleep. Fitted to 4 hours (14.9 m):

@@ -667,10 +667,18 @@ fn snapshot_row(
             }
         }
         if let Some(activity) = world_ref.get::<Doing>(entity) {
-            let name = world_ref
+            let base = world_ref
                 .resource::<SocietyDefs>()
                 .activity_name(activity.activity)
                 .to_owned();
+            // **A person still travelling is not doing the activity.** `Doing.activity` names the target
+            // from the moment it is chosen, so tallying it raw reports a village asleep 36% of the time
+            // against the 33% one 8-hour sleep a day allows — the gap is people walking to bed.
+            let name = if activity.arrived_day.is_some() {
+                base
+            } else {
+                format!("travelling:{base}")
+            };
             *doing.entry(name).or_insert(0) += 1;
         }
     }
