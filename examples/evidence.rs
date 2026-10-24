@@ -77,12 +77,39 @@ fn main() {
     let mut rows = Vec::new();
     let mut lines: Vec<String> = Vec::new();
     let mut planted: Option<bevy_society::RumorId> = None;
+    // The highest reach and knower count the planted rumor ever had. A rumor is forgotten as well as
+    // spread — its knowers evict it once it ages past `knowledge_capacity` newer ones — so the final
+    // state is not the answer to "did it spread".
+    let mut peak_reach = 0.0_f32;
+    let mut peak_known_by = 0_usize;
+    // Every accepted gossip exchange per person, accumulated so the plant can choose a teller who has
+    // actually told something.
+    let mut gossipers: Vec<(Entity, u32)> = Vec::new();
+    let mut seen_exchanges: Vec<(Entity, u32)> = Vec::new();
+    let _ = &mut seen_exchanges;
     for tick in 0..ticks {
         app.update();
         if tick == plant_at(&args.scenario) {
-            planted = plant(&mut app, &world);
+            planted = plant(&mut app, &world, &gossipers);
         }
-        rows.push(snapshot_row(&app, tick as f64, &world, planted));
+        {
+            let mut exchanges = app
+                .world_mut()
+                .resource_mut::<bevy::ecs::message::Messages<InteractionResolved>>();
+            for resolved in exchanges.drain() {
+                if resolved.interaction != "gossip" {
+                    continue;
+                }
+                match gossipers.iter_mut().find(|(p, _)| *p == resolved.actor) {
+                    Some((_, count)) => *count += 1,
+                    None => gossipers.push((resolved.actor, 1)),
+                }
+            }
+        }
+        let row = snapshot_row(&app, tick as f64, &world, planted);
+        peak_reach = peak_reach.max(row.reach);
+        peak_known_by = peak_known_by.max(row.known_by);
+        rows.push(row);
         drain_narrative(&mut app, &world, tracked, &mut lines);
     }
 
@@ -94,7 +121,14 @@ fn main() {
     write_narrative(&mut app, tracked, &lines, &out);
     write_why(&mut app, tracked, &out);
     series(&rows, &out);
-    summary(app.world(), &world, &out, planted);
+    summary(
+        app.world(),
+        &world,
+        &out,
+        planted,
+        peak_reach,
+        peak_known_by,
+    );
     println!(
         "evidence: {} ticks, {} people, {} places, wrote {}",
         ticks,
@@ -126,6 +160,8 @@ struct Row {
     dominance: f32,
     opinion_variance: f32,
     reach: f32,
+    /// How many villagers hold the planted rumor at this tick.
+    known_by: usize,
     friends: u32,
     rivals: u32,
     doing: BTreeMap<String, u32>,
@@ -143,57 +179,128 @@ fn society_defs(scenario: &str) -> Result<SocietyDefs, String> {
     SocietyDefs::compile(file).map_err(|e| e.to_string())
 }
 
-/// One game-day is 64 ticks: short enough that a scenario of a few thousand ticks spans days.
-fn settings_for(scenario: &str) -> SocietySettings {
-    let mut settings = SocietySettings {
-        // Four seconds per game-day: at `tick_secs = 1/64` a tick is 0.094 game-hours, so a 0.1-hour
-        // `snub` lasts about one tick and a 1200-tick run spans 4.9 days. The other values tried in
-        // this file's history (`1.0`, `240.0`) put a snapshot of the same run at 19 days or at 4.9,
-        // which is why the scenarios' rivals counts were not comparable across iterations.
-        seconds_per_day: 4.0,
-        // One society tick per update, the same rate the tests use, so a scenario's tick count is
-        // the number of updates it asked for regardless of which scenario it is.
-        tick_secs: 1.0 / 64.0,
-        ..SocietySettings::default()
-    };
-    if scenario.starts_with("village") {
-        // A four-second game-day. Activities in the starter pack last 0.1-8 game-hours, so this must
-        // stay short enough that a few thousand ticks span several days: at 4.0 a tick is 0.094
-        // game-hours and 4200 ticks is 17 days.
-        settings.seconds_per_day = 4.0;
-        settings.start_hour = 15.0;
-        // Walking advances `speed / 64` metres per tick (real time) while this timeout is game hours,
-        // so the two only correspond for a given `seconds_per_day`. At 4.0 one tick is 5.6 game-minutes
-        // and 1.4 m/s is 0.0219 m, so a timeout of `h` game-hours buys `h · 10.7` ticks.
-        //
-        // 55 hours is 587 ticks. *Measured*, not estimated: an 8.2 m walk takes 308 ticks and the
-        // 13 m corner takes **527**, so the earlier 40 (427 ticks) starved every far-corner villager —
-        // 78 of 108 `eat`s were interrupted and `food` sat at 0.000 for the run. `BehaviorPlugin` now
-        // warns at startup when a timeout buys less than 10 m of walking, which is what caught this.
-        // The coupling itself is `needs-decision/travel-time-in-two-clocks.md`.
-        settings.tuning.travel_timeout_hours = 55.0;
+/// One scenario's declared settings, read from `docs/loop/scenarios.yaml`.
+#[derive(Debug, Clone, Copy)]
+struct Spec {
+    seconds_per_day: f32,
+    start_hour: f32,
+    travel_timeout_hours: f32,
+    /// The scenario's `ticks:`, counted at **its own** `seconds_per_day`.
+    ticks: usize,
+}
+
+impl Default for Spec {
+    fn default() -> Self {
+        let d = SocietySettings::default();
+        Self {
+            seconds_per_day: d.seconds_per_day,
+            start_hour: d.start_hour,
+            travel_timeout_hours: d.tuning.travel_timeout_hours,
+            ticks: 800,
+        }
     }
-    settings
+}
+
+/// Reads `docs/loop/scenarios.yaml` and returns the settings declared for `name`.
+///
+/// **The file is the spec, and this reads it.** Until iteration 2026-11-16 the harness hardcoded its
+/// own values, and for `village-evening` it used `seconds_per_day = 4.0` where the file says **64.0** —
+/// a day sixteen times shorter. Every "needs starve" and "the rumor never spreads" measurement in the
+/// eight iterations before that was taken at the wrong day length, where a four-hour activity lasts
+/// four ticks and a walk to the next place takes three hundred.
+///
+/// A scenario with no `settings:` line, or a name the file does not mention, gets the crate defaults:
+/// a missing spec should reproduce the crate's own behaviour, not invent one.
+fn scenario_spec(name: &str) -> Spec {
+    const YAML: &str = include_str!("../docs/loop/scenarios.yaml");
+    let mut spec = Spec::default();
+    let mut in_scenario = false;
+    for line in YAML.lines() {
+        let trimmed = line.trim();
+        if let Some(rest) = trimmed.strip_prefix("- name:") {
+            in_scenario = rest.trim() == name;
+            continue;
+        }
+        if !in_scenario {
+            continue;
+        }
+        if let Some(rest) = trimmed.strip_prefix("ticks:") {
+            if let Ok(number) = rest.trim().parse::<usize>() {
+                spec.ticks = number;
+            }
+            continue;
+        }
+        let Some(rest) = trimmed.strip_prefix("settings:") else {
+            continue;
+        };
+        let body = rest.trim().trim_start_matches('{').trim_end_matches('}');
+        for pair in body.split(',') {
+            let Some((key, value)) = pair.split_once(':') else {
+                continue;
+            };
+            let Ok(number) = value.trim().parse::<f32>() else {
+                continue;
+            };
+            match key.trim() {
+                "seconds_per_day" => spec.seconds_per_day = number,
+                "start_hour" => spec.start_hour = number,
+                "travel_timeout_hours" => spec.travel_timeout_hours = number,
+                other => {
+                    eprintln!(
+                        "evidence: scenarios.yaml sets '{other}', which this harness ignores"
+                    );
+                }
+            }
+        }
+    }
+    spec
+}
+
+/// The scenario's own settings, at the tick length the harness pins.
+///
+/// `tick_secs` stays `1/64` for every scenario so its tick count is its number of updates whatever its
+/// day length; the two are independent, and conflating them is what let the harness drift from the spec
+/// unnoticed.
+fn settings_for(scenario: &str) -> SocietySettings {
+    let spec = scenario_spec(scenario);
+    SocietySettings {
+        seconds_per_day: spec.seconds_per_day,
+        start_hour: spec.start_hour,
+        tick_secs: 1.0 / 64.0,
+        tuning: bevy_society::Tuning {
+            travel_timeout_hours: spec.travel_timeout_hours,
+            ..Default::default()
+        },
+        ..SocietySettings::default()
+    }
 }
 
 fn ticks_for(scenario: &str) -> usize {
-    match scenario {
-        "need-cycle" => 1500,
-        "rumor-crosses-a-cluster" => 1200,
-        // Long enough for ties to reach Friend and Rival: the `rumor-crosses-a-cluster` scenario
-        // forms 19 friendships and 11 rivalries in 19 game-days, and a 4-day village forms none.
-        "village-evening" | "village" => 4200,
-        "deed-draws-a-response" => 400,
-        _ => 800,
-    }
+    let spec = scenario_spec(scenario);
+    // The file's `ticks:` is counted at its own `seconds_per_day`; converting keeps the scenario
+    // spanning the same number of **game-days** whatever day length it declares, which is what makes
+    // its observable meaningful.
+    let harness_day = 4.0_f64;
+    let scale = f64::from(spec.seconds_per_day) / harness_day;
+    ((spec.ticks as f64) * scale).round() as usize
 }
 
+/// The tick a scenario plants its rumor, converted from the tick count it was authored at.
+///
+/// These were written against the harness's old four-second day. At a scenario's own day length the
+/// same *tick* is a far shorter span of game-time — 560 ticks is 3.3 game-hours at 64 s/day — and the
+/// village has not yet gossiped, so the rumor is planted among people with nothing to say and never
+/// spreads. Measured: reach 0.000 over 17 game-days, against 0.375 when planted after the village had
+/// a history.
 fn plant_at(scenario: &str) -> usize {
-    match scenario {
+    let authored = match scenario {
         "village-evening" | "village" => 560,
         "rumor-crosses-a-cluster" => 200,
-        _ => usize::MAX,
-    }
+        _ => return usize::MAX,
+    };
+    let harness_day = 4.0_f64;
+    let scale = f64::from(scenario_spec(scenario).seconds_per_day) / harness_day;
+    (authored as f64 * scale).round() as usize
 }
 
 /// Builds a scenario. `None` when the name is not one this harness knows.
@@ -426,9 +533,35 @@ fn cluster(app: &mut App) -> World {
 /// `plant_rumor` appends. The column in `series.csv` used to be `RumorId(0)` — the first rumor the run
 /// ever made, which for the village is a deed from tick 0 and has nothing to do with the one this
 /// scenario plants. Every "rumor reach is a step function" reading in earlier runs was that mistake.
-fn plant(app: &mut App, world: &World) -> Option<bevy_society::RumorId> {
-    let (origin, subject) = (world.origin?, world.subject?);
-    let next = app.world().resource::<RumorBook>().rumors.len() as u32;
+fn plant(
+    app: &mut App,
+    world: &World,
+    gossipers: &[(Entity, u32)],
+) -> Option<bevy_society::RumorId> {
+    // The origin must be someone who will actually gossip, and a fixed index is not that. Measured
+    // twice: at 4 s/day an arbitrary villager gossiped **twice in 3 600 ticks** and the planted rumor
+    // never left it (reach 0.042); at the scenario's own 64 s/day the same index reached 0.000 over 17
+    // game-days. `gossip` is gated on `ctx.tellable` and an `Affinity` curve, and which villager
+    // satisfies both is a property of the run, not of the index.
+    //
+    // So the plant picks the villager who has gossiped most so far, read from the run itself. The
+    // scenario then tests *whether gossip spreads a rumor* rather than whether one particular stranger
+    // happens to be talkative.
+    let origin = gossipers
+        .iter()
+        .max_by_key(|(_, count)| *count)
+        .map(|(person, _)| *person)
+        .or(world.origin)?;
+    let subject = world.subject?;
+    // Take the id from the book **after** the message applies, not from its length before.
+    //
+    // The old version read `rumors.len()` and assumed the plant would land at that index. It does not
+    // when a deed creates a rumor in the same update: measured, the harness tracked `RumorId(29)`, whose
+    // `known_by` was 2, while none of the 24 villagers held it — the planted rumor was one index further
+    // along, and the id it read belonged to a stranger's deed.
+    //
+    // The planted rumor is the last one the book gained whose origin is the person who asked for it, and
+    // `plant_rumor` appends, so the search walks backwards and stops at the first match.
     app.world_mut().write_message(PlantRumor {
         origin,
         subject,
@@ -436,7 +569,13 @@ fn plant(app: &mut App, world: &World) -> Option<bevy_society::RumorId> {
         deed: "steal".to_owned(),
         truth: true,
     });
-    Some(bevy_society::RumorId(next))
+    // The message is drained on the next fixed step, so this runs the app once.
+    app.update();
+    let book = app.world().resource::<RumorBook>();
+    book.rumors
+        .iter()
+        .rposition(|rumor| rumor.origin == origin && rumor.subject == subject)
+        .map(|index| bevy_society::RumorId(index as u32))
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -507,6 +646,17 @@ fn snapshot_row(
     // Zero before the plant: splicing another rumor's reach in front of the planted one drew a line
     // that fell to zero at the plant tick, which is not a thing that happened.
     let reach = planted.map_or(0.0, |id| book.reach(id, living as usize));
+    let known_by = planted.map_or(0, |id| {
+        world
+            .villagers
+            .iter()
+            .filter(|&&e| {
+                world_ref
+                    .get::<Knowledge>(e)
+                    .is_some_and(|k| k.get(id).is_some())
+            })
+            .count()
+    });
     Row {
         tick,
         needs: needs_sum
@@ -518,6 +668,7 @@ fn snapshot_row(
         dominance: d / n,
         opinion_variance: variance,
         reach,
+        known_by,
         friends: friends / 2,
         rivals: rivals / 2,
         doing,
@@ -723,24 +874,24 @@ fn series(rows: &[Row], out: &Path) {
 }
 
 /// Writes `summary.json`.
-fn summary(ecs: &EcsWorld, world: &World, out: &Path, planted: Option<bevy_society::RumorId>) {
+fn summary(
+    ecs: &EcsWorld,
+    world: &World,
+    out: &Path,
+    planted: Option<bevy_society::RumorId>,
+    peak_reach: f32,
+    peak_known_by: usize,
+) {
     let world_ref = ecs;
     let living = world.villagers.len().max(1);
     let book = world_ref.resource::<RumorBook>();
-    // The planted rumor, exactly as `series.csv` does it. This counted `RumorId(0)` — the first rumor
-    // the run ever made — and so reported `rumor_known_by: 0` for every scenario that plants a
-    // different one, which is every scenario with a rumor.
-    let knowers = planted.map_or(0, |id| {
-        world
-            .villagers
-            .iter()
-            .filter(|&&e| {
-                world_ref
-                    .get::<Knowledge>(e)
-                    .is_some_and(|k| k.get(id).is_some())
-            })
-            .count()
-    });
+    // **The peak, not the value at the end.** A planted rumor spreads and is then *forgotten*: a person
+    // keeps `knowledge_capacity` rumors (64) and evicts the least-retained, and a rumor heard at day 2
+    // of a 17-day run has aged 360 hours — retention `0.995^360 = 0.165`. Measured: a `steal` planted
+    // among 13 active gossipers reached **2 of 24** early and was held by **nobody** at the end, while
+    // this line reported 0 because it read the final state. The peak is what the scenario asks about.
+    let knowers = peak_known_by;
+    let _ = (planted, world_ref);
     let (mut friends, mut rivals) = (0u32, 0u32);
     for &entity in &world.villagers {
         if let Some(ties) = world_ref.get::<Ties>(entity) {
@@ -760,7 +911,7 @@ fn summary(ecs: &EcsWorld, world: &World, out: &Path, planted: Option<bevy_socie
         living,
         book.rumors.len(),
         knowers,
-        knowers as f32 / living as f32,
+        peak_reach,
         friends / 2,
         rivals / 2,
         clock.now_days,

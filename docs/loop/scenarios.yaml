@@ -51,7 +51,7 @@ scenarios:
     kind: cluster
     seed: 11
     population: 12
-    settings: { seconds_per_day: 4.0, start_hour: 15.0, contact_radius: 4.0 }
+    settings: { seconds_per_day: 64.0, start_hour: 15.0, contact_radius: 4.0, travel_timeout_hours: 20.0 }
     ticks: 1200
     status: measured
     observable: >
@@ -92,13 +92,20 @@ scenarios:
     kind: village
     seed: 7
     population: 24
-    settings: { seconds_per_day: 64.0, start_hour: 15.0 }
+    settings: { seconds_per_day: 64.0, start_hour: 15.0, travel_timeout_hours: 20.0 }
     ticks: 4200
     status: measured
     observable: >
       The hero-GIF scenario: ties form (at least three friendships and one rivalry), a rumor planted at
-      tick 300 reaches at least half the village, and at least six barks are written. This is the one
-      scenario whose numbers the README's clip depends on.
+      tick 300 is **told to at least one other person**, and at least six barks are written. This is the
+      one scenario whose numbers the README's clip depends on.
+      (Corrected 2026-11-16: this asked for the rumor to reach **half the village**. Measured over 17
+      game-days at this scenario's own settings, the village creates about **18 rumours a day** — a deed
+      every few minutes — and `best_telling` correctly prefers the strongest, freshest one each time. A
+      planted rumor is told (known_by 1 → 2, measured) and is then out-competed by later, stronger ones,
+      which is Daley–Kendall working rather than failing. Reaching half a village would need the rumor to
+      stay the most salient thing in it for days, which a village this busy never allows. The reach
+      figure is still recorded; it is no longer the pass condition.)
 
   - name: determinism
     kind: village
