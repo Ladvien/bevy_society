@@ -155,6 +155,10 @@ pub struct Tuning {
     pub tier_cutoff: f32,
     /// Hours a person may travel toward an activity before giving up.
     pub travel_timeout_hours: f32,
+    /// Walking speed in metres per **real** second, used by the core walker that moves a person
+    /// toward its `Destination` when no `SocialMover` is steering. 1.4 m/s is an ordinary human
+    /// walking speed. `SocialMover::speed` overrides it per person.
+    pub walk_speed: f32,
 }
 
 impl Default for Tuning {
@@ -186,6 +190,7 @@ impl Default for Tuning {
             contest_steepness: 4.0,
             tier_cutoff: 0.25,
             travel_timeout_hours: 2.0,
+            walk_speed: 1.4,
         }
     }
 }

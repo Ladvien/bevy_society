@@ -48,8 +48,10 @@ pub struct Doing {
 
 /// Where a travelling person is walking to, on the society plane.
 ///
-/// Inserted and updated while travelling and removed on arrival or when the activity ends. Games
-/// without the steering plugin move persons themselves toward this point.
+/// Inserted and updated while travelling and removed on arrival or when the activity ends. A host
+/// that does not steer moves people with [`Tuning::walk_speed`](crate::Tuning) — see
+/// `walk_toward_destination`. A host that adds a `SocialMover` per person steers them itself and this
+/// system leaves them alone.
 #[derive(Component, Reflect, Debug, Clone, Copy, PartialEq, Default)]
 #[reflect(Component)]
 pub struct Destination(pub Vec2);
@@ -179,6 +181,12 @@ impl Plugin for BehaviorPlugin {
                 (end_activities, decide_activities)
                     .chain()
                     .in_set(crate::SocietySystems::Decide),
+            )
+            .add_systems(
+                FixedUpdate,
+                // The walk runs every fixed step, not only on society ticks, so motion stays smooth
+                // while the simulation ticks slowly — the same rule `steer_movers` follows.
+                walk_toward_destination.after(crate::SocietySystems::Rules),
             )
             .add_systems(
                 FixedUpdate,
@@ -446,6 +454,56 @@ fn target_position(
 // -------------------------------------------------------------------------------------------------
 // Ending
 // -------------------------------------------------------------------------------------------------
+
+/// Moves every person with a [`Destination`] toward it, unless something else is steering them.
+///
+/// This is the promise `Destination`'s own doc comment makes — *"games without the steering plugin
+/// move persons themselves toward this point"* — kept by the plugin that creates the destination.
+/// Without it a society has no way to arrive: measured, a person given `Destination(6.5, -5.0)` sat at
+/// `(0, 0)` for 600 ticks, every `Place`- and `Home`-targeted activity timed out, and the needs those
+/// activities satisfy never rose.
+///
+/// A person carrying a `SocialMover` is skipped: that is the steering plugin's, and two systems
+/// writing one `Transform` would fight. The speed is [`Tuning::walk_speed`], metres per real second
+/// at the fixed step, which is the same unit `SocialMover::speed` uses.
+#[cfg(feature = "steering")]
+type NotSteered = Without<crate::SocialMover>;
+/// Without the `steering` feature there is no `SocialMover` component to exclude, so every traveller
+/// is walked by this system. The alias keeps one function body for both builds.
+#[cfg(not(feature = "steering"))]
+type NotSteered = ();
+
+fn walk_toward_destination(
+    settings: Res<SocietySettings>,
+    time: Res<Time<Fixed>>,
+    mut walkers: Query<(&Destination, &mut Transform), NotSteered>,
+) {
+    let step = (settings.tuning.walk_speed * time.delta_secs()) as f64;
+    if step <= 0.0 {
+        return;
+    }
+    let plane = settings.plane;
+    for (destination, mut transform) in &mut walkers {
+        let mut here = plane.project(transform.translation);
+        let toward = destination.0 - here;
+        let distance = toward.length();
+        if distance <= f32::EPSILON {
+            continue;
+        }
+        let advanced = if f64::from(distance) <= step {
+            distance
+        } else {
+            step as f32
+        };
+        here += toward / distance * advanced;
+        // Keep the body's own height: `SocietyPlane::lift` puts the other axis at zero, which is right
+        // for a ground marker and wrong for a capsule.
+        transform.translation = match plane {
+            crate::SocietyPlane::XZ => Vec3::new(here.x, transform.translation.y, here.y),
+            crate::SocietyPlane::XY => Vec3::new(here.x, here.y, transform.translation.z),
+        };
+    }
+}
 
 /// Ends every activity that is over (plan D7): its duration passed, its `Person` target left
 /// perception, or it never arrived within `travel_timeout_hours`.
