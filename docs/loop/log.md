@@ -2563,7 +2563,7 @@ file would have measured a different experiment under the same `status: measured
 
 **Dead-code delta.** Zero. **Tests that assert a scenario:** one, where there were none.
 
-**Commit** `pending`.
+**Commit** `f0ca1ac`.
 
 **Top 5 remaining.**
 
