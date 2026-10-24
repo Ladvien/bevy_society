@@ -767,3 +767,69 @@ GREAT at seed 99 / 40 people — coherent narrative, rivals back; needs still NO
 4. **`warn_unscored_fields` says "1 definitions"** — plural helper.
 5. **`need-cycle` is still `pending`** in `scenarios.yaml` — with this fix it may pass once travel
    lands, and should be measured against both.
+
+## 2026-11-06-01 — A memory nobody bounded, and a column that lied
+
+**Pick.** The log's #2, "rumor reach flat-lines", which turned out to be **two** defects: an unbounded
+`Knowledge`, and an evidence column measuring the wrong rumor.
+
+**Defect 1 — `Knowledge` had no cap.** `Memories` evicts at 64 and `Ties` trims at Dunbar's 150;
+`Knowledge` grew forever, and `best_telling` scans all of it on every gossip.
+
+| tick | rumors in book | max entries one person held |
+|---|---|---|
+| 300 | 24 | 24 |
+| 1 000 | 88 | 78 |
+| 2 000 | 173 | 155 |
+| 4 000 | 386 | **344** |
+
+Fixed: `SocietySettings::knowledge_capacity` (default 64), evicting the lowest
+`belief · 0.995^(hours since heard)` — the crate's own `telling_weight` minus the valence `Knowledge`
+cannot see. Test written red first, capacity 32 against a book of 325: **287 → 32**.
+
+**Defect 2 — the harness measured `RumorId(0)`.** The first rumor a run ever creates, not the one the
+scenario plants. Three iterations recorded "rumor reach flat-lines" from that column. Following the
+planted id:
+
+| scenario | old column | planted rumor |
+|---|---|---|
+| `rumor-crosses-a-cluster` | 1 step, flat 0.333 | **6 changes**, 0 → 0.333 over ~350 ticks |
+| `village-evening` | flat 0.417 | **0.042 = 1/24**, never spreads |
+
+The first plot of the fix spliced both rumors into one line and fell to zero at the plant tick; the
+plot caught that, and it is now zero before the plant.
+
+**The village figure is worse than reported, and why.** Traced: the origin gossiped **twice in 3 600
+ticks** and its pick was stifled or ineligible both times, while 63 gossip exchanges happened around
+it. The scenario picks an arbitrary villager as town crier. Documented at the plant site; not fixed
+here.
+
+**Behaviour unchanged at the defaults — verified, not assumed.** The village's book peaks at 34, so a
+cap of 64 cannot bind: **4 200 / 4 200** `series.csv` rows identical and the narrative identical.
+
+**Perf.** Short runs unchanged (14.96 ms at 1 000). The long run is where it shows: **63.36 → 61.91 ms
+(−2.3%)**. The other 4× is the rumor book, below.
+
+**Not fixed, filed.** `Rumor.alive` is cleared only when a subject despawns, so the book grows 848 →
+**8 357** over 5 000 ticks and `rules.rs` walks all of it every tick. Measured: **992 rumors, 70 still
+tellable, 922 untellable (93%)**. `needs-decision/retiring-untellable-rumors.md` recommends retiring
+when no living spreader holds one; it changes what a host reads in `RumorBook.alive`, so it is the
+operator's call.
+
+**Tests.** 21 → **22** binaries both feature sets. Dead-code inventory: zero, unchanged; one public
+field added.
+
+**Verdicts.** Behaviour GREAT (287 → 32; defaults byte-identical). Zoom GREAT — it caught two harness
+errors of mine and traced the village plant to its origin. Fresh eyes GREAT — the cap holds at 40 and
+200 people; the remaining growth is filed, not unnoticed.
+
+**Commit.** `b5daf26`.
+
+**Top 5 remaining.**
+1. **Retire untellable rumors** — 93% of the book, and the per-tick walk over it is a 4× cost growth.
+   Filed with a recommendation.
+2. **The two-clocks decision** — still the only cause of need starvation in a real layout.
+3. **The village's rumor origin** — an arbitrary villager cannot be the town crier; pick a teller that
+   gossips or lower the target.
+4. **`Field` / `Gradient` wiring** — unchanged.
+5. **`warn_unscored_fields` says "1 definitions"** — plural helper.
