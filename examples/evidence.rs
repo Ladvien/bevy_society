@@ -42,6 +42,9 @@ fn main() {
         }
     };
     let mut settings = settings_for(&args.scenario);
+    if let Some(spd) = args.seconds_per_day {
+        settings.seconds_per_day = spd;
+    }
     if let Some(seed) = args.seed {
         settings.seed = seed;
     }
@@ -72,7 +75,7 @@ fn main() {
         std::process::exit(1);
     };
 
-    let ticks = ticks_for(&args.scenario);
+    let ticks = ticks_for(&args.scenario, args.seconds_per_day);
     let tracked = world.villagers.first().copied();
     let mut rows = Vec::new();
     let mut lines: Vec<String> = Vec::new();
@@ -312,13 +315,14 @@ fn settings_for(scenario: &str) -> SocietySettings {
     }
 }
 
-fn ticks_for(scenario: &str) -> usize {
+fn ticks_for(scenario: &str, day_override: Option<f32>) -> usize {
     let spec = scenario_spec(scenario);
+    let day = day_override.unwrap_or(spec.seconds_per_day);
     // The file's `ticks:` is counted at its own `seconds_per_day`; converting keeps the scenario
     // spanning the same number of **game-days** whatever day length it declares, which is what makes
     // its observable meaningful.
     let harness_day = 4.0_f64;
-    let scale = f64::from(spec.seconds_per_day) / harness_day;
+    let scale = f64::from(day) / harness_day;
     ((spec.ticks as f64) * scale).round() as usize
 }
 
@@ -984,6 +988,10 @@ struct Args {
     seed: Option<u64>,
     /// Overrides the scenario's population.
     people: Option<usize>,
+    /// Overrides the scenario's `seconds_per_day`, so the same scenario can be re-read at a different
+    /// watch speed. The **observable** should not move: `seconds_per_day` is how fast a host watches a day,
+    /// not how much of it a person spends walking.
+    seconds_per_day: Option<f32>,
 }
 
 impl Args {
@@ -993,6 +1001,7 @@ impl Args {
             out: "docs/loop/evidence".to_owned(),
             seed: None,
             people: None,
+            seconds_per_day: None,
         };
         let mut argv = std::env::args().skip(1);
         while let Some(flag) = argv.next() {
@@ -1001,6 +1010,9 @@ impl Args {
                 "--out" => args.out = argv.next().unwrap_or_default(),
                 "--seed" => args.seed = argv.next().and_then(|v| v.parse().ok()),
                 "--people" => args.people = argv.next().and_then(|v| v.parse().ok()),
+                "--seconds-per-day" => {
+                    args.seconds_per_day = argv.next().and_then(|v| v.parse().ok())
+                }
                 other => {
                     eprintln!("evidence: unknown argument {other}");
                     std::process::exit(1);

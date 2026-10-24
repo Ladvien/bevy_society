@@ -119,6 +119,29 @@ fn every_startup_warning_is_asserted_from_one_app() {
         travel[0]
     );
 
+    // The walk-outlasts-activity warning: at 4 s per day a 10 m walk is 42.9 game-hours against a
+    // 0.1-hour activity, so every journey outlasts what it reaches.
+    let walk: Vec<&String> = captured
+        .iter()
+        .filter(|event| event.message.contains("longer than the mean activity"))
+        .map(|event| &event.message)
+        .collect();
+    assert_eq!(
+        walk.len(),
+        1,
+        "exactly one walk-outlasts-activity warning: {captured:?}"
+    );
+    assert!(
+        walk[0].contains("seconds_per_day"),
+        "the warning names the setting that rescales it: {}",
+        walk[0]
+    );
+    assert!(
+        walk[0].contains("travel-time-in-two-clocks"),
+        "the warning points at the open decision: {}",
+        walk[0]
+    );
+
     #[cfg(feature = "fields")]
     {
         let field: Vec<&String> = captured
@@ -179,5 +202,27 @@ fn the_starter_pack_warns_about_nothing() {
     assert!(
         short.is_empty(),
         "no starter activity is degenerate at the default day: {short:?}"
+    );
+    // And the walk does not outlast the mean activity at the default 240-second day: 10 m at 1.4 m/s is
+    // 0.71 game-hours against a 1.61 h mean. At 64 s/day it is 2.68 h and the warning fires — which is
+    // the project's own `village-evening`, where villagers spend 58.9% of their ticks travelling.
+    let durations: Vec<f64> = defs
+        .activity_durations()
+        .into_iter()
+        .skip(1)
+        .map(|(_, hours)| f64::from(hours))
+        .collect();
+    let mean = durations.iter().sum::<f64>() / durations.len() as f64;
+    let walk_at_default = 10.0 / 1.4 / 240.0 * 24.0;
+    assert!(
+        walk_at_default <= mean,
+        "a 10 m walk at the default day ({walk_at_default:.2}h) must not outlast the mean activity \
+         ({mean:.2}h), or the crate warns on its own pack"
+    );
+    let walk_at_village = 10.0 / 1.4 / 64.0 * 24.0;
+    assert!(
+        walk_at_village > mean,
+        "the same walk at the project's village day ({walk_at_village:.2}h) must outlast the mean \
+         ({mean:.2}h), which is the case the warning exists for"
     );
 }

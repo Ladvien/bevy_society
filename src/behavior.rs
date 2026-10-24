@@ -214,6 +214,7 @@ impl Plugin for BehaviorPlugin {
         warn_short_activities(defs, &settings);
         warn_unscored_fields(defs);
         warn_short_travel_reach(&settings);
+        warn_walk_outlasts_activity(defs, &settings);
         warn_unbalanced_needs(defs);
     }
 }
@@ -319,6 +320,67 @@ fn warn_short_travel_reach(settings: &SocietySettings) {
          activity is further away will always time out, and the needs those activities satisfy will \
          never be met. Raise travel_timeout_hours or shorten the walks.",
         settings.tuning.travel_timeout_hours, settings.seconds_per_day, ticks_available, metres
+    );
+}
+
+/// Warns that `seconds_per_day` makes a typical walk longer than the activities it reaches.
+///
+/// The same two clocks meet, and this is the consequence the timeout warning cannot see: a walk costs
+/// `seconds_per_day`, but every `duration_hours` is fixed in game time. So the **pacing knob rescales
+/// every journey against every activity**, and the society changes when a host only meant to change how
+/// fast it watches.
+///
+/// Measured on `village-evening`, seed 7, the same 16.4 game-days and the same 24 people, with only
+/// `seconds_per_day` varied:
+///
+/// | `seconds_per_day` | travelling | need mean |
+/// |---|---|---|
+/// | 64 | **58.9%** | 0.545 |
+/// | 144 | 50.4% | 0.603 |
+/// | 480 | **43.9%** | 0.624 |
+///
+/// Fifteen points of a villager's life, from a setting that reads like a rendering speed. The crate's
+/// own rule is that every rate is per game-day; walking is the exception, so the walk must be checked
+/// against the activities rather than assumed consistent.
+///
+/// The check compares `MIN_WALK_METRES` of walking against the **mean** activity duration. The mean, not
+/// the median, because a day's balance is carried by its long activities: the starter pack's median is
+/// 0.5 h, which a 240-second day's 0.71 h walk already exceeds, yet that day is healthy (`food` 0.494,
+/// needs 0.621). Over the mean the check separates the two cases that matter — the project's own
+/// `village-evening` at 64 s/day, where a 10 m walk costs 2.68 game-hours against a 1.61 h mean and
+/// villagers spend **58.9%** of their ticks travelling; and the shipped 240-second default, where the
+/// walk is 0.71 h and the same measure is 46.8% with every need met.
+fn warn_walk_outlasts_activity(defs: &SocietyDefs, settings: &SocietySettings) {
+    let day_seconds = f64::from(settings.seconds_per_day);
+    if day_seconds <= 0.0 {
+        return;
+    }
+    let durations: Vec<f64> = defs
+        .activities
+        .iter()
+        .enumerate()
+        .filter(|(index, _)| *index != usize::from(crate::defs::IDLE_ACTIVITY.0))
+        .map(|(_, activity)| f64::from(activity.duration_hours))
+        .collect();
+    if durations.is_empty() {
+        return;
+    }
+    let mean = durations.iter().sum::<f64>() / durations.len() as f64;
+    // The default walking speed, for the same reason `warn_short_travel_reach` names it: the warning
+    // speaks for the default a host gets, and cannot see a host's own `SocialMover::speed`.
+    let speed = 1.4_f64;
+    let walk_hours = MIN_WALK_METRES / speed / day_seconds * 24.0;
+    if walk_hours <= mean {
+        return;
+    }
+    warn!(
+        "bevy_society: at seconds_per_day {} a {MIN_WALK_METRES:.0} m walk costs {walk_hours:.2} game-hours, \
+         longer than the mean activity ({mean:.2}h) — people will spend most of the day walking to \
+         things that are over before they arrive, and the needs those activities satisfy will lag. This is \
+         the coupling `needs-decision/travel-time-in-two-clocks.md` records: walking is in real time and \
+         durations are in game time. Lengthen the activities, raise seconds_per_day, or move the places \
+         closer together.",
+        settings.seconds_per_day
     );
 }
 

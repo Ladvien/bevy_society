@@ -1957,3 +1957,64 @@ asserted by the test.
 3. **The clock decision** (`travel_timeout_hours` real-time) - escalated, still open.
 4. **A log-capture harness** - still blocking two warnings from being properly tested.
 5. **A spatial index for perception** past ~2 000 people, with benchmark numbers behind it.
+
+## 2026-11-24-01 - A rendering speed decided how much of life is walking
+
+**Pick.** Not the log's #1 (the travel curve's shape) and not the escalated clock decision, but the thing the
+two have in common: **the clock coupling is silent, and silence is not a decision the crate may defer** --
+its own argument for `warn_short_travel_reach`.
+
+The runner-up lost on measurement. Three curves on `eat` + `relax` at seed 7:
+
+| curve | travelling | needs |
+|---|---|---|
+| `Linear(-0.4, 1.0)` | 57.8% | 0.555 |
+| `Linear(-0.25, 1.0)` | 59.0% | 0.546 |
+| `Logistic(-6.0, 0.6)` | 53.1% | 0.533 |
+| baseline | 58.9% | 0.545 |
+
+**All within one point.** The curve is a 1-point lever. The clock is a **15-point** one.
+
+**The measurement.** `walk_speed` is metres per **real** second; every `duration_hours` is **game** hours.
+`seconds_per_day` bridges them, so the knob documented as "how fast you watch a day" also decides how much of
+it is walking. Same seed, same 24 people, same 16.4 game-days:
+
+| `seconds_per_day` | travelling | need mean | sleep |
+|---|---|---|---|
+| **64** | **58.9%** | 0.545 | 15.0% |
+| 144 | 50.4% | 0.603 | 17.0% |
+| 240 (default) | 46.8% | 0.621 | 16.5% |
+| **480** | **43.9%** | 0.624 | 17.3% |
+
+**Change.** `warn_walk_outlasts_activity` at startup: a 10 m walk costing more game-hours than the **mean**
+activity. Fires at the project's own 64 s/day village (2.68 h vs 1.62 h); quiet at the shipped 240 s default
+(0.71 h). **Mean, not median** -- measured: the pack's median of 0.5 h trips at the healthy default, which
+would have been a warning crying wolf on the crate's own pack.
+
+**Proof.** `--seconds-per-day 64` prints *"2.68 game-hours, longer than the mean activity (1.62h)"*;
+`--seconds-per-day 240` prints nothing (0 matches).
+
+**Evidence.** `runs/2026-11-24-01/evidence/coupling.png` (four travelling traces over 16.4 days, and the
+travelling/needs trade against the knob), `evidence/before/spd-{64,144,240,480}.csv`.
+
+**Verdicts.** Behavior GREAT (fires on the project's own day, silent on the default, both asserted). Zoom GREAT
+(travelling falls monotonically 58.9 -> 43.9 as the knob turns, needs rise 0.545 -> 0.624; damage concentrated
+at the short-day end, which is where it warns). Fresh eyes GREAT (one sentence to a host).
+
+**Dead-code delta.** Zero. Called from `finish`, both branches asserted.
+
+**Honest limit.** This **reports** the coupling; it does not reduce it. Option 2 in the decision file is the
+only one that closes this half, and it is not mine to take.
+
+**Commit** `pending`.
+
+**Top 5 remaining.**
+
+1. **The clock decision** - now measured at 15 points, so it is the largest behavioural lever left. Option 2
+   (walking in game time) closes the half that Option 1 leaves open.
+2. **The travel curve's shape** - a 1-point lever at seed 7; worth doing only alongside (1), which changes the
+   units it is expressed in.
+3. **The cluster's 1:24 starvation** - a second need; a schema change.
+4. **`--seconds-per-day` on every scenario** - the harness flag exists; `scenarios.yaml` still declares one
+   day length per scenario, so cross-speed comparison is manual.
+5. **A spatial index for perception** past ~2 000 people, with benchmark numbers behind it.

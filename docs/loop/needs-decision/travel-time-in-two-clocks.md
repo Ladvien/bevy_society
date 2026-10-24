@@ -52,6 +52,25 @@ Hosts set `travel_timeout_hours` from `seconds_per_day` and the walking distance
 - **Against:** the failure is silent and catastrophic — a village that cannot walk — and
   the crate's own capture shipped with it for two iterations.
 
+## Measured 2026-11-24: the coupling is larger than the timeout
+
+The timeout is one failure of this coupling. The other is silent and survives a correct timeout: because
+`walk_speed` is real-time and `duration_hours` is game-time, **`seconds_per_day` rescales every walk against
+every activity**. Same seed, same 24 people, same 16.4 game-days, only that knob varied:
+
+| `seconds_per_day` | travelling | need mean |
+|---|---|---|
+| 64 | **58.9%** | 0.545 |
+| 144 | 50.4% | 0.603 |
+| 240 (default) | 46.8% | 0.621 |
+| 480 | **43.9%** | 0.624 |
+
+Fifteen points. Option 2 (walking in game time) is the only one that closes *this* half, because it makes one
+knob stop being two. Option 1 still leaves `seconds_per_day` deciding the walk-to-activity ratio.
+
+`warn_walk_outlasts_activity` now reports the case at startup, which is the most the crate may do without
+deciding this.
+
 ## Recommendation
 
 **Option 1**, in a later iteration, as a deliberate breaking change with a `CHANGELOG`
