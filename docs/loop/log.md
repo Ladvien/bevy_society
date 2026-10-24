@@ -2121,7 +2121,7 @@ both reasoned from the code, both worth ~5%, neither the cause. The timers settl
 
 **Dead-code delta.** Zero.
 
-**Commit** `pending`.
+**Commit** `5ed3596`.
 
 **Top 5 remaining.**
 
