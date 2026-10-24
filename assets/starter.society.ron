@@ -101,7 +101,16 @@
             target: Person,
             duration_hours: 0.1,
             considerations: [
-                (input: Affinity, curve: Logistic(-8.0, 0.3)),
+                // A grudge, not low affinity. People snub those they have a reason to resent, not
+                // strangers they barely know: gating on `Affinity Logistic(-8, 0.3)` meant the
+                // village snubbed only people it had not yet befriended, so a society that talks
+                // kindly to everyone could never form a rivalry. Measured over 4200 ticks the
+                // village chose `snub` for 0 person-ticks; a cluster of strangers chose it for 2583.
+                //
+                // Bondü & Richter 2016 (DOI 10.3389/fpsyg.2016.00795) is the mechanism: rejection
+                // and provocation sensitivity predict reactive aggression — a reaction to how one
+                // has been treated, which is exactly `Memories::grudge`.
+                (input: Script("ctx.grudge(actor, target)"), curve: Linear(2.5, 0.0)),
             ],
             satisfies: [],
             interaction: Some("insult"),

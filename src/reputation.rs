@@ -80,7 +80,10 @@ pub(crate) fn witness_reaction(
     settings: &SocietySettings,
     now_days: f64,
 ) -> WitnessReaction {
-    let approval = opinions.value(usize::from(deed_topic.0)).clamp(-1.0, 1.0);
+    // EXPERIMENT: approval of the *act*, not of the norm. A witness who values kindness (opinion
+    // > 0) disapproves of an insult (harm < 0).
+    let norm = opinions.value(usize::from(deed_topic.0)).clamp(-1.0, 1.0);
+    let approval = norm * harm.signum();
     let gain = trust_gain(&settings.tuning, personality.conscientiousness);
 
     let justified = patient.is_some()

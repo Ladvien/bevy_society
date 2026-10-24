@@ -593,20 +593,19 @@ fn decide_activities(
             perception_radius: settings.perception_radius,
         };
 
-        let script_ref = match (&engine, &snapshot) {
-            (Some(engine), Some(snapshot)) => Some(ScriptContext {
-                defs: &defs,
-                snapshot,
-                engine,
-                // `-1`, not `0`, when the person is missing from the index: `0` is a real person id
-                // and a script would read that person's state instead of finding nobody.
-                actor: index
-                    .sorted
-                    .iter()
-                    .find(|(_, e)| *e == person)
-                    .map_or(-1, |(id, _)| i64::from(id.0)),
-                target: -1,
-            }),
+        // The actor is fixed for this person; the target changes with every option, so it is bound
+        // per candidate in `score_option` rather than here.
+        let actor_id = index
+            .sorted
+            .iter()
+            .find(|(_, e)| *e == person)
+            // `-1`, not `0`, when the person is missing from the index: `0` is a real person id and a
+            // script would read that person's state instead of finding nobody.
+            .map_or(-1, |(id, _)| i64::from(id.0));
+        // The scripts read the tick-start snapshot and the compiled definitions; both are the same
+        // for every option, so they are borrowed once and only the target is rebound per candidate.
+        let script_ready = match (&engine, &snapshot) {
+            (Some(engine), Some(snapshot)) => Some((snapshot, engine)),
             _ => None,
         };
         let mut best: Option<(u8, Vec<Candidate>)> = None;
@@ -624,6 +623,21 @@ fn decide_activities(
                 &mut rng.0,
             );
             for target in targets {
+                let target_id = match target {
+                    DoingTarget::Person(other) => index
+                        .sorted
+                        .iter()
+                        .find(|(_, e)| *e == other)
+                        .map_or(-1, |(id, _)| i64::from(id.0)),
+                    _ => -1,
+                };
+                let script_ref = script_ready.map(|(snapshot, engine)| ScriptContext {
+                    defs: &defs,
+                    snapshot,
+                    engine,
+                    actor: actor_id,
+                    target: target_id,
+                });
                 let score = score_option(
                     &spec.considerations,
                     &decision,

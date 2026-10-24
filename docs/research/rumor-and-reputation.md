@@ -43,6 +43,7 @@ A rumour is a record about one deed by one person. It has an origin, a subject, 
 
 ## Sources
 
+- Bondü, R. & Richter, P. (2016). Interrelations of justice, rejection, provocation, and moral disgust sensitivity and their links with the hostile attribution bias, trait anger, and aggression. https://doi.org/10.3389/fpsyg.2016.00795 · `10.3389_fpsyg.2016.00795` — the mechanism behind snubbing: rejection and provocation sensitivity predict reactive aggression, i.e. a reaction to how one has been treated. Cited for the mechanism only; the study reports correlations, so the starter pack's grudge curve slope is a design default.
 - Park, J. S. et al. (2023). Generative Agents. https://doi.org/10.48550/arXiv.2304.03442 · `10.48550_arxiv.2304.03442`
 - Moreno, Y., Nekovee, M. & Pacheco, A. F. (2004). Dynamics of rumor spreading in complex networks. https://doi.org/10.1103/PhysRevE.69.066130 · `10.1103_physreve.69.066130`
 - Sommerfeld, R. D., Krambeck, H.-J., Semmann, D. & Milinski, M. (2007). Gossip as an alternative for direct observation in games of indirect reciprocity. https://doi.org/10.1073/pnas.0704598104 · `10.1073_pnas.0704598104`

@@ -589,3 +589,101 @@ fn an_accepted_interaction_can_bark() {
     );
     assert!(!actor_line.thought, "an interaction bark is speech");
 }
+
+#[test]
+fn a_script_consideration_can_score_a_person_target() {
+    // Regression: the script context bound `target` to -1 for every candidate, so
+    // `ctx.grudge(actor, target)` and every other ctx call that reads the target could never score
+    // a `Person` option. Grudges drive snubbing in the starter pack, and nothing could express it.
+    let mut app = headless(
+        SocietyDefs::from_ron(
+            r#"(
+                topics: [(id: "kindness")],
+                deeds: [(id: "insult", topic: "kindness", harm: -0.4)],
+                activities: [(
+                    id: "snub",
+                    target: Person,
+                    duration_hours: 0.1,
+                    rank: 1,
+                    considerations: [(
+                        input: Script("ctx.grudge(actor, target)"),
+                        curve: Linear(2.0, 0.0),
+                    )],
+                    interaction: Some("insult"),
+                )],
+                interactions: [(id: "insult", accept: (base: 0.99), deed: Some("insult"))],
+            )"#,
+        )
+        .expect("a ctx.grudge consideration compiles"),
+        fast_settings(),
+    );
+    let grudgeful = spawn_person(&mut app, "A", Vec2::ZERO);
+    let other = spawn_person(&mut app, "B", Vec2::new(1.0, 0.0));
+    app.world_mut().entity_mut(grudgeful).insert(Autonomous);
+    step(&mut app, 2);
+    // A remembers something bad about B: that is the grudge the script reads.
+    if let Some(mut memories) = app.world_mut().get_mut::<bevy_society::Memories>(grudgeful) {
+        memories.record(
+            bevy_society::Memory {
+                day: 0.0,
+                kind: bevy_society::MemoryKind::Talked,
+                other: Some(other),
+                valence: -0.9,
+                importance: 0.9,
+            },
+            0.0,
+            64,
+        );
+    }
+
+    step(&mut app, 3);
+
+    let doing = app
+        .world()
+        .get::<bevy_society::Doing>(grudgeful)
+        .expect("the grudge decided something");
+    assert_eq!(
+        doing.target,
+        bevy_society::DoingTarget::Person(other),
+        "the snub is aimed at the person the grudge is about"
+    );
+}
+
+#[test]
+fn a_script_consideration_reads_no_grudge_for_a_stranger() {
+    // The other half: with no memory about B the same definition must not choose the snub. Without
+    // this, the test above would pass even if `target` were bound to the wrong person.
+    let mut app = headless(
+        SocietyDefs::from_ron(
+            r#"(
+                topics: [(id: "kindness")],
+                deeds: [(id: "insult", topic: "kindness", harm: -0.4)],
+                activities: [(
+                    id: "snub",
+                    target: Person,
+                    duration_hours: 0.1,
+                    rank: 1,
+                    considerations: [(
+                        input: Script("ctx.grudge(actor, target)"),
+                        curve: Linear(2.0, 0.0),
+                    )],
+                    interaction: Some("insult"),
+                )],
+                interactions: [(id: "insult", accept: (base: 0.99), deed: Some("insult"))],
+            )"#,
+        )
+        .expect("a ctx.grudge consideration compiles"),
+        fast_settings(),
+    );
+    let person = spawn_person(&mut app, "A", Vec2::ZERO);
+    let _stranger = spawn_person(&mut app, "B", Vec2::new(1.0, 0.0));
+    app.world_mut().entity_mut(person).insert(Autonomous);
+
+    step(&mut app, 4);
+
+    let doing = app.world().get::<bevy_society::Doing>(person);
+    assert!(
+        doing.is_none_or(|d| d.activity == bevy_society::IDLE_ACTIVITY),
+        "no grudge, no snub: {doing:?}"
+    );
+}
