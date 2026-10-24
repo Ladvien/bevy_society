@@ -494,3 +494,55 @@ Fresh eyes GREAT — the negative result is recorded precisely enough to resume 
 4. **A log-capture harness** — now blocking two separate warnings from being properly tested.
    Promoted from fifth.
 5. **A spatial index for perception** past ~2 000 people, with benchmark numbers behind it.
+
+## 2026-11-02-01 — Assert the warnings, and the harness immediately earns its keep
+
+**Why this.** The log's #4: a log-capture harness, blocking two shipped `warn!`s from being tested.
+Both were pinned only by the *facts* they key on, so deleting either call left every test green. A
+warning nobody asserts is a comment.
+
+**Change.** `tests/common/capture.rs` — a `LogPlugin` layer that records every event into a resource a
+test can read, adapted from Bevy's `examples/app/log_layers_ecs.rs`. `tests/warnings.rs` asserts both
+warnings from one app.
+
+**What the harness exposed, in its first run.** `warn_unscored_fields` counted an activity twice when
+it had both a `Field` consideration and a `Gradient` target:
+
+| | message |
+|---|---|
+| before | `2 definitions rely on social-field inputs … — follow, follow` |
+| after | `1 definitions rely on social-field inputs … — follow` |
+
+One offending activity reported as two. The previous iteration's four tests were all green while that
+sentence was wrong, because they asserted that the accessors *see* the definition rather than what the
+warning *says*.
+
+**Two constraints discovered, both documented where the next author will hit them:**
+
+- The `tracing` subscriber is **process-global and settable once**, so a test binary may build only one
+  capturing app. Observed directly: four tests passed individually and three silently captured
+  nothing, with `Could not set global logger and tracing subscriber as they are already set`.
+- **Bevy 0.20 has no non-send resources** — `insert_non_send_resource` does not exist, so the upstream
+  example's approach does not compile. The receiver is behind a `Mutex` instead.
+
+**Evidence.** `runs/2026-11-02-01/evidence/captured-warnings.txt` — both lines verbatim from the
+asserting run.
+
+**Before → after.** Tests 18 → **19**. Coverage: level, message, activity name and arithmetic for both
+warnings; and a second test asserting the starter pack triggers neither.
+
+**Dead-code inventory.** Unchanged at zero.
+
+**Verdicts.** Behaviour GREAT — a deleted `warn!` now fails a test. Zoom GREAT — the one-app-per-binary
+limit documented. Fresh eyes GREAT — the harness found a shipped defect within minutes of existing.
+
+**Commit.** See `git log`.
+
+**Top 5 remaining.**
+1. **`Field` / `Gradient` wiring** — the actual bug, four measured facts and the unexplained tick-20
+   case recorded. Start from a single-person case with one cell of value 1.0.
+2. **The cluster's 1:24 starvation** — a second need; a schema change.
+3. **The clock decision** (`travel_timeout_hours` real-time) — escalated, still open.
+4. **A spatial index for perception** past ~2 000 people, with benchmark numbers behind it.
+5. **`warn_unscored_fields` says "1 definitions"** — grammatically wrong; a plural helper would fix it,
+   noted rather than done so the fix is deliberate.
