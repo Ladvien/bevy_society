@@ -1120,3 +1120,89 @@ over both grass and night).
 3. **The two-clocks decision** — warned about and measured, but the API question is still open.
 4. **The village's rumor origin** — reaches 1/24 in `village-evening`.
 5. **`need-cycle`'s two remaining needs** — `social` and `rest` never cross 0.35 at the shipped rates.
+
+## 2026-11-11-01 — A `Destination` nothing walked to
+
+**Pick.** The log's #1, the `Place`/`Person` completion asymmetry. Beat the runner-up (retiring
+untellable rumors) on one sentence: **this is a broken contract in a supported configuration**, not a
+paperweight — and it is the cause of that asymmetry.
+
+**The defect, in the crate's own words.** `Destination` says:
+
+> Games **without the steering plugin move persons themselves toward this point.**
+
+They did not. `BehaviorPlugin` *writes* a `Destination` for every travel target; the only system that
+*reads* one is `steer_movers`, inside the `steering` feature. With `--no-default-features` a person is
+given a destination and stands still:
+
+```
+t=  1 doing=eat dest=Some((6.5, -5.0)) pos=(0.0, 0.0)
+t=600 doing=eat dest=Some((6.5, -5.0)) pos=(0.0, 0.0)
+```
+
+**Consequences, measured in a 24-person village at the current 55-hour timeout:**
+
+| activity | target | completed | interrupted |
+|---|---|---|---|
+| chat, gossip, compliment, snub, wander | `Person`, `Point` | **339/339 (100%)** | 0 |
+| eat | `Place` | 14/62 (23%) | 43 |
+| sleep | `Home` | 24/79 (30%) | 48 |
+| work | `Place` | **6/64 (9%)** | 53 |
+
+Only **26 of 228** `Place`/`Home` activities ever arrived. `Person` targets succeed because the target
+walks to the actor — the crate only had to move one of the two.
+
+**The fix.** `walk_toward_destination`, every fixed step, at `Tuning::walk_speed` (1.4 m/s — the same
+number and unit `SocialMover` already used), skipping anyone a `SocialMover` is steering.
+
+The obvious way to write that skip breaks the build the fix is for: `SocialMover` does not exist
+without its feature, so `Without<SocialMover>` cannot be named there. A `cfg`-selected alias keeps one
+body for both. **The no-default-features gate caught exactly this** — 0 test binaries before the alias,
+28 after.
+
+**Before → after**, same seed and layout, 4 200 ticks:
+
+| | before | after |
+|---|---|---|
+| `Place`/`Home` arrivals | 26 | **212** |
+| `eat` completed | 23% | **85%** |
+| `relax` completed | 22% | **95%** |
+| `sleep` completed | 30% | **94%** |
+| `work` completed | 9% | **72%** |
+
+After the initial fall from 1.0, each need's share of ticks at zero:
+
+| need | before | after |
+|---|---|---|
+| social | 39.3% | **2.0%** |
+| rest | 43.6% | **0.8%** |
+| food | 71.2% | **12.8%** |
+| fun | 89.2% | **35.3%** |
+
+`evidence/walk.png`, `evidence/{before,after}.csv`. The mean of the four needs stops being a flat line
+at zero and starts oscillating — the shape a society with travel should have.
+
+**`fun` at 35% is not fixed**, and saying otherwise would be false: `relax` is its only source and is
+gated 17:00–23:00. Top remaining item, with the number.
+
+**The timeout is not the cause.** 55 game-hours here is 587 ticks = **12.8 m**, against an **8.2 m**
+longest walk. Last iteration's reach warning is correct in general and stays; this was a different
+defect, and the research note says so explicitly so a later reader does not conflate them.
+
+**Perf.** 0.564 / 15.02 / 275.5 ms at 100 / 1 000 / 5 000 — within ±1% of before, i.e. not measurable
+against the perception pass it runs beside.
+
+**Tests.** 27 → **28** binaries, 28 in **both** feature sets. Dead-code inventory: zero.
+
+**Verdicts.** Behaviour GREAT (26 → 212 arrivals, `Place` completions 23% → 85%). Zoom GREAT (needs stop
+flatlining; `fun` still 35% and reported as such). Fresh eyes GREAT (same pace as steering, and the
+wrong comment fixed at its source).
+
+**Commit.** `5eb4a7b`.
+
+**Top 5 remaining.**
+1. **`fun` at 35% of ticks at zero** — `relax` is its only source and is gated 17:00–23:00.
+2. **Retire untellable rumors** — 93% of the book cannot spread; a 4× cost growth over 3 000 ticks.
+3. **The two-clocks decision** — no longer the cause of starvation, but the API question is open.
+4. **The village's rumor origin** — reaches 1/24 in `village-evening`.
+5. **`work` at 72%** — the lowest of the three fixed activities.
