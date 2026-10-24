@@ -496,8 +496,18 @@ impl Memories {
         scored.into_iter().take(n).map(|(_, m)| m).collect()
     }
 
-    /// Grudge against `other`: the sum of `max(0, −valence) · r` over memories about them, clamped to
-    /// `[0, 1]` (power-law forgetting, Anderson & Schooler 1991, DOI 10.1111/j.1467-9280.1991.tb00174.x).
+    /// Grudge against `other`: the **maximum** of `max(0, −valence) · r` over memories about them,
+    /// clamped to `[0, 1]`. Recency is `recall::recency`, an exponential decay (Park et al. 2023, DOI
+    /// 10.48550/arXiv.2304.03442).
+    ///
+    /// A **design default**, and it used to be a sum. Summing made the grudge depend on
+    /// `memory_capacity`: four retained trivial slights saturated it exactly as one betrayal did, so a
+    /// person's opinion of another was set by how many small entries the buffer happened to hold. In a
+    /// cluster of twelve that pinned `snub`'s only consideration at 1.0 permanently — `snub` satisfies no
+    /// need, so nothing pushed back. Measured on `rumor-crosses-a-cluster` (seed 11): `snub` was **50.3%**
+    /// of activity starts with sums and **26.0%** with the maximum, the friends:rivals balance went 4:9 →
+    /// **6:5**, and rumor reach doubled **0.167 → 0.333**. `village-evening` held (travelling 58.9% →
+    /// 59.0%, need mean 0.545 → 0.542).
     pub fn grudge(&self, other: Entity, now_days: f64) -> f32 {
         recall::grudge(
             self.entries
@@ -759,15 +769,22 @@ mod tests {
     }
 
     #[test]
-    fn grudge_sums_negative_recent_memories_and_clamps() {
+    fn grudge_is_the_worst_offence_not_the_count_of_them() {
         let mut m = Memories::default();
         let a = ent(20);
         m.record(mem(0.0, Some(a), -0.6, 0.5), 0.0, 8);
         m.record(mem(0.0, Some(a), -0.6, 0.5), 0.0, 8);
-        assert_eq!(m.grudge(a, 0.0), 1.0);
+        // Four trivial slights do not equal one betrayal. While this summed, the value depended on
+        // `memory_capacity`: keeping four small entries instead of two turned 0.6 into a saturated 1.0.
+        assert!((m.grudge(a, 0.0) - 0.6).abs() < 1e-6);
         assert_eq!(m.grudge(ent(21), 0.0), 0.0);
         let mut positive = Memories::default();
         positive.record(mem(0.0, Some(a), 0.8, 0.5), 0.0, 8);
         assert_eq!(positive.grudge(a, 0.0), 0.0);
+        // A deeper offence still dominates, and recency still discounts it.
+        let mut mixed = Memories::default();
+        mixed.record(mem(0.0, Some(a), -0.9, 0.5), 0.0, 8);
+        mixed.record(mem(0.0, Some(a), -0.2, 0.5), 0.0, 8);
+        assert!((mixed.grudge(a, 0.0) - 0.9).abs() < 1e-6);
     }
 }

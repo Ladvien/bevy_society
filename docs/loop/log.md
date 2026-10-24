@@ -2018,3 +2018,63 @@ only one that closes this half, and it is not mine to take.
 4. **`--seconds-per-day` on every scenario** - the harness flag exists; `scenarios.yaml` still declares one
    day length per scenario, so cross-speed comparison is manual.
 5. **A spatial index for perception** past ~2 000 people, with benchmark numbers behind it.
+
+## 2026-11-25-01 - A grudge was the count of offences, not the worst one
+
+**Pick.** Candidate #2 -- behaviour that reads as wrong when you watch it -- and it was found by *reading the
+narrative*, not the plots. The cluster's day for G00 went `snub, compliment, snub, compliment` every six
+minutes, `snub` at **170 of 338** starts, a run of **ten** in a row, from an activity that satisfies **no
+need**.
+
+Runner-up was the `wander` ceiling (no considerations, so it always scores 1.000 and its `tier_cutoff` floor
+discards a starving person's `eat`). Measured by giving it an `Hour` curve: `snub` **50.3% -> 53.3%**,
+slightly *worse*. Not the lever.
+
+**Two defects, one level.**
+1. `grudge` **summed** offences and clamped at 1, so four retained trivial slights saturated it exactly as one
+   betrayal did -- the value depended on `memory_capacity`. `snub`'s only consideration is that grudge.
+2. A **refused** interaction was sized by the deed's `harm`, but the deed fires only on accept. A snub the
+   target refused wrote `-0.7` into the snubber, about the person who refused.
+
+**Change.** `grudge` is the **maximum** over memories rather than the sum; a refusal's memory is `0.3`.
+
+| | seed 11 | seed 42 |
+|---|---|---|
+| `snub` share, sum | **50.3%** | **48.4%** |
+| `snub` share, max | **26.0%** | **32.6%** |
+| longest run | 10 -> **6** | 11 -> **8** |
+| top activity | `snub` -> **`compliment`** | `snub` -> **`gossip`** |
+| refused-insult memory | 0.700 -> **0.300** | -- |
+
+`village-evening`: travelling 58.9% -> 59.0%, need mean 0.545 -> 0.542 (seed 42: 59.3% / 0.550).
+
+**A claim I nearly shipped and did not.** At seed 11 the change also gave friends:rivals **4:9 -> 6:5** and
+rumor reach **0.167 -> 0.333** -- double. I had that drafted as the headline. Seed 42: reach **0.167 either
+way**, friends 5 -> 6. Seed-specific. Only the snub reduction is claimed.
+
+**Evidence.** `runs/2026-11-25-01/evidence/grudge.png` (snub share below the sum line for 80 days, same
+shape; the village's four needs lying on top of each other), `before/cluster-narrative.txt` against
+`after/cluster-narrative.txt` (`work -> wander -> chat -> snub -> compliment -> wander -> play -> ...`).
+
+**Verdicts.** Behavior GREAT (named from the narrative, both seeds). Zoom GREAT (green below red at the same
+shape, no clipping, village untouched). Fresh eyes GREAT (and it falsified the reach claim, which is the
+point of the pass).
+
+**Dead-code delta.** Zero.
+
+**Honest limit.** `max` over `sum` is a **design default**: the corpus search for peak-versus-accumulate
+returned nothing usable, so `docs/research/memory.md` says so outright rather than citing something that does
+not address it.
+
+**Commit** `pending`.
+
+**Top 5 remaining.**
+
+1. **The clock decision** - the largest behavioural lever left (15 points), escalated, unmoved.
+2. **`wander` scores 1.000 always** - it pins the tier ceiling and its floor discards a starving person's
+   `eat`; giving it a consideration made things worse, so the fix is elsewhere (a `tier_cutoff` that ignores
+   zero-consideration options, or a weight that scales).
+3. **The cluster's 1:24 chat:gossip starvation** - a second need; a schema change.
+4. **`rumor-crosses-a-cluster` is still `pending`** at 0.167 reach against the 40% it asks for; the observable
+   may need re-stating, which is a decision.
+5. **A spatial index for perception** past ~2 000 people, with benchmark numbers behind it.

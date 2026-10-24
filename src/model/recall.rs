@@ -25,14 +25,19 @@ pub fn exposed_peak(familiarity_now: f32, rate_per_day: f32, dt_days: f32) -> f3
     (familiarity_now + rate_per_day * dt_days * (1.0 - familiarity_now)).clamp(0.0, 1.0)
 }
 
-/// Grudge: `Σ max(0, −valence) · recency` over the memories about one person, clamped to `[0, 1]`.
-/// Each item is `(valence, recency)`. Park et al. 2023 (DOI 10.48550/arXiv.2304.03442) weight
-/// retrieved memories by recency; the sum over negative valence is this crate's reading of it.
+/// Grudge: the **maximum** of `max(0, −valence) · recency` over the memories about one person, clamped
+/// to `[0, 1]`. Each item is `(valence, recency)`. Park et al. 2023 (DOI 10.48550/arXiv.2304.03442)
+/// weight retrieved memories by recency.
+///
+/// A design default. It was a **sum**, which made the value depend on how many entries the memory buffer
+/// happened to keep: four trivial slights reached 1.0 exactly as one betrayal did. Measured on a cluster
+/// of twelve, `snub` — whose only consideration is this — was 50.3% of activity starts when summing and
+/// 26.0% when taking the maximum.
 pub fn grudge(memories: impl IntoIterator<Item = (f32, f32)>) -> f32 {
     memories
         .into_iter()
         .map(|(valence, r)| (-valence).max(0.0) * r)
-        .sum::<f32>()
+        .fold(0.0_f32, f32::max)
         .clamp(0.0, 1.0)
 }
 
@@ -64,7 +69,12 @@ mod tests {
     #[test]
     fn grudge_counts_only_negative_memories_and_clamps() {
         assert_eq!(grudge([(0.5, 1.0), (0.3, 1.0)]), 0.0);
+        // The maximum, not the sum: two 0.3 slights are one 0.3 slight, not a 0.6 grievance.
+        assert!((grudge([(-0.3, 1.0), (-0.3, 1.0)]) - 0.3).abs() < 1e-6);
+        assert!((grudge([(-0.5, 1.0), (-0.2, 1.0)]) - 0.5).abs() < 1e-6);
         assert!((grudge([(-0.3, 1.0)]) - 0.3).abs() < 1e-6);
-        assert_eq!(grudge([(-0.9, 1.0), (-0.9, 1.0)]), 1.0);
+        // Clamped at one, and repeated identical offences do not exceed the offence itself.
+        assert_eq!(grudge([(-0.9, 1.0), (-0.9, 1.0)]), 0.9);
+        assert_eq!(grudge([(-1.4, 1.0)]), 1.0);
     }
 }

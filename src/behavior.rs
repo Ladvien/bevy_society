@@ -1585,10 +1585,27 @@ fn exchange(
     }
 
     // (6) Memories, both sides.
-    let harm = spec
-        .deed
-        .and_then(|d| defs.deeds.get(usize::from(d.0)))
-        .map_or(0.0, |spec| spec.harm);
+    //
+    // The magnitude of a **deed's** memory is `0.3 + its harm`, but the deed fires only on accept — see
+    // step (4). Sizing every outcome by `harm` therefore records an injury that never happened: a
+    // *refused* insult wrote `-0.7` into the snubber, about the person who refused.
+    //
+    // That closed a loop. `snub`'s only consideration is `ctx.grudge(actor, target)`, so a refused snub
+    // deepened the very grudge that motivated the next one, and because `snub` satisfies no need nothing
+    // pushed back. Measured on `rumor-crosses-a-cluster` (12 people, seed 11): `snub` was **170 of 338**
+    // activity starts, ten of them in a row, and the narrative read `snub, compliment, snub, compliment`
+    // through the evening. A single refusal scored the next snub at 0.7 through `Linear(1.0, 0.0)`; two
+    // clamped the grudge to 1.0.
+    //
+    // A refusal is not an injury. It costs the interaction's own weight — the `0.3` every resolved
+    // exchange carries — and the deed's `harm` sizes a memory only when the deed actually fired.
+    let harm = if accepted {
+        spec.deed
+            .and_then(|d| defs.deeds.get(usize::from(d.0)))
+            .map_or(0.0, |spec| spec.harm)
+    } else {
+        0.0
+    };
     let magnitude = 0.3 + harm.abs();
     let actor_valence = if accepted { magnitude } else { -magnitude };
     let target_valence = if harm < 0.0 {
