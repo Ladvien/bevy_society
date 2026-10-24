@@ -1786,3 +1786,67 @@ assumed). Fresh eyes GREAT (two silent harness bugs, one drowning the other).
 4. **`examples/capture.rs` still hardcodes 8.0 s/day** — the README clip's "23 of 25" is measured under
    settings the spec does not declare.
 5. **Retire untellable rumors** — right for memory: ~5 MiB at 5 000 over a long run, 87% untellable.
+
+## 2026-11-21-01 — A villager walks 62% of its life, and the harness was hiding it
+
+**Pick.** Last iteration reduced reported-asleep from 56.8% to 36.4% by fitting the travel timeout. That was
+still above the 33.3% one 8-hour sleep allows, so this iteration made the harness tell **travelling** from
+**doing** — a measurement fix, `src/` untouched.
+
+| label | share of person-ticks |
+|---|---|
+| `travelling:sleep` | **21.8%** |
+| `sleep` | **14.7%** |
+| `travelling:eat` | **12.6%** |
+| `travelling:work` | **12.4%** |
+
+| | |
+|---|---|
+| **travelling, total** | **62.5%** |
+| doing an activity | 37.5% |
+| `sleep` alone | **14.7%** — the 36.4% was 21.8 points of walking |
+
+`evidence/travelling.png`: red fills most of every column for 17 game-days.
+
+**The cause is arithmetic.** At 64 s/day a crossing walk in the 8.2 m village is **375 ticks**, and eight
+starter activities are shorter than that:
+
+| activity | ticks | scores `Distance`? |
+|---|---|---|
+| `snub` | **17** | **no** |
+| `compliment` | **34** | **no** |
+| `chat` / `gossip` | 51 | yes |
+| `play` / `wander` | 85 | `play` yes, `wander` no |
+| `eat` | **128** | **no** |
+| `relax` | **256** | **no** |
+
+**Five of the eight do not score distance at all**, so a person crosses the village for a 128-tick meal
+without the decision knowing how far it was. And `targets_for` gives a `Place` target no distance term, so
+the far tavern and the near one are equally likely.
+
+**Measured candidate fix.** Adding `Distance` to `eat`, `relax` and `compliment`: travelling **62.5% →
+50.5%**, need total 0.526 → 0.513. Fair and small — and it edits the file a host ships, so it is
+`needs-decision/travel-cost-is-not-scored.md`, recommending a crate-level consideration so the term exists
+once and is opt-in by name.
+
+**A correction to last iteration's headline.** "56.8% → 36.4% asleep" was itself 21.8 points of walking. The
+true sleeping figure was 14.7% both times. The fitted timeout did help — it removed the *excess* walking, not
+the label.
+
+**Tests.** 36 → **37** binaries, 0 failures, both feature sets. `tests/travel_cost.rs` is ignored and failing:
+it pins the eight short activities and the five blind to distance. Dead-code inventory: zero.
+
+**Verdicts.** Behaviour GREAT (`sleep` 14.7% and travelling 62.5%, both measured rather than inferred). Zoom
+GREAT (the clearest plot the loop has made; the red band was hidden inside the `sleep` label). Fresh eyes
+GREAT (the labelling decision's consequence is 62.5% of a life in transit, and the cause is priced nowhere).
+
+**Commit.** `967b35f`.
+
+**Top 5 remaining.**
+1. **Travel cost is not scored** — `needs-decision/travel-cost-is-not-scored.md`. Measured at 12 travelling
+   points for 1.3% of need; the larger lever is that a `Place` target carries no distance.
+2. **`Doing` while travelling** — the labelling decision; un-ignore `tests/travel.rs` when it lands.
+3. **`rumor-crosses-a-cluster` is `pending`** — 0.333 against a 40% observable; a 10.7 h crossing walk.
+4. **`need-cycle`'s observable** — three needs stay above 0.5 at these rates; a design question.
+5. **`examples/capture.rs` still hardcodes 8.0 s/day** — the README clip's "23 of 25" is measured under
+   settings the spec does not declare.
