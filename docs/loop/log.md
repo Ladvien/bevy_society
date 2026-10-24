@@ -1206,3 +1206,79 @@ wrong comment fixed at its source).
 3. **The two-clocks decision** — no longer the cause of starvation, but the API question is open.
 4. **The village's rumor origin** — reaches 1/24 in `village-evening`.
 5. **`work` at 72%** — the lowest of the three fixed activities.
+
+## 2026-11-12-01 — The fix that made the plot look better and the society worse
+
+**Pick.** The log's #1, `fun` at 35% of ticks at zero. Beat the runner-up (retiring untellable rumors) on
+one sentence: **the honest answer turned out to be "no rate can fix this", and that is what the next
+iteration needs to know.**
+
+**The budget.** Every need decays per game-day; every activity supplies `satisfies · duration_hours` per
+use.
+
+| need | decay/day | best source | per use | uses/day |
+|---|---|---|---|---|
+| social | 1.00 | `chat` | 0.36 | 2.78 |
+| rest | 0.70 | `sleep` | 1.20 | 0.58 |
+| food | 0.90 | `eat` | 0.90 | 1.00 |
+| **fun** | **0.80** | **`relax`** | **0.60** | **1.33** |
+
+`fun` needs 1.33 uses a day; measured supply is **0.10**.
+
+**Three hypotheses tested and rejected.**
+
+| hypothesis | measurement | verdict |
+|---|---|---|
+| `satisfies` does not pay | fun sampled at arrival and at end of one 1.5 h relax | **+0.6000**, exactly `0.4 × 1.5` |
+| the 17–23 gate binds | gate removed | relaxes 79 → 167, `fun` mean 0.053 → 0.092 — a constraint, not *the* constraint |
+| capacity binds | well holds 6, window holds 4 batches | not binding |
+
+What binds is **choice**: `relax` competes with three cheap `Person`-targeted activities for the same
+evening, and each use costs a walk plus 16 ticks against a `chat`'s 3.
+
+**The fix that was tried and reverted.** `relax` `satisfies` 0.4 → 0.55, so one evening session pays
+0.825 and covers the day:
+
+| after tick 200, 24 people | before | after |
+|---|---|---|
+| `fun` at zero | 33.8% | **18.8%** |
+| `fun` mean | 0.061 | **0.051** |
+| `social` mean | 0.124 | 0.112 |
+| `food` mean | 0.101 | 0.085 |
+| **mean of all four** | **0.127** | **0.118** |
+
+The zero fraction halves — the metric the log named — and the total gets **worse**. The village is
+over-subscribed: 24 people, four places, one evening. Raising one supply moves starvation around.
+Reverted.
+
+**The lesson, recorded because it generalises.** `evidence/relax.png` shows the reverted fix and it looks
+like an improvement: `fun`'s peaks rise from 0.10 to 0.15 and the mean line sits above the old one. I
+nearly shipped it on the strength of the zero fraction and the plot. What stopped it was computing the
+**mean of all four needs**, a metric the loop had not been requiring. A plot of one need can look better
+while the society is worse.
+
+**What shipped.** `SocietyDefs::need_decay` and `best_source`, and `warn_unbalanced_needs` in `finish`
+— the fourth warning, beside the short-activity, unscored-field and short-travel ones. Threshold four
+uses a day, not one, because the crate cannot see that `chat` is three ticks while `relax` is a walk.
+The starter pack does not trip it, and that limit is stated rather than papered over.
+
+**Literature.** Vansteenkiste & Ryan 2013, DOI 10.1037/a0032359: self-determination theory distinguishes
+need *satisfaction* from need *frustration*, and frustration is a different state with its own
+behavioural consequences — which is why a permanently unmet need is worth naming rather than leaving to a
+plot.
+
+**Tests.** 28 → **29** binaries, 29 in both feature sets. Dead-code inventory: zero.
+
+**Verdicts.** Behaviour GREAT (the arithmetic is named and testable; the limit is documented). Zoom GREAT
+(the plot of the reverted fix looks like a win while the numbers are not). Fresh eyes GREAT (the negative
+result is kept with its numbers and a decision file).
+
+**Commit.** `29b822e`.
+
+**Top 5 remaining.**
+1. **A cheap source for `fun`** — `needs-decision/over-subscribed-evening.md` recommends a
+   `Person`-targeted leisure activity so a use costs a `chat`'s three ticks.
+2. **Retire untellable rumors** — 93% of the book cannot spread; a 4× cost growth over 3 000 ticks.
+3. **The two-clocks decision** — warned about, measured, no longer the cause of starvation, API open.
+4. **The village's rumor origin** — reaches 1/24 in `village-evening`.
+5. **`work` at 72%** — the lowest completion of the three fixed activities.
