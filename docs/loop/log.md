@@ -1586,3 +1586,66 @@ plot faked a defect; the count disproved it). Fresh eyes GREAT (retires `food` a
    configuration.
 4. **Retire untellable rumors** — right for memory: ~5 MiB at 5 000 over a long run, 87% untellable.
 5. **Perception is 11.8% at 5 000 and `O(n²)`** — a real limit, now measured.
+
+## 2026-11-18-01 — The row that was not a sample
+
+**Pick.** The log's #1: the observable says *every person's* needs cycle, while the evidence was a **mean
+over eight**. Beat fixing `capture.rs`'s hardcoded day length on one sentence: **measuring it falsified a
+`measured` status**, which is worth more than a third configuration nobody reads.
+
+**Per person, at the scenario's own settings** — 64 s/day, 8 people, 80 000 ticks, seed 7:
+
+| need | lowest any person reached | cycles for all 8? | last iteration claimed |
+|---|---|---|---|
+| social | **0.39** | **no** | yes |
+| rest | **0.50** | **no** | yes |
+| food | 0.00 | **yes** | yes |
+| fun | 0.12 | 6 of 8 | yes |
+
+**Three of four claims were false.** `social` and `rest` never come within 0.1 of the threshold, and they
+are not supposed to — their rates are generous, which is what the starter pack intends.
+
+**Why the mean said otherwise.** The series recorded a row at **tick 0**, before `size_person_state` fills
+`Needs`. Every need read `0.000` in that one row, so *"crosses below 0.35"* was true of the series on a
+state the society never has. `evidence/tick-zero.png` shows it: a single vertical line at tick 0.
+
+**My first explanation was wrong.** I said a mean over out-of-phase sawtooths dips below any individual.
+It does not — a mean's trough is never below its lowest member. Writing that down and checking the
+arithmetic is what pointed at the row. The wrong explanation is kept in the review because a plausible
+statistical story nearly stopped the search.
+
+**The fix.** The tick-0 row is not recorded; a person with empty `Needs` is not counted. The corrected
+run's honest minima: `social` 0.613, `rest` 0.535, `food` 0.218, `fun` 0.556.
+
+**Status.** `need-cycle` returns to **`pending`** with the per-person figures in its note. Whether to
+tighten the rates or narrow the observable to *"recovers"* is a design question.
+
+**The third artefact of this shape in four iterations:**
+
+| | artefact | consequence |
+|---|---|---|
+| 2026-11-06 | `RumorId(0)` | "rumor reach flat-lines" for three iterations |
+| 2026-11-14 | a `4×` tick cost never measured | a breaking change nearly justified |
+| 2026-11-18 | a row at tick 0 | a `measured` status that was false |
+
+**Every published number comes from `examples/evidence.rs`, and that file has been wrong more often than
+the library it measures.** Each artefact now ends with a test that fails if it returns.
+
+**Tests.** 34 → **34** binaries (two rewritten in `need_cycle`), 34 in both feature sets. Dead-code
+inventory: zero; `src/` unchanged.
+
+**Verdicts.** Behaviour GREAT (per person, only `food` cycles; the observable was three-quarters false).
+Zoom GREAT (the artefact is one visible vertical line; my first explanation of it was wrong). Fresh eyes
+GREAT (third artefact of the class, named, each now pinned by a test).
+
+**Commit.** `d33552d`.
+
+**Top 5 remaining.**
+1. **`need-cycle`'s observable is a design question** — three needs stay above 0.5 at these rates. Tighten
+   the rates, or ask only that needs recover? A `needs-decision` candidate.
+2. **`opinion-converges-but-not-entirely` is not implemented in the harness** — it has a test but
+   `--scenario` rejects the name.
+3. **`examples/capture.rs` still hardcodes 8.0 s/day** — the README clip is checked against a third
+   configuration.
+4. **Retire untellable rumors** — right for memory: ~5 MiB at 5 000 over a long run, 87% untellable.
+5. **Perception is 11.8% at 5 000 and `O(n²)`** — a real limit, now measured.
