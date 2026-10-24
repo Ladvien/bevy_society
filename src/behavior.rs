@@ -429,6 +429,18 @@ struct Decider<'w> {
     home: Option<&'w crate::Home>,
 }
 
+/// Everything a `Signal::Script` consideration needs to be evaluated (plan D7).
+///
+/// The defs and the snapshot are the two things a script reads; the queue is where its actions go so
+/// they land at the same application point as every other script's.
+struct ScriptContext<'a> {
+    defs: &'a SocietyDefs,
+    snapshot: &'a std::sync::Arc<crate::snapshot::SocietySnapshot>,
+    engine: &'a crate::script::ScriptEngine,
+    actor: i64,
+    target: i64,
+}
+
 /// One option a decision is weighing: an activity and what it points at.
 #[derive(Debug, Clone, Copy)]
 struct Candidate {
@@ -460,6 +472,8 @@ fn decide_activities(
     doing: Query<&Doing>,
     autonomous: Query<(), With<crate::Autonomous>>,
     mut started: MessageWriter<ActivityStarted>,
+    engine: Option<Res<crate::script::ScriptEngine>>,
+    cell: Res<crate::snapshot::SnapshotCell>,
 ) {
     use bevy_emerge_rng::DetRng;
 
@@ -499,6 +513,10 @@ fn decide_activities(
             all_doing.push((entity, doing.activity.0));
         }
     }
+
+    // The engine and the tick's snapshot are the same for every consideration in this pass, so they
+    // are read once and shared by reference.
+    let snapshot = cell.0.clone();
 
     let mut plans: Vec<(
         Entity,
@@ -554,6 +572,22 @@ fn decide_activities(
             perception_radius: settings.perception_radius,
         };
 
+        let script_ref = match (&engine, &snapshot) {
+            (Some(engine), Some(snapshot)) => Some(ScriptContext {
+                defs: &defs,
+                snapshot,
+                engine,
+                // `-1`, not `0`, when the person is missing from the index: `0` is a real person id
+                // and a script would read that person's state instead of finding nobody.
+                actor: index
+                    .sorted
+                    .iter()
+                    .find(|(_, e)| *e == person)
+                    .map_or(-1, |(id, _)| i64::from(id.0)),
+                target: -1,
+            }),
+            _ => None,
+        };
         let mut best: Option<(u8, Vec<Candidate>)> = None;
         for (i, spec) in defs.activities.iter().enumerate() {
             // Index 0 is the reserved idle activity: it is the fallback, never a candidate.
@@ -569,7 +603,13 @@ fn decide_activities(
                 &mut rng.0,
             );
             for target in targets {
-                let score = score_option(&spec.considerations, &decision, target, i as u16);
+                let score = score_option(
+                    &spec.considerations,
+                    &decision,
+                    target,
+                    i as u16,
+                    script_ref.as_ref(),
+                );
                 if score <= 0.0 {
                     continue;
                 }
@@ -658,6 +698,40 @@ fn decide_activities(
     }
 }
 
+impl ScriptContext<'_> {
+    /// Evaluates one `Signal::Script` consideration through the sandboxed engine.
+    ///
+    /// The result is clamped to `[0, 1]` like every other consideration input. A failure is an
+    /// `error!` naming the script, and scores 0 — the rule the rest of the crate follows: a failed
+    /// consideration scores 0 rather than aborting the decision.
+    fn eval(
+        &self,
+        id: crate::script::ScriptId,
+        decision: &Decision,
+        target: DoingTarget,
+    ) -> Option<f32> {
+        let _ = (decision, target);
+        let bindings = crate::script::Bindings {
+            actor: self.actor,
+            target: self.target,
+            ..crate::script::Bindings::default()
+        };
+        match self
+            .engine
+            .eval_f32(&self.defs.scripts, id, self.snapshot, bindings)
+        {
+            Ok(value) => Some(value.clamp(0.0, 1.0)),
+            Err(err) => {
+                error!(
+                    "bevy_society: script {} failed: {err}",
+                    crate::script::ScriptEngine::owner(&self.defs.scripts, id)
+                );
+                None
+            }
+        }
+    }
+}
+
 /// The targets an activity offers this decision (plan D7), with full places excluded.
 ///
 /// `Wander` draws its point here, from the two `unit()` draws the SPEC names: radius · √u₁ at angle
@@ -702,6 +776,7 @@ fn score_option(
     decision: &Decision,
     target: DoingTarget,
     activity: u16,
+    scripts: Option<&ScriptContext<'_>>,
 ) -> f32 {
     let n = considerations.len();
     if n == 0 {
@@ -709,9 +784,13 @@ fn score_option(
     }
     let mut product = 1.0_f32;
     for term in considerations {
-        let s = term
-            .curve
-            .eval(signal_value(term.signal, decision, target, activity));
+        let s = term.curve.eval(signal_value(
+            term.signal,
+            decision,
+            target,
+            activity,
+            scripts,
+        ));
         let compensated = s + (1.0 - s) * (1.0 - 1.0 / n as f32) * s;
         product *= compensated;
     }
@@ -720,10 +799,22 @@ fn score_option(
 
 /// One consideration's normalised `[0, 1]` input (plan D7).
 ///
+/// **A zero is final.** Scoring is multiplicative, so one consideration at 0 zeroes the whole option
+/// and the compensation term cannot rescue it — `s + (1-s)(1-1/n)s` is still 0 at `s = 0`. A
+/// definition that wants "almost never" must say `0.01`, not `0`; a definition that wants "never"
+/// says `0`. This is deliberate: a need that is entirely unmet should make its activity impossible
+/// now, not unlikely.
+///
 /// Every arm returns a real value computed from the decision's copied state. `Field` and `Script`
 /// read the social-field grids and the Rhai snapshot, which a decision does not hold; they score 0
 /// and a host that wants them should say so through a definition the decision can score instead.
-fn signal_value(signal: Signal, decision: &Decision, target: DoingTarget, activity: u16) -> f32 {
+fn signal_value(
+    signal: Signal,
+    decision: &Decision,
+    target: DoingTarget,
+    activity: u16,
+    scripts: Option<&ScriptContext<'_>>,
+) -> f32 {
     let tie = match target {
         DoingTarget::Person(other) => decision.ties.iter().find(|t| t.target == other).copied(),
         _ => None,
@@ -783,7 +874,15 @@ fn signal_value(signal: Signal, decision: &Decision, target: DoingTarget, activi
                 following as f32 / decision.close_ties.len() as f32
             }
         }
-        Signal::Field(_) | Signal::Script(_) => 0.0,
+        Signal::Script(id) => match scripts {
+            Some(context) => context.eval(id, decision, target).unwrap_or(0.0),
+            // A decision made with no scripting context (no plugin, no snapshot yet) cannot score a
+            // script consideration. It scores 0 and the activity is skipped for this tick, which is
+            // the same answer a failed script gives.
+            None => 0.0,
+        },
+        // A field input needs the stigmergy grids, which only the `fields` feature builds.
+        Signal::Field(_) => 0.0,
     };
     value.clamp(0.0, 1.0)
 }

@@ -1,0 +1,394 @@
+   Compiling bevy_society v0.1.0 (/Users/ladvien/bevy_society)
+warning: field `person` is never read
+   --> src/behavior.rs:403:5
+    |
+402 | struct Decision {
+    |        -------- field in this struct
+403 |     person: Entity,
+    |     ^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: field `rank` is never read
+   --> src/behavior.rs:426:5
+    |
+422 | struct Candidate {
+    |        --------- field in this struct
+...
+426 |     rank: u8,
+    |     ^^^^
+    |
+    = note: `Candidate` has derived impls for the traits `Clone` and `Debug`, but these are intentionally ignored during dead code analysis
+
+warning: function `push_script_actions` is never used
+   --> src/core.rs:532:15
+    |
+532 | pub(crate) fn push_script_actions(
+    |               ^^^^^^^^^^^^^^^^^^^
+
+warning: field `barks` is never read
+    --> src/defs.rs:1240:16
+     |
+1231 | pub(crate) struct ActivitySpec {
+     |                   ------------ field in this struct
+...
+1240 |     pub(crate) barks: Vec<String>,
+     |                ^^^^^
+     |
+     = note: `ActivitySpec` has derived impls for the traits `Clone` and `Debug`, but these are intentionally ignored during dead code analysis
+
+warning: field `name` is never read
+    --> src/defs.rs:1356:16
+     |
+1355 | pub(crate) struct TriggerSpec {
+     |                   ----------- field in this struct
+1356 |     pub(crate) name: String,
+     |                ^^^^
+     |
+     = note: `TriggerSpec` has derived impls for the traits `Clone` and `Debug`, but these are intentionally ignored during dead code analysis
+
+warning: fields `conversation`, `priority`, and `condition` are never read
+    --> src/defs.rs:1367:16
+     |
+1366 | pub(crate) struct ConversationSpec {
+     |                   ---------------- fields in this struct
+1367 |     pub(crate) conversation: String,
+     |                ^^^^^^^^^^^^
+1368 |     pub(crate) priority: i32,
+     |                ^^^^^^^^
+1369 |     pub(crate) condition: Option<ScriptId>,
+     |                ^^^^^^^^^
+     |
+     = note: `ConversationSpec` has derived impls for the traits `Clone` and `Debug`, but these are intentionally ignored during dead code analysis
+
+warning: fields `conversation`, `node`, and `then` are never read
+    --> src/defs.rs:1375:16
+     |
+1374 | pub(crate) struct NodeEffectSpec {
+     |                   -------------- fields in this struct
+1375 |     pub(crate) conversation: String,
+     |                ^^^^^^^^^^^^
+1376 |     pub(crate) node: String,
+     |                ^^^^
+1377 |     pub(crate) then: ScriptId,
+     |                ^^^^
+     |
+     = note: `NodeEffectSpec` has derived impls for the traits `Clone` and `Debug`, but these are intentionally ignored during dead code analysis
+
+warning: variant `Dialogue` is never constructed
+  --> src/rules.rs:80:5
+   |
+49 | pub(crate) enum TriggerEvent {
+   |                 ------------ variant in this enum
+...
+80 |     Dialogue {
+   |     ^^^^^^^^
+   |
+   = note: `TriggerEvent` has derived impls for the traits `Clone` and `Debug`, but these are intentionally ignored during dead code analysis
+
+warning: variant `Converse` is never constructed
+   --> src/script.rs:295:5
+    |
+194 | pub(crate) enum ScriptAction {
+    |                 ------------ variant in this enum
+...
+295 |     Converse {
+    |     ^^^^^^^^
+    |
+    = note: `ScriptAction` has derived impls for the traits `Clone` and `Debug`, but these are intentionally ignored during dead code analysis
+
+warning: method `eval_f32` is never used
+   --> src/script.rs:391:19
+    |
+359 | impl ScriptEngine {
+    | ----------------- method in this implementation
+...
+391 |     pub(crate) fn eval_f32(
+    |                   ^^^^^^^^
+
+warning: fields `deeds` and `interactions` are never read
+  --> src/snapshot.rs:34:16
+   |
+28 | pub(crate) struct Names {
+   |                   ----- fields in this struct
+...
+34 |     pub(crate) deeds: Vec<String>,
+   |                ^^^^^
+...
+40 |     pub(crate) interactions: Vec<String>,
+   |                ^^^^^^^^^^^^
+   |
+   = note: `Names` has a derived impl for the trait `Clone`, but this is intentionally ignored during dead code analysis
+
+warning: methods `deed`, `activity`, and `interaction` are never used
+  --> src/snapshot.rs:67:19
+   |
+43 | impl Names {
+   | ---------- methods in this implementation
+...
+67 |     pub(crate) fn deed(&self, name: &str) -> Result<DeedId, String> {
+   |                   ^^^^
+...
+77 |     pub(crate) fn activity(&self, name: &str) -> Result<ActivityId, String> {
+   |                   ^^^^^^^^
+...
+82 |     pub(crate) fn interaction(&self, name: &str) -> Result<InteractionId, String> {
+   |                   ^^^^^^^^^^^
+
+warning: field `target` is never read
+   --> src/snapshot.rs:109:16
+    |
+107 | pub(crate) struct TieView {
+    |                   ------- field in this struct
+108 |     /// The person the tie points at, for lookups by id.
+109 |     pub(crate) target: PersonId,
+    |                ^^^^^^
+    |
+    = note: `TieView` has a derived impl for the trait `Clone`, but this is intentionally ignored during dead code analysis
+
+warning: method `tie_to` is never used
+   --> src/snapshot.rs:159:19
+    |
+157 | impl PersonView {
+    | --------------- method in this implementation
+158 |     /// The tie this person holds toward `target`, when there is one.
+159 |     pub(crate) fn tie_to(&self, target: PersonId) -> Option<&TieView> {
+    |                   ^^^^^^
+
+warning: methods `now_days`, `names`, and `persons` are never used
+   --> src/snapshot.rs:189:19
+    |
+187 | impl SocietySnapshot {
+    | -------------------- methods in this implementation
+188 |     /// Game time in days at the tick start.
+189 |     pub(crate) fn now_days(&self) -> f64 {
+    |                   ^^^^^^^^
+...
+204 |     pub(crate) fn names(&self) -> &Names {
+    |                   ^^^^^
+...
+209 |     pub(crate) fn persons(&self) -> &[PersonView] {
+    |                   ^^^^^^^
+
+warning: `bevy_society` (lib test) generated 15 warnings (15 duplicates)
+warning: `bevy_society` (lib) generated 15 warnings
+warning: missing documentation for the crate
+  --> tests/fields.rs:1:1
+   |
+ 1 | / #![cfg(feature = "fields")]
+ 2 | | //! Social fields (plan D9): three millers standing together leave a presence field whose gradient
+ 3 | | //! points toward them, and at a cell they have reached they own the whole share.
+...  |
+56 | |     );
+57 | | }
+   | |_^
+   |
+   = note: requested on the command line with `-W missing-docs`
+
+warning: unused import: `run`
+  --> tests/behavior.rs:13:24
+   |
+13 | use common::{headless, run, settings, spawn_person};
+   |                        ^^^
+   |
+   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: `bevy_society` (test "fields") generated 1 warning
+warning: unused import: `Tuning`
+  --> examples/common/scene.rs:10:90
+   |
+10 | use bevy_society::{Autonomous, Home, Person, Personality, Place, PlaceTags, SocietyDefs, Tuning};
+   |                                                                                          ^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: `bevy_society` (test "behavior") generated 1 warning (run `cargo fix --test "behavior" -p bevy_society` to apply 1 suggestion)
+warning: `bevy_society` (example "capture") generated 1 warning (run `cargo fix --example "capture" -p bevy_society` to apply 1 suggestion)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 12.45s
+     Running unittests src/lib.rs (/Users/ladvien/.cargo-target/society/debug/deps/bevy_society-b7ef69ba954ddd03)
+
+running 44 tests
+test beliefs::tests::stubborn_anchor_holds ... ok
+test groups::tests::contest_is_even_when_matched_and_favours_the_stronger ... ok
+test beliefs::tests::opinions_converge_when_within_the_bound ... ok
+test beliefs::tests::distant_opinions_do_not_move ... ok
+test groups::tests::standing_ignores_strangers ... ok
+test mind::tests::centre_is_weighted_mean_and_intensity_capped ... ok
+test mind::tests::emotions_decay_below_threshold_is_dropped ... ok
+test mind::tests::appraise_merges_same_kind_and_target_and_caps ... ok
+test groups::tests::memberships_stay_sorted_and_unique ... ok
+test beliefs::tests::knowledge_stays_sorted_and_tells_the_heaviest_rumor ... ok
+test mind::tests::grudge_sums_negative_recent_memories_and_clamps ... ok
+test mind::tests::mood_relaxes_to_baseline_without_emotions ... ok
+test mind::tests::needs_clamp_and_decay_floor_at_zero ... ok
+test mind::tests::personality_sample_is_deterministic_and_in_range ... ok
+test mind::tests::record_evicts_lowest_score_when_full ... ok
+test mind::tests::recall_prefers_about_then_recency ... ok
+test model::balance::tests::friend_of_a_friend_is_pulled_toward_friendship ... ok
+test model::balance::tests::relaxation_never_crosses_zero ... ok
+test model::curves::tests::hour_window_wraps_past_midnight ... ok
+test model::curves::tests::hours_curve_reads_a_normalised_hour ... ok
+test model::curves::tests::linear_clamps_to_unit_interval ... ok
+test model::curves::tests::logistic_is_half_at_its_midpoint ... ok
+test model::curves::tests::step_and_power ... ok
+test model::opinion::tests::anchor_pulls_stubborn_opinions_back ... ok
+test model::opinion::tests::confidence_grows_with_openness ... ok
+test model::opinion::tests::conformity_needs_a_strong_group_mean ... ok
+test model::opinion::tests::disagreement_lowers_affinity ... ok
+test model::opinion::tests::influence_only_inside_the_confidence_bound ... ok
+test model::opinion::tests::weighted_mean_respects_affinity_and_empty_input ... ok
+test model::pad::tests::extraverted_agreeable_people_start_pleased_and_dominant ... ok
+test model::pad::tests::neuroticism_lowers_stability_and_raises_arousal ... ok
+test model::pad::tests::neutral_personality_has_a_neutral_baseline ... ok
+test model::recall::tests::exposure_approaches_one_and_never_exceeds_it ... ok
+test model::recall::tests::familiarity_follows_the_power_law ... ok
+test model::recall::tests::grudge_counts_only_negative_memories_and_clamps ... ok
+test model::recall::tests::recency_halves_in_about_138_hours ... ok
+test model::rumor_dk::tests::belief_is_scaled_by_trust ... ok
+test model::rumor_dk::tests::fresher_and_stronger_rumors_are_told_first ... ok
+test model::rumor_dk::tests::telling_someone_who_knows_stifles ... ok
+test relationships::tests::entries_stay_sorted_by_target_bits ... ok
+test relationships::tests::label_change_is_reported_once ... ok
+test relationships::tests::labels_follow_the_d4_thresholds ... ok
+test relationships::tests::trim_drops_least_familiar_first ... ok
+test script::tests::the_default_engine_has_the_whole_api ... ok
+
+test result: ok. 44 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/behavior.rs (/Users/ladvien/.cargo-target/society/debug/deps/behavior-8a907aadb564417e)
+
+running 8 tests
+test a_home_target_sends_a_person_to_its_home ... ok
+test an_autonomous_person_chooses_an_activity ... ok
+test a_game_written_interact_is_resolved_and_reported ... ok
+test an_unknown_interaction_name_is_ignored ... ok
+test arriving_at_a_place_satisfies_its_needs ... ok
+test an_activity_ends_after_its_duration ... ok
+test the_clock_keeps_running_through_all_of_it ... ok
+test a_person_that_cannot_arrive_gives_up ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.11s
+
+     Running tests/core.rs (/Users/ladvien/.cargo-target/society/debug/deps/core-1b827a0bed69473a)
+
+running 4 tests
+test ids_follow_spawn_order_and_match_the_sorted_index ... ok
+test the_clock_starts_at_the_configured_hour_and_advances ... ok
+test removing_a_person_drops_it_from_the_index_and_from_others_ties ... ok
+test a_gated_set_runs_once_per_due_tick ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/defs.rs (/Users/ladvien/.cargo-target/society/debug/deps/defs-8f5b4330e0422dc8)
+
+running 8 tests
+test merging_a_repeated_activity_is_a_duplicate_and_leaves_self_unchanged ... ok
+test affinity_input_on_a_place_activity_is_invalid ... ok
+test redefining_idle_is_a_duplicate ... ok
+test unknown_need_in_consideration_is_reported_with_its_path ... ok
+test bark_with_unknown_placeholder_is_invalid ... ok
+test starter_pack_compiles ... ok
+test idle_is_pre_registered_at_the_reserved_id ... ok
+test script_syntax_error_names_its_trigger ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/dialogue.rs (/Users/ladvien/.cargo-target/society/debug/deps/dialogue-f6f2e85e8ce1a525)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/fields.rs (/Users/ladvien/.cargo-target/society/debug/deps/fields-f6f05f8a2717ebad)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/groups.rs (/Users/ladvien/.cargo-target/society/debug/deps/groups-f427f8fc245d41c5)
+
+running 3 tests
+test standing_is_the_mean_respect_of_familiar_persons_only ... ok
+test faction_stats_report_members_cohesion_and_regard_between_factions ... ok
+test a_person_nobody_knows_has_zero_standing ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/leaf.rs (/Users/ladvien/.cargo-target/society/debug/deps/leaf-af7cb0d5c8ec1a01)
+
+running 4 tests
+test the_dependency_list_stays_closed ... ok
+test the_pure_model_is_engine_free ... ok
+test hash_collections_stay_lookup_only ... ok
+test no_source_file_reaches_for_an_engine_or_a_game ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/mind.rs (/Users/ladvien/.cargo-target/society/debug/deps/mind-30a48ac6f48f95f7)
+
+running 3 tests
+test joy_intensity_halves_every_tenth_of_a_game_day ... ok
+test needs_fall_at_decay_per_day ... ok
+test joy_lifts_mood_toward_joy_and_then_returns_to_baseline ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.16s
+
+     Running tests/opinions.rs (/Users/ladvien/.cargo-target/society/debug/deps/opinions-cd2540bef206dd97)
+
+running 4 tests
+test a_missing_transform_does_not_stop_the_tick ... ok
+test a_person_alone_does_not_conform ... ok
+test conformity_pulls_an_agreeable_person_toward_a_confident_group ... ok
+test conformity_ignores_a_lukewarm_group ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+     Running tests/relationships.rs (/Users/ladvien/.cargo-target/society/debug/deps/relationships-f3480bc62ba6dd20)
+
+running 6 tests
+test despawning_a_person_removes_every_tie_to_it ... ok
+test crossing_into_friendship_writes_exactly_one_label_change ... ok
+test two_metres_apart_for_a_game_day_builds_familiarity_both_ways ... ok
+test structural_balance_pushes_a_to_c_negative_when_a_likes_b_and_b_dislikes_c ... ok
+test capacity_caps_ties_at_max_ties ... ok
+test familiarity_decays_as_power_law_after_contact_stops ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.10s
+
+     Running tests/rules.rs (/Users/ladvien/.cargo-target/society/debug/deps/rules-9a623de180d791ad)
+
+running 7 tests
+test a_trigger_sees_the_tick_start_snapshot_not_its_own_writes ... ok
+test an_infinite_loop_hits_the_operation_limit ... ok
+test a_rumor_reach_trigger_fires_once_when_the_rumor_reaches_its_fraction ... ok
+test the_plugin_works_without_any_trigger_defined ... ok
+test a_cooldown_trigger_fires_then_holds ... ok
+test a_script_error_is_reported_and_the_app_keeps_running ... ok
+test a_once_trigger_fires_once_per_actor ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests/rumor.rs (/Users/ladvien/.cargo-target/society/debug/deps/rumor-08ac229de495e10c)
+
+running 4 tests
+test a_lone_planted_rumor_has_no_reach ... ok
+test a_planted_rumor_naming_an_unknown_deed_creates_nothing ... ok
+test planted_rumor_is_known_by_its_origin_and_dies_with_its_subject ... ok
+test settings_keep_seeded_randomness_out_of_planting ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/steering.rs (/Users/ladvien/.cargo-target/society/debug/deps/steering-519572fa87d68cb2)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests bevy_society
+
+running 1 test
+test src/lib.rs - (line 16) - compile ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+all doctests ran in 1.14s; merged doctests compilation took 1.13s

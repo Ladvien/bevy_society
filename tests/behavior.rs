@@ -307,3 +307,138 @@ fn the_clock_keeps_running_through_all_of_it() {
     let after = app.world().resource::<SocietyClock>().tick;
     assert_eq!(after - before, 29, "one tick per update after the first");
 }
+
+#[test]
+fn a_script_consideration_is_evaluated() {
+    // A script that always returns 1.0 must make its activity win. Before `Signal::Script` was wired
+    // through the engine, this scored 0 and the person idled: the definition format promised script
+    // scoring and delivered nothing.
+    let mut app = headless(
+        SocietyDefs::from_ron(
+            r#"(
+                needs: [(id: "rest", decay_per_day: 1.0)],
+                activities: [(
+                    id: "read",
+                    target: Itself,
+                    duration_hours: 1.0,
+                    rank: 1,
+                    considerations: [(input: Script("1.0"), curve: Linear(1.0, 0.0))],
+                )],
+            )"#,
+        )
+        .expect("a script consideration compiles"),
+        fast_settings(),
+    );
+    let person = spawn_person(&mut app, "A", Vec2::ZERO);
+    app.world_mut().entity_mut(person).insert(Autonomous);
+
+    step(&mut app, 4);
+
+    let doing = app
+        .world()
+        .get::<bevy_society::Doing>(person)
+        .expect("the person chose an activity");
+    assert_ne!(
+        doing.activity,
+        bevy_society::IDLE_ACTIVITY,
+        "a script returning 1.0 must not leave the person idle"
+    );
+}
+
+#[test]
+fn a_script_consideration_can_score_zero() {
+    // The same shape with a script that returns 0.0: the activity must not be chosen. This is the
+    // other half of the contract — a consideration that says no really says no.
+    let mut app = headless(
+        SocietyDefs::from_ron(
+            r#"(
+                needs: [(id: "rest", decay_per_day: 1.0)],
+                activities: [(
+                    id: "read",
+                    target: Itself,
+                    duration_hours: 1.0,
+                    rank: 1,
+                    considerations: [(input: Script("0.0"), curve: Linear(1.0, 0.0))],
+                )],
+            )"#,
+        )
+        .expect("a script consideration compiles"),
+        fast_settings(),
+    );
+    let person = spawn_person(&mut app, "A", Vec2::ZERO);
+    app.world_mut().entity_mut(person).insert(Autonomous);
+
+    step(&mut app, 4);
+
+    let doing = app.world().get::<bevy_society::Doing>(person);
+    assert!(
+        doing.is_none_or(|d| d.activity == bevy_society::IDLE_ACTIVITY),
+        "a script returning 0.0 must not win the decision"
+    );
+}
+
+#[test]
+fn a_script_consideration_sees_its_own_actor() {
+    // The script reads the actor's own need, so it only wins for the tired person. If `actor` were
+    // unbound or bound to somebody else, both people would get the same answer and this fails.
+    let mut app = headless(
+        SocietyDefs::from_ron(
+            r#"(
+                needs: [(id: "rest", decay_per_day: 0.0)],
+                activities: [(
+                    id: "doze",
+                    target: Itself,
+                    duration_hours: 1.0,
+                    rank: 1,
+                    considerations: [(
+                        input: Script("if ctx.need(actor, \"rest\") > 0.5 { 1.0 } else { 0.0 }"),
+                        curve: Linear(1.0, 0.0),
+                    )],
+                )],
+            )"#,
+        )
+        .expect("a ctx-reading consideration compiles"),
+        fast_settings(),
+    );
+    let tired = spawn_person(&mut app, "Tired", Vec2::new(40.0, 0.0));
+    let rested = spawn_person(&mut app, "Rested", Vec2::new(-40.0, 0.0));
+    for person in [tired, rested] {
+        app.world_mut().entity_mut(person).insert(Autonomous);
+    }
+    // The first `update` primes `Time<Fixed>`, the second runs the first society tick, and only then
+    // has `size_person_state` grown `Needs` from empty to the definitions' length. Both people choose
+    // an activity on that tick, so the levels are set and the decision re-run.
+    step(&mut app, 2);
+    for (person, level) in [(tired, 0.9_f32), (rested, 0.1_f32)] {
+        if let Some(mut needs) = app.world_mut().get_mut::<bevy_society::Needs>(person) {
+            assert!(
+                !needs.0.is_empty(),
+                "Needs must be sized by now, or this test proves nothing"
+            );
+            needs.0[0] = level;
+        }
+        // Clear the activity the first tick chose, so the next tick decides again.
+        app.world_mut()
+            .entity_mut(person)
+            .remove::<(bevy_society::Doing, bevy_society::Destination)>();
+    }
+
+    step(&mut app, 2);
+
+    let tired_activity = app
+        .world()
+        .get::<bevy_society::Doing>(tired)
+        .map(|d| d.activity);
+    let rested_activity = app
+        .world()
+        .get::<bevy_society::Doing>(rested)
+        .map(|d| d.activity);
+    assert!(
+        tired_activity.is_some_and(|a| a != bevy_society::IDLE_ACTIVITY),
+        "the tired person's script returned 1.0, so it acts: {tired_activity:?}"
+    );
+    assert!(
+        rested_activity.is_none_or(|a| a == bevy_society::IDLE_ACTIVITY),
+        "the rested person's script returned 0.0, so it does not: {rested_activity:?}"
+    );
+}
