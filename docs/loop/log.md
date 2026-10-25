@@ -4078,7 +4078,7 @@ colour and length, mood halos differing in colour and size, all four stalls in f
 **Dead-code delta.** Zero. **Tests:** `tests/profession.rs` is new (4 tests); both feature sets green;
 clippy/fmt/doc clean. Perf unchanged: 0.730 ms/tick at 100, 508.8 at 5 000, inside the spread.
 
-**Commit** `PENDING`.
+**Commit** `f414423`.
 
 **Top 5 remaining.**
 
