@@ -4037,3 +4037,57 @@ have the old dynamics without pinning the version.
 **One deployment lesson.** The first `cargo publish` failed verification on the default toolchain
 (`rustc 1.94.1`); this repo requires `cargo +1.98.1`, which AGENTS.md says for every command and I did not
 follow. The second attempt with the pinned toolchain published.
+
+## 2026-10-25-06 — A task is not a skill
+
+**Pick.** The brief asked for a deep literature dive and for professions and economics as mechanics. The
+dive produced one distinction that decides the design, and it is worth quoting: Acemoglu & Autor (2010,
+`10.3386/w16082`) — "a **task** is a unit of work activity that produces output ... a **skill** is a worker's
+endowment of capabilities for performing various tasks ... **workers have different comparative advantages**".
+The crate modelled neither: `work` was one `Hour(8, 17)` gate at any place tagged `work`, so a miller and a
+weaver were the same person in a different colour.
+
+**What shipped.** `skills:` in the definitions file, `profession:` on an activity, and `Input::Skill`. **A
+skill is read, not stored** — its level is the Big Five trait its group names, so two people with the same
+traits are equally good at the same trade and nothing needs saving. Measured at one bench with a rival task:
+conscientiousness 0.95 / 0.50 / 0.05 took the craft task **5 / 4 / 0** times.
+
+**Two wrong measurements, both caught.**
+
+1. **The first probe showed the skill doing nothing at all** — 10 / 10 / 10 starts. The fixture had a single
+   activity, and with one option the score never decides anything. Adding a rival task made it discriminate;
+   the test file carries that lesson so `potter` is not deleted as noise.
+2. **Gating the dominant activity is destructive.** Putting the same consideration on the starter pack's
+   `work` took seed 42 from rivals 29 to **55** and rumor reach 0.50 to **0.08**. The mechanic ships on an
+   *additive* `craft` activity in the village pack. `profession:` alone, with no consideration, is exactly
+   inert (16 / 24 / 0.083 at seed 7), so the field is metadata until a consideration uses it.
+
+**The clips were cropping a stall, and the camera maths says why.** `Camera3d::default()` is a 45° *vertical*
+field, so the half-height is `tan(22.5°) = 0.414`. Projecting the four stalls through the camera puts
+`workshop` at |y| = 0.66 and `market` at 0.49 at a 12 m distance — both outside the frame. A small village
+hits the distance *floor*, so the floor was cropping, the opposite of what a floor is for. The floor is 20 m,
+where every stall sits inside |y| ≤ 0.37. A −2.2 m tilt bias added earlier in the same session was wrong in
+the other direction (`market` at +0.385); it is now zero.
+
+**All six clips re-recorded and inspected at frames 0 / 120 / 239**, plus the encoded GIFs rather than only
+the PNGs: captions burned in and legible, three faction colours distinct, opinion bars differing in both
+colour and length, mood halos differing in colour and size, all four stalls in frame, HUD clear.
+
+**Verdicts.** Pass 1 GREAT. Pass 2 GREAT, after two measured rejections and one wrong probe. Pass 3 GREAT.
+
+**Dead-code delta.** Zero. **Tests:** `tests/profession.rs` is new (4 tests); both feature sets green;
+clippy/fmt/doc clean. Perf unchanged: 0.730 ms/tick at 100, 508.8 at 5 000, inside the spread.
+
+**Commit** `PENDING`.
+
+**Top 5 remaining.**
+
+1. **No economy at all** — no money, inventory or price. The Edgeworth-barter design and the two measurements
+   that must precede it are in `needs-decision/professions-and-economics.md`.
+2. **The refusal rate is `accept.base` 0.50**, not asymmetry: mean P 0.656, mean affinity term +0.058. Still
+   the most host-visible unmeasured number in the crate.
+3. **`last_exchange_day` on `Tie`** — the only way to fix the 43 drift endings without lying; needs the save
+   version bump. `needs-decision/which-tie-field-says-someone-spoke.md`.
+4. **Romance and pairing** — `needs-decision/romance-and-pairing.md`, after professions.
+5. **A skill cannot improve.** The level is a trait reading, constant for a life; learning needs stored state
+   and a save field.

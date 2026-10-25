@@ -4,6 +4,18 @@ All notable changes to bevy_society. The format follows [Keep a Changelog](https
 
 ## [Unreleased]
 
+### Added
+
+- **A task is not a skill, and now the crate knows the difference.** Acemoglu & Autor (2010, DOI `10.3386/w16082`): "a task is a unit of work activity that produces output ... a skill is a worker's endowment of capabilities for performing various tasks", and "workers have different comparative advantages". Before this, `work` was one `Hour(8, 17)` gate at any place tagged `work`, so a miller and a weaver were the same person in a different colour. The definitions file gains `skills: [(id, group)]`, an activity may declare the `profession` it is a task for, and a consideration may read `Input::Skill("craft")`.
+
+  **A skill is read, not stored.** Its level is the Big Five trait its group names (`Craft` → conscientiousness, `Creative` → openness, `Social` → extraversion), so two people with the same traits are equally good at the same trade and nothing has to be saved, serialised or kept deterministic. Measured: at one bench with a rival task, villagers at 0.95 / 0.50 / 0.05 conscientiousness took the craft task **5 / 4 / 0** times — the least diligent never chose it. `tests/profession.rs` holds that, and that a low-skill villager still takes the task when it is the only work on offer, because the allocation is comparative advantage and not assignment.
+
+  **Gating the dominant activity was measured and rejected.** Applying the same consideration to the starter pack's `work` — the village's main daytime activity — reshuffled the whole day: seed 42 went rivals 29 → **55** and rumor reach 0.50 → **0.08**. The mechanic ships on an *additive* `craft` activity in the village pack instead, where it competes for hours without replacing the day. `docs/research/economics.md` is the new note; the money-and-prices layer is recorded with its design and its prerequisites in `docs/loop/needs-decision/professions-and-economics.md` rather than built.
+
+### Fixed
+
+- **The README clips were cropping a stall, and the camera maths says why.** `Camera3d::default()` is a 45° *vertical* field, so the half-height at the image plane is `tan(22.5°) = 0.414`. Projecting the four stalls through the camera puts `workshop` at |y| = 0.66 and `market` at 0.49 at the old 12 m floor — **both outside the frame** — and a small village always hits the floor, so a tight crowd was *cropping*, which is the opposite of what a floor is for. The floor is 20 m, where every stall sits within |y| ≤ 0.37. A −2.2 m tilt bias added earlier in the same session was also wrong: it saved the far stall by pushing the near one to +0.385.
+
 ## [0.3.0] - 2026-10-25
 
 Published to crates.io at 2026-10-25T21:33:38Z.

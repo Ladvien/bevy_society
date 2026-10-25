@@ -156,14 +156,14 @@ pub use core::{
     AssessmentNorm, Autonomous, BoundPlaces, ClockSource, Deceased, Dormant, Home, HostClock,
     Locomotion, NextPersonId, Perception, Person, PersonId, PersonIndex, PersonKey, Place,
     PlaceKey, PlaceTags, SocietyClock, SocietyCorePlugin, SocietyPlane, SocietyRng,
-    SocietySettings, SocietySystems, SocietyTick, Tuning, society_tick_due,
+    SocietySettings, SocietySystems, SocietyTick, Tuning, skill_level, society_tick_due,
 };
 pub use defs::{
     AcceptDef, ActivityDef, ActivityId, ActivityTarget, Consideration, ConversationRuleDef,
     DeedDef, DeedId, DefsError, DefsFile, EffectsDef, FactionDef, FactionId, FieldInput,
     IDLE_ACTIVITY, Input, InteractionBarks, InteractionDef, InteractionId, NeedDef, NeedId,
-    NodeEffectDef, Signal, SignalDef, SignalId, SocietyDefs, TieDelta, TopicDef, TopicId,
-    TriggerDef, TriggerOn, size_person_state,
+    NodeEffectDef, Signal, SignalDef, SignalId, SkillDef, SkillGroup, SkillId, SocietyDefs,
+    TieDelta, TopicDef, TopicId, TriggerDef, TriggerOn, size_person_state,
 };
 #[cfg(feature = "dialogue")]
 pub use dialogue::{DialoguePlugin, TalkTo};

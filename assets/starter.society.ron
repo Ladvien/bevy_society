@@ -5,6 +5,18 @@
         (id: "food", decay_per_day: 0.9),
         (id: "fun", decay_per_day: 0.8),
     ],
+    // **A skill is a worker's endowment; a task is a unit of work.**
+    //
+    // Acemoglu & Autor 2010 (`10.3386/w16082`): "a task is a unit of work activity that produces output
+    // ... a skill is a worker's endowment of capabilities for performing various tasks". A skill's level is
+    // read from one personality trait, so it needs no stored state: two people with the same
+    // conscientiousness are equally good at the same craft, and nobody carries a skill vector to save.
+    // The three groups are the crate's own choice (a design default) — no paper assigns traits to trades.
+    skills: [
+        (id: "craft", group: Craft),
+        (id: "invention", group: Creative),
+        (id: "dealings", group: Social),
+    ],
     topics: [
         (id: "kindness"),
         (id: "honesty"),
@@ -44,6 +56,10 @@
             id: "work",
             target: Place("work"),
             duration_hours: 4.0,
+            // Work is a **task** for the craft skill: a diligent person gets more out of the same hours.
+            // Nothing is gated — an idle person can still choose to work, at a lower score, which is
+            // comparative advantage rather than assignment.
+            profession: Some("craft"),
             considerations: [
                 (input: Hour, curve: Hours(8.0, 17.0)),
             ],

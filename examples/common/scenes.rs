@@ -207,14 +207,20 @@ pub fn crowd(world: &mut World) -> (Vec3, f32) {
     // actually leaves frame.
     // **Biased toward the far corner.** The camera tilts, so the near edge of the shot covers less ground
     // than the far edge; framing exactly on the box midpoint left the workshop half off the bottom of
-    // the last frame. Pushing the centre back along the view direction costs nothing at the far end.
-    let centre = centre - Vec3::new(0.0, 0.0, 1.2);
+    // the last frame.
+    //
+    // **The bias was in the wrong direction and is now zero.** Projecting the four stalls through the
+    // camera solves it exactly: at zero bias they land at y ∈ [-0.37, +0.31], which fits a 0.40 half-height;
+    // the -2.2 m bias that "fixed the workshop" pushed `market` to **+0.385** and cropped *that* one, and a
+    // +2.2 m bias pushed `workshop` to **-0.486**. The workshop is the far stall, so pushing the centre away
+    // from the camera saved it by losing the near one. Symmetric is correct, so no bias is applied.
     let spread = points
         .iter()
         .map(|p| Vec2::new(p.x - centre.x, p.z - centre.z).length())
         .chain(places.iter().map(|p| {
-            // A stall is a 1.2 m box; its corner is what clips first.
-            Vec2::new(p.x - centre.x, p.z - centre.z).length() + 0.85
+            // A stall is a 1.2 m box; its corner is what clips first. `+ 1.3` is the half-diagonal
+            // (0.85) plus a person's body radius, so a villager standing against the stall also fits.
+            Vec2::new(p.x - centre.x, p.z - centre.z).length() + 1.3
         }))
         .fold(0.0_f32, f32::max);
     (Vec3::new(centre.x, 0.4, centre.z), spread)
@@ -232,7 +238,13 @@ pub fn crowd_camera(centre: Vec3, spread: f32, fraction: f32) -> Transform {
     // Measured through three framings on the same run: 2.7 lost two of four stalls, **3.2 keeps all
     // four** and leaves the villagers large enough to read a 0.5 m ring at 720 px, and 4.0 pulled back so
     // far that people became specks. The cap stops a scattered crowd being filmed from the stratosphere.
-    let reach = (spread * 2.5).clamp(12.0, 22.0);
+    //
+    // **The floor was the bug.** `Camera3d::default()` is a 45 degree *vertical* field, so the half-height
+    // at the image plane is `tan(22.5) = 0.414`. Projecting the four stalls through the camera at the old
+    // floor of 12 m puts `workshop` at **|y| = 0.66** and `market` at 0.49 — both outside. A tiny village
+    // hits the floor, so a small `spread` was *cropping*, which is the opposite of what a floor is for.
+    // 20 m fits every stall at |y| <= 0.37 with margin, and at 22 m they sit at 0.33.
+    let reach = (spread * 2.5).clamp(20.0, 26.0);
     let angle = (18.0 + 12.0 * fraction).to_radians();
     Transform::from_xyz(
         centre.x + 0.27 * reach * angle.sin(),

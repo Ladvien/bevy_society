@@ -472,6 +472,23 @@ impl Default for Tuning {
     }
 }
 
+/// A skill's level for a person, in `[0, 1]`: the trait its group reads, as it stands.
+///
+/// **A task is not a skill.** Acemoglu & Autor (2010, DOI `10.3386/w16082`): "a task is a unit of work
+/// activity that produces output ... a skill is a worker's endowment of capabilities for performing various
+/// tasks", and the allocation of one to the other is what a labour market settles. The crate models the
+/// task as an [`ActivityDef`](crate::ActivityDef) and the endowment as this number, read from a Big Five
+/// trait so that it needs **no stored state**: two people with the same personality are equally good at the
+/// same trade, and nobody carries a skill vector to save.
+///
+/// The trait-to-group mapping is the crate's own choice (a **design default**; no paper in the corpus
+/// assigns traits to trades) and lives in [`SkillGroup::trait_of`](crate::defs::SkillGroup).
+///
+/// No gating: a low-skill person may still take a task. Comparative advantage, not assignment.
+pub fn skill_level(traits: &crate::Personality, group: crate::defs::SkillGroup) -> f32 {
+    traits.value(group.trait_of()).clamp(0.0, 1.0)
+}
+
 /// Where the society clock's time comes from.
 #[derive(Reflect, Debug, Clone, Copy, Default, PartialEq, Eq)]
 pub enum ClockSource {

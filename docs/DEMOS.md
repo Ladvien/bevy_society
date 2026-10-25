@@ -15,7 +15,7 @@
 | `factions.gif` | `factions` | the three faction colours, no lines | `faction colour · orange millers, green weavers, violet watch` |
 
 All six are the same village, same seed and the same run: `{"frames": 240, "rumor_reach": 0.080,
-"friends": 27, "rivals": 0, "barks": 565}`, recorded 2026-10-25. Only what is drawn differs, which is the
+"friends": 29, "rivals": 0, "barks": 574}`, recorded 2026-10-25. Only what is drawn differs, which is the
 point — a feature clip is a different *view* of one simulation, not a different simulation.
 
 ### The clips were rebuilt in 2026-11-28, and every one of them had been lying

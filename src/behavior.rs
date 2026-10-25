@@ -1599,6 +1599,7 @@ fn decide_activities(
                     i as u16,
                     script_ref.as_ref(),
                     fields.as_deref(),
+                    &defs.skills,
                 );
                 if score <= 0.0 {
                     continue;
@@ -1966,6 +1967,7 @@ fn score_option(
     activity: u16,
     scripts: Option<&ScriptContext<'_>>,
     fields: Option<&FieldGrids>,
+    skills: &[crate::defs::SkillGroup],
 ) -> f32 {
     let n = considerations.len();
     if n == 0 {
@@ -1980,6 +1982,7 @@ fn score_option(
             activity,
             scripts,
             fields,
+            skills,
         ));
         let compensated = s + (1.0 - s) * (1.0 - 1.0 / n as f32) * s;
         product *= compensated;
@@ -2005,6 +2008,7 @@ fn signal_value(
     activity: u16,
     scripts: Option<&ScriptContext<'_>>,
     fields: Option<&FieldGrids>,
+    skills: &[crate::defs::SkillGroup],
 ) -> f32 {
     let tie = match target {
         DoingTarget::Person(other) => decision.ties.iter().find(|t| t.target == other).copied(),
@@ -2058,6 +2062,12 @@ fn signal_value(
                 (decision.position.distance(p) / decision.perception_radius).min(1.0)
             })
         }
+        // **A skill is read, not stored.** The level is the trait its group names, so the same personality
+        // is the same competence everywhere and nothing has to be saved. An undefined skill cannot reach
+        // here: `compile_term` resolves the name against the defs and refuses a package that names one.
+        Signal::Skill(id) => skills.get(usize::from(id.0)).map_or(0.0, |group| {
+            crate::skill_level(&decision.personality, *group)
+        }),
         Signal::SocialProof => {
             if decision.close_ties.is_empty() {
                 0.0

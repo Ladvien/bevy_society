@@ -7,6 +7,31 @@
 //     file.merge(DefsFile::from_ron(include_str!("assets/village.society.ron"))?)?;
 //     let defs = SocietyDefs::compile(file)?;
 (
+    // **A village trade: a task that only some people are good at.**
+    //
+    // `work` in the starter pack is the village's dominant daytime activity, so gating *it* on a trait
+    // reshuffles the whole day and was measured to hurt the village (seed 42: rivals 29 -> 55, rumor reach
+    // 0.50 -> 0.08). This activity is additive instead: it competes with `work` for the same hours, and the
+    // people with the conscientiousness for it are the ones who pick it. See
+    // `docs/loop/runs/2026-10-25-06/eval.md`.
+    activities: [
+        (
+            id: "craft",
+            target: Place("work"),
+            duration_hours: 3.0,
+            // The task side of Acemoglu & Autor's distinction: a unit of work activity that produces output.
+            profession: Some("craft"),
+            considerations: [
+                (input: Hour, curve: Hours(8.0, 17.0)),
+                // The skill side: a diligent person gets more out of the same hours, and this is the only
+                // term that distinguishes them, so it is also the term that decides who does the crafting.
+                (input: Skill("craft"), curve: Linear(0.9, 0.05)),
+            ],
+            satisfies: [],
+            interaction: None,
+            barks: ["Steady hands."],
+        ),
+    ],
     factions: [
         (id: "millers"),
         (id: "weavers"),

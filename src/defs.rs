@@ -40,6 +40,11 @@ pub struct NeedId(pub u16);
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default, Reflect)]
 pub struct SignalId(pub u16);
 
+/// Index of a skill, in definition order.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default, Reflect)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct SkillId(pub u16);
+
 /// Index of a topic, in definition order.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default, Reflect)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -73,6 +78,8 @@ pub struct DefsFile {
     pub needs: Vec<NeedDef>,
     /// Signals the host writes and the crate only reads.
     pub signals: Vec<SignalDef>,
+    /// Named capabilities, each read from one personality trait.
+    pub skills: Vec<SkillDef>,
     /// Opinion topics.
     pub topics: Vec<TopicDef>,
     /// Deeds that witnesses judge and that can become rumors.
@@ -111,6 +118,45 @@ pub struct NeedDef {
 pub struct SignalDef {
     /// Unique name.
     pub id: String,
+}
+
+/// Which personality axis a skill draws on.
+///
+/// **A design default, measured.** Acemoglu & Autor (2010, DOI `10.3386/w16082`) separate a **task** ("a
+/// unit of work activity that produces output") from a **skill** ("a worker's endowment of capabilities for
+/// performing various tasks"), and that is the distinction this file needs: an activity is the task, and
+/// this is the endowment. The three-way grouping of Big Five traits onto kinds of work is the crate's own
+/// choice — no paper in the corpus assigns traits to trades — and each group reads exactly one trait so
+/// that the mapping is inspectable in one place.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize)]
+pub enum SkillGroup {
+    /// Diligence: scales with conscientiousness.
+    Craft,
+    /// Invention: scales with openness.
+    Creative,
+    /// Dealing with people: scales with extraversion.
+    Social,
+}
+
+impl SkillGroup {
+    /// The trait this group reads, as an index into [`Personality::values`](crate::Personality).
+    pub fn trait_of(self) -> crate::defs::Trait {
+        match self {
+            Self::Craft => Trait::Conscientiousness,
+            Self::Creative => Trait::Openness,
+            Self::Social => Trait::Extraversion,
+        }
+    }
+}
+
+/// A named capability. Level comes from personality, not from stored state.
+#[derive(Debug, Clone, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct SkillDef {
+    /// Unique name.
+    pub id: String,
+    /// Which trait the level is read from.
+    pub group: SkillGroup,
 }
 
 /// An opinion topic.
@@ -168,6 +214,15 @@ pub struct ActivityDef {
     pub satisfies: Vec<(String, f32)>,
     /// Interaction performed on arrival; requires a `Person` target.
     pub interaction: Option<String>,
+    /// The skill this activity is a **task** for, when it is one.
+    ///
+    /// A task is "a unit of work activity that produces output" and a skill is "a worker's endowment of
+    /// capabilities for performing various tasks" — Acemoglu & Autor 2010 (DOI `10.3386/w16082`). Naming a
+    /// skill here does **not** gate the activity: an unskilled person can still choose it, at a lower score
+    /// if a consideration reads `Skill(..)`. That is comparative advantage rather than assignment, which is
+    /// the paper's own point ("the assignment of skills to tasks is endogenous").
+    #[serde(default)]
+    pub profession: Option<String>,
     /// Thought barks while doing the activity.
     #[serde(default)]
     pub barks: Vec<String>,
@@ -235,6 +290,8 @@ pub enum Input {
     Distance,
     /// Fraction of the actor's close ties doing this activity. Person targets only.
     SocialProof,
+    /// A named skill's level, in `[0, 1]`. See [`SkillDef`].
+    Skill(String),
     /// A social field value at the target cell. Needs the `fields` feature.
     Field(FieldInput),
     /// A Rhai float expression, clamped to [0, 1].
@@ -630,6 +687,8 @@ fn check_disjoint<'a>(
 pub struct SocietyDefs {
     pub(crate) needs: Vec<NeedSpec>,
     pub(crate) signals: Vec<String>,
+    /// Named capabilities, in definition order.
+    pub(crate) skills: Vec<SkillGroup>,
     pub(crate) topics: Vec<TopicSpec>,
     pub(crate) deeds: Vec<DeedSpec>,
     pub(crate) factions: Vec<FactionSpec>,
@@ -641,6 +700,7 @@ pub struct SocietyDefs {
     pub(crate) scripts: Vec<CompiledScript>,
     need_ids: HashMap<String, u16>,
     signal_ids: HashMap<String, u16>,
+    skill_ids: HashMap<String, u16>,
     topic_ids: HashMap<String, u16>,
     deed_ids: HashMap<String, u16>,
     faction_ids: HashMap<String, u16>,
@@ -661,6 +721,7 @@ impl SocietyDefs {
         Self {
             needs: Vec::new(),
             signals: Vec::new(),
+            skills: Vec::new(),
             topics: Vec::new(),
             deeds: Vec::new(),
             factions: Vec::new(),
@@ -682,6 +743,7 @@ impl SocietyDefs {
             scripts: Vec::new(),
             need_ids: HashMap::new(),
             signal_ids: HashMap::new(),
+            skill_ids: HashMap::new(),
             topic_ids: HashMap::new(),
             deed_ids: HashMap::new(),
             faction_ids: HashMap::new(),
@@ -699,6 +761,9 @@ impl SocietyDefs {
         }
         for def in file.signals {
             defs.add_signal(def)?;
+        }
+        for def in file.skills {
+            defs.add_skill(def)?;
         }
         for def in file.topics {
             defs.add_topic(def)?;
@@ -742,6 +807,16 @@ impl SocietyDefs {
     /// The id of a need, if defined.
     pub fn need_id(&self, name: &str) -> Option<NeedId> {
         self.need_ids.get(name).copied().map(NeedId)
+    }
+
+    /// The id of a skill, if defined.
+    pub fn skill_id(&self, name: &str) -> Option<SkillId> {
+        self.skill_ids.get(name).copied().map(SkillId)
+    }
+
+    /// The group a skill reads, by id.
+    pub fn skill_group(&self, id: SkillId) -> Option<SkillGroup> {
+        self.skills.get(usize::from(id.0)).copied()
     }
 
     /// The id of a signal, if defined.
@@ -1009,6 +1084,12 @@ impl SocietyDefs {
         Ok(())
     }
 
+    fn add_skill(&mut self, def: SkillDef) -> Result<(), DefsError> {
+        register(&mut self.skill_ids, "skill", &def.id, self.skills.len())?;
+        self.skills.push(def.group);
+        Ok(())
+    }
+
     fn add_topic(&mut self, def: TopicDef) -> Result<(), DefsError> {
         register(&mut self.topic_ids, "topic", &def.id, self.topics.len())?;
         self.topics.push(TopicSpec { name: def.id });
@@ -1219,6 +1300,9 @@ impl SocietyDefs {
             Input::Familiarity => Signal::Familiarity,
             Input::Distance => Signal::Distance,
             Input::SocialProof => Signal::SocialProof,
+            Input::Skill(name) => {
+                Signal::Skill(require(self.skill_id(name), "skill", name, owner)?)
+            }
             Input::Field(field) => Signal::Field(*field),
             Input::Script(source) => Signal::Script(scripts.expression(owner, source)?),
         };
@@ -1467,6 +1551,8 @@ pub enum Signal {
     Distance,
     /// Share of close ties doing the activity.
     SocialProof,
+    /// A skill's level, read from the actor's personality.
+    Skill(SkillId),
     /// A social field value.
     Field(FieldInput),
     /// A compiled Rhai expression.
