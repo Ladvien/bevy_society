@@ -3840,3 +3840,59 @@ paper says "counts".
 3. **Split arrival radius from contact radius** — schema change. In `needs-decision/people-cannot-reach-their-beds.md`.
 4. **The clock decision** - 5.4-hour walks against 0.75-hour activities; a breaking change.
 5. **`rumor-crosses-a-cluster`** - honestly `pending`; restate the observable or build a bridge activity.
+
+## 2026-10-25-02 — A label is a latitude, not a line
+
+**Pick.** Not on the list. Reading the last iteration's instrument (`examples/evidence.rs`) with a new
+counter — *every* `TieLabelChanged`, not only the rival ones — showed the message a host acts on fires
+**2 867** times in 16.4 game-days, one every **8.2 game-minutes**. The runner-up was item 1, "raise the
+rate of friendly interaction": authored content, changes what a host's village *is*, and already measured
+to fail in its weight-based form last iteration.
+
+**The instrument was the finding.** For each flip, read the tie's affinity, familiarity and trust *in the
+tick it flipped*:
+
+| transition | count | median margin from its bar | one-tick step |
+|---|---|---|---|
+| `Stranger -> Acquaintance` | 828 | **0.0027** | 0.0002 — decay |
+| `Friend <-> Acquaintance` | 1 027 | 0.019 / 0.043 | **0.013** — an exchange |
+
+**Half the messages are events, half are noise.** That sentence decided the design.
+
+**The first implementation was wrong and the sweep said so.** A band on every bar cut messages **35%**
+(2 291 → 1 486) — and took rivals **42 → 48** and friends **18 → 20** at seed 7, because it held a
+friendship past the event that ended it. A band on an event is a lie. The band went to the stranger bar
+only, at 0.02:
+
+| seed 7, band 0.02 | no band | stranger-bar band |
+|---|---|---|
+| `Stranger -> Acquaintance` | 828 | **552** (276 pairs, once each) |
+| `Acquaintance -> Stranger` | 96 | **1** |
+| friends / rivals | 18 / 42 | **18 / 42** |
+| label messages | 2 291 | **1 953** (−15%) |
+
+**Verdicts.** Pass 1 GREAT. Pass 2 GREAT, and it is where the wrong band was caught. Pass 3 GREAT.
+
+**A claim retracted in flight.** The plan promised "an order of magnitude"; the measurement is 15%. Written
+into the review and the eval rather than into the changelog headline.
+
+**Mechanism.** Sherif & Hovland 1961's latitude of acceptance — a judgement is a band, not a point — via
+Fagan & Browne 1994, corpus doc `10.1007_0-306-47586-3_8`. The width is a design default with a plateau:
+0.02, 0.04 and 0.08 all leave the same 552 promotions, so the number is not a knob that has to be right.
+
+**Dead-code delta.** Zero (one new public item, `classify_from`, and one new `Tuning` field, both consumed).
+**Tests:** 72 binaries, both feature sets, clippy/fmt/doc clean; `tests/label_hysteresis.rs` is new and
+bites — its first two assertions failed on real behaviour and were corrected, not the code.
+
+**Commit** `0d5f2c1`.
+
+**Top 5 remaining.**
+
+1. **`TieLabelChanged` still fires 1 953 times in 17 game-days**, and 85 pairs change more than ten times.
+   The remainder is real dynamics, not noise: the friend count itself is unstable. Whether a `Friend`
+   should be *sticky* once made is the next question, and the sweep here says the answer is not a wider band.
+2. **Raise the rate of friendly interaction** — unchanged from last iteration; still needs three axes.
+3. **`witness_gain` makes one insult cost the whole crowd** — needs a three-axis measurement.
+4. **Split arrival radius from contact radius** — schema change, in `needs-decision/people-cannot-reach-their-beds.md`.
+5. **`rumor-crosses-a-cluster`** — the `Stranger` band does not touch it; it is still `pending` on the
+   arrival-gate cause in `needs-decision/how-can-two-groups-ever-meet.md`.

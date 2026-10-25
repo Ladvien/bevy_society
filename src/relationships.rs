@@ -68,6 +68,78 @@ impl TieLabel {
         }
     }
 
+    /// [`classify_with_trust`](Self::classify_with_trust), except that a tie **already** in a category
+    /// keeps it until the value falls past a lower bar.
+    ///
+    /// **A label is a latitude, not a line.** `classify_with_trust` gives *promotion* bars — what it
+    /// takes to become a Friend. Leaving a category asks for `Tuning::label_hysteresis` less than that,
+    /// so a value resting on the bar does not flip the label every time the model nudges it.
+    ///
+    /// The shape is social judgment theory's **latitude of acceptance**: a judgement about a person is a
+    /// band around an anchor, not a point, and a stimulus just past the anchor's end shifts the band
+    /// rather than reversing the judgement — Fagan & Browne (1994: 219-220), reproducing Sherif &
+    /// Hovland (1961), corpus doc `10.1007_0-306-47586-3_8`. The source supplies the shape and no
+    /// number; `Tuning::label_hysteresis` is a **design default chosen by measurement**.
+    ///
+    /// # What the measurement says, and why the band is on the low end only
+    ///
+    /// `village-evening`, seed 7, 16.4 game-days, 24 people: **2 867** `TieLabelChanged` messages, one
+    /// per 8.2 game-minutes, with 85 of the 276 ordered pairs changing more than ten times. The causes
+    /// are not alike:
+    ///
+    /// | transition | count | median margin from its bar | the step that flipped it |
+    /// |---|---|---|---|
+    /// | `Stranger -> Acquaintance` | 828 | **0.0027** (familiarity) | 0.0002, a relaxation step |
+    /// | `Friend <-> Acquaintance` | 1 027 | 0.019 / 0.043 (affinity) | 0.013 median, an **event** |
+    /// | `Acquaintance <-> Rival` | 736 | 0.016 / 0.0001 (affinity) | mixed |
+    ///
+    /// **Half the messages are events and half are noise.** Where the flip is an event — one accepted
+    /// `compliment`, one witnessed deed moving affinity by 0.01 or more in a single tick — the label
+    /// *should* change, and holding it would be a lie about what happened. Where the flip is a value
+    /// resting a thousandth from its bar while familiarity decays through it, nothing happened at all.
+    ///
+    /// So the band applies **only at the `stranger_familiarity` end**, where the noise is, and not to
+    /// the friend and rival bars, where the changes are real. Measured, that is also the only place it
+    /// is free: the full band removes 19% of messages but takes rivals from 42 to 48 and friends from 18
+    /// to 20 at seed 7, because it holds a tie as a Friend after the event that ended the friendship.
+    /// The low-end band at 0.02 leaves **friends 18 / rivals 42 exactly as they are** on all three seeds
+    /// and cuts `Stranger <-> Acquaintance` from 828 + 96 to **552 and nothing** — which is 276 ordered
+    /// pairs becoming an acquaintance **once each**, and never falling out of it.
+    ///
+    /// A weak tie is supposed to be the most stable thing in the graph, not the least: "a 'superficial
+    /// network' is composed of low intimate and weak ties that are stable but changeable" — Igarashi,
+    /// *Longitudinal Changes in Face-to-Face and Text Message-Mediated Friendship Networks*, corpus doc
+    /// `10.1017_cbo9780511894701.022`.
+    ///
+    /// With `label_hysteresis = 0.0` this is exactly `classify_with_trust`.
+    pub fn classify_from(
+        current: Self,
+        affinity: f32,
+        familiarity: f32,
+        trust: f32,
+        tuning: &crate::Tuning,
+    ) -> Self {
+        // A band wider than the bar itself would make `stranger_familiarity - band` negative and hold a
+        // tie as an Acquaintance at familiarity 0, which is a relationship the tie does not have.
+        let band = tuning
+            .label_hysteresis
+            .clamp(0.0, tuning.stranger_familiarity.max(0.0));
+        let promoted = Self::classify_with_trust(affinity, familiarity, trust, tuning);
+        // **Promotion is never held.** Only leaving the low end is: a tie that climbs is an
+        // Acquaintance in the same tick it always was.
+        if promoted != Self::Stranger {
+            return promoted;
+        }
+        match current {
+            Self::Acquaintance | Self::Friend | Self::Rival
+                if familiarity >= (tuning.stranger_familiarity - band).max(0.0) =>
+            {
+                current
+            }
+            _ => promoted,
+        }
+    }
+
     /// Lowercase name used by scripts (`"stranger" | "acquaintance" | "friend" | "rival"`).
     pub fn script_name(self) -> &'static str {
         match self {
@@ -164,7 +236,11 @@ impl Tie {
         now_days: f32,
         tuning: &Tuning,
     ) -> Option<(TieLabel, TieLabel)> {
-        let next = TieLabel::classify_with_trust(
+        // **The tie's own label is the state.** A category is entered at its promotion bar and left at
+        // the lower bar `Tuning::label_hysteresis` defines, so a value resting on the line does not
+        // announce a relationship change every time relaxation crosses it.
+        let next = TieLabel::classify_from(
+            self.label,
             self.affinity,
             self.familiarity(now_days, tuning),
             self.trust,

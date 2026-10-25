@@ -51,6 +51,9 @@ fn main() {
     if let Some(bar) = args.friend_affinity {
         settings.tuning.friend_affinity = bar;
     }
+    if let Some(band) = args.label_hysteresis {
+        settings.tuning.label_hysteresis = band;
+    }
     if let Some(seed) = args.seed {
         settings.seed = seed;
     }
@@ -113,6 +116,10 @@ fn main() {
     // recording it. Measured on `village-evening`: rivals 0 -> 42 over 17 game-days while friends stayed 13-18.
     let mut accepted_compliments = 0usize;
     let mut became_rival = 0usize;
+    // **Every** label transition, not only the rival ones. A host that shows "you are now friends"
+    // or unlocks a conversation on `TieLabelChanged` cares about how many arrive and whether they mean
+    // anything: measured before hysteresis, 58% of them came from a value resting within 0.01 of the bar.
+    let mut label_changes = 0usize;
     let mut left_rival = 0usize;
     let mut peak_reach = 0.0_f32;
     let mut peak_known_by = 0_usize;
@@ -183,6 +190,7 @@ fn main() {
                 .world_mut()
                 .resource_mut::<bevy::ecs::message::Messages<TieLabelChanged>>();
             for message in changed.drain() {
+                label_changes += 1;
                 if message.new == TieLabel::Rival {
                     became_rival += 1;
                 } else if message.old == TieLabel::Rival {
@@ -222,6 +230,7 @@ fn main() {
             failed_by_activity: &failed_by_activity,
             rival_transitions: (became_rival, left_rival),
             accepted_compliments,
+            label_changes,
         },
     );
     println!(
@@ -1015,6 +1024,8 @@ struct Endings<'a> {
     rival_transitions: (usize, usize),
     /// Accepted `compliment`s — the only affinity-raising interaction the starter pack has.
     accepted_compliments: usize,
+    /// Every `TieLabelChanged`, in either direction.
+    label_changes: usize,
 }
 
 /// Writes `summary.json`.
@@ -1032,6 +1043,7 @@ fn summary(
         failed_by_activity,
         rival_transitions,
         accepted_compliments,
+        label_changes,
     } = endings;
     let endings = (completed_endings_unused, interrupted_endings_unused);
     let world_ref = ecs;
@@ -1058,7 +1070,7 @@ fn summary(
     }
     let clock = world_ref.resource::<SocietyClock>();
     let json = format!(
-        "{{\n  \"ticks\": {},\n  \"people\": {},\n  \"rumors\": {},\n  \"rumor_known_by\": {},\n  \"rumor_reach\": {:.3},\n  \"friends\": {},\n  \"rivals\": {},\n  \"completed_endings\": {},\n  \"interrupted_endings\": {},\n  \"became_rival\": {},\n  \"left_rival\": {},\n  \"accepted_compliments\": {},\n  \"game_days\": {:.2}\n}}\n",
+        "{{\n  \"ticks\": {},\n  \"people\": {},\n  \"rumors\": {},\n  \"rumor_known_by\": {},\n  \"rumor_reach\": {:.3},\n  \"friends\": {},\n  \"rivals\": {},\n  \"completed_endings\": {},\n  \"interrupted_endings\": {},\n  \"became_rival\": {},\n  \"left_rival\": {},\n  \"accepted_compliments\": {},\n  \"label_changes\": {},\n  \"game_days\": {:.2}\n}}\n",
         clock.tick,
         living,
         book.rumors.len(),
@@ -1071,6 +1083,7 @@ fn summary(
         rival_transitions.0,
         rival_transitions.1,
         accepted_compliments,
+        label_changes,
         clock.now_days,
     );
     let mut failed = String::new();
@@ -1107,6 +1120,8 @@ struct Args {
     /// Overrides `Tuning::friend_affinity`, so the same scenario can be read with a stricter or looser bar
     /// for friendship.
     friend_affinity: Option<f32>,
+    /// Overrides `Tuning::label_hysteresis`, so a run can be read with a band instead of a single bar.
+    label_hysteresis: Option<f32>,
     /// Overrides `Tuning::positivity_offset`, so the same scenario can be re-read with a different
     /// resting mood.
     positivity_offset: Option<f32>,
@@ -1129,6 +1144,7 @@ impl Args {
             seconds_per_day: None,
             positivity_offset: None,
             friend_affinity: None,
+            label_hysteresis: None,
             days: None,
         };
         let mut argv = std::env::args().skip(1);
@@ -1143,6 +1159,9 @@ impl Args {
                 }
                 "--positivity-offset" => {
                     args.positivity_offset = argv.next().and_then(|v| v.parse().ok())
+                }
+                "--label-hysteresis" => {
+                    args.label_hysteresis = argv.next().and_then(|v| v.parse().ok())
                 }
                 "--friend-affinity" => {
                     args.friend_affinity = argv.next().and_then(|v| v.parse().ok())

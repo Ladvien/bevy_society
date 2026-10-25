@@ -13,16 +13,54 @@ Each person keeps a `Ties` component: one `Tie` per person they know. A tie hold
 - Relaxation (`src/relationships.rs:120–123`): affinity moves toward zero by `affinity_relax_per_day · dt`, with `affinity_relax_per_day` = 0.01 (`src/model/balance.rs`, `relax_toward_zero`).
 - Triadic balance (`src/model/balance.rs:7–9`): `Δaff(A→B) = balance_rate_per_day · dt · aff(A→B) · aff(B→C)`, with `balance_rate_per_day` = 0.5 and `balance_samples_per_tick` = 8 (`src/core.rs`).
 - Introduction (`introduction_familiarity` = 0.1 starting peak, design default): a new tie starts at this familiarity.
-- Labels (`src/relationships.rs:40–50`, `TieLabel::classify`):
-  - Friend if affinity ≥ 0.4 and familiarity ≥ 0.3;
-  - Rival if affinity ≤ −0.4 and familiarity ≥ 0.2;
-  - Stranger if familiarity < 0.1;
+- Labels (`TieLabel::classify_with_trust`), the **promotion** bars:
+  - Friend if affinity ≥ `friend_affinity` and familiarity ≥ `friend_familiarity` and trust ≥ `friend_trust`;
+  - Rival if affinity ≤ −`rival_affinity` and familiarity ≥ `rival_familiarity`;
+  - Stranger if familiarity < `stranger_familiarity`;
   - otherwise Acquaintance.
-  `refresh_label` (`:127–140`) returns the old and new label only when the label changes.
+  `refresh_label` returns the old and new label only when the label changes.
+- **Leaving a category is not the same as entering it** (`TieLabel::classify_from`). An `Acquaintance`
+  falls back to a `Stranger` only at `stranger_familiarity − label_hysteresis`, so familiarity decaying
+  through one line no longer flips the label. See "A label is a latitude" below.
 
 - **The label thresholds are `Tuning` fields.** `friend_affinity` 0.4, `friend_familiarity` 0.3, `rival_affinity` 0.4, `rival_familiarity` 0.2, `stranger_familiarity` 0.1, and `rejection_affinity_penalty` 0.05 — all **design defaults**, none from a paper. They were literals inside `classify` until 2026-12-12. Measured, `friend_familiarity` is satisfied by 0.907 among friend-ties and 0.908 among the rest, so that term discriminates nothing; that is now visible and adjustable in one place.
 - **Trust can rise and fall.** `chat` (+0.05 to each party), `gossip` (+0.03) and `compliment` (+0.02) raise it on accept; `witness_reaction` moves it by `trust_gain * harm`, so a witnessed `steal` (`harm -0.7`) is **-0.14 per witness**. The starter pack set **no** trust delta at all until 2026-12-03, so trust could only fall: measured, targets held **0.13-0.27** toward the person approaching them against the 0.5 that `AcceptDef` treats as neutral, and 47% of interactions were refused.
 - **The asymmetry that remains is a decision.** A gain reaches two parties; a loss reaches every witness at full magnitude. One chat is `+0.10`; one insult seen by three people is `-0.42`. See `docs/loop/needs-decision/a-deed-costs-what-the-crowd-saw.md`.
+
+## A label is a latitude, not a line (issue #10)
+
+- **Sherif, M. & Hovland, C. I. (1961).** *Social judgment: Assimilation and contrast effects in
+  communication and attitude change.* Read via **Fagan, P. J. & Browne, A. (1994: 219–220)**, in
+  *Responses of the Battered*, corpus doc `10.1007_0-306-47586-3_8` (in the corpus), which quotes the
+  latitude model:
+
+  > "The 'latitude of acceptance' is the range of possibilities with which an individual is willing to
+  > agree or to which an individual can adapt. ... According to social judgment theory, if stimuli
+  > continue to fall at the end of the continuum or even slightly above the end point, this will produce
+  > a shift of the range toward that anchor—or assimilation."
+
+  A categorical judgement about a person is a **band**, not a point. Entering a category and leaving it
+  are therefore not the same test, which is hysteresis. **The source supplies the shape and no number**;
+  `Tuning::label_hysteresis` is a design default chosen by measurement.
+
+- **Igarashi, T.** *Longitudinal Changes in Face-to-Face and Text Message–Mediated Friendship Networks.*
+  Corpus doc `10.1017_cbo9780511894701.022` (in the corpus).
+
+  > "A 'superficial network' is composed of low intimate and weak ties that are **stable but
+  > changeable**."
+
+  A weak tie should be the most stable thing in the graph. Measured before this change it was the least:
+  `Stranger <-> Acquaintance` was 924 of 2 867 `TieLabelChanged` messages over 16.4 game-days, with a
+  median margin from the bar of **0.0027**.
+
+- **Where the band goes, and where it must not.** `village-evening`, seed 7, 16.4 game-days: **2 867**
+  label messages, one per 8.2 game-minutes. Of the four transitions measured, the low end is noise (the
+  affinity or familiarity in the flipping tick moved by ~0.0002) and the friend and rival ends are events
+  (a median one-tick step of 0.013 — one accepted exchange or one witnessed deed). A band on the friend
+  and rival bars as well cut messages 19% but moved rivals 42 → **48** and friends 18 → **20**, because
+  it held a friendship after the event that ended it. The shipped band is on `stranger_familiarity`
+  only, at 0.02: **friends and rivals identical on all three seeds**, `Stranger -> Acquaintance` 828 →
+  **552** (= 276 ordered pairs, once each) and back 96 → **1**.
 
 ## Why these defaults
 

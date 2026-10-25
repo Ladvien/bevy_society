@@ -241,6 +241,34 @@ pub struct Tuning {
     pub rival_familiarity: f32,
     /// Familiarity below which a tie is a stranger, whatever its affinity.
     pub stranger_familiarity: f32,
+    /// Familiarity a tie must **fall** below, past [`Self::stranger_familiarity`], before it returns
+    /// to being a stranger: a `Stranger` becomes an `Acquaintance` at `stranger_familiarity`, and an
+    /// `Acquaintance` only falls back at `stranger_familiarity - label_hysteresis`.
+    ///
+    /// **A label is a latitude, not a line.** With one bar, a tie whose familiarity rests on it flips
+    /// its label every time the model nudges it, and the host gets a `TieLabelChanged` that reports no
+    /// change of relationship. Measured on `village-evening` seed 7 over 16.4 game-days: `Stranger ->
+    /// Acquaintance` fired **828** times and back **96**, with a median margin from the bar of
+    /// **0.0027** and the familiarity in the flipping tick having moved **0.0002** — a relaxation step.
+    /// A weak tie is supposed to be the most stable thing in the graph, not the least ("stable but
+    /// changeable": Igarashi, corpus doc `10.1017_cbo9780511894701.022`).
+    ///
+    /// **Only the low end has a band, and that is measured.** Half of all label messages in the village
+    /// are events — one accepted `compliment` or one witnessed deed moving affinity by 0.01 or more in a
+    /// single tick — and at those bars the label *should* change. Adding the band to the friend and
+    /// rival bars as well cut messages 19% but took rivals from 42 to **48** and friends 18 to **20** at
+    /// seed 7, because it holds a friendship after the event that ended it. At 0.02 the low-end band
+    /// leaves friends and rivals **identical on all three seeds** and cuts the low-end churn to one
+    /// acquaintance per ordered pair, ever.
+    ///
+    /// Social judgment theory is the mechanism — a judgement about a person has a latitude of
+    /// acceptance, and a stimulus just past the anchor shifts the band rather than reversing the
+    /// judgement (Sherif & Hovland 1961, via Fagan & Browne 1994: 219-220, corpus doc
+    /// `10.1007_0-306-47586-3_8`). **The source gives the shape and no number**: this width is a **design
+    /// default chosen by measurement** — see `docs/loop/runs/2026-10-25-02/eval.md`.
+    ///
+    /// `0.0` restores the single bar exactly, which is the old behaviour a host may want back.
+    pub label_hysteresis: f32,
     /// Affinity lost by the person whose approach is **refused**, per refusal.
     ///
     /// Design default (no source paper gives it); it was a literal `0.05` in `resolve_interactions` until
@@ -371,6 +399,10 @@ impl Default for Tuning {
             rival_affinity: 0.3,
             rival_familiarity: 0.2,
             stranger_familiarity: 0.1,
+            // **Design default, chosen by measurement** — `docs/loop/runs/2026-10-25-02/eval.md`.
+            // The sweep: 0.00 removes nothing, 0.02 removes the low-end churn and moves no friend or
+            // rival count on any of three seeds, and 0.04 / 0.08 start holding real friendships.
+            label_hysteresis: 0.02,
             rejection_affinity_penalty: 0.05,
             contest_steepness: 4.0,
             tier_cutoff: 0.25,

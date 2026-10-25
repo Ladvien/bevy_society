@@ -70,4 +70,49 @@ fn the_label_thresholds_are_on_tuning_and_the_defaults_are_unchanged() {
         TieLabel::Acquaintance,
         "raising `friend_affinity` must demote a tie that was a friend, or the field is not being read"
     );
+
+    // `label_hysteresis` is read too, and it is the fifth label number a host can turn. A tie that is
+    // already an Acquaintance keeps the label inside the band and loses it past it; with no band the two
+    // are the same test. Measured, the default removes the village's low-end churn outright without
+    // moving a single friend or rival count.
+    let at_bar = tuning.stranger_familiarity;
+    assert!(
+        tuning.label_hysteresis > 0.0,
+        "the default must have a band, or `Stranger <-> Acquaintance` flips on a 0.0002 decay step again"
+    );
+    let inside = TieLabel::classify_from(
+        TieLabel::Acquaintance,
+        0.0,
+        at_bar - tuning.label_hysteresis / 2.0,
+        0.5,
+        &tuning,
+    );
+    assert_eq!(
+        inside,
+        TieLabel::Acquaintance,
+        "the band holds at the low end"
+    );
+    let outside = TieLabel::classify_from(
+        TieLabel::Acquaintance,
+        0.0,
+        at_bar - tuning.label_hysteresis - 0.01,
+        0.5,
+        &tuning,
+    );
+    assert_eq!(outside, TieLabel::Stranger, "and releases past it");
+    let none = Tuning {
+        label_hysteresis: 0.0,
+        ..Tuning::default()
+    };
+    assert_eq!(
+        TieLabel::classify_from(
+            TieLabel::Acquaintance,
+            0.0,
+            at_bar - tuning.label_hysteresis / 2.0,
+            0.5,
+            &none
+        ),
+        TieLabel::Stranger,
+        "`0.0` must restore the single bar for a host that wants the old behaviour"
+    );
 }

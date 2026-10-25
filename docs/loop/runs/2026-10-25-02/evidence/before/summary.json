@@ -1,0 +1,24 @@
+{
+  "ticks": 67200,
+  "people": 24,
+  "rumors": 665,
+  "rumor_known_by": 5,
+  "rumor_reach": 0.542,
+  "friends": 18,
+  "rivals": 42,
+  "completed_endings": 6596,
+  "interrupted_endings": 329,
+  "became_rival": 272,
+  "left_rival": 188,
+  "accepted_compliments": 1604,
+  "label_changes": 2291,
+  "interrupted_by_activity": {
+    "compliment": 16,
+    "eat": 55,
+    "relax": 15,
+    "sleep": 129,
+    "snub": 10,
+    "work": 104
+  },
+  "game_days": 17.03
+}
