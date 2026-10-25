@@ -3249,3 +3249,61 @@ behaviour is removed. **Tests:** 54 binaries, both feature sets; clippy and docs
 3. **`Doing` names the target activity while travelling** - 49.8% of person-ticks; escalated.
 4. **The clock decision** - 5.4-hour walks against 0.75-hour activities; a breaking change.
 5. **`rumor-crosses-a-cluster`** - now honestly `pending`. Either restate the observable or build a bridge activity.
+
+## 2026-12-18-01 - "What is this person doing?" now has one honest answer
+
+**Pick.** Three of the top five are escalation-blocked (affinity's four readers, the clamp trade, the clock), item 1
+is already complete (all three messages registered, 39 uses), and item 4 turned out to be unmeasurable on this
+machine. That left the one unblocked host-facing defect: **`Doing` lies to every consumer.**
+
+**The defect.** `Doing::activity` names the activity that was *chosen*, from the moment it is chosen, while needs
+and duration start counting only when `arrived_day` is set. Measured over `village-evening` (67 199 rows):
+
+| state | share of person-ticks |
+|---|---|
+| sleep | **36.8%** |
+| work | 22.9% |
+| eat | 13.3% |
+| compliment | 8.7% |
+
+One 8-hour sleep a day is 33.3%. The 3.5-point gap is people walking to bed, labelled asleep and paid nothing.
+
+**The fix, and why not the recommended option.** The decision file recommends option 2 (a reserved `travelling`
+activity plus a target field) — a schema change a host must approve. Option 1 was "document that readers must
+check `arrived_day`", which leaves every consumer to remember. What shipped is option 1 **put on the component**:
+
+```rust
+impl Doing {
+    pub fn is_travelling(&self) -> bool { self.arrived_day.is_none() }
+    pub fn label(&self, defs: &SocietyDefs) -> String { /* travelling:<activity> | <activity> */ }
+}
+```
+
+`activity` keeps its meaning, so no existing consumer changes behaviour — `series.csv` and `summary.json` are
+**byte-identical**. Option 2 stays open.
+
+**The evidence it belongs on the type.** The crate's own evidence harness had already invented
+`format!("travelling:{base}")` privately. Two independent readers converging on one workaround means the
+workaround belongs on the type.
+
+**Verdicts.** Pass 1 GREAT (the walking test fails if the prefix is deleted, and only that one). Pass 2 **GREAT
+after correcting my own misparse** — I first read the harness's `doing` field as one token and got "compliment at
+34.7%", a village whose main activity is complimenting. Re-parsed: the distribution above, which reads like a
+village. Pass 3 GREAT (one sentence a host can follow).
+
+**Perf, and an honest non-result.** I could not re-measure the scale curve: the machine sat at **load 10.2 on 10
+cores**, and even the 100-person case — no perception work — reads 1.6x above the documented 0.6 ms. Before/after
+pairs agree within 1% at 100 / 1 000 / 5 000, so the change costs nothing, but the guide's **0.6 / 13.5 / 245.1 ms**
+could not be confirmed and needs an idle machine. Recorded as a standing item rather than quietly dropped.
+
+**Dead-code delta.** Zero. **Tests:** 55 binaries, both feature sets; clippy and docs clean.
+
+**Commit** `pending`.
+
+**Top 5 remaining.**
+
+1. **`affinity` has four readers.** Only separating the influence weight fixes the clamp once; a schema change.
+2. **`Doing` still names the target in `activity`** — option 2 of that decision file, for a host to approve.
+3. **The guide's scale curve is unverified** — 0.6/13.5/245.1 ms, and the machine read 0.97/36.8/461 today.
+4. **The clock decision** - 5.4-hour walks against 0.75-hour activities; a breaking change.
+5. **`rumor-crosses-a-cluster`** - honestly `pending`; restate the observable or build a bridge activity.

@@ -47,6 +47,35 @@ pub struct Doing {
     pub arrived_day: Option<f64>,
 }
 
+impl Doing {
+    /// Whether the person is still walking to the activity's target, and so is being paid nothing yet.
+    ///
+    /// The activity's needs and duration start counting only once `arrived_day` is set, so a reader that
+    /// wants "what is this person doing **now**" must check this first. [`Doing::label`] does it for you.
+    pub fn is_travelling(&self) -> bool {
+        self.arrived_day.is_none()
+    }
+
+    /// The honest answer to "what is this person doing?", for a HUD, a log or a script.
+    ///
+    /// `Doing::activity` names the activity that was **chosen**, from the moment it is chosen, so reading it
+    /// raw reports a person as asleep while it is still walking to bed. Measured on the shipped village at
+    /// 64 s/day, that over-reports sleep by more than three points of every person-tick. The convention here is
+    /// `"travelling:<activity>"` while `arrived_day` is `None`, and the bare activity name once it is set.
+    ///
+    /// This is the convention the crate's own evidence harness had to invent privately before it existed,
+    /// which is the argument for owning it here: a host that reads `activity` alone gets a number nobody can
+    /// interpret, and the fix should not depend on every consumer rediscovering the same workaround.
+    pub fn label(&self, defs: &crate::defs::SocietyDefs) -> String {
+        let base = defs.activity_name(self.activity);
+        if self.is_travelling() {
+            format!("travelling:{base}")
+        } else {
+            base.to_owned()
+        }
+    }
+}
+
 /// Where a travelling person is walking to, on the society plane.
 ///
 /// Inserted and updated while travelling and removed on arrival or when the activity ends. A host

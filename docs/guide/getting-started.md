@@ -100,6 +100,26 @@ The messages worth knowing:
 | `ScriptEvent` | A Rhai script emitted a named event. |
 | `FireTrigger` | **You** write this to fire the `Custom` triggers with that name. |
 
+### "What is this person doing?"
+
+For a HUD or a log, read the `Doing` component and ask it:
+
+```rust,ignore
+fn hud(people: Query<(&Name, &Doing)>, defs: Res<SocietyDefs>) {
+    for (name, doing) in &people {
+        info!("{name}: {}", doing.label(&defs));
+    }
+}
+```
+
+`doing.label(&defs)` gives `"travelling:sleep"` while the person is still walking to bed, and `"sleep"` once it
+has arrived and the activity has actually begun. That distinction matters: a person's needs and its activity's
+duration start counting only on arrival, so a walker labelled `sleep` is not being paid anything.
+
+`doing.activity` alone names the activity that was **chosen**, which is why the raw field over-reports whatever
+people travel to — measured on the shipped village, sleep reads 36.8% of all person-ticks against the 33.3% one
+8-hour sleep a day implies. Use `label` unless you specifically want the target.
+
 ## Give it a font, if you want balloons
 
 With the `dialogue` feature (on by default) the crate turns barks into `bevy_speech_bubbles` balloons.

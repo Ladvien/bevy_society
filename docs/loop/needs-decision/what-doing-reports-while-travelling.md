@@ -82,3 +82,37 @@ Four hypotheses were measured and disproved this iteration before this one: a `P
 its duration, a doubled `satisfies` payout, a `best_telling` tie-break, and a probe measuring overlapping
 sleeps. Each is recorded in the run's `review.md`, because the wrong answers are why the right one took
 this long.
+
+## Option 1 shipped, in the form that does not depend on every reader remembering, 2026-12-18
+
+The file recommended option 2 (a reserved `travelling` activity plus a new target field). That is still the
+better *schema*, and still needs a host's approval because it changes a component a host reads and adds a field.
+
+What shipped is option 1 **made safe**: `Doing` now carries the honest answer itself.
+
+```rust
+impl Doing {
+    pub fn is_travelling(&self) -> bool { self.arrived_day.is_none() }
+    pub fn label(&self, defs: &SocietyDefs) -> String { /* "travelling:<activity>" | "<activity>" */ }
+}
+```
+
+This is not option 1 as written — option 1 said "document that a reader must check `arrived_day`", which leaves
+every consumer to remember. Putting the check on the component means a host calls `doing.label(&defs)` and gets
+something true, while a raw `doing.activity` read keeps its existing meaning (the **target**), so no existing
+consumer changes behaviour.
+
+**The evidence that this was the right place for it:** the crate's own evidence harness had already invented
+`format!("travelling:{base}")` privately. When two independent readers converge on the same workaround, the
+workaround belongs on the type. After the change the harness calls `label`, and `village-evening`'
+`series.csv` and `summary.json` are **byte-identical** — the helper is a faithful extraction, not a behaviour
+change.
+
+**What is still a decision.** Option 2 remains open, because `Doing.activity` still names the target and a host
+that switches on the activity *name* (rather than reading `arrived_day`) still sees `sleep` for a walker. The
+difference now is that the crate offers a correct alternative next to it.
+
+**Tests.** `tests/doing_label.rs` pins the prefix while walking, its removal on arrival, and that a raw
+`activity` read still names the target — three properties, and the walking one fails if the prefix is deleted.
+`tests/travel.rs` keeps its `#[ignore]`: it asserts the *stronger* claim that a walker is being **paid**, which
+is a different defect (the clock decision), not this one.
