@@ -269,6 +269,28 @@ pub struct Tuning {
     ///
     /// `0.0` restores the single bar exactly, which is the old behaviour a host may want back.
     pub label_hysteresis: f32,
+    /// How far below [`Self::friend_affinity`] a friendship's affinity may dip before the friend label
+    /// is lost, in affinity units.
+    ///
+    /// **A friendship lives in a narrow shelf.** `friend_affinity` is 0.30 and
+    /// [`Self::affinity_ceiling`] is 0.35, so the whole band a friend can occupy is **0.05 wide** while a
+    /// median tie's affinity swings **0.072** over a run. Measured on `village-evening` seed 7 over 16.4
+    /// game-days: **523** friendships made, **504** lost, held for a median of **0.36 game-days**; **91%**
+    /// of the losses are the affinity gate, and the affinity at the moment of loss clusters on exactly
+    /// **0.25 and 0.30** — one `-0.05` step, which is [`Self::rejection_affinity_penalty`] paid by the
+    /// person whose approach was refused (38% of approaches are).
+    ///
+    /// Holding a friend while its affinity dipped into this band cut total label messages **1 953 ->
+    /// 1 546** at seed 7 with **rivals unchanged at 42**, and raised the median held friendship from
+    /// **0.36 to 1.01 game-days**. Holding the friend bar *unconditionally* instead took rivals to 48,
+    /// which is why the band is a number and not an absence.
+    ///
+    /// **Design default, chosen by measurement** — `docs/loop/runs/2026-10-25-03/eval.md`. Altman &
+    /// Taylor 1973 supply the mechanism — a friendship is *maintained*, so its loss should follow a
+    /// failure to maintain rather than a small dip — and no number.
+    ///
+    /// `0.0` is the single bar, `classify_with_trust` exactly.
+    pub friend_band: f32,
     /// Affinity lost by the person whose approach is **refused**, per refusal.
     ///
     /// Design default (no source paper gives it); it was a literal `0.05` in `resolve_interactions` until
@@ -403,6 +425,9 @@ impl Default for Tuning {
             // The sweep: 0.00 removes nothing, 0.02 removes the low-end churn and moves no friend or
             // rival count on any of three seeds, and 0.04 / 0.08 start holding real friendships.
             label_hysteresis: 0.02,
+            // **Design default, chosen by measurement.** 0.05 holds a friendship through one refusal
+            // without creating one: measured, rivals unchanged, friends 18 -> 22 at seed 7.
+            friend_band: 0.05,
             rejection_affinity_penalty: 0.05,
             contest_steepness: 4.0,
             tier_cutoff: 0.25,

@@ -72,46 +72,42 @@ impl TieLabel {
     /// keeps it until the value falls past a lower bar.
     ///
     /// **A label is a latitude, not a line.** `classify_with_trust` gives *promotion* bars — what it
-    /// takes to become a Friend. Leaving a category asks for `Tuning::label_hysteresis` less than that,
-    /// so a value resting on the bar does not flip the label every time the model nudges it.
+    /// takes to become a Friend. Leaving a category asks for a band below that, so a value resting near
+    /// the bar does not flip the label every time the model nudges it.
     ///
     /// The shape is social judgment theory's **latitude of acceptance**: a judgement about a person is a
     /// band around an anchor, not a point, and a stimulus just past the anchor's end shifts the band
     /// rather than reversing the judgement — Fagan & Browne (1994: 219-220), reproducing Sherif &
     /// Hovland (1961), corpus doc `10.1007_0-306-47586-3_8`. The source supplies the shape and no
-    /// number; `Tuning::label_hysteresis` is a **design default chosen by measurement**.
+    /// numbers; both bands are **design defaults chosen by measurement**.
     ///
-    /// # What the measurement says, and why the band is on the low end only
+    /// # Two bands, and why they are different widths
     ///
-    /// `village-evening`, seed 7, 16.4 game-days, 24 people: **2 867** `TieLabelChanged` messages, one
-    /// per 8.2 game-minutes, with 85 of the 276 ordered pairs changing more than ten times. The causes
-    /// are not alike:
+    /// `Tuning::label_hysteresis` guards the **low end** (`stranger_familiarity`), where the noise is
+    /// pure decay: measured, `Stranger -> Acquaintance` fired 828 times with a median margin of 0.0027
+    /// and a one-tick step of 0.0002. `Tuning::friend_band` guards **friendship**, where the shelf is
+    /// narrower and the traffic heavier.
     ///
-    /// | transition | count | median margin from its bar | the step that flipped it |
-    /// |---|---|---|---|
-    /// | `Stranger -> Acquaintance` | 828 | **0.0027** (familiarity) | 0.0002, a relaxation step |
-    /// | `Friend <-> Acquaintance` | 1 027 | 0.019 / 0.043 (affinity) | 0.013 median, an **event** |
-    /// | `Acquaintance <-> Rival` | 736 | 0.016 / 0.0001 (affinity) | mixed |
+    /// `village-evening`, seed 7, 16.4 game-days: **523** friendships made and **504** lost, held for a
+    /// median of **0.36 game-days** (p10 0.02). The friend bar is 0.30 and the ceiling is 0.35, so a
+    /// friendship lives in a **0.05-wide sliver** on a variable whose median tie swings 0.072 — and 7%
+    /// of all positive tie-samples sit inside that sliver. **91% of the endings are the affinity gate**
+    /// (461 of 504; 43 are trust, 0 familiarity), and the affinity at the ending clusters on exactly
+    /// **0.25 and 0.30**, the signature of a single `-0.05` step — `rejection_affinity_penalty`, which
+    /// every refused approach pays, at a 38% refusal rate.
     ///
-    /// **Half the messages are events and half are noise.** Where the flip is an event — one accepted
-    /// `compliment`, one witnessed deed moving affinity by 0.01 or more in a single tick — the label
-    /// *should* change, and holding it would be a lie about what happened. Where the flip is a value
-    /// resting a thousandth from its bar while familiarity decays through it, nothing happened at all.
+    /// So a friend is held while its affinity has dipped no further than `friend_band` below the bar.
+    /// Measured at 0.05, seed 7: total label messages **1 953 -> 1 546** with **rivals unchanged at 42**
+    /// (seed 11: 2 080 -> 1 710, rivals 40) — where holding the friend bar *unconditionally* took rivals
+    /// to 48, the failure that rejected the previous iteration's attempt. Friendships last **0.36 -> 1.01
+    /// game-days** at the median and **504 -> 242** of them end at all.
     ///
-    /// So the band applies **only at the `stranger_familiarity` end**, where the noise is, and not to
-    /// the friend and rival bars, where the changes are real. Measured, that is also the only place it
-    /// is free: the full band removes 19% of messages but takes rivals from 42 to 48 and friends from 18
-    /// to 20 at seed 7, because it holds a tie as a Friend after the event that ended the friendship.
-    /// The low-end band at 0.02 leaves **friends 18 / rivals 42 exactly as they are** on all three seeds
-    /// and cuts `Stranger <-> Acquaintance` from 828 + 96 to **552 and nothing** — which is 276 ordered
-    /// pairs becoming an acquaintance **once each**, and never falling out of it.
+    /// **What it does not fix, measured.** A refusal-driven ending survives if the drop is deeper than
+    /// the band, and the endings with **no interaction behind them** only fall 56 -> 43: the band holds
+    /// the shallow dips, not the causal ones. Fixing those needs a "last exchange" stamp on the tie,
+    /// which is a save-format change and therefore a `needs-decision` item, not this function's job.
     ///
-    /// A weak tie is supposed to be the most stable thing in the graph, not the least: "a 'superficial
-    /// network' is composed of low intimate and weak ties that are stable but changeable" — Igarashi,
-    /// *Longitudinal Changes in Face-to-Face and Text Message-Mediated Friendship Networks*, corpus doc
-    /// `10.1017_cbo9780511894701.022`.
-    ///
-    /// With `label_hysteresis = 0.0` this is exactly `classify_with_trust`.
+    /// With both bands at `0.0` this is exactly `classify_with_trust`.
     pub fn classify_from(
         current: Self,
         affinity: f32,
@@ -125,6 +121,16 @@ impl TieLabel {
             .label_hysteresis
             .clamp(0.0, tuning.stranger_familiarity.max(0.0));
         let promoted = Self::classify_with_trust(affinity, familiarity, trust, tuning);
+        // **A friendship is held while the dip is shallow.** `friend_band` is the second band, and it is
+        // narrower than `label_hysteresis` because the shelf it guards is narrower: see the doc above.
+        if promoted != Self::Friend
+            && current == Self::Friend
+            && affinity >= tuning.friend_affinity - tuning.friend_band
+            && trust >= tuning.friend_trust
+            && familiarity >= tuning.friend_familiarity
+        {
+            return Self::Friend;
+        }
         // **Promotion is never held.** Only leaving the low end is: a tie that climbs is an
         // Acquaintance in the same tick it always was.
         if promoted != Self::Stranger {

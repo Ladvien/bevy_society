@@ -55,21 +55,53 @@ fn a_tie_at_the_bar_is_an_acquaintance_and_one_just_under_it_stays_one() {
 }
 
 #[test]
-fn the_friend_and_rival_bars_keep_a_single_line() {
+fn a_friendship_is_held_only_within_its_band() {
     let tuning = Tuning::default();
-    let just_under = tuning.friend_affinity - tuning.label_hysteresis / 2.0;
+    assert!(
+        tuning.friend_band > 0.0,
+        "the shipped default must hold a friendship through a shallow dip, or every refusal ends one"
+    );
+    let inside = tuning.friend_affinity - tuning.friend_band / 2.0;
     assert_eq!(
         TieLabel::classify_from(
             TieLabel::Friend,
-            just_under,
+            inside,
+            tuning.friend_familiarity + 0.5,
+            tuning.friend_trust + 0.2,
+            &tuning
+        ),
+        TieLabel::Friend,
+        "a dip inside the band keeps the friendship: measured, that dip is one refused approach"
+    );
+    let outside = tuning.friend_affinity - tuning.friend_band - 0.01;
+    assert_eq!(
+        TieLabel::classify_from(
+            TieLabel::Friend,
+            outside,
             tuning.friend_familiarity + 0.5,
             tuning.friend_trust + 0.2,
             &tuning
         ),
         TieLabel::Acquaintance,
-        "an affinity just under the friend bar is not a friend, band or no band: the flip there is an \
-         event, and holding it would hide one"
+        "a dip past the band ends it, so an insult or a refused approach still has a consequence"
     );
+    // A friendship that has gone to rival affinity is a Rival, in one tick.
+    assert_eq!(
+        TieLabel::classify_from(
+            TieLabel::Friend,
+            -tuning.rival_affinity - 0.01,
+            tuning.friend_familiarity + 0.5,
+            tuning.friend_trust + 0.2,
+            &tuning
+        ),
+        TieLabel::Rival,
+        "a friendship that turned is a rivalry at once"
+    );
+}
+
+#[test]
+fn the_rival_bar_keeps_a_single_line() {
+    let tuning = Tuning::default();
     let just_over = -tuning.rival_affinity + tuning.label_hysteresis / 2.0;
     assert_eq!(
         TieLabel::classify_from(
@@ -88,6 +120,7 @@ fn the_friend_and_rival_bars_keep_a_single_line() {
 fn a_zero_band_is_the_old_single_bar() {
     let strict = Tuning {
         label_hysteresis: 0.0,
+        friend_band: 0.0,
         ..Tuning::default()
     };
     for (affinity, familiarity) in [
@@ -255,5 +288,80 @@ fn the_band_is_deterministic() {
         sequence(Tuning::default().label_hysteresis),
         sequence(Tuning::default().label_hysteresis),
         "two runs at the same seed must produce the same label sequence"
+    );
+}
+
+/// **A friendship is held through a shallow dip, and the held duration shows it.**
+///
+/// Measured on `village-evening` at the scenario's own clock, seed 7, 16.4 game-days: `friend_affinity`
+/// 0.30 against a ceiling of 0.35 puts a friendship on a **0.05-wide shelf**, and
+/// `rejection_affinity_penalty` — paid by anyone whose approach is refused, at a 38% refusal rate — is
+/// **0.05**, so one refusal is exactly one shove off the shelf. With `friend_band` at 0.05 the median held
+/// friendship goes **0.36 -> 1.01 game-days** and the endings halve, **while rivals stay at 42**.
+///
+/// Holding the friend bar *unconditionally* was measured to take rivals to 48 and was rejected last
+/// iteration; this is the narrower claim that survived.
+#[test]
+fn a_friendship_is_held_through_a_shallow_dip_and_lasts_longer() {
+    /// `(friendships that ended, median held in game-days, friend-label messages, rival pairs)`.
+    fn run(band: f32) -> (usize, f32, usize, u32) {
+        let mut app = village(7, Tuning::default().label_hysteresis);
+        app.world_mut()
+            .resource_mut::<SocietySettings>()
+            .tuning
+            .friend_band = band;
+        let mut since: Vec<(Entity, Entity, f32)> = Vec::new();
+        let mut held: Vec<f32> = Vec::new();
+        let mut friend_messages = 0usize;
+        for _ in 0..4_200 {
+            app.update();
+            let now = app.world().resource::<SocietyClock>().now_days as f32;
+            for message in app
+                .world_mut()
+                .resource_mut::<Messages<TieLabelChanged>>()
+                .drain()
+            {
+                if message.new == TieLabel::Friend {
+                    since.push((message.from, message.to, now));
+                }
+                if message.old == TieLabel::Friend {
+                    friend_messages += 1;
+                    if let Some(i) = since
+                        .iter()
+                        .position(|(f, t, _)| *f == message.from && *t == message.to)
+                    {
+                        let (_, _, start) = since.remove(i);
+                        held.push(now - start);
+                    }
+                }
+            }
+        }
+        held.sort_by(f32::total_cmp);
+        let median = if held.is_empty() {
+            0.0
+        } else {
+            held[held.len() / 2]
+        };
+        (held.len(), median, friend_messages, counts(&app).1)
+    }
+
+    let (ended_without, median_without, _, rivals_without) = run(0.0);
+    let (ended_with, median_with, messages_with, rivals_with) = run(Tuning::default().friend_band);
+
+    assert!(
+        ended_with < ended_without,
+        "a band must reduce the endings ({ended_with} with, {ended_without} without)"
+    );
+    assert!(
+        median_with > median_without,
+        "and the ones that remain must last longer ({median_with:.2} vs {median_without:.2} game-days)"
+    );
+    assert_eq!(
+        rivals_with, rivals_without,
+        "the band must not create rivalries: {rivals_with} with, {rivals_without} without"
+    );
+    assert!(
+        messages_with > 0,
+        "friendships must still end, or the label has become permanent"
     );
 }

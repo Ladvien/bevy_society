@@ -54,6 +54,9 @@ fn main() {
     if let Some(band) = args.label_hysteresis {
         settings.tuning.label_hysteresis = band;
     }
+    if let Some(band) = args.friend_band {
+        settings.tuning.friend_band = band;
+    }
     if let Some(seed) = args.seed {
         settings.seed = seed;
     }
@@ -1122,6 +1125,8 @@ struct Args {
     friend_affinity: Option<f32>,
     /// Overrides `Tuning::label_hysteresis`, so a run can be read with a band instead of a single bar.
     label_hysteresis: Option<f32>,
+    /// Overrides `Tuning::friend_band`, so a run can be read with a friendship held below its bar.
+    friend_band: Option<f32>,
     /// Overrides `Tuning::positivity_offset`, so the same scenario can be re-read with a different
     /// resting mood.
     positivity_offset: Option<f32>,
@@ -1145,6 +1150,7 @@ impl Args {
             positivity_offset: None,
             friend_affinity: None,
             label_hysteresis: None,
+            friend_band: None,
             days: None,
         };
         let mut argv = std::env::args().skip(1);
@@ -1163,6 +1169,7 @@ impl Args {
                 "--label-hysteresis" => {
                     args.label_hysteresis = argv.next().and_then(|v| v.parse().ok())
                 }
+                "--friend-band" => args.friend_band = argv.next().and_then(|v| v.parse().ok()),
                 "--friend-affinity" => {
                     args.friend_affinity = argv.next().and_then(|v| v.parse().ok())
                 }

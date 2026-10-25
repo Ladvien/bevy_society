@@ -3896,3 +3896,54 @@ bites — its first two assertions failed on real behaviour and were corrected, 
 4. **Split arrival radius from contact radius** — schema change, in `needs-decision/people-cannot-reach-their-beds.md`.
 5. **`rumor-crosses-a-cluster`** — the `Stranger` band does not touch it; it is still `pending` on the
    arrival-gate cause in `needs-decision/how-can-two-groups-ever-meet.md`.
+
+## 2026-10-25-03 — A friendship is maintained, so its loss needs a size
+
+**Pick.** Item 1 on the list: the 1 953 remaining `TieLabelChanged` messages, and whether a `Friend` should be
+*sticky*. Last iteration said "a wider band is not the answer" from label counts alone. This iteration measured
+the endings themselves and found that conclusion was half wrong.
+
+**The measurement that reopened it.** Every `Friend` transition, 16.4 game-days, seed 7: **523** friendships
+made, **504** lost, held a median of **0.36 game-days** — about four game-hours for a relationship. **91%** of
+the losses are the affinity gate, and the affinity at the moment of loss clusters on exactly **0.25** and
+**0.30**: one `-0.05` step from the ceiling and from the bar. `-0.05` is `rejection_affinity_penalty`, paid by
+whoever's approach was refused, at a **38%** refusal rate. The friend shelf is **0.05 wide**; a median tie's
+affinity swings **0.072**; **7%** of positive tie-samples live in the shelf.
+
+By cause: **99** within six game-hours of a witnessed insult, **349** within six of an exchange, **56 with
+nothing behind them at all**. Half of that is a real event and half is a bar being grazed — exactly the split
+whose absence made last iteration's rejection too broad.
+
+**The change.** `Tuning::friend_band` = 0.05: a `Friend` is kept while its affinity has dipped no further
+than that. Seed 7: label messages **1 953 → 1 546**, endings **504 → 242**, median held **0.36 → 1.01
+game-days**, **rivals unchanged at 42**, `became_rival` unchanged at 272, reach and interruptions identical.
+Holding the friend bar unconditionally still takes rivals to 48 and is still rejected.
+
+**Two wrong versions, both caught by sweeping rather than reading.** The first put the friend guard inside
+the branch that only runs after the *stranger* test failed — it compiled, read plausibly, and changed
+**nothing** at any width. The second was my "proof" that refusals were not the cause: a controlled comparison
+run against that inert guard, which measured the arm and not the knob.
+
+**What it does not fix.** The drift endings fall only **56 → 43**. Telling a quiet friendship from one whose
+owner was refused needs a "last exchange" stamp, which `Tie` has no field for — `last_contact_day` is stamped
+on mere proximity (4 m), not conversation. That is a `SocietySave::VERSION` bump, recorded in
+`needs-decision/which-tie-field-says-someone-spoke.md` with three options and a recommendation. The plan's
+grace-window arm was **dropped on this measurement**, not shipped on a guess.
+
+**Verdicts.** Pass 1 GREAT. Pass 2 GREAT, after two measured rejections. Pass 3 GREAT.
+
+**Dead-code delta.** Zero. **Tests:** 73 binaries green in both feature sets; clippy/fmt/doc clean;
+`tests/label_hysteresis.rs` gains the band and the village test, and deletes last iteration's
+"single line at the friend bar" assertion, which this iteration's measurement overturned.
+
+**Commit** `PENDING`.
+
+**Top 5 remaining.**
+
+1. **`last_exchange_day` on `Tie`** — the only way to fix the 43 drift endings without lying; needs the save
+   version bump. In `needs-decision/which-tie-field-says-someone-spoke.md`.
+2. **`rejection_affinity_penalty` 0.05 against a 0.05 shelf** — one refusal is one shove off it, at a 38%
+   refusal rate. The refusal rate itself is the upstream question.
+3. **Raise the rate of friendly interaction** — unchanged; still needs three axes.
+4. **Split arrival radius from contact radius** — schema change.
+5. **`rumor-crosses-a-cluster`** — still `pending` on the arrival-gate cause.

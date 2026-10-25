@@ -20,8 +20,9 @@ Each person keeps a `Ties` component: one `Tie` per person they know. A tie hold
   - otherwise Acquaintance.
   `refresh_label` returns the old and new label only when the label changes.
 - **Leaving a category is not the same as entering it** (`TieLabel::classify_from`). An `Acquaintance`
-  falls back to a `Stranger` only at `stranger_familiarity − label_hysteresis`, so familiarity decaying
-  through one line no longer flips the label. See "A label is a latitude" below.
+  falls back to a `Stranger` only at `stranger_familiarity − label_hysteresis`, and a `Friend` is kept while
+  its affinity has dipped no further than `friend_band` below `friend_affinity`. See "A label is a latitude"
+  below.
 
 - **The label thresholds are `Tuning` fields.** `friend_affinity` 0.4, `friend_familiarity` 0.3, `rival_affinity` 0.4, `rival_familiarity` 0.2, `stranger_familiarity` 0.1, and `rejection_affinity_penalty` 0.05 — all **design defaults**, none from a paper. They were literals inside `classify` until 2026-12-12. Measured, `friend_familiarity` is satisfied by 0.907 among friend-ties and 0.908 among the rest, so that term discriminates nothing; that is now visible and adjustable in one place.
 - **Trust can rise and fall.** `chat` (+0.05 to each party), `gossip` (+0.03) and `compliment` (+0.02) raise it on accept; `witness_reaction` moves it by `trust_gain * harm`, so a witnessed `steal` (`harm -0.7`) is **-0.14 per witness**. The starter pack set **no** trust delta at all until 2026-12-03, so trust could only fall: measured, targets held **0.13-0.27** toward the person approaching them against the 0.5 that `AcceptDef` treats as neutral, and 47% of interactions were refused.
@@ -61,6 +62,39 @@ Each person keeps a `Ties` component: one `Tie` per person they know. A tie hold
   it held a friendship after the event that ended it. The shipped band is on `stranger_familiarity`
   only, at 0.02: **friends and rivals identical on all three seeds**, `Stranger -> Acquaintance` 828 →
   **552** (= 276 ordered pairs, once each) and back 96 → **1**.
+
+## A friendship is maintained, so its loss needs a size (issue #10)
+
+- **Altman, I. & Taylor, D. A. (1973).** *Social Penetration: The Development of Interpersonal
+  Relationships.* Read via **Battle, N. & White, G. (2024)**, *Intimate Introverts* (DOI
+  `10.33790/jmhsb1100188`, in the corpus):
+
+  > "According to social penetration theory, friendships go through four stages of development:
+  > orientation, exploratory affective exchange, affective, and stable exchange ... **Maintenance of
+  > friendships is described differently depending on whether the friend is considered 'casual,' 'close,'
+  > or 'best.'** 'Casual' friendships rely mostly on proximity, while 'close' and 'best' friendships rely
+  > more on increased affection and interaction."
+
+  Two claims matter here: friends are **staged**, so the categories are not one threshold on one scalar;
+  and a friendship is **maintained**, so losing it should follow a failure to maintain rather than any dip.
+  The crate has the second through `Tuning::friend_band` and not the first. The paper gives no number.
+
+- **What was measured.** `village-evening`, seed 7, 24 people, 16.4 game-days: **523** friendships made and
+  **504** lost, held a median of **0.36 game-days**. `friend_affinity` 0.30 against `affinity_ceiling` 0.35
+  puts a friendship in a **0.05-wide shelf**, while a median tie's affinity swings **0.072**, and 7% of all
+  positive tie-samples sit inside the shelf. **91%** of endings fail the affinity gate, and the affinity at
+  the ending clusters on exactly **0.25** and **0.30** — one `-0.05` step, which is
+  `Tuning::rejection_affinity_penalty`, paid by whoever's approach was refused (38% of approaches are).
+
+- **What ships.** `Tuning::friend_band` = 0.05, a design default chosen by measurement: at seed 7 total
+  label messages **1 953 → 1 546** and **rivals unchanged at 42** (where holding the friend bar
+  unconditionally took rivals to 48), median held friendship **0.36 → 1.01 game-days**, endings **504 → 242**.
+
+- **What it does not fix.** Endings with no interaction behind them fall only **56 → 43**. Telling a quiet
+  friendship from one whose owner was refused needs a "last exchange" stamp, which `Tie` does not have and
+  `last_contact_day` cannot supply — it is stamped on mere proximity. Recorded in
+  `docs/loop/needs-decision/which-tie-field-says-someone-spoke.md`, because adding the field bumps
+  `SocietySave::VERSION`.
 
 ## Why these defaults
 

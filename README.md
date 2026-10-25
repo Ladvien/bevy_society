@@ -136,7 +136,7 @@ Options are scored by compensated considerations, tiered by `rank`, and drawn by
 
 ### Relationships
 
-`Ties` holds one directed edge per person with affinity, trust, respect and familiarity. Labels are recomputed each tick and a change writes `TieLabelChanged`. **A label is a latitude, not a line**: entering a category and leaving it are different tests (`Tuning::label_hysteresis`), so a value resting on a bar does not announce a relationship change every time the model nudges it.
+`Ties` holds one directed edge per person with affinity, trust, respect and familiarity. Labels are recomputed each tick and a change writes `TieLabelChanged`. **A label is a latitude, not a line**: entering a category and leaving it are different tests (`Tuning::label_hysteresis` at the low end, `Tuning::friend_band` for a friendship), so a value resting on a bar does not announce a relationship change every time the model nudges it. Measured, a friendship now lasts a median **1.0 game-day** instead of **0.36**.
 
 ### Opinions
 
