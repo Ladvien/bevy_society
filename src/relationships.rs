@@ -18,6 +18,7 @@ use crate::{
 
 /// The label a tie carries, recomputed each tick from affinity and familiarity (plan D4).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Reflect, Deserialize)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub enum TieLabel {
     /// Barely known: familiarity below 0.1.
     #[default]

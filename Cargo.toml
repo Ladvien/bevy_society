@@ -15,6 +15,10 @@ default = ["dialogue", "steering", "fields"]
 steering = ["dep:bevy_orca"]
 fields = ["dep:bevy_stigmergy"]
 dialogue = ["dep:bevy_speech_bubbles"]
+# Save and restore the whole society: `capture`/`restore` and the `SocietySave` types. `serde` is a
+# plain dependency (it parses the definitions file), so the feature only turns the derives and the
+# `src/save.rs` module on.
+serde = []
 
 [dependencies]
 bevy = { version = "0.20.0", default-features = false, features = ["bevy_log", "std"] }  # https://github.com/bevyengine/bevy — the engine
