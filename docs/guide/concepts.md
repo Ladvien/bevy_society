@@ -24,7 +24,7 @@ flowchart LR
 | `Decide` | choosing an activity | tick only |
 | `Interact` | arrivals, needs satisfied, social exchanges | tick only |
 | `Propagate` | opinions, conformity, rumors | tick only |
-| `Relate` | ties, balance, labels, factions, status | tick only |
+| `Relate` | ties, balance, labels, factions, status, contact gossip | tick only |
 | `Rules` | triggers and their scripts | tick only |
 
 Every rate in `Tuning` is **per game-day**, and every duration is converted to game-days through
@@ -48,6 +48,21 @@ One that jumps forward (a phase skipped) applies the whole jump in one tick with
 every `Hour` trigger the jump crossed fires once. One that goes backward (a reload) takes the host's
 time and applies no negative `dt`, so nothing fires twice. A `Host` clock with **no** `HostClock`
 freezes and warns once, rather than inventing time.
+
+## Contact gossip
+
+Two people who share a place talk even when neither has chosen the other as an activity target, but only
+**when the speaker has news the listener does not have**. The gate is `Knowledge::best_telling`, so a pair
+with nothing between them says nothing at all — a village where people share a tavern bench and simply
+ignore each other, rather than one where standing near someone makes you friends. Goffman's *civil
+inattention* (1963, via Cañigueral & Hamilton 2019, DOI 10.3389/fpsyg.2019.00560) is the shape: acknowledge
+presence, do not treat it as special interest.
+
+Pacing matters more than it looks. Every telling to a listener who **already knows** stifles the teller
+(Daley & Kendall 1964, DOI 10.1038/2041118a0), so a contact pass that runs too often spends the village's
+spreaders faster than it spreads news. `Tuning::contact_gossip_cooldown_days` (2.0 by default) is set by
+measurement: on the shipped village, rumor reach is **0.875** at 2 days, **0.375** at half a day, and
+**0.583** — exactly the no-contact-gossip number — at 6.
 
 Because a society tick is many fixed steps apart, Bevy's message buffers (two swaps) would drop a
 message written between ticks. So every **game-written input message** — `PlantRumor`, `Interact`,

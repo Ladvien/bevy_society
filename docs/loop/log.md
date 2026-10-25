@@ -3189,3 +3189,63 @@ weight (the schema change).
 3. **Accept rate sits under its own midpoint** (`trust_rises`: 0.538 against 0.542, mean trust rising).
 4. **`Doing` names the target activity while travelling** - 49.8% of person-ticks; escalated.
 5. **The clock decision** - 5.4-hour walks against 0.75-hour activities.
+
+## 2026-12-17-01 - People speak when they have news
+
+**Pick.** `rumor-crosses-a-cluster` is `pending` since November. Its decision file's own recommendation was two
+halves, and the second was never built: "a 'people who share a place notice each other' system, worth having for
+its own sake". It is also item 2 — a silent tavern reads wrong when you watch it.
+
+**The diagnosis in the file was wrong.** It blamed the *rate*: contact-`chat` gave 13 742 requests against a
+7 500 baseline and 267 friend pairs out of 276. The fault is the **gate** — a `chat` is offered whether or not
+either person has anything to say.
+
+**The new gate.** Contact gossip queues a `gossip` only when `Knowledge::best_telling` yields a rumor the
+listener does not know. A pair with no news says nothing. Civil inattention, Goffman 1963 via Cañigueral &
+Hamilton 2019 (DOI 10.3389/fpsyg.2019.00560).
+
+**Measured, same seed, `village-evening`:**
+
+| | friends | rivals | mood | rumor reach |
+|---|---|---|---|---|
+| before | 22 | 33 | -0.054 | 0.583 |
+| **after** | **25** | **28** | **-0.052** | **0.875** |
+
+Reach **+50%**, rivals **-15%**, mood slightly better. The clique failure mode is absent: 25 friend pairs, not
+267.
+
+**The trap I nearly shipped.** I deleted `theirs.knows(rumor)` as redundant, since `best_telling` already skips
+stifled spreaders. It is not redundant. Reach fell to **0.375** — a 35% regression on a scenario the change did
+not target, invisible in the friends and mood summaries and visible only in the reach panel.
+
+**Pacing is the spreader pool.** Every telling to an informed listener stifles the teller (Daley & Kendall), so:
+
+| cooldown | reach | friends | rivals |
+|---|---|---|---|
+| 0.5 d | **0.375** | 23 | 45 |
+| **2.0 d** | **0.875** | **25** | **28** |
+| 6.0 d | 0.583 | 22 | 33 |
+| gate off | 0.583 | 22 | 33 |
+
+Non-monotonic, with an interior optimum. Two days is the only sampled setting where the system earns its
+compute.
+
+**What it does not do.** It does not cross the scenario's 40 m gap, and `tests/contact_gossip.rs` asserts that so
+the scenario stays `pending` for the honest reason — its observable asks for something the decision model cannot
+produce at this clock.
+
+**Verdicts.** Pass 1 GREAT. Pass 2 **FAIL -> GREAT** (the plot caught the 0.375 regression; the summary did not).
+Pass 3 GREAT (second seed: 22 / 50 / -0.047, same shape).
+
+**Dead-code delta.** Zero — the system is registered and covered by four tests, each verified to fail when its
+behaviour is removed. **Tests:** 54 binaries, both feature sets; clippy and docs clean.
+
+**Commit** `3de81b9`.
+
+**Top 5 remaining.**
+
+1. **`affinity` has four readers.** Only separating the influence weight fixes the clamp once; a schema change.
+2. **Decide the clamp trade** — three measured options, recommendation: never tune the anchor.
+3. **`Doing` names the target activity while travelling** - 49.8% of person-ticks; escalated.
+4. **The clock decision** - 5.4-hour walks against 0.75-hour activities; a breaking change.
+5. **`rumor-crosses-a-cluster`** - now honestly `pending`. Either restate the observable or build a bridge activity.
