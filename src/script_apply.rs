@@ -38,7 +38,7 @@ pub(crate) fn apply(world: &mut World, action: ScriptAction, now_days: f64) {
             };
             let tie = ties.entry(other);
             match field.as_str() {
-                "affinity" => tie.affinity = (tie.affinity + delta).clamp(-1.0, 1.0),
+                "affinity" => tie.add_affinity(delta, &tuning),
                 "trust" => tie.trust = (tie.trust + delta).clamp(0.0, 1.0),
                 "respect" => tie.respect = (tie.respect + delta).clamp(-1.0, 1.0),
                 "familiarity" => {

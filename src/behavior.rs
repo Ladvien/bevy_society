@@ -2067,8 +2067,10 @@ fn exchange(
         // (5) Rejection penalty.
         if let Some(mut ties) = world.get_mut::<Ties>(actor) {
             let tie = ties.entry(target);
-            tie.affinity =
-                (tie.affinity - settings.tuning.rejection_affinity_penalty).clamp(-1.0, 1.0);
+            tie.add_affinity(
+                -settings.tuning.rejection_affinity_penalty,
+                &settings.tuning,
+            );
         }
         // **The definition's own `on_reject` emotion wins.** A pack that says what a refusal feels
         // like is not second-guessed; the crate's number is the fallback for a pack that says nothing,
@@ -2165,6 +2167,10 @@ fn apply_effects(
     _interaction: &str,
     _now: f64,
 ) {
+    // Read once: the affinity clamp is `Tuning::affinity_ceiling`, so every writer needs it.
+    let tuning = world
+        .get_resource::<SocietySettings>()
+        .map_or_else(Default::default, |settings| settings.tuning.clone());
     // Tie deltas, clamped exactly as `fx.adjust` clamps them.
     for (owner, other, delta) in [
         (actor, target, effects.actor_to_target),
@@ -2174,7 +2180,7 @@ fn apply_effects(
             continue;
         };
         let tie = ties.entry(other);
-        tie.affinity = (tie.affinity + delta.affinity).clamp(-1.0, 1.0);
+        tie.add_affinity(delta.affinity, &tuning);
         tie.trust = (tie.trust + delta.trust).clamp(0.0, 1.0);
         tie.respect = (tie.respect + delta.respect).clamp(-1.0, 1.0);
         if delta.familiarity != 0.0 {

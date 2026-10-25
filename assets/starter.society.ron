@@ -115,7 +115,7 @@
             target: Person,
             duration_hours: 0.2,
             considerations: [
-                (input: Affinity, curve: Logistic(8.0, 0.7)),
+                (input: Affinity, curve: Logistic(16.0, 0.25)),
             ],
             satisfies: [],
             interaction: Some("compliment"),

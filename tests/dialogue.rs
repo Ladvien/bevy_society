@@ -164,8 +164,12 @@ fn affinity(app: &App, from: Entity, to: Entity) -> f32 {
 }
 
 /// The conversation rules: a friend greeting above the plain one, which matches everyone.
+///
+/// **The bar is 0.25, not 0.5**, because `Tuning::affinity_ceiling` bounds `|affinity|` at 0.35 (issue
+/// #10): a script that asks for `> 0.5` is asking for a value the model can no longer produce, so it
+/// would never match and the test would be measuring the ceiling rather than the rule.
 const GREETINGS: &str = r#"
-    (conversation: "greet_friend", priority: 2, if: Some("ctx.affinity(actor, target) > 0.5")),
+    (conversation: "greet_friend", priority: 2, if: Some("ctx.affinity(actor, target) > 0.25")),
     (conversation: "greet", priority: 0),
 "#;
 
@@ -174,7 +178,7 @@ fn a_talk_between_friends_starts_the_friend_conversation() {
     let mut app = app(defs(GREETINGS, ""));
     let a = common::spawn_person(&mut app, "Ada", Vec2::ZERO);
     let b = common::spawn_person(&mut app, "Bram", Vec2::new(1.0, 0.0));
-    set_affinity(&mut app, a, b, 0.9);
+    set_affinity(&mut app, a, b, 0.3);
     // A snapshot exists after the first tick; the conditioned rule needs one.
     common::run(&mut app, 2);
 

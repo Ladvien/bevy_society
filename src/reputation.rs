@@ -104,7 +104,7 @@ pub(crate) fn witness_reaction(
     }
 
     let tie = ties.entry(actor);
-    tie.affinity = (tie.affinity + 0.15 * approval).clamp(-1.0, 1.0);
+    tie.add_affinity(0.15 * approval, &settings.tuning);
     tie.respect = (tie.respect + 0.1 * approval).clamp(-1.0, 1.0);
 
     if approval > 0.0 {

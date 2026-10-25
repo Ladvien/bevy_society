@@ -247,8 +247,10 @@ pub(crate) fn gossip(
 
     let tie = listener_ties.entry(subject);
     tie.trust = (tie.trust + settings.tuning.gossip_trust_gain * valence * belief).clamp(0.0, 1.0);
-    tie.affinity =
-        (tie.affinity + settings.tuning.gossip_affinity_gain * valence * belief).clamp(-1.0, 1.0);
+    tie.add_affinity(
+        settings.tuning.gossip_affinity_gain * valence * belief,
+        &settings.tuning,
+    );
 
     let importance = (valence.abs() * belief).clamp(0.0, 1.0);
     listener_memories.record(

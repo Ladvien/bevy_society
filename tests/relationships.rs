@@ -99,11 +99,15 @@ fn structural_balance_pushes_a_to_c_negative_when_a_likes_b_and_b_dislikes_c() {
     let b = spawn_person(&mut app, "b", Vec2::new(20.0, 0.0));
     let c = spawn_person(&mut app, "c", Vec2::new(40.0, 0.0));
 
+    // **Inside `Tuning::affinity_ceiling` (0.35)**, because `relax_affinity` and `balance_triads` both
+    // clamp through `Tie::add_affinity`: an input above the ceiling is pulled to it on the first tick, so
+    // a 0.8 here would be a test of the clamp rather than of the balance step. The push is
+    // `balance_rate · dt · ab · bc`, so the ceiling scales it and the assertion below is scaled with it.
     app.world_mut()
         .get_mut::<Ties>(a)
         .expect("a has ties")
         .entry(b)
-        .affinity = 0.8;
+        .affinity = 0.35;
     app.world_mut()
         .get_mut::<Ties>(a)
         .expect("a has ties")
@@ -113,7 +117,7 @@ fn structural_balance_pushes_a_to_c_negative_when_a_likes_b_and_b_dislikes_c() {
         .get_mut::<Ties>(b)
         .expect("b has ties")
         .entry(c)
-        .affinity = -0.8;
+        .affinity = -0.35;
 
     run(&mut app, 64);
 
@@ -123,7 +127,10 @@ fn structural_balance_pushes_a_to_c_negative_when_a_likes_b_and_b_dislikes_c() {
         .and_then(|t| t.get(c))
         .map(|tie| tie.affinity)
         .expect("a still has a tie to c");
-    assert!(ac < -0.05, "a→c affinity after one game-day: {ac}");
+    assert!(
+        ac < -0.01,
+        "a→c affinity after one game-day: {ac}; balance must push it negative even at the ceiling"
+    );
 }
 
 #[test]

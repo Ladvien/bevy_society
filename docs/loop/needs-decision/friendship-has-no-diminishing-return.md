@@ -388,3 +388,39 @@ the trust second input makes *more* ties label as friends, and the accept curve 
 
 The measurement says the clamp is **good for the village** and **bad for one scenario's threshold**. Options 2 and
 3 keep the crate honest; option 1 does not.
+
+## Decided by the owner, 2026-10-24
+
+**Clamp `|affinity|` to 0.35, gate `Friend` on trust ≥ 0.5, set the friend bar at 0.30 and the
+compliment gate at `Logistic(16.0, 0.25)`, and scale the opinion weights by the ceiling.**
+
+The file above is the record of five mechanisms that were measured and did not work. The shape accepted
+here is the **measured clamp configuration**, and the numbers come from the bar the issue states:
+
+| measurement, 60 people / seed 7 / 30 game-days | before | after |
+|---|---|---|
+| friend ties | 122 at day 24 (44% of pairs), rising with contact | **155 of 3 540 pairs = 4.4%** |
+| rival ties | — | **656** |
+| `opinion-converges-but-not-entirely` spread, 12 000 ticks | 0.5106 → 0.3699 (27.6%) | 0.5106 → **0.3967** (22.3%) |
+| mood, `village-evening` | **-0.054** (no clamp) | **-0.045** (clamp + the moved compliment gate) |
+
+Why each piece, in the order the measurements forced them:
+
+- **The ceiling, not the threshold.** Affinity reached 1.0, so every bar below 1.0 was eventually passed;
+  raising the bar moved friends 22 → 16 and no further. Capping the variable bounds the network by
+  construction. `rival_affinity` had to move with it — at 0.4 under a 0.35 ceiling, a rival was
+  unlabelable and the measured run gave **0 rivals**.
+- **The trust gate**, because trust is the one variable that separates friends from everyone else
+  (0.480 against 0.068).
+- **`affinity_weight`**, because the opinion model reads affinity as an influence weight tuned for
+  `[-1, 1]`; reading the raw clamped value would put every weight at a third of it. This is also why the
+  opinion bar moved from a third to a fifth: the pull is smaller by construction, and the spread
+  asymptotes rather than continuing to fall, so no longer run would reach the old bar.
+- **The compliment gate at 0.25**, because `Logistic(8.0, 0.7)` scores 0.057 at the ceiling against 0.673
+  at the old mean of 0.79 — compliments were 12× less likely purely from where the gate sat relative to
+  the ceiling.
+
+`cargo run --release --example evidence -- --scenario village-evening --people 60 --days 30 --seed 7 --out /tmp/ev60`
+reproduces the run; `cargo test --release --test friendship_bound` is the assertion.
+
+Implemented in the `bounded-ties` branch, `Closes #10`.

@@ -81,7 +81,20 @@ fn main() {
         std::process::exit(1);
     };
 
-    let ticks = ticks_for(&args.scenario, args.seconds_per_day);
+    // `--days` overrides the scenario's own `ticks:` with `days · seconds_per_day / tick_secs`, so a
+    // thirty-day run is one flag rather than an arithmetic exercise.
+    let day_secs = args
+        .seconds_per_day
+        .unwrap_or_else(|| app.world().resource::<SocietySettings>().seconds_per_day);
+    let tick_secs = app
+        .world()
+        .resource::<SocietySettings>()
+        .tick_secs
+        .max(1.0e-6);
+    let ticks = match args.days {
+        Some(days) => (days * day_secs / tick_secs).round().max(1.0) as usize,
+        None => ticks_for(&args.scenario, args.seconds_per_day),
+    };
     let tracked = world.villagers.first().copied();
     let mut rows = Vec::new();
     let mut lines: Vec<String> = Vec::new();
@@ -1064,6 +1077,9 @@ struct Args {
     /// watch speed. The **observable** should not move: `seconds_per_day` is how fast a host watches a day,
     /// not how much of it a person spends walking.
     seconds_per_day: Option<f32>,
+    /// Runs for this many game-days instead of the scenario's `ticks:`, so a long run is one flag rather
+    /// than an arithmetic exercise. The friendship bound needs thirty days.
+    days: Option<f32>,
 }
 
 impl Args {
@@ -1076,6 +1092,7 @@ impl Args {
             seconds_per_day: None,
             positivity_offset: None,
             friend_affinity: None,
+            days: None,
         };
         let mut argv = std::env::args().skip(1);
         while let Some(flag) = argv.next() {
@@ -1093,6 +1110,7 @@ impl Args {
                 "--friend-affinity" => {
                     args.friend_affinity = argv.next().and_then(|v| v.parse().ok())
                 }
+                "--days" => args.days = argv.next().and_then(|v| v.parse().ok()),
                 other => {
                     eprintln!("evidence: unknown argument {other}");
                     std::process::exit(1);
