@@ -177,8 +177,8 @@ pub(crate) fn witness_contest(ties: &mut Ties, winner: Entity) {
 /// Intergroup contact (plan D6; Pettigrew & Tropp 2006, DOI 10.1037/0022-3514.90.5.751): an accepted
 /// interaction between people who share no faction adds `contact_gain` affinity in both directions.
 pub(crate) fn intergroup_contact(a_to_b: &mut Tie, b_to_a: &mut Tie, tuning: &Tuning) {
-    a_to_b.affinity = (a_to_b.affinity + tuning.contact_gain).clamp(-1.0, 1.0);
-    b_to_a.affinity = (b_to_a.affinity + tuning.contact_gain).clamp(-1.0, 1.0);
+    a_to_b.add_affinity(tuning.contact_gain, tuning);
+    b_to_a.add_affinity(tuning.contact_gain, tuning);
 }
 
 /// Per-faction aggregates, indexed by `FactionId` (plan D6). Recomputed each tick by the groups system.

@@ -95,11 +95,15 @@ fn faction_stats_report_members_cohesion_and_regard_between_factions() {
     app.world_mut().entity_mut(a2).insert(miller_set);
     app.world_mut().entity_mut(b1).insert(weaver_set);
 
-    // Within millers: a1→a2 0.4, a2→a1 0.2 (mean 0.3).
-    set_tie(&mut app, a1, a2, 0.4, 0.0, 0.0);
+    // **Every value here is inside `Tuning::affinity_ceiling` (0.35).** `relax_affinity` runs on each
+    // tick and now clamps through `Tie::add_affinity`, so an input above the ceiling would be silently
+    // pulled down before the stat is read and the expected means would be wrong. The test is about what
+    // `FactionStats` averages, not about the clamp.
+    // Within millers: a1→a2 0.3, a2→a1 0.2 (mean 0.25).
+    set_tie(&mut app, a1, a2, 0.3, 0.0, 0.0);
     set_tie(&mut app, a2, a1, 0.2, 0.0, 0.0);
-    // Millers toward weavers: a1→b1 0.6, a2→b1 0.2 (mean 0.4).
-    set_tie(&mut app, a1, b1, 0.6, 0.0, 0.0);
+    // Millers toward weavers: a1→b1 0.35, a2→b1 0.2 (mean 0.275).
+    set_tie(&mut app, a1, b1, 0.35, 0.0, 0.0);
     set_tie(&mut app, a2, b1, 0.2, 0.0, 0.0);
     // Weavers toward millers: b1→a1 0.0, b1→a2 -0.2 (mean -0.1).
     set_tie(&mut app, b1, a1, 0.0, 0.0, 0.0);
@@ -114,12 +118,12 @@ fn faction_stats_report_members_cohesion_and_regard_between_factions() {
     assert_eq!(m.members, 2);
     assert_eq!(w.members, 1);
     assert!(
-        (m.cohesion - 0.3).abs() < 1e-2,
+        (m.cohesion - 0.25).abs() < 2e-2,
         "millers cohesion {}",
         m.cohesion
     );
     assert!(
-        (m.regard[weavers.0 as usize] - 0.4).abs() < 1e-2,
+        (m.regard[weavers.0 as usize] - 0.275).abs() < 2e-2,
         "millers→weavers regard {}",
         m.regard[weavers.0 as usize]
     );

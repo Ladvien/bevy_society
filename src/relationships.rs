@@ -38,7 +38,25 @@ impl TieLabel {
     /// mechanisms the literature does supply: familiarity from mere exposure (Zajonc 1968,
     /// DOI 10.1037/h0025848) and affinity from similarity (Byrne 1961, DOI 10.1037/h0044721).
     pub fn classify(affinity: f32, familiarity: f32, tuning: &crate::Tuning) -> Self {
-        if affinity >= tuning.friend_affinity && familiarity >= tuning.friend_familiarity {
+        Self::classify_with_trust(affinity, familiarity, f32::MAX, tuning)
+    }
+
+    /// [`classify`](Self::classify) with the tie's trust, which `Friend` additionally requires.
+    ///
+    /// **Trust is what separates friends from everyone else**: measured on the village, friend-ties
+    /// average trust 0.480 against 0.068 for the rest — sevenfold — while familiarity does not separate
+    /// them at all (0.907 against 0.908). The `friend_affinity` bar alone therefore never distinguished
+    /// anything; a clamped affinity plus this gate does.
+    pub fn classify_with_trust(
+        affinity: f32,
+        familiarity: f32,
+        trust: f32,
+        tuning: &crate::Tuning,
+    ) -> Self {
+        if affinity >= tuning.friend_affinity
+            && familiarity >= tuning.friend_familiarity
+            && trust >= tuning.friend_trust
+        {
             Self::Friend
         } else if affinity <= -tuning.rival_affinity && familiarity >= tuning.rival_familiarity {
             Self::Rival
@@ -93,6 +111,17 @@ impl Tie {
         }
     }
 
+    /// Adds `delta` to affinity, **clamped to `±Tuning::affinity_ceiling`**.
+    ///
+    /// The one place affinity moves. Routing every writer through it is what makes the clamp a property
+    /// of the model rather than of whichever call site remembered: a new affinity effect cannot
+    /// accidentally escape the ceiling, and `grep -n 'affinity =' src` finds no direct write outside
+    /// [`Tie::new`], this function, and the two places that set a tie's *initial* value.
+    pub fn add_affinity(&mut self, delta: f32, tuning: &Tuning) {
+        let ceiling = tuning.affinity_ceiling.max(0.0);
+        self.affinity = (self.affinity + delta).clamp(-ceiling, ceiling);
+    }
+
     /// Familiarity at `now_days`, decayed from the peak by power-law forgetting (Anderson &
     /// Schooler 1991, DOI 10.1111/j.1467-9280.1991.tb00174.x; Murre & Dros 2015, DOI
     /// 10.1371/journal.pone.0120644).
@@ -111,15 +140,20 @@ impl Tie {
         let f = self.familiarity(now_days, tuning);
         self.familiarity_peak = recall::exposed_peak(f, tuning.exposure_per_day, dt_days);
         self.last_contact_day = now_days;
-        self.affinity = (self.affinity
-            + tuning.mere_exposure_per_day * dt_days * (1.0 - self.affinity.abs()))
-        .clamp(-1.0, 1.0);
+        // Exposure saturates on `(1 − |affinity|)` and now also honours the ceiling, through the one
+        // writer. Before the ceiling, this term is what carried a village to affinity 0.999.
+        let step = tuning.mere_exposure_per_day * dt_days * (1.0 - self.affinity.abs());
+        self.add_affinity(step, tuning);
     }
 
     /// Relaxes affinity toward zero by `affinity_relax_per_day · dt_days`, never crossing zero.
+    ///
+    /// Goes through [`add_affinity`](Self::add_affinity) like every other writer, so a ceiling lowered
+    /// under an existing tie is respected on the next tick rather than only on the next write.
     pub fn relax(&mut self, dt_days: f32, tuning: &Tuning) {
-        self.affinity =
+        let relaxed =
             balance::relax_toward_zero(self.affinity, tuning.affinity_relax_per_day * dt_days);
+        self.add_affinity(relaxed - self.affinity, tuning);
     }
 
     /// Recomputes the label from the current affinity and familiarity. Returns `Some((old, new))`
@@ -129,7 +163,12 @@ impl Tie {
         now_days: f32,
         tuning: &Tuning,
     ) -> Option<(TieLabel, TieLabel)> {
-        let next = TieLabel::classify(self.affinity, self.familiarity(now_days, tuning), tuning);
+        let next = TieLabel::classify_with_trust(
+            self.affinity,
+            self.familiarity(now_days, tuning),
+            self.trust,
+            tuning,
+        );
         if next == self.label {
             None
         } else {
@@ -177,6 +216,10 @@ impl Ties {
             Ok(i) => i,
             Err(i) => {
                 let mut tie = Tie::new(target);
+                // **An initial value, not a delta**, and one of the two direct writes left in the crate
+                // (the other is `Tie::new`). `entry_with` has no `Tuning` to clamp against; the caller
+                // sets a faction's `ingroup_bias`, which is already in `[-1, 1]`, and the next
+                // `add_affinity` brings it under the ceiling.
                 tie.affinity = affinity;
                 self.0.insert(i, tie);
                 i
@@ -375,7 +418,7 @@ fn balance_triads(
         if let Ok(mut owned) = ties.get_mut(a)
             && let Some(ac) = owned.get_mut(c_target)
         {
-            ac.affinity = (ac.affinity + delta).clamp(-1.0, 1.0);
+            ac.add_affinity(delta, tuning);
         }
     }
 }

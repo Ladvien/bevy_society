@@ -25,25 +25,48 @@ use bevy_society::{TieLabel, Tuning};
 fn the_label_thresholds_are_on_tuning_and_the_defaults_are_unchanged() {
     let tuning = Tuning::default();
 
-    // The defaults the literals had, now reachable and named.
+    // **The defaults moved with the clamp** (issue #10). `friend_affinity` and `rival_affinity` sat at
+    // 0.4, which is above `affinity_ceiling` (0.35) and therefore unreachable once affinity is bounded —
+    // measured, that produced 155 friend ties and **0 rivals**. Both are 0.30 now, and the point of this
+    // test is that they are *read*, not that they are any particular number.
     assert!(
-        (tuning.friend_affinity - 0.4).abs() < 1e-6,
-        "the friend affinity default is {}; it was a literal 0.4",
-        tuning.friend_affinity
+        (tuning.affinity_ceiling - 0.35).abs() < 1e-6,
+        "the affinity ceiling default is {}",
+        tuning.affinity_ceiling
+    );
+    assert!(
+        tuning.friend_affinity <= tuning.affinity_ceiling,
+        "the friend bar ({}) must be reachable under the ceiling ({})",
+        tuning.friend_affinity,
+        tuning.affinity_ceiling
+    );
+    assert!(
+        tuning.rival_affinity <= tuning.affinity_ceiling,
+        "and so must the rival bar ({})",
+        tuning.rival_affinity
     );
     assert!((tuning.friend_familiarity - 0.3).abs() < 1e-6);
-    assert!((tuning.rival_affinity - 0.4).abs() < 1e-6);
     assert!((tuning.rival_familiarity - 0.2).abs() < 1e-6);
     assert!((tuning.stranger_familiarity - 0.1).abs() < 1e-6);
+    assert!((tuning.friend_trust - 0.5).abs() < 1e-6);
 
-    // `classify` reads them, so a host that raises the bar gets a different label for the same tie.
-    assert_eq!(TieLabel::classify(0.45, 0.5, &tuning), TieLabel::Friend);
+    // `classify_with_trust` reads them, so a host that raises the bar gets a different label for the
+    // same tie.
+    assert_eq!(
+        TieLabel::classify_with_trust(0.45, 0.5, 0.8, &tuning),
+        TieLabel::Friend
+    );
+    assert_eq!(
+        TieLabel::classify_with_trust(0.45, 0.5, 0.1, &tuning),
+        TieLabel::Acquaintance,
+        "affinity and familiarity are not enough without trust"
+    );
     let strict = Tuning {
         friend_affinity: 0.9,
         ..Tuning::default()
     };
     assert_eq!(
-        TieLabel::classify(0.45, 0.5, &strict),
+        TieLabel::classify_with_trust(0.45, 0.5, 0.8, &strict),
         TieLabel::Acquaintance,
         "raising `friend_affinity` must demote a tie that was a friend, or the field is not being read"
     );
