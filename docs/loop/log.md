@@ -3676,7 +3676,7 @@ the same lesson one level down — **re-read the item, not just the measurement.
 **Dead-code delta.** Zero. **Tests:** 68 binaries, both feature sets; clippy, docs, fmt clean. New test bites with a
 message naming both coordinates.
 
-**Commit** `pending`.
+**Commit** `8999193`.
 
 **Top 5 remaining.**
 
