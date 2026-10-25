@@ -4,7 +4,7 @@ Give your Bevy world a living society: villagers who remember, gossip, take side
 
 [![CI](https://github.com/Ladvien/bevy_society/actions/workflows/ci.yml/badge.svg)](https://github.com/Ladvien/bevy_society/actions/workflows/ci.yml)
 
-![A rumor spreads through a village](docs/media/village.gif)
+![A rumor spreads through a village](https://raw.githubusercontent.com/Ladvien/bevy_society/main/docs/media/village.gif)
 
 One afternoon in a village of twenty-four people: a weaver tells the rumor that Bram stole bread, and in the six game-hours the clip covers (14:00 to 20:00) it passes to a second villager — known by **2 of 24** at the end, as the counter in the corner shows. The same run recorded twice as long, twelve game-hours, reaches 3. A rumor crosses a village in game-days, not hours, because each telling is one choice among many and the Daley–Kendall rule stifles a teller whose listener already knew. Tie lines show friendships green and rivalries red; the magenta ring marks whoever knows the rumor. Every clip below is the same village, same seed, same run — only the overlay changes.
 
@@ -12,9 +12,9 @@ One afternoon in a village of twenty-four people: a weaver tells the rumor that 
 
 | | |
 |---|---|
-| ![Mood](docs/media/mood.gif) **Mood** — a halo on every villager. Green is pleased, amber neutral, red displeased; halo size is arousal. The colour scale is normalised to the ±0.4 the model actually produces, so a small mood shift is visible. | ![Opinion](docs/media/opinions.gif) **Opinions** — one bar per villager on the honesty topic, green above the midpoint and red below, length by strength. |
-| ![Needs](docs/media/needs.gif) **Needs** — a full green halo is a fed villager, a small red one is hungry. | ![Ties](docs/media/ties.gif) **Relationships** — the tie graph alone: green friendship, red rivalry, brightness by familiarity. |
-| ![Factions](docs/media/factions.gif) **Factions** — orange millers, green weavers, violet watch, no ties, so the group structure is the only thing on screen. | The clip above is the same run with every overlay on. |
+| ![Mood](https://raw.githubusercontent.com/Ladvien/bevy_society/main/docs/media/mood.gif) **Mood** — a halo on every villager. Green is pleased, amber neutral, red displeased; halo size is arousal. The colour scale is normalised to the ±0.4 the model actually produces, so a small mood shift is visible. | ![Opinion](https://raw.githubusercontent.com/Ladvien/bevy_society/main/docs/media/opinions.gif) **Opinions** — one bar per villager on the honesty topic, green above the midpoint and red below, length by strength. |
+| ![Needs](https://raw.githubusercontent.com/Ladvien/bevy_society/main/docs/media/needs.gif) **Needs** — a full green halo is a fed villager, a small red one is hungry. | ![Ties](https://raw.githubusercontent.com/Ladvien/bevy_society/main/docs/media/ties.gif) **Relationships** — the tie graph alone: green friendship, red rivalry, brightness by familiarity. |
+| ![Factions](https://raw.githubusercontent.com/Ladvien/bevy_society/main/docs/media/factions.gif) **Factions** — orange millers, green weavers, violet watch, no ties, so the group structure is the only thing on screen. | The clip above is the same run with every overlay on. |
 
 ## Cargo features
 
