@@ -6,6 +6,8 @@ All notable changes to bevy_society. The format follows [Keep a Changelog](https
 
 ## [0.3.0] - 2026-10-25
 
+Published to crates.io at 2026-10-25T21:33:38Z.
+
 ### Breaking
 
 - **Three fields were added to `Tuning`, which is not `#[non_exhaustive]`.** A host that constructs `Tuning` in full, or that `match`es on `TieLabel` exhaustively, needs a code change. The additions are `label_hysteresis` (0.02), `friend_band` (0.05) and `dyad_balance_per_day` (0.5). Hosts using `Tuning { ..Default::default() }` or `..SocietySettings::default()` are unaffected. Each field documents its measurement and each is switchable off: `label_hysteresis = 0.0` and `friend_band = 0.0` restore the single-bar label exactly, and `dyad_balance_per_day = 0.0` restores one-directional ties exactly, so a host that wants 0.2.0's behaviour can have it without pinning the version.

@@ -4010,3 +4010,30 @@ the clip shows and `docs/DEMOS.md` records why.
    `needs-decision/romance-and-pairing.md`; the recommendation is a `Partners` component after professions,
    and only if a measurement shows it moves something a very good friendship does not. Both this and
    professions are definitions-schema changes and neither was started.
+
+## 2026-10-25-05 — Release 0.3.0
+
+**Not a loop iteration**; the release the previous iteration's work needed.
+
+**Published** `bevy_society 0.3.0` to crates.io at 2026-10-25T21:33:38Z (tag `v0.3.0` → `bfdb930`, main
+`b0027d4`). Confirmed in the registry index and by a throwaway consumer crate that added
+`bevy_society = "0.3"` from crates.io, built, and read the new defaults back:
+`label_hysteresis 0.02`, `friend_band 0.05`, `dyad_balance_per_day 0.50`.
+
+**Why 0.3.0 and not 0.2.1.** Three fields were added to `Tuning`, which is not `#[non_exhaustive]`. The
+CHANGELOG carries a `### Breaking` section; each field disables to exact 0.2.0 behaviour, so a host can
+have the old dynamics without pinning the version.
+
+**Four packaging defects found by unpacking the tarball, none of which would have surfaced otherwise:**
+
+1. **Every `docs/` link in the README 404s on crates.io** — the README is the crate's front page, `docs/`
+   is not shipped, and all 32 links were relative. Now absolute GitHub URLs, images included.
+2. **`include = ["README.md"]` is a glob** and shipped four `docs/**/README.md` files. A bisect showed
+   `src/**` alone gives zero and `src/** + README.md` gives four; the root README is named with an
+   explicit `readme` field instead. Package is 39 files, 252 KiB, zero `docs/`.
+3. **`examples/assets/` was missing** although the examples reference it.
+4. **The guides still said install-from-git and `publish = false`**, stale since 0.2.0.
+
+**One deployment lesson.** The first `cargo publish` failed verification on the default toolchain
+(`rustc 1.94.1`); this repo requires `cargo +1.98.1`, which AGENTS.md says for every command and I did not
+follow. The second attempt with the pinned toolchain published.
