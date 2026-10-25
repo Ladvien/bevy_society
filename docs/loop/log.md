@@ -3578,7 +3578,7 @@ out of shipping a lever three times.
 
 **Dead-code delta.** Zero. **Tests:** 62 binaries, both feature sets; clippy, docs, fmt clean. New test bites.
 
-**Commit** `pending`.
+**Commit** `9a6c6f1`.
 
 **Top 5 remaining.**
 
