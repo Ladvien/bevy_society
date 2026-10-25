@@ -65,31 +65,54 @@ fn main() {
     for _ in 0..settle {
         app.update();
     }
-    let settled = app.world().resource::<SocietyClock>().tick;
 
-    // The measurement. Each update past the first is exactly one society tick.
-    let start = Instant::now();
-    for _ in 0..args.ticks {
-        app.update();
+    // **Repetition, because a single window is not a measurement.** The same binary on the same machine
+    // has produced 36.8, 46.2, 50.9, 51.1 and 54.7 ms/tick at 1 000 people depending on what else was
+    // running. One window cannot distinguish the code from the load, so this reports the **median** and the
+    // **spread** of `--reps` windows and lets a reader judge whether the machine was quiet enough to quote.
+    let mut per_tick: Vec<f64> = Vec::with_capacity(args.reps);
+    let mut ticks = 0u64;
+    for _ in 0..args.reps {
+        let before = app.world().resource::<SocietyClock>().tick;
+        let start = Instant::now();
+        for _ in 0..args.ticks {
+            app.update();
+        }
+        let elapsed = start.elapsed();
+        let ran = app.world().resource::<SocietyClock>().tick - before;
+        ticks = ran;
+        if ran > 0 {
+            per_tick.push(elapsed.as_secs_f64() * 1000.0 / ran as f64);
+        }
     }
-    let elapsed = start.elapsed();
-    let ticks = app.world().resource::<SocietyClock>().tick - settled;
 
-    if ticks == 0 {
+    if ticks == 0 || per_tick.is_empty() {
         eprintln!("benchmark: no ticks elapsed; the clock is not advancing");
         std::process::exit(1);
     }
-    let per_tick_ms = elapsed.as_secs_f64() * 1000.0 / ticks as f64;
+    per_tick.sort_by(f64::total_cmp);
+    let median = per_tick[per_tick.len() / 2];
+    let min = per_tick[0];
+    let max = per_tick[per_tick.len() - 1];
+    // Spread as a fraction of the median: the number that says whether this machine was quiet enough for
+    // the figure to mean anything.
+    let spread_pct = if median > 0.0 {
+        (max - min) / median * 100.0
+    } else {
+        0.0
+    };
     let living = app.world().resource::<PersonIndex>().sorted.len();
     let pairs = (living as u64).saturating_mul(living.saturating_sub(1) as u64) / 2;
 
     println!(
-        "{{\"people\": {living}, \"ticks\": {ticks}, \"ms_per_tick\": {per_tick_ms:.3}, \
+        "{{\"people\": {living}, \"ticks\": {ticks}, \"reps\": {}, \"ms_per_tick_median\": {median:.3}, \
+         \"ms_per_tick_min\": {min:.3}, \"ms_per_tick_max\": {max:.3}, \"spread_pct\": {spread_pct:.1}, \
          \"pairs_per_tick\": {pairs}, \"ms_per_million_pairs\": {:.1}}}",
+        per_tick.len(),
         if pairs == 0 {
             0.0
         } else {
-            per_tick_ms * 1_000_000.0 / pairs as f64
+            median * 1_000_000.0 / pairs as f64
         }
     );
 }
@@ -164,6 +187,7 @@ struct Args {
     people: usize,
     ticks: usize,
     settle: usize,
+    reps: usize,
 }
 
 impl Args {
@@ -172,6 +196,7 @@ impl Args {
             people: 1000,
             ticks: 200,
             settle: 400,
+            reps: 5,
         };
         let mut argv = std::env::args().skip(1);
         while let Some(flag) = argv.next() {
@@ -185,6 +210,7 @@ impl Args {
                 "--people" => args.people = value(),
                 "--ticks" => args.ticks = value(),
                 "--settle" => args.settle = value(),
+                "--reps" => args.reps = value().max(1),
                 other => {
                     eprintln!("benchmark: unknown argument {other}");
                     std::process::exit(1);
