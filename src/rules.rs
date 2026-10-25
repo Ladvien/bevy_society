@@ -56,6 +56,11 @@ pub(crate) enum TriggerEvent {
         /// The target, or −1.
         target: i64,
     },
+    /// A person died; the actor binding is the deceased.
+    Deceased {
+        /// The deceased, by `PersonId`.
+        actor: i64,
+    },
     /// An interaction resolved (plan D7).
     Interaction {
         /// The interaction's id.
@@ -327,6 +332,13 @@ fn evaluate_triggers(
     }
 
     events.extend(queue.0.drain(..).map(|event| match event {
+        TriggerEvent::Deceased { actor } => (
+            EventKey::PersonDied,
+            Bindings {
+                actor,
+                ..Bindings::default()
+            },
+        ),
         TriggerEvent::Custom {
             name,
             actor,
@@ -537,6 +549,8 @@ enum EventKey {
         to: f64,
     },
     Custom(String),
+    /// A person died; the bindings' actor is the deceased.
+    PersonDied,
     Interaction(InteractionId),
     Activity(ActivityId),
     Label(TieLabel),
@@ -561,6 +575,7 @@ impl EventKey {
                 ((to * 24.0 - want) / 24.0).floor() > ((from * 24.0 - want) / 24.0).floor()
             }
             (Self::Custom(name), TriggerKind::Custom(want)) => name == want,
+            (Self::PersonDied, TriggerKind::PersonDied) => true,
             (Self::Interaction(id), TriggerKind::Interaction(want)) => id == want,
             (Self::Activity(id), TriggerKind::Activity(want)) => id == want,
             (Self::Label(label), TriggerKind::TieLabel(want)) => label == want,

@@ -74,6 +74,7 @@ fn every_trigger_form_in_the_guide_parses() {
         r#"Activity("eat")"#,
         r#"DialogueNode(conversation: "greet", node: "n")"#,
         r#"Custom("thing")"#,
+        "PersonDied",
     ];
     for form in forms {
         let source = format!(

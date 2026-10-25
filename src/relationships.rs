@@ -251,18 +251,38 @@ impl Ties {
     /// 10.1016/0047-2484(92)90081-J). Ties of equal familiarity go first by lower target bits, so
     /// the result is deterministic.
     pub fn trim(&mut self, now_days: f32, tuning: &Tuning, max_ties: usize) {
-        if self.0.len() <= max_ties {
+        self.trim_keeping(now_days, tuning, max_ties, |_| false);
+    }
+
+    /// [`trim`](Self::trim), except a tie for which `frozen(target)` holds is **excluded from the count
+    /// and never removed**.
+    ///
+    /// That is what a dead person's ties need: a town that has lost half its people must not forget them
+    /// because the Dunbar cap only counted the living. A cap below the frozen count keeps every frozen
+    /// tie and trims the living ones to nothing, which is the honest answer — the frozen set is not the
+    /// caller's to trade away.
+    pub fn trim_keeping(
+        &mut self,
+        now_days: f32,
+        tuning: &Tuning,
+        max_ties: usize,
+        frozen: impl Fn(Entity) -> bool,
+    ) {
+        let live = self.0.iter().filter(|t| !frozen(t.target)).count();
+        if live <= max_ties {
             return;
         }
-        let excess = self.0.len() - max_ties;
+        let excess = live - max_ties;
         let mut ranked: Vec<(f32, u64)> = self
             .0
             .iter()
+            .filter(|t| !frozen(t.target))
             .map(|t| (t.familiarity(now_days, tuning), t.target.to_bits()))
             .collect();
         ranked.sort_by(|a, b| a.0.total_cmp(&b.0).then(a.1.cmp(&b.1)));
         let doomed: Vec<u64> = ranked.iter().take(excess).map(|&(_, bits)| bits).collect();
-        self.0.retain(|t| !doomed.contains(&t.target.to_bits()));
+        self.0
+            .retain(|t| frozen(t.target) || !doomed.contains(&t.target.to_bits()));
     }
 
     /// The `close_ties` targets with the highest `max(0, affinity) · familiarity`, best first.
@@ -363,12 +383,22 @@ fn relax_affinity(
     clock: Res<SocietyClock>,
     settings: Res<SocietySettings>,
     index: Res<PersonIndex>,
+    deceased: Query<(), With<crate::Deceased>>,
     mut ties: Query<&mut Ties>,
 ) {
     let tuning = &settings.tuning;
     for &(_, entity) in &index.sorted {
+        // **A tie to or from the dead is frozen**: it stays at what it was when they died. That is what
+        // lets the living grieve someone the social graph still remembers, and it is why a dead person's
+        // own ties stop moving too — nothing decides for them.
+        if deceased.get(entity).is_ok() {
+            continue;
+        }
         if let Ok(mut owned) = ties.get_mut(entity) {
             for tie in owned.0.iter_mut() {
+                if deceased.get(tie.target).is_ok() {
+                    continue;
+                }
                 tie.relax(clock.dt_days, tuning);
             }
         }
@@ -382,6 +412,7 @@ fn balance_triads(
     clock: Res<SocietyClock>,
     settings: Res<SocietySettings>,
     index: Res<PersonIndex>,
+    deceased: Query<(), With<crate::Deceased>>,
     mut rng: ResMut<SocietyRng>,
     mut ties: Query<&mut Ties>,
 ) {
@@ -416,6 +447,11 @@ fn balance_triads(
         };
         let (ab, c_target, bc) = picked;
         let delta = balance::triad_delta(tuning.balance_rate_per_day, dt, ab, bc);
+        // A frozen tie takes no balance step, in either direction: the dead person's relations are fixed
+        // at death, and so is everyone's feeling toward them.
+        if deceased.get(a).is_ok() || deceased.get(c_target).is_ok() {
+            continue;
+        }
         if let Ok(mut owned) = ties.get_mut(a)
             && let Some(ac) = owned.get_mut(c_target)
         {
@@ -429,12 +465,17 @@ fn trim_ties(
     clock: Res<SocietyClock>,
     settings: Res<SocietySettings>,
     index: Res<PersonIndex>,
+    deceased: Query<(), With<crate::Deceased>>,
     mut ties: Query<&mut Ties>,
 ) {
     let now = clock.now_days as f32;
     for &(_, entity) in &index.sorted {
         if let Ok(mut owned) = ties.get_mut(entity) {
-            owned.trim(now, &settings.tuning, settings.max_ties);
+            // A frozen tie is excluded from the count and never removed, so a person who has lost many
+            // people still keeps every one of them.
+            owned.trim_keeping(now, &settings.tuning, settings.max_ties, |target| {
+                deceased.get(entity).is_ok() || deceased.get(target).is_ok()
+            });
         }
     }
 }
@@ -444,15 +485,24 @@ pub(crate) fn refresh_labels(
     clock: Res<SocietyClock>,
     settings: Res<SocietySettings>,
     index: Res<PersonIndex>,
+    deceased: Query<(), With<crate::Deceased>>,
     mut ties: Query<&mut Ties>,
     mut changed: MessageWriter<TieLabelChanged>,
 ) {
     let now = clock.now_days as f32;
     for &(_, entity) in &index.sorted {
+        // A dead person's labels stay as they were at death, and so does the label of a tie pointing at
+        // them: the living still think of them as the friend they lost.
+        if deceased.get(entity).is_ok() {
+            continue;
+        }
         let Ok(mut owned) = ties.get_mut(entity) else {
             continue;
         };
         for tie in owned.0.iter_mut() {
+            if deceased.get(tie.target).is_ok() {
+                continue;
+            }
             if let Some((old, new)) = tie.refresh_label(now, &settings.tuning) {
                 changed.write(TieLabelChanged {
                     from: entity,

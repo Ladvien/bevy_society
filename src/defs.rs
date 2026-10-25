@@ -412,6 +412,8 @@ pub enum TriggerOn {
     Tick,
     /// When the clock crosses this hour, in [0, 24).
     Hour(f32),
+    /// When a person dies, with the deceased bound as the actor.
+    PersonDied,
     /// When this interaction resolves.
     Interaction(String),
     /// When a tie's label changes to this label.
@@ -1261,6 +1263,7 @@ impl SocietyDefs {
     fn trigger_kind(&self, owner: &str, on: &TriggerOn) -> Result<TriggerKind, DefsError> {
         Ok(match on {
             TriggerOn::Tick => TriggerKind::Tick,
+            TriggerOn::PersonDied => TriggerKind::PersonDied,
             TriggerOn::Hour(hour) => {
                 if !(0.0..24.0).contains(hour) {
                     return Err(invalid(owner, "an Hour trigger needs an hour in [0, 24)"));
@@ -1505,6 +1508,8 @@ pub(crate) enum TriggerKind {
     Tick,
     /// The clock crossing an hour.
     Hour(f32),
+    /// A person died; the actor binding is the deceased.
+    PersonDied,
     /// An interaction resolving.
     Interaction(InteractionId),
     /// A tie label changing to this label.
