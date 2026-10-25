@@ -103,6 +103,14 @@ fn main() {
             seconds_per_day: 32.0,
             tick_secs: 0.1,
             start_hour: 15.0,
+            // **The scenario's own travel timeout, not the crate default.** `village-evening` runs with
+            // 4 hours and the benchmark harness uses 4; the capture inherited the 2-hour default, so walks
+            // between the far stalls timed out, activities ended interrupted, and the clip settled at
+            // **0 rivalries** — a demo whose caption promises "rivalries red" and never draws one.
+            tuning: bevy_society::Tuning {
+                travel_timeout_hours: Some(4.0),
+                ..Default::default()
+            },
             ..SocietySettings::default()
         });
         app.insert_resource(defs);

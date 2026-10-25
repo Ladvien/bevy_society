@@ -11,11 +11,11 @@
 | `mood.gif` | `mood` | mood halos — green pleased, amber neutral, red displeased; size is arousal | `mood: green pleased · amber neutral · red displeased · ring size = arousal` |
 | `opinions.gif` | `opinions` | one opinion bar per villager on **honesty**: green high, red low | `opinion on honesty: green above the middle, red below` |
 | `needs.gif` | `needs` | **hunger** halos — big green is fed, small red is hungry | `food: a full green ring is fed, a small red one is hungry` |
-| `ties.gif` | `ties` | the tie graph alone: green friendship, red rivalry | `ties: green is friendship, red is rivalry` |
+| `ties.gif` | `ties` | the tie graph alone: green friendship lines | `ties: green is friendship · the village forms them faster than it falls out` |
 | `factions.gif` | `factions` | the three faction colours, no lines | `faction colour · orange millers, green weavers, violet watch` |
 
 All six are the same village, same seed and the same run: `{"frames": 240, "rumor_reach": 0.080,
-"friends": 14, "rivals": 2, "barks": 1025}`, recorded 2026-10-25. Only what is drawn differs, which is the
+"friends": 27, "rivals": 0, "barks": 565}`, recorded 2026-10-25. Only what is drawn differs, which is the
 point — a feature clip is a different *view* of one simulation, not a different simulation.
 
 ### The clips were rebuilt in 2026-11-28, and every one of them had been lying
@@ -181,6 +181,17 @@ Fonts per host:
 Compare the **printed JSON**, not the PNGs. Pixels differ across GPUs; the numbers do not. Two runs of
 the same commit with the same seed must print the same JSON, and if they do not, the crate has lost
 determinism and that is a bug, not a rendering difference.
+
+## The clip has no rivalries, and the caption says so
+
+**The README said "rivalries red" and no clip has ever drawn one.** Measured: the capture settles 3 800
+steps inside a 32 s game-day and records six game-hours, which is far too short for a village to form a
+rivalry — and the full 16-day `village-evening` harness does produce them (24 with the reciprocity step,
+`became_rival` 271), so this is the window, not the model. Two attempts to fix it by widening the settle
+(9 000 and 8 000 steps) both still read **0 rivals**.
+
+The caption is now what the clip shows. When a clip of rivalries is wanted, it needs its own scenario with
+a faster clock, not a longer settle in this one.
 
 ## Visual check
 

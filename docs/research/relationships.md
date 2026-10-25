@@ -96,6 +96,39 @@ Each person keeps a `Ties` component: one `Tie` per person they know. A tie hold
   `docs/loop/needs-decision/which-tie-field-says-someone-spoke.md`, because adding the field bumps
   `SocietySave::VERSION`.
 
+## A relationship is mutual (issue #10)
+
+- **Heider, F. (1946), balance theory**, read as summarised in **Schweighofer, S. & Schweitzer, F.**,
+  *Raising the Spectrum of Polarization* (DOI `10.18564/jasss.5323`, in the corpus):
+
+  > "The central postulate of Balance Theory is that cognitive representations of attitude relations tend
+  > toward balance. ... **In a dyadic relation, balance basically means reciprocity: feeling positive about
+  > a person who doesn't reciprocate this feeling is unbalanced.**"
+
+  The crate implemented the **triadic** half ("a friend of a friend is pulled toward friendship") and not
+  the dyadic one. That is the simpler case, and the measured consequence was large: on `village-evening`
+  (seed 7, 16.4 game-days) **27%** of directed friend ties were unreciprocated and the two directions of a
+  pair disagreed by **0.133** on average, against a `friend_band` of 0.05.
+
+- **Why it reaches behaviour.** The decision model reads the *actor's* tie (`Signal::Affinity` is
+  `decision.ties`) and the acceptance draw reads the *target's* (`toward_actor.affinity`), so a person was
+  choosing to compliment someone because *they* liked them while the someone decided otherwise.
+
+- **What ships.** `Tuning::dyad_balance_per_day` (0.5) pulls each pair's two directed affinities toward
+  their mean, both directions moving, so the mean is conserved and the step cannot overshoot. Measured gap
+  0.133 → **0.048** (seed 7), 0.123 → **0.046** (42), 0.130 → **0.050** (11). **The cost is real**: two
+  people who disagree about each other cannot be one friend and one rival, so rivals fall 42 → 24 at seed 7
+  and by 10-18 on every seed.
+
+- **Two implementations were measured and rejected.** Walking every unordered pair is `O(n^2)` and took the
+  5 000-person benchmark from 495.7 to **942.0 ms** a tick. Walking `Perception::contact` was affordable but
+  wrong — only people within `contact_radius` got balanced, so the gap closed to 0.069 instead of 0.048 and
+  rivals fell 42 → 17 instead of 42 → 24. The shipped version iterates each person's **tie list**, which is
+  the exact set of pairs that have a relationship and is capped by `max_ties`: identical results to all
+  pairs, **507.9 ms** at 5 000 people.
+
+- **Design default for the rate**, because the source is qualitative. `0.0` disables the step exactly.
+
 ## Why these defaults
 
 - **Familiarity decay.** Murre & Dros (2015) fit a power function to forgetting (`10.1371_journal.pone.0120644`, converted; power-function passage checked). Anderson & Schooler (1991) show the same shape for memory (DOI `10.1111/j.1467-9280.1991.tb00174.x`, not converted; cited from DOI only).

@@ -181,11 +181,41 @@ pub fn crowd(world: &mut World) -> (Vec3, f32) {
     if points.is_empty() {
         return (Vec3::new(0.0, 0.4, -2.5), 0.0);
     }
-    let count = points.len() as f32;
-    let centre = points.iter().fold(Vec3::ZERO, |sum, p| sum + *p) / count;
+    // **Framed on the villagers AND the places they use**, not on the villagers alone.
+    //
+    // The village's four stalls span `(-6.5, -5)` to `(6.5, 5)`, but the people gather at whichever two
+    // are busy, so a villager-only centroid drifts toward that pair and the far stalls leave frame —
+    // measured, two of the four stalls were out of shot and one sat half off the bottom edge. A clip
+    // whose subject is a *village* has to keep the village in frame.
+    let mut stalls = world.query_filtered::<&Transform, With<bevy_society::Place>>();
+    let places: Vec<Vec3> = stalls.iter(world).map(|t| t.translation).collect();
+    // **Centred on the places' bounding box, not on their centroid.** The four stalls are not symmetric
+    // about their mean (the workshop is alone on one side), so a centroid framing clipped the workshop at
+    // the bottom edge of every frame. The box's midpoint puts the village in the middle of the shot.
+    let (min, max) = places.iter().fold(
+        (Vec3::splat(f32::MAX), Vec3::splat(f32::MIN)),
+        |(lo, hi), p| (lo.min(*p), hi.max(*p)),
+    );
+    let centre = if places.is_empty() {
+        let count = points.len() as f32;
+        points.iter().fold(Vec3::ZERO, |sum, p| sum + *p) / count
+    } else {
+        0.5 * (min + max)
+    };
+
+    // How far anything in shot is from that centre: villagers **and** the stall corners, which are what
+    // actually leaves frame.
+    // **Biased toward the far corner.** The camera tilts, so the near edge of the shot covers less ground
+    // than the far edge; framing exactly on the box midpoint left the workshop half off the bottom of
+    // the last frame. Pushing the centre back along the view direction costs nothing at the far end.
+    let centre = centre - Vec3::new(0.0, 0.0, 1.2);
     let spread = points
         .iter()
         .map(|p| Vec2::new(p.x - centre.x, p.z - centre.z).length())
+        .chain(places.iter().map(|p| {
+            // A stall is a 1.2 m box; its corner is what clips first.
+            Vec2::new(p.x - centre.x, p.z - centre.z).length() + 0.85
+        }))
         .fold(0.0_f32, f32::max);
     (Vec3::new(centre.x, 0.4, centre.z), spread)
 }
@@ -197,7 +227,12 @@ pub fn crowd_camera(centre: Vec3, spread: f32, fraction: f32) -> Transform {
     // degree tilt the ground is compressed vertically, so the multiplier has to be generous. Measured at
     // 2.6: the violet group sat on the left edge with half its members outside. 3.6 covers it, and the
     // floor keeps a tight crowd from being filmed from the stratosphere.
-    let reach = (spread * 2.7).clamp(14.5, 27.0);
+    // `spread` is now the radius of everything in shot — people and places — so this is the multiplier
+    // that fits that radius plus its 0.6 m stalls in the narrower (vertical) field at a 45 degree tilt.
+    // Measured through three framings on the same run: 2.7 lost two of four stalls, **3.2 keeps all
+    // four** and leaves the villagers large enough to read a 0.5 m ring at 720 px, and 4.0 pulled back so
+    // far that people became specks. The cap stops a scattered crowd being filmed from the stratosphere.
+    let reach = (spread * 2.5).clamp(12.0, 22.0);
     let angle = (18.0 + 12.0 * fraction).to_radians();
     Transform::from_xyz(
         centre.x + 0.27 * reach * angle.sin(),

@@ -542,6 +542,84 @@ fn balance_triads(
     }
 }
 
+/// **The dyadic half of balance**: each relationship is pulled toward a mutual view.
+///
+/// Heider's balance theory is usually quoted for triads, and it is just as much a statement about a dyad:
+/// "in a dyadic relation, balance basically means reciprocity: feeling positive about a person who doesn't
+/// reciprocate this feeling is unbalanced" (Heider 1946, as summarised in Schweighofer & Schweitzer, DOI
+/// `10.18564/jasss.5323`, in the corpus). [`balance_triads`] implements the triadic case; this is the
+/// simpler one it was missing.
+///
+/// **Why it matters to behaviour, not just to bookkeeping.** The decision model reads the *actor's* tie
+/// (`Signal::Affinity` is `decision.ties`) and the acceptance draw reads the *target's*
+/// (`toward_actor.affinity`). Measured before this system, on `village-evening` seed 7 over 16.4
+/// game-days: **27%** of directed friend ties were unreciprocated and the two directions of a pair
+/// disagreed by **0.133** on average, against a friend band 0.05 wide. It closed the gap to **0.048** on
+/// seed 7 and to 0.046 / 0.050 on seeds 42 and 11.
+///
+/// **The pairs come from each person's tie list, and that is what makes it exact and cheap.** Two earlier
+/// versions were measured and rejected. Walking every unordered pair is `O(n^2)` and took the 5 000-person
+/// benchmark from **495.7 to 942.0 ms** a tick. Walking `Perception::contact` instead was affordable but
+/// **wrong**: only people within `contact_radius` were balanced, so the gap closed to 0.069 rather than
+/// 0.048 and rivals fell 42 → 17 instead of 42 → 24, because two people who never stand near each other
+/// still disagree about each other. A tie list is capped by `max_ties` (150), so iterating it is bounded
+/// per person and visits exactly the pairs that have a relationship to balance — which is the set that
+/// matters, because a pair with no tie in either direction cannot be one friend and one rival.
+///
+/// Each pair is handled once (`a.to_bits() < b.to_bits()`), both directions move by the same amount in
+/// opposite signs so the mean is conserved and the step cannot overshoot, and there is no draw and no hash
+/// iteration.
+fn balance_dyads(
+    clock: Res<SocietyClock>,
+    settings: Res<SocietySettings>,
+    index: Res<PersonIndex>,
+    deceased: Query<(), With<crate::Deceased>>,
+    mut ties: Query<&mut Ties>,
+) {
+    let tuning = &settings.tuning;
+    if tuning.dyad_balance_per_day <= 0.0 {
+        return;
+    }
+    let dt = clock.dt_days;
+    for &(_, a) in &index.sorted {
+        if deceased.get(a).is_ok() {
+            continue;
+        }
+        let Ok(a_ties) = ties.get(a) else {
+            continue;
+        };
+        // Every edge from `a`, read into a local list so no borrow is held across the writes.
+        let edges: Vec<(Entity, f32)> = a_ties
+            .0
+            .iter()
+            .filter(|tie| a.to_bits() < tie.target.to_bits())
+            .map(|tie| (tie.target, tie.affinity))
+            .collect();
+        for (b, ab) in edges {
+            if deceased.get(b).is_ok() {
+                continue;
+            }
+            let Some(ba) = ties.get(b).ok().and_then(|t| t.get(a)).map(|t| t.affinity) else {
+                continue;
+            };
+            let delta = balance::dyad_delta(tuning.dyad_balance_per_day, dt, ab, ba);
+            if delta == 0.0 {
+                continue;
+            }
+            if let Ok(mut owned) = ties.get_mut(a)
+                && let Some(tie) = owned.get_mut(b)
+            {
+                tie.add_affinity(delta, tuning);
+            }
+            if let Ok(mut owned) = ties.get_mut(b)
+                && let Some(tie) = owned.get_mut(a)
+            {
+                tie.add_affinity(-delta, tuning);
+            }
+        }
+    }
+}
+
 /// Drops each person's least-familiar ties beyond `max_ties` (plan D4, Dunbar 1992).
 fn trim_ties(
     clock: Res<SocietyClock>,
@@ -613,6 +691,7 @@ impl Plugin for RelationshipsPlugin {
                     expose_contacts,
                     relax_affinity,
                     balance_triads,
+                    balance_dyads,
                     trim_ties,
                     refresh_labels,
                 )

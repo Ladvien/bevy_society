@@ -6,7 +6,7 @@ Give your Bevy world a living society: villagers who remember, gossip, take side
 
 ![A rumor spreads through a village](https://raw.githubusercontent.com/Ladvien/bevy_society/main/docs/media/village.gif)
 
-One afternoon in a village of twenty-four people: a weaver tells the rumor that Bram stole bread, and in the six game-hours the clip covers (14:00 to 20:00) it passes to a second villager — known by **2 of 24** at the end, as the counter in the corner shows. The same run recorded twice as long, twelve game-hours, reaches 3. A rumor crosses a village in game-days, not hours, because each telling is one choice among many and the Daley–Kendall rule stifles a teller whose listener already knew. Tie lines show friendships green and rivalries red; the magenta ring marks whoever knows the rumor. Every clip below is the same village, same seed, same run — only the overlay changes.
+One afternoon in a village of twenty-four people: a weaver tells the rumor that Bram stole bread, and in the six game-hours the clip covers (14:00 to 20:00) it passes to a second villager — known by **2 of 24** at the end, as the counter in the corner shows. The same run recorded twice as long, twelve game-hours, reaches 3. A rumor crosses a village in game-days, not hours, because each telling is one choice among many and the Daley–Kendall rule stifles a teller whose listener already knew. Tie lines show friendships green; the magenta ring marks whoever knows the rumor. (No clip draws a rivalry — six game-hours is too short for one to form; the full 16-game-day run forms 24.) Every clip below is the same village, same seed, same run — only the overlay changes.
 
 ### One clip per feature
 

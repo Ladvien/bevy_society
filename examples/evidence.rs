@@ -57,6 +57,9 @@ fn main() {
     if let Some(band) = args.friend_band {
         settings.tuning.friend_band = band;
     }
+    if let Some(rate) = args.dyad_balance {
+        settings.tuning.dyad_balance_per_day = rate;
+    }
     if let Some(seed) = args.seed {
         settings.seed = seed;
     }
@@ -123,6 +126,9 @@ fn main() {
     // or unlocks a conversation on `TieLabelChanged` cares about how many arrive and whether they mean
     // anything: measured before hysteresis, 58% of them came from a value resting within 0.01 of the bar.
     let mut label_changes = 0usize;
+    // **Every approach**, accepted or refused: the quantity a reciprocity step should move, because a
+    // person choosing an approach with its own tie and being judged by the other's is the asymmetry.
+    let (mut accepted_approaches, mut refused_approaches) = (0usize, 0usize);
     let mut left_rival = 0usize;
     let mut peak_reach = 0.0_f32;
     let mut peak_known_by = 0_usize;
@@ -151,6 +157,16 @@ fn main() {
                 // earlier iteration's "bad outweighs good 4.8:1" was arithmetic on the wrong variable.
                 if resolved.interaction == "compliment" && resolved.accepted {
                     accepted_compliments += 1;
+                }
+                // Every approach, accepted or refused. A reciprocity step should move this ratio without
+                // touching the acceptance model, because the model already reads the *target's* tie.
+                if resolved.refused_by_rule {
+                    continue;
+                }
+                if resolved.accepted {
+                    accepted_approaches += 1;
+                } else {
+                    refused_approaches += 1;
                 }
                 if resolved.interaction != "gossip" {
                     continue;
@@ -234,6 +250,8 @@ fn main() {
             rival_transitions: (became_rival, left_rival),
             accepted_compliments,
             label_changes,
+            reciprocity: reciprocity_of(app.world(), &world),
+            approaches: (accepted_approaches, refused_approaches),
         },
     );
     println!(
@@ -724,6 +742,37 @@ fn plant(
 // -------------------------------------------------------------------------------------------------
 
 /// The aggregates one tick contributes, read straight from the world.
+/// `(mutual friend pairs, one-way friend pairs, mean |aff(a->b) - aff(b->a)|)` over every pair.
+///
+/// The crate holds each direction of a tie separately, so a friendship can be one-sided. Measured before
+/// the dyad balance step: **50%** of directed friend ties were unreciprocated and the two directions of a
+/// pair disagreed by **0.145**, against a friend band 0.05 wide.
+fn reciprocity_of(ecs: &EcsWorld, world: &World) -> (usize, usize, f32) {
+    let mut mutual = 0usize;
+    let mut one_way = 0usize;
+    let (mut gap_sum, mut pairs) = (0.0_f64, 0usize);
+    let people = &world.villagers;
+    for (i, &a) in people.iter().enumerate() {
+        for &b in &people[i + 1..] {
+            let (Some(ta), Some(tb)) = (
+                ecs.get::<Ties>(a).and_then(|t| t.get(b)),
+                ecs.get::<Ties>(b).and_then(|t| t.get(a)),
+            ) else {
+                continue;
+            };
+            gap_sum += f64::from((ta.affinity - tb.affinity).abs());
+            pairs += 1;
+            let (fa, fb) = (ta.label == TieLabel::Friend, tb.label == TieLabel::Friend);
+            if fa && fb {
+                mutual += 1
+            } else if fa || fb {
+                one_way += 1
+            }
+        }
+    }
+    (mutual, one_way, (gap_sum / pairs.max(1) as f64) as f32)
+}
+
 fn snapshot_row(
     app: &App,
     tick: f64,
@@ -1029,6 +1078,10 @@ struct Endings<'a> {
     accepted_compliments: usize,
     /// Every `TieLabelChanged`, in either direction.
     label_changes: usize,
+    /// `(mutual friends, one-way friends, mean |aff(a->b) - aff(b->a)|)` over every pair.
+    reciprocity: (usize, usize, f32),
+    /// `(accepted, refused)` approaches.
+    approaches: (usize, usize),
 }
 
 /// Writes `summary.json`.
@@ -1047,6 +1100,8 @@ fn summary(
         rival_transitions,
         accepted_compliments,
         label_changes,
+        reciprocity,
+        approaches,
     } = endings;
     let endings = (completed_endings_unused, interrupted_endings_unused);
     let world_ref = ecs;
@@ -1073,7 +1128,7 @@ fn summary(
     }
     let clock = world_ref.resource::<SocietyClock>();
     let json = format!(
-        "{{\n  \"ticks\": {},\n  \"people\": {},\n  \"rumors\": {},\n  \"rumor_known_by\": {},\n  \"rumor_reach\": {:.3},\n  \"friends\": {},\n  \"rivals\": {},\n  \"completed_endings\": {},\n  \"interrupted_endings\": {},\n  \"became_rival\": {},\n  \"left_rival\": {},\n  \"accepted_compliments\": {},\n  \"label_changes\": {},\n  \"game_days\": {:.2}\n}}\n",
+        "{{\n  \"ticks\": {},\n  \"people\": {},\n  \"rumors\": {},\n  \"rumor_known_by\": {},\n  \"rumor_reach\": {:.3},\n  \"friends\": {},\n  \"rivals\": {},\n  \"completed_endings\": {},\n  \"interrupted_endings\": {},\n  \"became_rival\": {},\n  \"left_rival\": {},\n  \"accepted_compliments\": {},\n  \"label_changes\": {},\n  \"mutual_friends\": {},\n  \"one_way_friends\": {},\n  \"affinity_gap\": {:.3},\n  \"refusals\": {},\n  \"acceptances\": {},\n  \"game_days\": {:.2}\n}}\n",
         clock.tick,
         living,
         book.rumors.len(),
@@ -1087,6 +1142,11 @@ fn summary(
         rival_transitions.1,
         accepted_compliments,
         label_changes,
+        reciprocity.0,
+        reciprocity.1,
+        reciprocity.2,
+        approaches.1,
+        approaches.0,
         clock.now_days,
     );
     let mut failed = String::new();
@@ -1127,6 +1187,8 @@ struct Args {
     label_hysteresis: Option<f32>,
     /// Overrides `Tuning::friend_band`, so a run can be read with a friendship held below its bar.
     friend_band: Option<f32>,
+    /// Overrides `Tuning::dyad_balance_per_day`, so a run can be read with ties pulled toward reciprocity.
+    dyad_balance: Option<f32>,
     /// Overrides `Tuning::positivity_offset`, so the same scenario can be re-read with a different
     /// resting mood.
     positivity_offset: Option<f32>,
@@ -1151,6 +1213,7 @@ impl Args {
             friend_affinity: None,
             label_hysteresis: None,
             friend_band: None,
+            dyad_balance: None,
             days: None,
         };
         let mut argv = std::env::args().skip(1);
@@ -1170,6 +1233,7 @@ impl Args {
                     args.label_hysteresis = argv.next().and_then(|v| v.parse().ok())
                 }
                 "--friend-band" => args.friend_band = argv.next().and_then(|v| v.parse().ok()),
+                "--dyad-balance" => args.dyad_balance = argv.next().and_then(|v| v.parse().ok()),
                 "--friend-affinity" => {
                     args.friend_affinity = argv.next().and_then(|v| v.parse().ok())
                 }

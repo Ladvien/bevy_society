@@ -148,6 +148,21 @@ pub struct Tuning {
     /// Rate at which a balanced triad pulls the third edge (Cartwright & Harary 1956,
     /// DOI 10.1037/h0046049).
     pub balance_rate_per_day: f32,
+    /// Rate at which two people's **directed** affinities are pulled toward their mean, per game-day.
+    ///
+    /// The **dyadic** half of Heider's balance theory: "in a dyadic relation, balance basically means
+    /// reciprocity: feeling positive about a person who doesn't reciprocate this feeling is unbalanced"
+    /// (Heider 1946, via Schweighofer & Schweitzer, DOI `10.18564/jasss.5323`, in the corpus). The crate
+    /// has always implemented the triadic half (`balance_rate_per_day`) and not this one.
+    ///
+    /// **Measured before it was added** (`village-evening`, seed 7, 16.4 game-days): **50%** of directed
+    /// friend ties unreciprocated, a mean directional disagreement of **0.145** against a friend band 0.05
+    /// wide, and **38.9%** of approaches refused — because the decision reads the actor's tie and the
+    /// acceptance draw reads the target's. See `docs/loop/runs/2026-10-25-04/eval.md` for the sweep.
+    ///
+    /// **Design default, chosen by measurement**: the source is qualitative and gives no rate.
+    /// `0.0` disables the step exactly.
+    pub dyad_balance_per_day: f32,
     /// Familiarity added to two people by a mutual close friend's introduction. Design default (no
     /// source paper gives this number); mechanism: triadic closure, Kossinets & Watts 2006,
     /// DOI 10.1126/science.1116869.
@@ -397,6 +412,10 @@ impl Default for Tuning {
             affinity_relax_per_day: 0.01,
             balance_samples_per_tick: 8,
             balance_rate_per_day: 0.5,
+            // **Design default, chosen by measurement.** 0.5 closes the directional affinity gap
+            // 0.133 -> 0.048 over 16 game-days while leaving the village's shape recognisable; the
+            // sweep and the trade it makes are in `docs/loop/runs/2026-10-25-04/eval.md`.
+            dyad_balance_per_day: 0.5,
             introduction_familiarity: 0.1,
             confidence_base: 0.2,
             confidence_openness: 0.6,
