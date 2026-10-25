@@ -75,6 +75,7 @@ fn main() {
     .add_plugins(SocietyPlugins)
     .insert_resource(ShowTies(true))
     .insert_resource(RumorMarkers(true))
+    .init_resource::<visuals::PlantedRumor>()
     .insert_resource(SunClock::default())
     .insert_resource(ClearColor(Color::srgb(0.45, 0.55, 0.68)))
     .insert_resource(FontBytes(font_bytes))
@@ -82,7 +83,10 @@ fn main() {
     .add_systems(Startup, setup_scene)
     .add_systems(Update, (update_hud, visuals::move_sun).chain())
     .add_systems(Update, visuals::draw_ties)
-    .add_systems(Update, visuals::draw_rumor_rings)
+    .add_systems(
+        Update,
+        (visuals::track_planted_rumor, visuals::draw_rumor_rings).chain(),
+    )
     .add_systems(Update, (click_to_talk, plant_rumor_key, toggle_ties));
     app.run();
 }
@@ -207,6 +211,8 @@ fn click_to_talk(
 fn plant_rumor_key(
     keys: Res<ButtonInput<KeyCode>>,
     index: Res<PersonIndex>,
+    books: Res<bevy_society::RumorBook>,
+    mut planted: ResMut<visuals::PlantedRumor>,
     mut writer: MessageWriter<PlantRumor>,
 ) {
     if !keys.just_pressed(KeyCode::KeyR) {
@@ -217,6 +223,7 @@ fn plant_rumor_key(
     else {
         return;
     };
+    planted.request(&books, origin, subject);
     writer.write(PlantRumor {
         origin,
         subject,

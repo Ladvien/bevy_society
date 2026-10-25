@@ -75,12 +75,21 @@ def main() -> int:
         draw.text((10, canvas_size[1] + 7), caption, font=font, fill=(255, 255, 255))
         frames.append(strip)
 
-    # **One palette, built from the frames themselves.** Each frame is first reduced to `COLORS` with an
-    # adaptive palette, then every frame is re-mapped onto the *first* frame's palette. Sampling eight
-    # frames into a vertical montage and quantizing that produced a palette dominated by grass — the
-    # faction colours (amber, teal, blue) disappeared and every villager came out grey-green. Reducing a
-    # full frame adaptively keeps the colours that are actually in it.
-    palette = frames[0].quantize(colors=COLORS, method=Image.Quantize.MEDIANCUT)
+    # **One palette, from five frames, by octree.** The first version reduced the first frame with
+    # median cut, and median cut spends its 256 buckets on the grass gradient: measured on the capture's
+    # frames, the watch faction's violet capsules came out **0 bluish pixels of 847** — grey-green — in
+    # both the old clips and the rebuilt ones, and the rumor ring that only exists after frame 30 would
+    # have had no colour at all. Octree quantization keeps rare saturated colours: 867 bluish pixels
+    # against 847 in the source, at a mean error of 3.2 against 1.5. The palette is taken from a montage of the first,
+    # quarter, middle, three-quarter and last frames so that a colour which appears late (the rumor ring)
+    # is in it.
+    picks = sorted({0, len(frames) // 4, len(frames) // 2, 3 * len(frames) // 4, len(frames) - 1})
+    montage = Image.new("RGB", (frames[0].width, sum(frames[i].height for i in picks)))
+    top = 0
+    for i in picks:
+        montage.paste(frames[i], (0, top))
+        top += frames[i].height
+    palette = montage.quantize(colors=COLORS, method=Image.Quantize.FASTOCTREE)
     quantized = [frame.quantize(palette=palette, dither=Image.Dither.NONE) for frame in frames]
     quantized[0].save(
         out_path,

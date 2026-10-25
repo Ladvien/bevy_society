@@ -6,7 +6,7 @@ Give your Bevy world a living society: villagers who remember, gossip, take side
 
 ![A rumor spreads through a village](docs/media/village.gif)
 
-One evening in a village of twenty-four people: Bram steals bread, the watch sees it, and by nightfall the rumor has reached twenty-three of twenty-five. Tie lines show friendships green and rivalries red; the red ring marks whoever knows the rumor. Every clip below is the same village, same seed, same run — only the overlay changes.
+One afternoon in a village of twenty-four people: a weaver tells the rumor that Bram stole bread, and in the six game-hours the clip covers (14:00 to 20:00) it passes to a second villager — known by **2 of 24** at the end, as the counter in the corner shows. The same run recorded twice as long, twelve game-hours, reaches 3. A rumor crosses a village in game-days, not hours, because each telling is one choice among many and the Daley–Kendall rule stifles a teller whose listener already knew. Tie lines show friendships green and rivalries red; the magenta ring marks whoever knows the rumor. Every clip below is the same village, same seed, same run — only the overlay changes.
 
 ### One clip per feature
 
@@ -15,6 +15,16 @@ One evening in a village of twenty-four people: Bram steals bread, the watch see
 | ![Mood](docs/media/mood.gif) **Mood** — a halo on every villager. Green is pleased, amber neutral, red displeased; halo size is arousal. The colour scale is normalised to the ±0.4 the model actually produces, so a small mood shift is visible. | ![Opinion](docs/media/opinions.gif) **Opinions** — one bar per villager on the honesty topic, green above the midpoint and red below, length by strength. |
 | ![Needs](docs/media/needs.gif) **Needs** — a full green halo is a fed villager, a small red one is hungry. | ![Ties](docs/media/ties.gif) **Relationships** — the tie graph alone: green friendship, red rivalry, brightness by familiarity. |
 | ![Factions](docs/media/factions.gif) **Factions** — orange millers, green weavers, violet watch, no ties, so the group structure is the only thing on screen. | The clip above is the same run with every overlay on. |
+
+## Cargo features
+
+| feature | default | turns on |
+|---|---|---|
+| `dialogue` | yes | `DialoguePlugin`, `TalkTo`, barks and conversations through `bevy_speech_bubbles`. The host adds `SpeechBubblesPlugin` over its own camera. |
+| `steering` | yes | `SteeringPlugin`: `SocialMover` walking under ORCA (`bevy_orca`), and `Obstacle`. |
+| `fields` | yes | `SocialFieldPlugin`: crowd presence and commotion grids and per-faction presence grids (`bevy_stigmergy`), the `Field` consideration and the `Gradient` target. |
+| `serde` | no | `SocietySave`, `capture` and `restore`: save and load the whole society. |
+| none (`--no-default-features`) | | the core: mind, daily life, relationships, opinions, rumors, reputation, factions, scripts and `DecisionTrace`. |
 
 ## What you get
 
@@ -27,6 +37,9 @@ One evening in a village of twenty-four people: Bram steals bread, the watch see
 - **Crowd fields** — a stigmergy grid of presence and commotion per cell, readable as a `Field(Crowd)` consideration and walkable as a `Gradient` target, so an activity can be "join the crowd" without naming a place. [needs-and-utility](docs/research/needs-and-utility.md)
 - **Scripts** — Rhai triggers over a per-tick snapshot, with a `ctx` reader and an `fx` writer that cannot see its own writes. [scripting](docs/guide/scripting.md)
 - **Dialogue** — barks and conversations through `bevy_speech_bubbles`. [dialogue](docs/guide/dialogue.md)
+- **Decision traces** — why a person chose what they did: every option weighed, its score, and how far the chosen one fell short of the best. Insert a `DecisionTrace` and read it; recording changes no outcome. [decisions](docs/guide/decisions.md)
+- **Obstacles** — solid buildings that walkers path around, as hard walls in the ORCA solver, with a resolver that pushes anyone who lands inside back out. [getting started](docs/guide/getting-started.md#solid-buildings-obstacle)
+- **Persistence** — the whole society captured and restored through `serde`: ties, memories, rumors, the clock, the random stream and every trigger's bookkeeping, keyed by your own ids, so the ticks after a reload are the ticks that would have followed. [persistence](docs/guide/persistence.md)
 
 Every formula traces to a paper; every rate is a named field on `Tuning`; every default either comes from a paper or says it is a design default.
 
@@ -77,7 +90,7 @@ assert!(app.world().resource::<SocietyClock>().tick > 0);
 ```
 
 Run it headlessly with `cargo run --example quickstart`, which is this code. On a real run it reports
-`59 social exchanges, 30 accepted` after nine game-days.
+`237 social exchanges, 127 accepted` after nine game-days.
 
 The full village, with balloons and the debug server:
 
@@ -207,7 +220,7 @@ The papers were gathered with [home-still](docs/research/corpus/README.md), a lo
 
 ## Documentation
 
-[Getting started](docs/guide/getting-started.md) · [Concepts](docs/guide/concepts.md) · [Authoring](docs/guide/authoring.md) · [Scripting](docs/guide/scripting.md) · [Dialogue](docs/guide/dialogue.md) · [Research](docs/research/README.md) · [Demos](docs/DEMOS.md)
+[Getting started](docs/guide/getting-started.md) · [Concepts](docs/guide/concepts.md) · [Authoring](docs/guide/authoring.md) · [Scripting](docs/guide/scripting.md) · [Dialogue](docs/guide/dialogue.md) · [Decisions](docs/guide/decisions.md) · [Persistence](docs/guide/persistence.md) · [Research](docs/research/README.md) · [Demos](docs/DEMOS.md)
 
 ## Contributing
 

@@ -23,19 +23,22 @@ fragile. The crate has the opposite: fewer friendly ties *and* symmetric decay.
 
 ## Why bad wins here, quantified
 
-The asymmetry is not in the decay rates — it is in the **event weights**, and it is large.
+The asymmetry is not in the decay rates — it is in the **event count**, and the totals are measured. On
+`village-evening`, seed 7, 24 people over 17 game-days, summing every affinity write:
 
-| event | affinity effect | reach |
-|---|---|---|
-| `compliment` | **+0.10** | one person |
-| `insult` (a deed, harm `-0.4`) | **-0.08** per witness (`witness_gain 0.2 x -0.4`) | **every witness** |
+| event | affinity effect | events | total |
+|---|---|---|---|
+| accepted `compliment` | **+0.10** each | **1 604** | **+160.4** |
+| `insult` witnessed (a deed, harm `-0.4`) | **-0.0305** mean per witness | **7 920** | **-241.2** |
 
-A village has roughly six people within perception. One insult therefore moves about **-0.48 of total affinity**
-across the crowd, against **+0.10** for a compliment — bad outweighs good about **5:1 per event**.
+Bad is ahead **1.5:1** in total, and good is outnumbered **4.9:1** by events: one compliment weighs about 3.3x a
+witness's reaction, but there are 4.9x as many reactions. Good loses on numbers, not on weight, and friendship
+cannot accumulate. That is the whole mechanism.
 
-And the *numbers* do not compensate: `compliment` occupies **11.3%** of person-ticks against `snub`'s **3.8%**, a
-ratio of about **3:1**. Good is outnumbered 3:1 while being outweighed 5:1 per event, so friendship cannot
-accumulate. That is the whole mechanism.
+An earlier version of this section claimed `-0.08` per witness (`witness_gain 0.2 x -0.4`), `-0.48` in total and
+"5:1 per event". `witness_gain` moves **trust**; affinity moves by `0.15 x approval`, which is where `-0.0305`
+comes from. The ledger reproduces with `cargo run --release --example evidence -- --scenario village-evening
+--seed 7 --out <dir>` (`accepted_compliments` in `summary.json`).
 
 ## The three levers, all measured, all rejected
 
@@ -72,15 +75,16 @@ deterministic trajectory more than it changes the dynamics, so the result is not
 
 ### 2. Cut `witness_gain` so that bad stops winning per event.
 
-- **For:** one number, and it targets the actual asymmetry — a deed's cost is currently multiplied by the crowd.
-- **Against:** `witness_gain` also drives reputation and rumor formation; lowering it weakens two other models.
-  Needs a three-axis measurement before it can be chosen.
+- **Withdrawn.** This option rested on the arithmetic corrected above: `witness_gain` moves **trust**, not
+  affinity, so cutting it would not touch the 1.5:1 affinity gap. It would weaken reputation and rumor formation
+  for nothing. The affinity lever is `0.15 * approval` in `src/reputation.rs`, which has not been measured as a
+  lever.
 
 ### 3. Raise the **rate** of friendly interaction, not its weight.
 
 - **For:** matches the paper's own account of how good prevails — "superior force of numbers" — rather than
   making each compliment stronger. A second affinity-positive activity, or a shorter `compliment` duration, would
-  raise the 3:1 ratio toward the 5:1 the weights demand.
+  raise the compliment count; it takes **1.5x** as many (about 2 400 instead of 1 604) to level the totals.
 - **Against:** new authored content, and it changes the activity mix a host may have tuned.
 
 ## Recommendation

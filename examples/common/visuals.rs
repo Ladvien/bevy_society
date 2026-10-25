@@ -24,6 +24,46 @@ pub const MARK_HEIGHT: f32 = 0.06;
 #[derive(Resource, Debug, Clone, Copy, Default)]
 pub struct RumorMarkers(pub bool);
 
+/// The rumor the host planted, so the rings, the HUD line and the printed reach all describe it and not
+/// whichever rumor the village happened to make last.
+///
+/// The host calls [`PlantedRumor::request`] when it writes a `PlantRumor`; [`track_planted_rumor`] then
+/// finds the rumor that message created. The book is append-only, so the planted rumor is the first one
+/// at or after the book's length at request time with that origin and subject.
+#[derive(Resource, Debug, Clone, Copy, Default)]
+pub struct PlantedRumor {
+    /// `(book length at request, origin, subject)`, until the rumor is found.
+    pending: Option<(usize, Entity, Entity)>,
+    /// The planted rumor, once the society has processed the request.
+    pub id: Option<RumorId>,
+}
+
+impl PlantedRumor {
+    /// Records that a `PlantRumor` from `origin` about `subject` has just been written, and forgets
+    /// any earlier plant.
+    pub fn request(&mut self, books: &RumorBook, origin: Entity, subject: Entity) {
+        self.pending = Some((books.rumors.len(), origin, subject));
+        self.id = None;
+    }
+}
+
+/// Resolves a pending [`PlantedRumor`] to the rumor the society made from it.
+pub fn track_planted_rumor(mut planted: ResMut<PlantedRumor>, books: Res<RumorBook>) {
+    let Some((since, origin, subject)) = planted.pending else {
+        return;
+    };
+    let found = books
+        .rumors
+        .iter()
+        .enumerate()
+        .skip(since)
+        .find(|(_, rumor)| rumor.origin == origin && rumor.subject == subject);
+    if let Some((index, _)) = found {
+        planted.id = Some(RumorId(index as u32));
+        planted.pending = None;
+    }
+}
+
 /// Draws a line for every friendship and rivalry, in `PersonIndex` order so the picture is stable.
 ///
 /// Only labels that mean something are drawn, and only for ties the pair is actually familiar: a line
@@ -84,7 +124,7 @@ pub fn draw_ties(
 /// A ring under every villager who knows the planted rumor with belief at least 0.3.
 pub fn draw_rumor_rings(
     markers: Res<RumorMarkers>,
-    books: Res<RumorBook>,
+    planted: Res<PlantedRumor>,
     index: Res<PersonIndex>,
     knowledge: Query<&Knowledge>,
     transforms: Query<&GlobalTransform>,
@@ -93,21 +133,12 @@ pub fn draw_rumor_rings(
     if !markers.0 {
         return;
     }
-    // **The newest alive rumor, not `RumorId(0)`.** This read `books.rumors.first()` — the first rumor
-    // the run ever produced, which is not the one the clip plants. The hero clip therefore drew rings for
-    // a rumor nobody in frame had heard, and showed no rings at all while the HUD counted 10/24. The
-    // correct version already existed in `scenes::draw_newest_rumor_rings` and was never called; that is
-    // the one below now.
-    let Some((index_of, _)) = books
-        .rumors
-        .iter()
-        .enumerate()
-        .rev()
-        .find(|(_, rumor)| rumor.alive)
-    else {
+    // **The planted rumor, not `RumorId(0)` and not the newest alive one.** The first rumor a run makes is
+    // a deed from the settle steps, and so is the newest by the time the clip starts: both drew rings for
+    // a rumor nobody in frame had been told. Nothing is drawn until a plant has been processed.
+    let Some(id) = planted.id else {
         return;
     };
-    let id = RumorId(index_of as u32);
     for &(_, entity) in &index.sorted {
         let (Ok(known), Ok(transform)) = (knowledge.get(entity), transforms.get(entity)) else {
             continue;
@@ -133,12 +164,6 @@ pub fn draw_rumor_rings(
 /// The HUD's text node.
 #[derive(Component)]
 pub struct Hud;
-
-/// A per-clip line under the HUD, naming the feature the GIF is about.
-///
-/// One GIF per feature needs one sentence per GIF, or a reader has to infer what the colours mean.
-#[derive(Resource, Debug, Clone, Default)]
-pub struct SceneLabel(pub String);
 
 /// Builds the HUD: a text node in the top-left, with the font the host passed in.
 pub fn spawn_hud(commands: &mut Commands, font: Handle<Font>) -> Entity {
@@ -182,9 +207,9 @@ pub fn spawn_hud(commands: &mut Commands, font: Handle<Font>) -> Entity {
 pub fn update_hud(
     clock: Res<SocietyClock>,
     books: Res<RumorBook>,
+    planted: Res<PlantedRumor>,
     index: Res<PersonIndex>,
     ties: Query<&Ties>,
-    label: Option<Res<SceneLabel>>,
     villagers: Query<(), (With<Autonomous>, With<Person>)>,
     mut hud: Query<&mut Text, With<Hud>>,
 ) {
@@ -206,28 +231,23 @@ pub fn update_hud(
             }
         }
     }
-    // The **newest** alive rumor, not `RumorId(0)`. The first rumor a run makes is not the one the
-    // clip plants, and reading it reported a claim about the wrong one — the same mistake the
-    // evidence harness made twice and the capture's ring overlay made once.
-    let reach =
-        books
-            .rumors
-            .iter()
-            .rev()
-            .find(|rumor| rumor.alive)
-            .map_or(String::new(), |rumor| {
-                // `PersonIndex::sorted` includes every `Person` — the player too — while `known_by`
-                // counts the ones holding the rumor. Against the raw index the HUD read "17/25" in a
-                // village of 24 villagers, which looks like an off-by-one bug to anyone reading it.
-                let villagers = villagers.iter().count().max(1);
-                format!(
-                    "\n“Bram stole bread” — known by {}/{}",
-                    rumor.known_by, villagers
-                )
-            });
-    // The scene label is **not** in the HUD. Every GIF carries it as a burned-in caption, so printing it
-    // twice cost a third line of the plate and covered the village it described.
-    let _ = label;
+    // **The rumor the host planted, not the newest alive one.** The newest alive rumor is whichever deed
+    // the village last made a story of, and the settle steps create about 39 a day: the HUD named a
+    // stranger's rumor "Bram stole bread" before the clip had planted anything, and its count wandered
+    // 8, 9, 8 as the "newest" one changed under it. Until a plant has been processed there is no line.
+    let reach = planted
+        .id
+        .and_then(|id| books.rumors.get(id.0 as usize))
+        .map_or(String::new(), |rumor| {
+            // `PersonIndex::sorted` includes every `Person` — the player too — while `known_by`
+            // counts the ones holding the rumor. Against the raw index the HUD read "17/25" in a
+            // village of 24 villagers, which looks like an off-by-one bug to anyone reading it.
+            let villagers = villagers.iter().count().max(1);
+            format!(
+                "\n“Bram stole bread” — known by {}/{}",
+                rumor.known_by, villagers
+            )
+        });
     **text = format!(
         "Day {} · {:02}:{:02}   Friendships {} · Rivalries {}{reach}",
         clock.day(),

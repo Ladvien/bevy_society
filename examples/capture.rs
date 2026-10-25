@@ -21,7 +21,8 @@ use common::recorder::Recorder;
 use common::scene::{self, VillageMaterials};
 use common::scenes;
 use common::visuals::{
-    RumorMarkers, ShowTies, SunClock, draw_rumor_rings, draw_ties, move_sun, spawn_hud, update_hud,
+    PlantedRumor, RumorMarkers, ShowTies, SunClock, draw_rumor_rings, draw_ties, move_sun,
+    spawn_hud, track_planted_rumor, update_hud,
 };
 
 /// The recorded frame at which the rumor is planted.
@@ -116,13 +117,13 @@ fn main() {
         // and lines over the crowd hid the colours that are its whole subject.
         app.insert_resource(ShowTies(matches!(scene, Scene::Village | Scene::Ties)));
         app.insert_resource(RumorMarkers(matches!(scene, Scene::Village)));
+        app.init_resource::<PlantedRumor>();
         // **`honesty` is index 1, not 0.** The starter pack declares `kindness` (0) then `honesty` (1);
         // this was 0, so the clip captioned "opinion of honesty" drew the village's kindness opinions.
         // The watch faction is the honest one (0.7 against -0.2), so with the right topic a third of the
         // bars go red — which is what makes the clip show a *contrast* rather than one colour.
         app.insert_resource(scenes::OpinionBar(1));
         app.insert_resource(scenes::NeedRing(NEED_CLIP));
-        app.insert_resource(common::visuals::SceneLabel(scene_label(scene).to_owned()));
         // Fixed daylight, deliberately. Following the clock sounded right and looked wrong: the
         // village's run starts at 15:00 and reaches 22:00 inside a clip, so the last third of every
         // GIF went dark blue and the feature it was recorded to show became unreadable. A README clip
@@ -143,7 +144,7 @@ fn main() {
         app.insert_resource(ClearColor(Color::srgb(0.45, 0.55, 0.68)));
         app.add_systems(Update, (update_hud, move_sun).chain());
         app.add_systems(Update, draw_ties);
-        app.add_systems(Update, draw_rumor_rings);
+        app.add_systems(Update, (track_planted_rumor, draw_rumor_rings).chain());
         app.insert_resource(FontBytes(font_bytes.clone()));
         app.add_systems(Startup, (setup_fonts, setup_scene));
     }) else {
@@ -251,18 +252,6 @@ fn spread_opinions(rec: &mut Recorder, village: &scene::Village) {
     }
 }
 
-/// The line the HUD shows under the counters, naming the feature the clip is about.
-fn scene_label(scene: Scene) -> &'static str {
-    match scene {
-        Scene::Village => "a rumor spreads · ties form",
-        Scene::Mood => "mood: green pleased · amber neutral · red displeased · ring size = arousal",
-        Scene::Opinions => "opinion on honesty: green above the middle, red below",
-        Scene::Needs => "food: a full green ring is fed, a small red one is hungry",
-        Scene::Ties => "ties: green is friendship, red is rivalry",
-        Scene::Factions => "faction colour · orange millers, green weavers, violet watch",
-    }
-}
-
 /// Which need the needs clip rings.
 ///
 /// **`food` is index 2, not 1.** The starter pack declares `social` (0), `rest` (1), `food` (2),
@@ -283,6 +272,10 @@ fn plant(rec: &mut Recorder, subject: Option<Entity>) {
     let (Some(subject), Some(origin)) = (subject, weaver(rec)) else {
         return;
     };
+    rec.world()
+        .resource_scope(|world, mut planted: Mut<PlantedRumor>| {
+            planted.request(world.resource::<bevy_society::RumorBook>(), origin, subject);
+        });
     rec.world().write_message(PlantRumor {
         origin,
         subject,
@@ -294,6 +287,10 @@ fn plant(rec: &mut Recorder, subject: Option<Entity>) {
 
 /// The first weaver: villagers spawn in `NAMES` order, eight per faction, so index 8 is the first
 /// weaver. It is deliberately not the subject, and not a miller.
+///
+/// A busier teller was tried — the villager with the most accepted `gossip` exchanges over the settle
+/// steps — and measured: the planted rumor reached **2** villagers in both cases, at 240 and at 480
+/// frames, so the extra code bought nothing and was removed.
 fn weaver(rec: &mut Recorder) -> Option<Entity> {
     rec.world()
         .resource::<PersonIndex>()
@@ -326,17 +323,10 @@ fn stats(world: &mut World, village: &scene::Village) -> (f32, u32, u32) {
         }
     }
     let living = world.resource::<PersonIndex>().sorted.len().max(1);
-    // The **newest** alive rumor, which is the one `plant` writes. Reading `RumorId(0)` reported a
-    // different rumor: the first the run ever made, which for this clip is a deed from the settle
-    // steps and not the theft the caption names.
-    let newest = world
-        .resource::<bevy_society::RumorBook>()
-        .rumors
-        .iter()
-        .enumerate()
-        .rev()
-        .find(|(_, rumor)| rumor.alive)
-        .map(|(index, _)| bevy_society::RumorId(index as u32));
+    // The planted rumor: the one `plant` writes and the rings and the HUD describe. Neither `RumorId(0)`
+    // nor the newest alive rumor is it: the first is the settle steps' first deed, and the newest is
+    // whichever deed the village last made a story of, which changes under the count.
+    let newest = world.resource::<PlantedRumor>().id;
     let knowers = newest.map_or(0, |id| {
         village
             .villagers

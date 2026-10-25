@@ -87,6 +87,22 @@ shift that ended.
 `Place` and `PlaceTags` are how activities find somewhere to go. A `Place`'s `capacity` limits how
 many people may use it at once, so a crowded tavern pushes the next villager to the market.
 
+### Solid buildings: `Obstacle`
+
+With the `steering` feature (on by default) a `Person` that also carries `SocialMover` walks to its destination under ORCA, so two walkers passing each other keep a gap. A building they must not walk through is an `Obstacle`, a round solid with a `radius` in metres on the plane, put on the same entity as the `Place` or on any other entity with a `Transform`:
+
+```rust,ignore
+commands.spawn((
+    Name::new("tavern"),
+    Place { capacity: 10 },
+    PlaceTags(vec!["gathering".to_owned(), "food".to_owned()]),
+    Obstacle { radius: 2.0 },
+    Transform::from_xyz(6.5, 0.0, -5.0),
+));
+```
+
+The obstacle's centre and radius are fed to ORCA as **hard wall half-planes**: a walker may slide along the edge or turn away, but is never accelerated into it. A final resolver also pushes any mover that has ended up inside one (a spawn placed there, a fast arrival) out to its surface along the line from the centre, so nobody is drawn half-buried in a building. The push needs no random draw, so a replay matches. Only entities with `SocialMover` are steered or pushed; a person you move yourself under `Locomotion::Host` is yours to keep outside. The default radius is `1.0`. The measurement behind it is in [`concepts.md`](concepts.md#walking-and-obstacles).
+
 ## Read what happens
 
 Everything the society does is a message. A game reads the ones it cares about:
@@ -133,6 +149,8 @@ duration start counting only on arrival, so a walker labelled `sleep` is not bei
 people travel to — measured on the shipped village, sleep reads 36.8% of all person-ticks against the 33.3% one
 8-hour sleep a day implies. Use `label` unless you specifically want the target.
 
+`Doing` says what a person is doing now. For *why they chose it* and what they passed over, insert a `DecisionTrace` and read it as in [`decisions.md`](decisions.md).
+
 ## Give it a font, if you want balloons
 
 With the `dialogue` feature (on by default) the crate turns barks into `bevy_speech_bubbles` balloons.
@@ -158,3 +176,5 @@ Font paths per host are in [`../DEMOS.md`](../DEMOS.md).
   messages.
 - [`scripting.md`](scripting.md): the Rhai `ctx` and `fx` API.
 - [`dialogue.md`](dialogue.md): conversations with the player.
+- [`decisions.md`](decisions.md): `DecisionTrace`, for "why did they do that?".
+- [`persistence.md`](persistence.md): saving and restoring the whole society (feature `serde`).

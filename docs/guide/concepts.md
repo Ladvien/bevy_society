@@ -135,6 +135,8 @@ the median moved 18%. A single number with no repetitions is not a measurement, 
 `examples/benchmark` now takes `--reps` and prints `ms_per_tick_min`, `ms_per_tick_median` and `spread_pct`.
 **If `spread_pct` is above about 20, the machine was too busy for any of these figures to mean anything.**
 
+Re-checked 2026-10-25 on the same M1 Max with `--reps 3`: fastest windows **0.78**, **28.9** and **101.2** ms at 100, 1 000 and 2 000 people, within 5%, 2% and 1% of the table. The spreads were 17%, 44% and 31% (the machine was shared, so by the rule above those runs say little beyond the minimum), and the table is unchanged.
+
 An earlier version of this table said **13.5 ms** at 1 000 and **245.1 ms** at 5 000. Those cannot be
 reproduced on this hardware: the fastest window measured here at 1 000 is 28.4 ms, more than twice that figure,
 and the discrepancy was carried for nine iterations because the only tool available reported a single mean and

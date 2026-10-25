@@ -5,11 +5,7 @@
 //! same rule `docs/DEMOS.md` states for the capture — a demo must not change the thing it demonstrates.
 
 use bevy::prelude::*;
-use bevy_society::{
-    Autonomous, Knowledge, Mood, Needs, Opinions, Person, PersonIndex, RumorBook, RumorId,
-};
-
-use crate::common::visuals::MARK_HEIGHT;
+use bevy_society::{Autonomous, Mood, Needs, Opinions, Person, PersonIndex};
 
 /// Draws one ring per villager whose level on need `slot` is low, sized by how low.
 ///
@@ -170,82 +166,6 @@ pub fn draw_mood_discs(
             color,
         );
     }
-}
-
-/// Draws a ring under everyone who knows the **newest** alive rumor.
-///
-/// The capture used to read `RumorId(0)`, the first rumor the run made, which is not the one the clip
-/// plants — the same mistake the evidence harness made twice. The newest alive rumor is the one the
-/// clip is about.
-pub fn draw_newest_rumor_rings(
-    books: Res<RumorBook>,
-    index: Res<PersonIndex>,
-    knowledge: Query<&Knowledge>,
-    transforms: Query<&GlobalTransform>,
-    mut gizmos: Gizmos,
-) {
-    let Some((id, rumor)) = books
-        .rumors
-        .iter()
-        .enumerate()
-        .rev()
-        .find(|(_, rumor)| rumor.alive)
-    else {
-        return;
-    };
-    let id = RumorId(id as u32);
-    for &(_, entity) in &index.sorted {
-        let (Ok(known), Ok(transform)) = (knowledge.get(entity), transforms.get(entity)) else {
-            continue;
-        };
-        let Some(entry) = known.get(id) else {
-            continue;
-        };
-        if entry.belief < 0.3 {
-            continue;
-        }
-        let pos = transform.translation();
-        gizmos.circle(
-            Isometry3d::new(
-                Vec3::new(pos.x, MARK_HEIGHT, pos.z),
-                Quat::from_rotation_x(std::f32::consts::FRAC_PI_2),
-            ),
-            0.55,
-            Color::srgb(0.95, 0.2, 0.2),
-        );
-    }
-    let _ = rumor;
-}
-
-/// Counts, for the printed line, how many villagers know the newest alive rumor.
-pub fn newest_rumor_reach(
-    books: &RumorBook,
-    index: &PersonIndex,
-    knowledge: &Query<&Knowledge>,
-    world: &World,
-) -> f32 {
-    let Some((id, _)) = books
-        .rumors
-        .iter()
-        .enumerate()
-        .rev()
-        .find(|(_, rumor)| rumor.alive)
-    else {
-        return 0.0;
-    };
-    let id = RumorId(id as u32);
-    let living = index.sorted.len().max(1);
-    let knowers = index
-        .sorted
-        .iter()
-        .filter(|(_, entity)| {
-            world
-                .get::<Knowledge>(*entity)
-                .is_some_and(|known| known.get(id).is_some())
-        })
-        .count();
-    let _ = knowledge;
-    knowers as f32 / living as f32
 }
 
 /// The centre of the crowd right now, and how far it reaches, from the villagers' transforms.

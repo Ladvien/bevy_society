@@ -111,6 +111,7 @@ fn main() {
     // count that rises *and falls* says the society reconciles. `TieLabelChanged` fires on every transition,
     // so counting the ones that *leave* `Rival` is the direct measurement of recovery, and nothing was
     // recording it. Measured on `village-evening`: rivals 0 -> 42 over 17 game-days while friends stayed 13-18.
+    let mut accepted_compliments = 0usize;
     let mut became_rival = 0usize;
     let mut left_rival = 0usize;
     let mut peak_reach = 0.0_f32;
@@ -134,6 +135,13 @@ fn main() {
                 .world_mut()
                 .resource_mut::<bevy::ecs::message::Messages<InteractionResolved>>();
             for resolved in exchanges.drain() {
+                // **Both sides of the affinity ledger.** `compliment` is the only activity that raises
+                // affinity between two people; a witnessed deed lowers it for every witness. Without
+                // counting both, a claim about which side outweighs the other cannot be checked — and an
+                // earlier iteration's "bad outweighs good 4.8:1" was arithmetic on the wrong variable.
+                if resolved.interaction == "compliment" && resolved.accepted {
+                    accepted_compliments += 1;
+                }
                 if resolved.interaction != "gossip" {
                     continue;
                 }
@@ -213,6 +221,7 @@ fn main() {
             counts: (completed_endings, interrupted_endings),
             failed_by_activity: &failed_by_activity,
             rival_transitions: (became_rival, left_rival),
+            accepted_compliments,
         },
     );
     println!(
@@ -1004,6 +1013,8 @@ struct Endings<'a> {
     failed_by_activity: &'a BTreeMap<String, usize>,
     /// `(became rival, left rival)` — the two halves of reconciliation.
     rival_transitions: (usize, usize),
+    /// Accepted `compliment`s — the only affinity-raising interaction the starter pack has.
+    accepted_compliments: usize,
 }
 
 /// Writes `summary.json`.
@@ -1020,6 +1031,7 @@ fn summary(
         counts: (completed_endings_unused, interrupted_endings_unused),
         failed_by_activity,
         rival_transitions,
+        accepted_compliments,
     } = endings;
     let endings = (completed_endings_unused, interrupted_endings_unused);
     let world_ref = ecs;
@@ -1046,7 +1058,7 @@ fn summary(
     }
     let clock = world_ref.resource::<SocietyClock>();
     let json = format!(
-        "{{\n  \"ticks\": {},\n  \"people\": {},\n  \"rumors\": {},\n  \"rumor_known_by\": {},\n  \"rumor_reach\": {:.3},\n  \"friends\": {},\n  \"rivals\": {},\n  \"completed_endings\": {},\n  \"interrupted_endings\": {},\n  \"became_rival\": {},\n  \"left_rival\": {},\n  \"game_days\": {:.2}\n}}\n",
+        "{{\n  \"ticks\": {},\n  \"people\": {},\n  \"rumors\": {},\n  \"rumor_known_by\": {},\n  \"rumor_reach\": {:.3},\n  \"friends\": {},\n  \"rivals\": {},\n  \"completed_endings\": {},\n  \"interrupted_endings\": {},\n  \"became_rival\": {},\n  \"left_rival\": {},\n  \"accepted_compliments\": {},\n  \"game_days\": {:.2}\n}}\n",
         clock.tick,
         living,
         book.rumors.len(),
@@ -1058,6 +1070,7 @@ fn summary(
         endings.1,
         rival_transitions.0,
         rival_transitions.1,
+        accepted_compliments,
         clock.now_days,
     );
     let mut failed = String::new();

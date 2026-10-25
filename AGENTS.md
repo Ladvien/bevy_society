@@ -26,9 +26,9 @@ Pinned to **Bevy 0.20.0**. Read the vendored source (`~/.cargo/registry/src/inde
 - `examples/assets/starter.society.ron` — the starter pack every host starts from.
 - `examples/assets/village.society.ron` — the village's additions to the starter pack.
 - `examples/common/recorder.rs` — the headless PNG recorder the capture example drives.
-- `tools/gif.sh` — frames to a caption-burned GIF.
+- `tools/gif.py` — frames to a caption-burned GIF (Pillow only; this is the encoder). `tools/gif.sh` is the ffmpeg and ImageMagick variant and cannot run where those are absent.
 - `docs/README.md` — the documentation index.
-- `docs/guide/{getting-started,concepts,authoring,scripting,dialogue}.md` — the guides.
+- `docs/guide/{getting-started,concepts,authoring,scripting,dialogue,decisions,persistence}.md` — the guides.
 - `docs/DEMOS.md` — the capture and encode recipe.
 - `docs/research/*.md` — one note per model, with DOIs.
 - `docs/research/corpus/` — the corpus pipeline and its snapshot tables.

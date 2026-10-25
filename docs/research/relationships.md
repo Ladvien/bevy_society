@@ -74,7 +74,7 @@ Each person keeps a `Ties` component: one `Tie` per person they know. A tie hold
 - **Byrne, D. (1961).** Interpersonal attraction and attitude similarity. DOI `10.1037/h0044721`. The affinity-from-similarity mechanism the clamp modifies; the ceiling itself is a **design default**, chosen by the measurement in `docs/loop/needs-decision/friendship-has-no-diminishing-return.md` rather than supplied by a paper.
 - **Trust as the discriminator.** Measured on the village: friend-ties average affinity 0.792 against -0.223 for the rest, but familiarity is **0.907 against 0.908** — no separation at all — while trust separates **sevenfold** (0.480 against 0.068). That is why `Tuning::friend_trust` is the second thing a friend is. Design default; the paper supplies the mechanism (Zajonc 1968, above) and none of the numbers.
 
-## Bad is stronger than good, per event — and good should win by numbers (issue #10)
+## Bad is stronger than good in total — and good should win by numbers (issue #10)
 
 - **Baumeister, R. F., Bratslavsky, E., Finkenauer, C. & Vohs, K. D. (2001).** Bad is stronger than good.
   *Review of General Psychology* 5(4): 323–370. DOI `10.1037/1089-2680.5.4.323` · `10.1037_1089-2680.5.4.323`
@@ -89,12 +89,19 @@ Each person keeps a `Ties` component: one `Tie` per person they know. A tie hold
   > "**good may prevail over bad by superior force of numbers**: Many good events can overcome the psychological
   > effects of a single bad one."
 
-  The second is conditional, and it is the one the starter pack does not satisfy. Measured: a `compliment` moves
-  one person **+0.10**; an `insult` (deed harm `-0.4`) moves **every witness** by `witness_gain 0.2 x -0.4 =
-  -0.08`, so with roughly six people in perception a single insult is **-0.48 of total affinity** — bad outweighs
-  good about **5:1 per event**. And good does not make up the difference by count: `compliment` holds **11.3%** of
-  person-ticks against `snub`'s **3.8%**, only **3:1**. Good is outnumbered 3:1 while outweighed 5:1, so
-  friendship cannot accumulate, and the village settles at **18 friend pairs against 42 rival pairs**.
+  The second is conditional, and it is the one the starter pack does not satisfy. Measured on `village-evening`,
+  seed 7, 24 people over 17 game-days, summing every affinity write (`examples/evidence.rs` counts the accepted
+  compliments; the insult side is the sum of `0.15 * approval` where `approval < 0.0` in `src/reputation.rs`):
+  **1 604** accepted `compliment`s moved affinity by **+160.4** in total (**+0.10** each), while an `insult`
+  (deed harm `-0.4`) reached witnesses **7 920** times and moved them by **-241.2** in total — a mean of
+  **-0.0305** affinity per witness. Bad is ahead **1.5:1** in total weight, and good is outnumbered **4.9:1** by
+  events: one compliment weighs about 3.3x a witness's reaction, but there are 4.9x as many reactions. Good loses
+  on numbers, not on weight, so friendship cannot accumulate, and the village settles at **18 friend pairs
+  against 42 rival pairs**.
+
+  An earlier version of this note said an insult was `witness_gain 0.2 x -0.4 = -0.08` per witness, **-0.48** in
+  total, "5:1 per event". That applied `witness_gain` to affinity. `witness_gain` moves **trust**; affinity moves by
+  `0.15 x approval`, where `approval` is the witness's opinion of kindness signed by the deed's harm.
 
   **The asymmetry is a design default the crate does not yet have.** It is recorded rather than shipped, because
   the obvious implementation — making negative affinity decay more slowly — was measured and it **doubles**

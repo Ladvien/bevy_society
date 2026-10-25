@@ -5,18 +5,18 @@
 
 ## One clip per feature
 
-| file | `--scene` | what it shows |
-|---|---|---|
-| `village.gif` | `village` | the whole thing: rumor halos, tie lines, counters |
-| `mood.gif` | `mood` | mood halos — green pleased, amber neutral, red displeased; size is arousal |
-| `opinions.gif` | `opinions` | one opinion bar per villager on **honesty**: green high, red low |
-| `needs.gif` | `needs` | **hunger** halos — big green is fed, small red is hungry |
-| `ties.gif` | `ties` | the tie graph alone: green friendship, red rivalry |
-| `factions.gif` | `factions` | the three faction colours, no lines |
+| file | `--scene` | what it shows | burned-in caption (the argument to `tools/gif.py`) |
+|---|---|---|---|
+| `village.gif` | `village` | the whole thing: rumor halos, tie lines, counters | `a rumor spreads · ties form · relationships change` |
+| `mood.gif` | `mood` | mood halos — green pleased, amber neutral, red displeased; size is arousal | `mood: green pleased · amber neutral · red displeased · ring size = arousal` |
+| `opinions.gif` | `opinions` | one opinion bar per villager on **honesty**: green high, red low | `opinion on honesty: green above the middle, red below` |
+| `needs.gif` | `needs` | **hunger** halos — big green is fed, small red is hungry | `food: a full green ring is fed, a small red one is hungry` |
+| `ties.gif` | `ties` | the tie graph alone: green friendship, red rivalry | `ties: green is friendship, red is rivalry` |
+| `factions.gif` | `factions` | the three faction colours, no lines | `faction colour · orange millers, green weavers, violet watch` |
 
-All six are the same village, same seed and the same run: `{"frames": 240, "rumor_reach": 0.520,
-"friends": 16, "rivals": 5, "barks": 959}`. Only what is drawn differs, which is the point — a feature
-clip is a different *view* of one simulation, not a different simulation.
+All six are the same village, same seed and the same run: `{"frames": 240, "rumor_reach": 0.080,
+"friends": 14, "rivals": 2, "barks": 1025}`, recorded 2026-10-25. Only what is drawn differs, which is the
+point — a feature clip is a different *view* of one simulation, not a different simulation.
 
 ### The clips were rebuilt in 2026-11-28, and every one of them had been lying
 
@@ -39,6 +39,17 @@ pushes a walker out of it. Before it, `steer_movers` passed `&[]` for walls and 
 express a building at all. `examples/common/scene.rs` also gives each faction its own `Home`; all
 twenty-four shared one, which made every sleep a cross-village walk that timed out — measured, 25
 interrupted sleeps against 4 completed.
+
+### Rebuilt again on 2026-10-25: two more faults, and numbers that were not true
+
+| fault | what it looked like | cause |
+|---|---|---|
+| the HUD and the rings described the wrong rumor | at frame 0, before the clip had planted anything, the HUD read `“Bram stole bread” — known by 8/24` with a ring under eight villagers, and the count wandered 8, 9, 8 | `update_hud`, `draw_rumor_rings` and `stats` read the **newest alive rumor**, which is whichever deed the village last made a story of; the settle steps create dozens. A fix to this exact mistake (`RumorId(0)`) had picked a different wrong rumor. They now read `visuals::PlantedRumor`, set when the host writes `PlantRumor` and resolved to the rumor that message created |
+| the watch faction was grey in every GIF | violet capsules rendered grey-green | `tools/gif.py` quantized the first frame with median cut, which spends its buckets on the grass: **0 of 847** bluish pixels survived. Fixed in the encoder |
+| every printed number was about another rumor | `rumor_reach 0.520`, a threshold met | same cause as the first row. The planted rumor reaches **2 of 25** in the clip, and the README had said twenty-three of twenty-five |
+
+The HUD's rumor line and the rings now appear only after the plant at frame 30 (and, in the interactive
+`village` example, after `R`).
 
 ### Overlay scales are normalised to the measured range, and the sign is the colour
 
@@ -72,11 +83,12 @@ cargo +1.98.1 run --release --example capture -- \
 
 What it does:
 
-- Settings: `seconds_per_day 64.0`, `tick_secs 0.1`, `start_hour 15.0`, so the clip covers about six
-  game-hours — one afternoon into one evening.
-- Six hundred unrecorded steps first, so ties have formed before the first captured frame.
-- `warm_up(3)`, then 240 recorded frames at 30 fps (8 s). The encode uses `STRIDE=2 FPS=60`
-  (see below), which keeps real-time speed at half the file.
+- Settings: `seconds_per_day 32.0`, `tick_secs 0.1`, `start_hour 15.0`. A frame is 1/30 s, so the clip's
+  240 frames are 8 s, a quarter of a game-day, **six game-hours**: 14:00 to 20:00 on the HUD.
+- 3 800 unrecorded steps first, so ties have formed before the first captured frame.
+- `warm_up(3)`, then 240 recorded frames at 30 fps (8 s). The encode is stride 1, 30 fps; if a clip
+  exceeds about 6 MiB, pass `stride 2` and `fps 60` to `tools/gif.py`, which halves the file at the same
+  speed. None did on 2026-10-25 (2.4 to 3.2 MiB).
 - At recorded frame 30 it writes the same `PlantRumor` the village example's `R` key writes: Bram stole
   bread, told by a weaver.
 - The camera orbits from 20° to 50° around the origin at radius 24, height 16, at 720×405.
@@ -86,35 +98,31 @@ What it does:
 {"frames": 480, "rumor_reach": 0.0, "friends": 0, "rivals": 0, "barks": 0}
 ```
 
-The clip is accepted when `rumor_reach ≥ 0.5`, `barks ≥ 6`, `friends ≥ 3` and `rivals ≥ 1`. If it is
-not, tune **only** `examples/assets/village.society.ron` (the gossip, compliment and snub weights) and
-the capture's `bark_chance`. Never change a crate default to make a demo look better: the defaults are
-the model.
+The clip is accepted when `rumor_reach ≥ 0.08` (the planted rumor has left its teller), `barks ≥ 6`,
+`friends ≥ 3` and `rivals ≥ 1`. If it is not, tune **only** `examples/assets/village.society.ron` (the
+gossip, compliment and snub weights) and the capture's `bark_chance`. Never change a crate default to make
+a demo look better: the defaults are the model.
 
-### Current result: all four thresholds met
+### Current result
 
 ```
-{"frames": 480, "rumor_reach": 0.360, "friends": 80, "rivals": 37, "barks": 3648}
+{"frames": 240, "rumor_reach": 0.080, "friends": 14, "rivals": 2, "barks": 1025}
+{"frames": 480, "rumor_reach": 0.120, "friends": 11, "rivals": 2, "barks": 1094}
 ```
 
-`rivals 0` was the last one outstanding, and it took three fixes to reach: `snub` was gated on low
-affinity so the village never snubbed anyone it knew, script considerations could not see their
-target, and `witness_reaction` signed approval by the witness's opinion of the *norm* rather than of
-the *act* — so a kindness-valuing witness rewarded an insult. With those fixed the village forms
-both friendships and rivalries, which is the picture the clip was always meant to show.
+The first line is the six clips of 2026-10-25, the second the same village recorded twice as long. All
+three thresholds that measure the society are met. **The rumor threshold is not what it was**: the
+previous documentation claimed `rumor_reach` of 0.520 and 0.360 against a threshold of 0.5, but that
+number counted the **newest alive rumor**, which is whichever deed the village last made a story of — the
+settle steps create dozens — and not the one the clip plants. Measured against the planted rumor the
+reach is 2 of 25 at 240 frames and 3 of 25 at 480. It is slow because telling is one choice among many and
+Daley–Kendall stifles a teller whose listener already knew; a busier teller (the villager with the most
+accepted `gossip` exchanges in the settle steps) was tried in place of the first weaver and reached 2 as
+well.
 
-The earlier clip ran 900 ticks — 4.1 game-days — and formed no friendships at all. Ties were never
-broken: `TieLabel::classify` needs `affinity ≥ 0.4`, affinity moves at `mere_exposure_per_day = 0.05`
-per day against `affinity_relax_per_day = 0.01`, and four days is not enough. The same village run for
-4200 ticks (17 game-days) forms 125+ friendships and the rumor reaches half of it. The capture now
-settles 3800 frames before recording, and the village spawns on a 3.5 m grid so its people can actually
-reach each other — at `1.4 / 64` metres per tick a 14 m walk was 640 ticks and every activity ended
-interrupted.
-
-`rivals 0` remains. No rivalry forms because `snub`'s consideration
-(`Affinity Logistic(-8, 0.3)`) needs a negative affinity, and nothing in this village creates one:
-gossip about Bram pushes *his* regard down, but he is also someone people compliment. A rivalry
-scenario needs a deliberate snub, which is the next iteration's candidate.
+The capture settles for 3 800 steps before recording. An earlier clip ran 900 ticks — 4.1 game-days — and
+formed no friendships: `TieLabel::classify` needs `affinity ≥ 0.4`, affinity moves at
+`mere_exposure_per_day = 0.05` against `affinity_relax_per_day = 0.01`, and four days is not enough.
 
 Simulated time is pinned with `TimeUpdateStrategy::ManualDuration(1/30 s)`, so a frame is exactly one
 thirtieth of a second of game time whatever the host's clock does. Two captures on different machines
@@ -133,10 +141,15 @@ python3 tools/gif.py frames/village docs/media/village.gif \
 
 Optional positional arguments after the caption: `width` (720), `stride` (1), `fps` (30).
 
-- **One palette for the whole clip**, `256` colours, built by adaptively quantizing the first frame. Two
-  wrong versions preceded it: a vertical montage of eight sample frames produced a palette dominated by
-  grass and turned every faction grey-green, and 128 colours compressed the amber/teal/blue faction
-  capsules into one another. A demo whose subject is colour needs the format's full depth.
+- **One palette for the whole clip**, `256` colours, by octree quantization of a montage of five frames
+  (first, quarter, middle, three-quarter, last). Three versions preceded it. A vertical montage of eight
+  frames with median cut turned every faction grey-green; 128 colours compressed the amber, green and
+  violet capsules into one another; and **median cut on the first frame** kept **0 of 847** of the
+  watch faction's bluish pixels (measured against the PNG, in the old
+  clips and in the rebuilt ones) because it spent its buckets on the grass gradient, and would have had
+  no colour for the rumor ring, which first appears at frame 30. Octree on a five-frame montage keeps
+  867 of 847, with the ring, at a mean error of 3.2 against 1.5. A demo whose subject is colour needs
+  the format's full depth and a palette that has seen the late frames.
 - The caption is burned into a 30 px strip below the frame. It is the *only* place the scene's name
   appears: the in-scene HUD carried it as well, which cost a third line of the plate and covered the
   village.
@@ -176,21 +189,35 @@ plain full-frame GIF, so any image viewer or `read` can open it directly — no 
 
 Each frame must show:
 
-- faction colours that tell villagers apart at a glance;
-- legible balloons, with no clipped text;
-- the HUD (`Day n · hh:mm`, the rumor's reach, friendships and rivalries);
-- rumor halos appearing only after frame 30 and spreading;
+- faction colours that tell villagers apart at a glance, **in the encoded GIF as well as the PNG**: count the
+  bluish pixels of the `watch` faction in `docs/media/<clip>.gif` against the frame (about 650 to 1 250,
+  depending on the scene), because the encoder once turned them grey;
+- the HUD (`Day n · hh:mm`, friendships and rivalries, and — after frame 30 only — the rumor's reach);
+- no rumor line and no halo at frame 0, one halo and `known by 1/24` at frame 120, and the count growing
+  from there (`village` and the HUD of every clip);
 - the scene's own overlay legible as the thing it names — for `mood`, halos that differ in colour *and*
   size between villagers; for `opinions`, bars that differ in **both** colour and length; for `needs`,
-  halos that visibly shrink over the clip; for `ties`, a graph rather than a handful of segments;
+  halos that shrink over the clip; for `ties`, a graph rather than a handful of segments;
 - **no villager intersecting a stall**, and nobody standing inside one;
 - all three factions in frame at every moment, not just at the start.
 
-Last checked 2026-11-28, all six clips, frames 0 / 120 / 239: HUD plate legible over the grass in
-constant daylight (the clips no longer follow the clock — the last third of every one went dark blue and
-the feature became unreadable), captions correct, every overlay distinguishing at least two villagers, no
-blank first frame, no villager inside a stall. The `factions` clip deliberately carries no tie lines, so its three colours are the only thing
-on screen.
+`capture` draws **no speech balloons** by design (the dialogue plugin is disabled, so the frames would
+never show them); balloons are the interactive `village` example's, so they are not part of this check.
 
-Any failure is a scene bug: fix `examples/common/scene.rs` or `visuals.rs` and capture again. Do not
-paper over it in the encode.
+Last checked **2026-10-25**, all six clips, frames 0 / 120 / 239 of each, against the run
+`{"frames": 240, "rumor_reach": 0.080, "friends": 14, "rivals": 2, "barks": 1025}`:
+
+| clip | frame 0 | frame 120 | frame 239 | verdict |
+|---|---|---|---|---|
+| `village` | 19 friendships, 2 rivalries, no rumor line, no halo | `known by 1/24`, one magenta halo | `known by 2/24`, two halos | pass: the rumor starts at frame 30 and spreads, slowly |
+| `mood` | mostly amber rings, a few orange-red or lime; sizes differ | same | same | pass, but **subtle**: most villagers are near neutral, so the clip differs by a few rings |
+| `opinions` | red and green bars, lengths from short to long | same | same | pass: both colour and length differ |
+| `needs` | every ring full and green | rings smaller and yellower-green | rings small and olive | pass, but **subtle**: six game-hours is a short time for a need to decay |
+| `ties` | 19 friendships, 2 rivalries | 17 and 2 | 14 and 2 | pass: a graph, but a sparse one; lines inside the violet and green clusters are hidden by the bodies |
+| `factions` | orange, green and violet, no lines | same | same | pass |
+
+Also seen and left alone: the fourth stall sits mostly below the bottom edge of every frame, and two or
+three orange villagers touch that edge at frame 120. Nobody is inside a stall; villagers stand against
+their edges, which is what the `Obstacle` resolver leaves. All three factions are in frame at every one of
+the three frames.
+
