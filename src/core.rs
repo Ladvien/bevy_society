@@ -11,6 +11,8 @@ use bevy::ecs::component::Component;
 use bevy::ecs::entity::Entity;
 use bevy::ecs::lifecycle::{Add, Remove};
 use bevy::ecs::observer::On;
+use bevy::ecs::query::Has;
+use bevy::ecs::reflect::ReflectComponent;
 use bevy::ecs::resource::Resource;
 use bevy::ecs::schedule::{IntoScheduleConfigs, SystemSet};
 use bevy::ecs::system::{Commands, Local, Query, Res, ResMut};
@@ -493,6 +495,31 @@ pub struct Person;
 #[derive(Component, Reflect, Debug, Clone, Copy, Default, PartialEq, Eq)]
 pub struct Autonomous;
 
+/// Marker: this person is out of its daily life for now — posted on a wall, sheltering indoors, away on
+/// an expedition, fleeing, or in a conversation with the player.
+///
+/// A dormant person **keeps who they are**: ties, memories, opinions, knowledge and memberships are
+/// untouched, and needs keep decaying and emotions keep relaxing, because time still passes for them.
+/// What stops is the social machinery around them:
+///
+/// - the crate never chooses an activity for them;
+/// - they are in nobody's [`Perception::near`] or [`Perception::contact`], so no familiarity accrues
+///   with them, they are never a `Person` target, and they are never a witness or a mood source. They
+///   keep their slot in [`Perception::persons`] and [`Perception::pos`], because scripts and the
+///   snapshot index by slot and a shifted list would point every `ctx` call at the wrong person;
+/// - an activity they were running ends with `ActivityEnded { completed: false }`, and so does anyone
+///   else's activity that targeted them;
+/// - no social exchange happens with them, including one the host asked for directly with
+///   [`crate::Interact`].
+///
+/// Removing the marker lets them re-decide on the next tick. Removing `Person` instead destroys them:
+/// `on_person_removed` deletes every tie to and from them.
+///
+/// Compare `Deceased`, which is this plus forever.
+#[derive(Component, Reflect, Debug, Clone, Copy, Default, PartialEq, Eq)]
+#[reflect(Component)]
+pub struct Dormant;
+
 /// The home of a person, used by the `Home` activity target.
 #[derive(Component, Reflect, Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Home(pub Entity);
@@ -701,7 +728,7 @@ fn on_person_removed(
 fn perceive(
     settings: Res<SocietySettings>,
     index: Res<PersonIndex>,
-    transforms: Query<&GlobalTransform>,
+    transforms: Query<(&GlobalTransform, Has<Dormant>)>,
     mut perception: ResMut<Perception>,
 ) {
     let n = index.sorted.len();
@@ -713,15 +740,18 @@ fn perceive(
     } = &mut *perception;
     persons.clear();
     pos.clear();
+    // **A dormant person keeps their slot and position but is left out of the grid**, so nobody can be
+    // near or in contact with them while every slot-indexed reader still points at the right person.
+    let mut dormant: Vec<bool> = Vec::with_capacity(n);
     for (_, entity) in &index.sorted {
         persons.push(*entity);
-        // A person without a transform yet sits at the origin for this tick.
-        pos.push(
-            transforms
-                .get(*entity)
-                .map(|t| settings.plane.project(t.translation()))
-                .unwrap_or(Vec2::ZERO),
-        );
+        let (at, is_dormant) = transforms
+            .get(*entity)
+            .map(|(t, d)| (settings.plane.project(t.translation()), d))
+            // A person without a transform yet sits at the origin for this tick.
+            .unwrap_or((Vec2::ZERO, false));
+        pos.push(at);
+        dormant.push(is_dormant);
     }
     near.resize_with(n, Vec::new);
     contact.resize_with(n, Vec::new);
@@ -755,10 +785,18 @@ fn perceive(
     // Cell contents, in ascending index order because `pos` is walked once, in order.
     let mut cells: Vec<Vec<u32>> = vec![Vec::new(); cols * rows];
     for (index, point) in pos.iter().enumerate() {
+        if dormant.get(index).copied().unwrap_or(false) {
+            continue;
+        }
         cells[row(point.y) * cols + column(point.x)].push(index as u32);
     }
 
     for (i, pi) in pos.iter().enumerate() {
+        // A dormant person has no neighbours either: their `near` and `contact` stay empty, so nothing
+        // they would accumulate from the world happens while they are away from it.
+        if dormant.get(i).copied().unwrap_or(false) {
+            continue;
+        }
         let cx = column(pi.x);
         let cy = row(pi.y);
         // All nine cells around this one. The person's own cell is included, and so are the cells behind
@@ -856,6 +894,7 @@ impl Plugin for SocietyCorePlugin {
             .register_type::<PersonId>()
             .register_type::<Person>()
             .register_type::<Autonomous>()
+            .register_type::<Dormant>()
             .register_type::<Home>()
             .register_type::<Place>()
             .register_type::<PlaceTags>()

@@ -150,6 +150,17 @@ edge or walk away, never accelerate into it — and `push_out_of_obstacles` reso
 `bevy_orca` leaves to the caller. Without an `Obstacle` a person walks straight through: measured, a walker
 crossed a block whose face was 1.5 m from its centre and reached **0.01 m**; with one it stopped at **2.35 m**.
 
+**A crowd walking to one place needs room, and ORCA needs a symmetry kick to pack it.** When everyone shares a
+`Home`, the whole village converges on one coordinate at evening. ORCA cannot decide whether to pass left or
+right at an exactly head-on meeting, so without a nudge the walkers' wishes cancel and they stall short — measured,
+**2.0–4.0 m** away, for the whole `travel_timeout_hours`. The crate's `NUDGE` breaks that symmetry; at the old
+`0.05` it was too weak to, and a village of 24 interrupted **40** activities against **4** with steering switched
+off entirely. It is now `0.30`, which brings it to **19**.
+
+Those remaining 19 are geometry, not steering: twenty-four bodies of 0.35 m radius cannot all fit inside a 1.5 m
+arrival circle. So **give a shared place enough room** — spread it out, or use several — because the arrival test
+is "within `interaction_radius` of the place", and a place everyone shares is a place everyone must fit inside.
+
 **Give an activity's place a radius smaller than `interaction_radius`.** A place whose half-width exceeded
 `interaction_radius` could not be used at all: being "arrived" required standing inside it. The demo scene
 keeps its stalls at a 0.6 m half-width with a 1.3 m gather ring, so a person is outside the stall and within

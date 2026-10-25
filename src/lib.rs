@@ -146,14 +146,15 @@ mod snapshot;
 mod trace;
 
 pub use behavior::{
-    ActivityEnded, ActivityStarted, BehaviorPlugin, Destination, Doing, DoingTarget,
+    ActivityEnded, ActivityStarted, BehaviorPlugin, Destination, Doing, DoingTarget, EndActivity,
     InteractionResolved, TravelFailed,
 };
 pub use beliefs::{BeliefsPlugin, Knowledge, Known, Opinion, Opinions, belief_after_hearing};
 pub use core::{
-    AssessmentNorm, Autonomous, ClockSource, Home, HostClock, Locomotion, NextPersonId, Perception,
-    Person, PersonId, PersonIndex, Place, PlaceTags, SocietyClock, SocietyCorePlugin, SocietyPlane,
-    SocietyRng, SocietySettings, SocietySystems, SocietyTick, Tuning, society_tick_due,
+    AssessmentNorm, Autonomous, ClockSource, Dormant, Home, HostClock, Locomotion, NextPersonId,
+    Perception, Person, PersonId, PersonIndex, Place, PlaceTags, SocietyClock, SocietyCorePlugin,
+    SocietyPlane, SocietyRng, SocietySettings, SocietySystems, SocietyTick, Tuning,
+    society_tick_due,
 };
 pub use defs::{
     AcceptDef, ActivityDef, ActivityId, ActivityTarget, Consideration, ConversationRuleDef,
@@ -165,7 +166,7 @@ pub use defs::{
 #[cfg(feature = "dialogue")]
 pub use dialogue::{DialoguePlugin, TalkTo};
 #[cfg(feature = "fields")]
-pub use fields::{SocialFieldPlugin, SocialFieldSettings, SocialFields};
+pub use fields::{Commotion, SocialFieldPlugin, SocialFieldSettings, SocialFields};
 // The two value types the fields are configured with, re-exported so a host names one crate. Both are
 // `bevy_stigmergy` types now: `ChannelDef` because the crate's own mirror type had no reason to exist
 // once `bevy_stigmergy` 0.2 added `Reflect`, and `CellFrame` because it is the shared world↔cell

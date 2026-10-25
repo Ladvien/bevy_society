@@ -208,6 +208,7 @@ impl Plugin for BehaviorPlugin {
             )
             .init_resource::<EndRequests>()
             .add_message::<TravelFailed>()
+            .add_message::<EndActivity>()
             .add_systems(
                 FixedUpdate,
                 // Ungated, in `Clock`: a host writes `TravelFailed` whenever it likes, and a
@@ -706,6 +707,17 @@ fn walk_toward_destination(
     }
 }
 
+/// The host asks for a person's current activity to end, without dormancy.
+///
+/// The use a host has: a place that has closed for the night, a shift that ended, an activity the game
+/// has made impossible. The activity ends with `ActivityEnded { completed: false }` in the same tick
+/// and the person re-decides. A request about a person with no activity is ignored.
+#[derive(Message, Debug, Clone, Copy, PartialEq, Eq)]
+pub struct EndActivity {
+    /// The person whose activity should end.
+    pub person: Entity,
+}
+
 /// The host reports that it cannot walk a person to its `Destination`.
 ///
 /// Under [`Locomotion::Host`](crate::Locomotion::Host) the crate cannot see the host's paths, so it
@@ -729,10 +741,14 @@ pub(crate) struct EndRequests(pub(crate) Vec<Entity>);
 /// Drains every host-written end-request message into [`EndRequests`] on every fixed step.
 fn queue_end_requests(
     mut travel_failed: MessageReader<TravelFailed>,
+    mut end_activity: MessageReader<EndActivity>,
     mut requests: ResMut<EndRequests>,
 ) {
     for failed in travel_failed.read() {
         requests.0.push(failed.person);
+    }
+    for asked in end_activity.read() {
+        requests.0.push(asked.person);
     }
 }
 
@@ -742,6 +758,18 @@ fn queue_end_requests(
 /// Gathers first and writes after, so the messages and the removals happen outside any borrow of the
 /// people it read.
 #[allow(clippy::too_many_arguments)]
+/// The two per-person queries `end_activities` reads.
+///
+/// Bundled because Bevy's system-parameter limit is a hard cap and `end_activities` is close to it
+/// once the dormancy query joins the `Doing` one; this crate already bundles this way in
+/// `TriggerBookkeeping`.
+#[derive(bevy::ecs::system::SystemParam)]
+struct ActivityQueries<'w, 's> {
+    doing: Query<'w, 's, &'static Doing>,
+    dormant: Query<'w, 's, (), With<crate::Dormant>>,
+}
+
+#[allow(clippy::too_many_arguments)]
 fn end_activities(
     clock: Res<SocietyClock>,
     settings: Res<SocietySettings>,
@@ -749,10 +777,14 @@ fn end_activities(
     index: Res<PersonIndex>,
     perception: Res<Perception>,
     mut commands: Commands,
-    people: Query<&Doing>,
+    queries: ActivityQueries,
     mut ended: MessageWriter<ActivityEnded>,
     mut requests: ResMut<EndRequests>,
 ) {
+    let ActivityQueries {
+        doing: people,
+        dormant,
+    } = queries;
     let now = clock.now_days;
     // `None` means a walk never times out: only the host may declare it impossible, through
     // `TravelFailed`, because only the host can see whether a path exists.
@@ -798,16 +830,33 @@ fn end_activities(
         if endings.iter().any(|(ended, _, _)| *ended == person) {
             continue;
         }
+        // **A dormant person is out of its daily life, and an activity that targets a dormant person
+        // can no longer happen.** Both end now, `completed: false`: dormancy is a suspension, not a
+        // completion, and whoever was walking toward them has to choose again.
+        let suspended = dormant.get(person).is_ok()
+            || match doing.target {
+                DoingTarget::Person(target) => dormant.get(target).is_ok(),
+                _ => false,
+            };
+        if suspended {
+            endings.push((person, spec.name.clone(), false));
+            continue;
+        }
         let (finished, completed) = match doing.arrived_day {
             None => {
                 let timed_out =
                     timeout_hours.is_some_and(|hours| (now - doing.started_day) * 24.0 > hours);
                 // A `Person` target that no longer exists can never be reached, so the activity ends
                 // now rather than at a timeout that may not exist at all.
+                // **`contains`, not `binary_search`.** `Perception::persons` is filled in
+                // `PersonIndex.sorted` order — by `PersonId` — while an `Entity`'s ordering is by index
+                // and generation. `binary_search` therefore reports "gone" for people who are present,
+                // and every activity targeting them is interrupted on the very tick it starts. Measured
+                // on `village-evening`: **1 045 of 1 045** `compliment` interruptions took this branch
+                // with the target standing in a list of 24; `binary_search` said gone and `contains` said
+                // present on the same call.
                 let gone = match doing.target {
-                    DoingTarget::Person(target) => {
-                        perception.persons.binary_search(&target).is_err()
-                    }
+                    DoingTarget::Person(target) => !perception.persons.contains(&target),
                     _ => false,
                 };
                 (timed_out || gone, false)
@@ -968,7 +1017,9 @@ fn decide_activities(
     people: Query<Decider>,
     places: Query<(Entity, &crate::Place, &crate::PlaceTags, &Transform)>,
     doing: Query<&Doing>,
-    autonomous: Query<(), With<crate::Autonomous>>,
+    // Two markers in one query, so the system stays under Bevy's system-parameter cap once the
+    // dormancy check joins the autonomy one. `Has` reads both without a second query.
+    marks: Query<(Has<crate::Autonomous>, Has<crate::Dormant>)>,
     mut started: MessageWriter<ActivityStarted>,
     engine: Option<Res<crate::script::ScriptEngine>>,
     cell: Res<crate::snapshot::SnapshotCell>,
@@ -1059,7 +1110,10 @@ fn decide_activities(
     )> = Vec::new();
 
     for (slot, &(_, person)) in index.sorted.iter().enumerate() {
-        if autonomous.get(person).is_err() || doing.get(person).is_ok() {
+        // **A dormant person is out of its daily life**: it keeps its ties, memories and knowledge,
+        // but the crate stops choosing for it until the marker is removed.
+        let (autonomous, dormant) = marks.get(person).unwrap_or((false, false));
+        if !autonomous || dormant || doing.get(person).is_ok() {
             continue;
         }
         let Ok(view) = people.get(person) else {
@@ -1742,6 +1796,13 @@ fn exchange(
     if world.get::<Ties>(actor).is_none() || world.get::<Ties>(target).is_none() {
         return;
     }
+    // **A dormant person takes part in nothing**, and that includes an exchange the host asked for
+    // directly with `Interact`: dormancy is the host saying this person is not living their daily life
+    // right now, and honouring it only for crate-chosen exchanges would make the marker a suggestion.
+    if world.get::<crate::Dormant>(actor).is_some() || world.get::<crate::Dormant>(target).is_some()
+    {
+        return;
+    }
 
     // (1) `requires` first: a script that says no ends it with no draw and no effect.
     if let Some(requires) = spec.requires
@@ -2205,6 +2266,21 @@ fn witness(
                 .collect()
         })
         .unwrap_or_default();
+
+    // **A deed deposits its harm into the commotion field, at the actor's cell.** The channel is what
+    // `FieldInput::Commotion` reads and what a `Gradient(Commotion, true)` activity climbs, and until
+    // this line nothing wrote it: the field was always zero, so a `gawk` activity had no direction and
+    // every `Commotion` consideration scored 0. `at` is a plane position, which is what the message
+    // takes, so a host writing one needs no grid geometry and neither does this.
+    #[cfg(feature = "fields")]
+    if deed_spec.harm != 0.0
+        && let Some(transform) = world.get::<GlobalTransform>(actor)
+    {
+        world.write_message(crate::fields::Commotion {
+            at: settings.plane.project(transform.translation()),
+            amount: deed_spec.harm.abs(),
+        });
+    }
 
     let mut approvals: Vec<(Entity, f32)> = Vec::new();
     // Everyone who saw it, for `Tuning::witness_dilution`; the crowd is the same for every witness.
