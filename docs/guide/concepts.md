@@ -72,8 +72,8 @@ never lost.
 ## Snapshots
 
 Scripts see the society as it stood at the **start of the tick**. `Perceive` freezes every person's
-personality, mood, emotions, needs, opinions, ties, knowledge, memberships, standing and activity into
-one immutable snapshot, and every `ctx` call in that tick reads it.
+personality, mood, emotions, needs, signals, opinions, ties, knowledge, memberships, standing and
+activity into one immutable snapshot, and every `ctx` call in that tick reads it.
 
 Two consequences follow, and both are deliberate:
 
@@ -168,11 +168,11 @@ reach at the same time.
 
 ## Ids
 
-Needs, topics, deeds, factions, activities and interactions are interned at compile time into
-`NeedId(u16)`, `TopicId(u16)` and so on, in definition order. Runtime state is a `Vec` indexed by the
-id, so looking up a person's opinion on a topic is an array index. Scripts and definitions name things
-by string; the snapshot and `SocietyDefs` map the name to the id, and an unknown name is an error that
-names it.
+Needs, signals, topics, deeds, factions, activities and interactions are interned at compile time
+into `NeedId(u16)`, `TopicId(u16)`, `SignalId(u16)` and so on, in definition order. Runtime state is a
+`Vec` indexed by the id, so looking up a person's opinion on a topic is an array index. Scripts and
+definitions name things by string; the snapshot and `SocietyDefs` map the name to the id, and an
+unknown name is an error that names it.
 
 ## Why ties are a component, not Bevy relationships
 

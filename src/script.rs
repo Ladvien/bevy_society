@@ -540,6 +540,12 @@ fn register_ctx(engine: &mut Engine) {
         },
     );
     engine.register_fn(
+        "signal",
+        |ctx: &mut Ctx, a: i64, signal: &str| -> Result<f32, Box<EvalAltResult>> {
+            ctx.0.signal(a, signal).map_err(boxed)
+        },
+    );
+    engine.register_fn(
         "opinion",
         |ctx: &mut Ctx, a: i64, topic: &str| -> Result<f32, Box<EvalAltResult>> {
             ctx.0.opinion(a, topic).map_err(boxed)

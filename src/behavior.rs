@@ -1098,6 +1098,8 @@ struct PlaceView {
 struct Decision {
     position: Vec2,
     needs: Vec<f32>,
+    /// The host-written signal values at the tick start, indexed by `SignalId`.
+    signals: Vec<f32>,
     personality: Personality,
     mood: [f32; 3],
     emotions: Emotions,
@@ -1130,6 +1132,7 @@ struct Decider<'w> {
     ties: &'w Ties,
     memberships: &'w crate::Memberships,
     needs: &'w Needs,
+    signals: &'w crate::mind::Signals,
     personality: &'w Personality,
     mood: &'w Mood,
     emotions: &'w Emotions,
@@ -1216,9 +1219,10 @@ fn decide_activities(
     } = world;
     use bevy_emerge_rng::DetRng;
 
-    // (person, scored options) for the trace; only filled when a host added the resource.
+    // (person, scored options, the host signals the options were scored with) for the trace; only
+    // filled when a host added the resource.
     type Scored = (String, f32, bool);
-    let mut recorded: Vec<(Entity, Vec<Scored>)> = Vec::new();
+    let mut recorded: Vec<(Entity, Vec<Scored>, Vec<f32>)> = Vec::new();
 
     let now = clock.now_days;
     let tuning = &settings.tuning;
@@ -1306,10 +1310,11 @@ fn decide_activities(
         let Ok(view) = people.get(person) else {
             continue;
         };
-        let (ties, memberships, needs, personality, mood, emotions, home, bound) = (
+        let (ties, memberships, needs, signals, personality, mood, emotions, home, bound) = (
             view.ties,
             view.memberships,
             view.needs,
+            view.signals,
             view.personality,
             view.mood,
             view.emotions,
@@ -1350,6 +1355,7 @@ fn decide_activities(
             place_positions: place_positions.clone(),
             position,
             needs: needs.0.clone(),
+            signals: signals.0.clone(),
             personality: *personality,
             mood: mood.as_array(),
             emotions: emotions.clone(),
@@ -1510,7 +1516,7 @@ fn decide_activities(
                 .map(|(name, score)| (name, score, false))
                 .collect();
             scored.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap_or(std::cmp::Ordering::Equal));
-            recorded.push((person, scored));
+            recorded.push((person, scored, decision.signals.clone()));
         }
 
         let picked = best.and_then(|(_, list)| {
@@ -1561,7 +1567,7 @@ fn decide_activities(
         });
 
         if trace.is_some()
-            && let Some((_, scored)) = recorded.iter_mut().find(|(p, _)| *p == person)
+            && let Some((_, scored, _)) = recorded.iter_mut().find(|(p, _, _)| *p == person)
         {
             let chosen = picked.map(|(activity, _)| activity);
             if scored.is_empty() {
@@ -1605,13 +1611,14 @@ fn decide_activities(
     }
 
     if let Some(trace) = trace.as_mut() {
-        for (person, scored) in recorded {
+        for (person, scored, signals) in recorded {
             trace.push(crate::trace::Decision {
                 tick: clock.tick,
                 person,
                 // Resolved by `Decision::describe` when read: `decide_activities` is already at
                 // Bevy's 16-parameter limit, and a `Name` query would be the seventeenth.
                 name: None,
+                signals,
                 options: scored
                     .into_iter()
                     .map(|(activity, score, chosen)| crate::trace::ScoredOption {
@@ -1874,6 +1881,11 @@ fn signal_value(
     let value = match signal {
         Signal::Need(id) => decision
             .needs
+            .get(usize::from(id.0))
+            .copied()
+            .unwrap_or(0.0),
+        Signal::Host(id) => decision
+            .signals
             .get(usize::from(id.0))
             .copied()
             .unwrap_or(0.0),

@@ -27,6 +27,8 @@ use crate::rumor::RumorId;
 pub(crate) struct Names {
     /// Need names, indexed by [`NeedId`].
     pub(crate) needs: Vec<String>,
+    /// Signal names, indexed by [`SignalId`](crate::SignalId).
+    pub(crate) signals: Vec<String>,
     /// Topic names, indexed by [`TopicId`].
     pub(crate) topics: Vec<String>,
     /// Faction names, indexed by [`FactionId`].
@@ -40,6 +42,7 @@ impl Names {
     pub(crate) fn from_defs(defs: &SocietyDefs) -> Self {
         Self {
             needs: defs.needs.iter().map(|s| s.name.clone()).collect(),
+            signals: defs.signals.clone(),
             topics: defs.topics.iter().map(|s| s.name.clone()).collect(),
             factions: defs.factions.iter().map(|s| s.name.clone()).collect(),
             activities: defs.activities.iter().map(|s| s.name.clone()).collect(),
@@ -49,6 +52,11 @@ impl Names {
     /// The need called `name`.
     pub(crate) fn need(&self, name: &str) -> Result<NeedId, String> {
         position(&self.needs, "need", name).map(|i| NeedId(i as u16))
+    }
+
+    /// The signal called `name`.
+    pub(crate) fn signal(&self, name: &str) -> Result<crate::defs::SignalId, String> {
+        position(&self.signals, "signal", name).map(|i| crate::defs::SignalId(i as u16))
     }
 
     /// The topic called `name`.
@@ -114,6 +122,8 @@ pub(crate) struct PersonView {
     pub(crate) emotions: Emotions,
     /// Need levels.
     pub(crate) needs: Needs,
+    /// Host-written signal values.
+    pub(crate) signals: crate::mind::Signals,
     /// Opinions by topic.
     pub(crate) opinions: Opinions,
     /// Outgoing ties, ascending by target id; ties to despawned persons are dropped.
@@ -245,6 +255,13 @@ impl SocietySnapshot {
             .unwrap_or(0.0))
     }
 
+    /// `ctx.signal(a, id)`: a host-written signal value. An unknown name is an error naming it; a
+    /// signal the host never wrote is `0.0`.
+    pub(crate) fn signal(&self, a: i64, signal: &str) -> Result<f32, String> {
+        let id = self.names.signal(signal)?;
+        Ok(self.person(a)?.signals.get(id))
+    }
+
     /// `ctx.opinion(a, topic)`: an opinion in `[-1, 1]`. An unknown name is an error naming it.
     pub(crate) fn opinion(&self, a: i64, topic: &str) -> Result<f32, String> {
         let id = self.names.topic(topic)?;
@@ -359,6 +376,7 @@ pub(crate) struct SnapshotSource<'w> {
     mood: &'w Mood,
     emotions: &'w Emotions,
     needs: &'w Needs,
+    signals: &'w crate::mind::Signals,
     ties: &'w Ties,
     opinions: &'w Opinions,
     knowledge: &'w Knowledge,
@@ -407,6 +425,7 @@ pub(crate) fn build_snapshot(
             mood,
             emotions,
             needs,
+            signals,
             ties,
             opinions,
             knowledge,
@@ -420,6 +439,7 @@ pub(crate) fn build_snapshot(
             view.mood,
             view.emotions,
             view.needs,
+            view.signals,
             view.ties,
             view.opinions,
             view.knowledge,
@@ -450,6 +470,7 @@ pub(crate) fn build_snapshot(
             mood: *mood,
             emotions: emotions.clone(),
             needs: needs.clone(),
+            signals: signals.clone(),
             opinions: opinions.clone(),
             ties: views,
             knowledge: knowledge.clone(),
