@@ -689,7 +689,20 @@ fn arrive_and_satisfy(
             if let DoingTarget::Person(_) = doing.target {
                 commands.entity(person).insert(Destination(target_pos));
             }
-            if here.distance(target_pos) > radius {
+            // **A crowded place is still an arrival.** Everyone sleeps at the same hour, so every resident
+            // aims at one coordinate inside `interaction_radius`; ORCA holds centres one body diameter apart,
+            // so the disc packs solid and the queue behind it times out. Measured: the goal already holds a
+            // median of 6 bodies when a sleep fails, and a 1.5 m disc seats about 4.6.
+            let crowd = match doing.target {
+                DoingTarget::Place(_) => perception
+                    .pos
+                    .iter()
+                    .filter(|p| p.distance(target_pos) <= radius)
+                    .count(),
+                _ => 0,
+            };
+            let allowed = radius + settings.tuning.crowded_arrival_growth * (crowd as f32).sqrt();
+            if here.distance(target_pos) > allowed {
                 continue;
             }
             doing.arrived_day = Some(now);

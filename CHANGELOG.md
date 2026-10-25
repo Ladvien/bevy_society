@@ -6,6 +6,16 @@ All notable changes to bevy_society. The format follows [Keep a Changelog](https
 
 ### Added
 
+- **A crowded place admits its own residents, and the clamp is what made that affordable.** Everyone goes to bed at the same hour, so every resident of a home aims at the same coordinate inside `interaction_radius`; ORCA holds two people's centres one body diameter apart, so the disc packs solid and the queue behind it expires its whole `travel_timeout_hours`. Measured: at every timed-out `sleep` in `village-evening` the goal already held a **median of 6 bodies**, and a 1.5 m disc seats only about `(1.5 / 0.7)^2 = 4.6`. New `Tuning::crowded_arrival_growth` (0.7) grows a `Place`'s accepted arrival boundary by one body diameter per `sqrt(occupants)` — the square root because a crowd occupies *area*. Measured on three seeds, same village, 17 game-days:
+
+  | seed | interrupted | `sleep` | friends | rivals |
+  |---|---|---|---|---|
+  | 7 | 401 -> **329** (-18%) | 169 -> **129** (-24%) | 15 -> 18 | 28 -> 42 |
+  | 42 | 417 -> **369** (-12%) | 176 -> **139** (-21%) | 19 -> 14 | 25 -> 35 |
+  | 11 | 438 -> **383** (-13%) | 187 -> **148** (-21%) | 14 -> 9 | 30 -> 40 |
+
+  **This is the same fix that was rejected two iterations ago.** It was measured then at **38 -> 61 rivals** and recorded as a decision for the host; `Tuning::affinity_ceiling` (merged since) bounds that drift, and the same change now costs 10-14 rivalries against a baseline that has already halved friendships. The earlier blocker was correct when written and had expired — re-measuring before building is why this shipped instead of a third warning-only iteration. `crowded_arrival_growth = 0.0` reproduces the old arrival test **exactly** (401 / 169 / 15 / 28), so a host can turn it off with one number, and a test asserts that an empty disc still refuses a walker at 2.2 m. `tests/crowded_arrival.rs` asserts the gate directly: four end-to-end fixtures were built first and **all produced identical numbers with the feature on and off**, because a single crowded disc does not reproduce what four homes and a shared gathering place do together. The shipped test uses a stationary walker with **no `Destination`** — with one, `walk_toward_destination` walks them in and the test passes with the gate disabled, which is how the earlier attempts failed silently.
+
 - **The crate names a home that cannot seat its residents, which is what interrupts 150 sleeps in its own village.** Everyone goes to bed at the same hour, so every resident of a place aims at the same coordinate inside `interaction_radius`; ORCA holds two people one body diameter apart, so the disc packs solid and the queue behind it times out. Instrumenting the arrival gate found the mechanism: at every one of the **150** timed-out sleeps the goal already held a **median of 6 bodies, maximum 10** — and those homes declare `capacity: 6`, while a 1.5 m disc seats only about `(1.5 / 0.7)² ≈ 4.6`. The failures are not lost walkers; they are the queue behind a full disc. `warn_unreachable_places` — already a `Startup` system measuring the layout — now counts residents per home and says so:
 
   ```

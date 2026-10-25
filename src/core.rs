@@ -280,6 +280,29 @@ pub struct Tuning {
     /// Game-days between two contact-gossips along one directed tie. A shared place is one
     /// conversation, not one per fixed step; the gate is the teller having news, this is only pacing.
     pub contact_gossip_cooldown_days: f32,
+    /// How far a crowded `Place`'s arrival radius grows per person already standing in it, in metres.
+    ///
+    /// Design default (no paper). `SocialMover::radius` is 0.35 m, so `2 * 0.35 = 0.70 m` is the distance
+    /// ORCA holds two people's centres apart — one body diameter is therefore the queue spacing, and a disc
+    /// holding `n` people legitimately reaches `interaction_radius + this * sqrt(n)` before it is full.
+    ///
+    /// **Why it is needed.** Everyone goes to bed at the same hour, so every resident of a home aims at the
+    /// same coordinate inside `interaction_radius`. Measured on `village-evening`: at every timed-out `sleep`
+    /// the goal already held a median of **6** bodies, and a 1.5 m disc seats only about `(1.5 / 0.7)^2 =
+    /// 4.6`. The queue behind the disc then expires its whole `travel_timeout_hours`.
+    ///
+    /// **Measured effect**, three seeds, same village, 17 game-days — interrupted endings and `sleep`s:
+    ///
+    /// | seed | interrupted | `sleep` | friends | rivals |
+    /// |---|---|---|---|---|
+    /// | 7 | 401 → **329** | 169 → **129** | 15 → 18 | 28 → 42 |
+    /// | 42 | 417 → **369** | 176 → **139** | 19 → 14 | 25 → 35 |
+    /// | 11 | 438 → **383** | 187 → **148** | 14 → 9 | 30 → 40 |
+    ///
+    /// Interruptions fall **12-18%** and `sleep` falls by 21-24% on every seed. Rivalries rise by 10-14,
+    /// which `Tuning::affinity_ceiling` bounds — before the clamp the same change took 38 rivals to 61.
+    /// Set this to `0.0` to restore plain `interaction_radius` arrival exactly.
+    pub crowded_arrival_growth: f32,
 }
 
 impl Tuning {
@@ -359,6 +382,7 @@ impl Default for Tuning {
             // Two days is the setting where contact gossip *adds* something: reach 50% above the shipped
             // 0.583 while rivals fall from 33 to 28. At six days the system costs compute and changes nothing.
             contact_gossip_cooldown_days: 2.0,
+            crowded_arrival_growth: 0.7,
         }
     }
 }
