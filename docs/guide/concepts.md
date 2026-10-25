@@ -110,17 +110,37 @@ are deterministic too.
 ## Scale
 
 Perception runs through a uniform grid: one cell per `perception_radius`, with a person's neighbours read
-from the nine cells around its own. Measured with `examples/benchmark` on an M1 Max, release build, starter
-pack, `tick_secs = 0.25`:
+from the nine cells around its own.
+
+Measured with `examples/benchmark` on an M1 Max, release build, starter pack:
 
 | persons | ms per society tick | amortised per 60 fps frame |
 |---|---|---|
-| 100 | 0.6 | 0.04 ms (0.2%) |
-| 1 000 | **13.5** | 0.9 ms (5.3%) |
-| 2 000 | 49.9 | 3.1 ms (19%) |
-| 5 000 | **245.1** | 15.3 ms (**92%**) |
+| 100 | 0.74 | 0.04 ms (0.3%) |
+| 1 000 | **28.4** | 1.8 ms (11%) |
+| 2 000 | 100.6 | 6.3 ms (38%) |
 
-A thousand people costs about 5% of a 60 fps budget; five thousand costs most of a frame.
+**Quote the minimum, not the mean.** These are the *fastest* window out of 5-9 repeated runs, and that is
+deliberate: on a machine shared with other work the mean measures the load, not the code. Measured on one
+binary, one afternoon:
+
+| persons | fastest window | median of 9 windows | spread |
+|---|---|---|---|
+| 100 | **0.74** | 1.08 | 103% |
+| 1 000 | **28.4** | 60.4 | **100%** |
+| 2 000 | **100.6** | 140.1 | 49% |
+
+The fastest window reproduced to **0.4%** across separate invocations (100.55 and 100.93 ms at 2 000), while
+the median moved 18%. A single number with no repetitions is not a measurement, which is why
+`examples/benchmark` now takes `--reps` and prints `ms_per_tick_min`, `ms_per_tick_median` and `spread_pct`.
+**If `spread_pct` is above about 20, the machine was too busy for any of these figures to mean anything.**
+
+An earlier version of this table said **13.5 ms** at 1 000 and **245.1 ms** at 5 000. Those cannot be
+reproduced on this hardware: the fastest window measured here at 1 000 is 28.4 ms, more than twice that figure,
+and the discrepancy was carried for nine iterations because the only tool available reported a single mean and
+there was never a quiet enough moment to trust it. The numbers above replace them.
+
+A thousand people costs about a tenth of a 60 fps budget; two thousand more than a third.
 
 **The cost is the crowd, not the search.** An earlier version scanned every pair, and this section said the
 pair count was the scale curve. It is not: measured with direct timers, the all-pairs scan was **36 ms of a

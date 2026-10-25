@@ -3688,3 +3688,54 @@ message naming both coordinates.
    measured to make the village worse (400 → 440), so it needs an overflow destination first.
 4. **The clock decision** - 5.4-hour walks against 0.75-hour activities; a breaking change.
 5. **`rumor-crosses-a-cluster`** - honestly `pending`; restate the observable or build a bridge activity.
+
+## 2026-12-26-01 - The scale curve was wrong by 2x, and the tool could not have said so
+
+**Pick.** Item 2, standing for nine iterations. Last iteration's note was already the right instruction — *stop
+waiting for a quiet machine; re-measure with median-of-N and a reported spread* — so this iteration followed it
+instead of writing a tenth note.
+
+**The defect was the tool.** `examples/benchmark` timed **one window** and printed a mean. Measured:
+
+| persons | fastest window | median of 9 | spread |
+|---|---|---|---|
+| 100 | **0.74 ms** | 1.08 | 103% |
+| 1 000 | **28.4 ms** | 60.4 | **100%** |
+| 2 000 | **100.6 ms** | 140.1 | 49% |
+
+A **100% spread at 1 000 people**. A mean over that describes the load, not the crate.
+
+**What is reproducible is the minimum.** Four invocations at 1 000 gave 28.29 / 28.38 / 28.38 / 28.48 (**0.7%**),
+and 100.55 / 100.93 at 2 000 (**0.4%**), while the medians from those same runs moved 18-25%. A fast window is
+evidence the machine was momentarily quiet; a slow one is evidence it was not. So the minimum bounds the code and
+the median bounds the machine — different questions, and the guide was answering the second.
+
+**The retraction.** The guide said **13.5 ms** at 1 000 and **245.1** at 5 000. Measured fastest: **28.4** and
+unreachable. A host budgeting from that table was told the crate is 2x cheaper than it is. The table is replaced,
+the old numbers retracted with the reason they survived, and 5 000 is **removed rather than guessed** because it
+does not finish inside a 30-minute deadline here.
+
+**Shipped.** `--reps` with min/median/max/spread, the guide rewritten with the method stated, and
+`tests/benchmark_reporting.rs` which parses the tool's JSON and **recomputes `spread_pct`** so a tool printing a
+spread it did not measure would fail.
+
+**The process lesson.** Nine iterations recorded the doubt and none replaced the number. A doubt recorded is not a
+doubt resolved, and "the machine was too busy" was a diagnosis of the tool wearing the costume of a diagnosis of
+the environment.
+
+**Verdicts.** Pass 1 GREAT. Pass 2 GREAT (three answers disagreeing by 4.5x at 1 000). Pass 3 GREAT.
+
+**Dead-code delta.** Zero. **Tests:** 69 binaries, both feature sets; clippy, docs, fmt clean. New test bites.
+
+**Commit** `0bc8826`.
+
+**Top 5 remaining.**
+
+1. **Split arrival radius from contact radius** — schema change, non-urgent since the clamp made the numeric fix
+   affordable. In `needs-decision/people-cannot-reach-their-beds.md`.
+2. **5 000-person cost is unmeasured.** The guide no longer quotes it; somebody with a quieter machine or more
+   patience should fill it in, and the tool now makes that safe to do.
+3. **`Place::capacity` is used only to filter candidates**, never enforced at arrival. Enforcing it alone was
+   measured to make things worse (400 → 440), so it needs an overflow destination first.
+4. **The clock decision** - 5.4-hour walks against 0.75-hour activities; a breaking change.
+5. **`rumor-crosses-a-cluster`** - honestly `pending`; restate the observable or build a bridge activity.
