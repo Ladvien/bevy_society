@@ -10,7 +10,7 @@
 //! Deposits are order-dependent `+=`, so they run in `PersonIndex.sorted` order.
 
 use bevy::prelude::*;
-use bevy_stigmergy::{ChannelDef, StigGrid};
+use bevy_stigmergy::{CellFrame, ChannelDef, StigGrid};
 
 use crate::core::require_core;
 use crate::{
@@ -18,60 +18,29 @@ use crate::{
     SocietySettings, SocietySystems,
 };
 
-/// One channel's tuning, mirrored as a `Reflect` type of this crate because `bevy_stigmergy`'s
-/// `ChannelDef` has none. It converts to that type when the grids are built.
-#[derive(Reflect, Debug, Clone, Copy, PartialEq)]
-pub struct FieldChannel {
-    /// Fraction of the value lost per **game-day**. Grids step with `dt_days`, so this is not a
-    /// per-second rate despite the upstream doc comment.
-    pub evaporate: f32,
-    /// Blend weight in `[0, 1]` toward the 4-neighbour average, applied each update.
-    pub diffuse: f32,
-    /// Radius in cells of a deposit's linear falloff.
-    pub deposit_radius: f32,
-}
-
-impl FieldChannel {
-    fn def(self) -> ChannelDef {
-        ChannelDef {
-            evaporate: self.evaporate,
-            diffuse: self.diffuse,
-            deposit_radius: self.deposit_radius,
-        }
-    }
-}
-
 /// Where the fields sit in the world and how they behave. Changing it rebuilds the fields empty.
 #[derive(Resource, Reflect, Debug, Clone, PartialEq)]
 #[reflect(Resource)]
 pub struct SocialFieldSettings {
-    /// World-plane position of the grid's corner (cell `(0, 0)` starts here).
-    pub origin: Vec2,
-    /// Side length of one cell in world units.
-    pub cell_size: f32,
-    /// Grid width in cells.
-    pub width: usize,
-    /// Grid height in cells.
-    pub height: usize,
+    /// The world↔cell mapping: where the grid starts, how wide a cell is, and how many cells.
+    pub frame: CellFrame,
     /// Presence channel: where persons are. Faction grids use this channel too.
-    pub presence: FieldChannel,
+    pub presence: ChannelDef,
     /// Commotion channel: `|harm|` of each witnessed deed, deposited at the actor's cell.
-    pub commotion: FieldChannel,
+    pub commotion: ChannelDef,
 }
 
 impl Default for SocialFieldSettings {
     fn default() -> Self {
         Self {
-            origin: Vec2::new(-32.0, -32.0),
-            cell_size: 1.0,
-            width: 64,
-            height: 64,
-            presence: FieldChannel {
+            frame: CellFrame::new(Vec2::new(-32.0, -32.0), 1.0, 64, 64),
+            presence: ChannelDef {
+                // A fraction per game-day: the grids are stepped with `dt_days`.
                 evaporate: 6.0,
                 diffuse: 0.1,
                 deposit_radius: 1.5,
             },
-            commotion: FieldChannel {
+            commotion: ChannelDef {
                 evaporate: 12.0,
                 diffuse: 0.2,
                 deposit_radius: 2.5,
@@ -98,36 +67,36 @@ pub struct SocialFields {
     pub crowd: StigGrid<2>,
     /// One grid per faction, indexed by `FactionId.0`. Channel 0 is the presence of its members.
     pub factions: Vec<StigGrid<1>>,
-    origin: Vec2,
-    cell_size: f32,
+    frame: CellFrame,
     peaks: Peaks,
 }
 
 impl SocialFields {
     /// Empty fields for `faction_count` factions on the grid described by `settings`.
     pub fn new(settings: &SocialFieldSettings, faction_count: usize) -> Self {
-        let cells = all_cells(settings.width, settings.height);
+        let frame = settings.frame;
+        // `CellFrame::cells` is ascending row-major, which is what `StigGrid::new` requires.
+        let cells: Vec<IVec2> = frame.cells().collect();
         let crowd = StigGrid::new(
-            settings.width,
-            settings.height,
+            frame.width,
+            frame.height,
             cells.iter().copied(),
-            [settings.presence.def(), settings.commotion.def()],
+            [settings.presence, settings.commotion],
         );
         let factions = (0..faction_count)
             .map(|_| {
                 StigGrid::new(
-                    settings.width,
-                    settings.height,
+                    frame.width,
+                    frame.height,
                     cells.iter().copied(),
-                    [settings.presence.def()],
+                    [settings.presence],
                 )
             })
             .collect();
         Self {
             crowd,
             factions,
-            origin: settings.origin,
-            cell_size: settings.cell_size,
+            frame,
             peaks: Peaks {
                 presence: 0.0,
                 commotion: 0.0,
@@ -136,11 +105,16 @@ impl SocialFields {
         }
     }
 
-    /// The cell containing a plane position: `floor((p − origin) / cell_size)`. Positions off the grid
+    /// The cell containing a plane position, through the frame's own mapping. Positions off the grid
     /// map to cells that read as zero.
     pub fn world_to_cell(&self, p: Vec2) -> IVec2 {
-        let q = ((p - self.origin) / self.cell_size).floor();
-        IVec2::new(q.x as i32, q.y as i32)
+        self.frame.world_to_cell(p)
+    }
+
+    /// The frame the grids currently use. It is a copy, so a host reading it does not need the
+    /// resource borrowed.
+    pub fn frame(&self) -> CellFrame {
+        self.frame
     }
 
     /// The value of `input` at `cell` for an actor whose faction memberships are `own`, in `[0, 1]`.
@@ -192,7 +166,7 @@ impl SocialFields {
             return None;
         }
         let sign = if toward { 1.0 } else { -1.0 };
-        Some(pos + sign * grad.normalize() * 4.0 * self.cell_size)
+        Some(pos + sign * grad.normalize() * 4.0 * self.frame.cell_size)
     }
 
     /// Sum of the cell values and of the peaks across the factions that match (`member = true`) or do
@@ -241,7 +215,6 @@ pub struct SocialFieldPlugin;
 impl Plugin for SocialFieldPlugin {
     fn build(&self, app: &mut App) {
         app.register_type::<SocialFieldSettings>()
-            .register_type::<FieldChannel>()
             .init_resource::<SocialFieldSettings>()
             .add_message::<Commotion>()
             .add_systems(FixedUpdate, sync_fields.in_set(SocietySystems::Clock))
@@ -251,13 +224,6 @@ impl Plugin for SocialFieldPlugin {
     fn finish(&self, app: &mut App) {
         require_core(app, "SocialFieldPlugin");
     }
-}
-
-/// The grid's cell list in ascending row-major order, as `StigGrid::new` requires.
-fn all_cells(width: usize, height: usize) -> Vec<IVec2> {
-    (0..height)
-        .flat_map(|y| (0..width).map(move |x| IVec2::new(x as i32, y as i32)))
-        .collect()
 }
 
 /// A value over its channel peak, in `[0, 1]`, or 0 when the peak is zero.

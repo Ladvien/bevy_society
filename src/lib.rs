@@ -165,7 +165,13 @@ pub use defs::{
 #[cfg(feature = "dialogue")]
 pub use dialogue::{DialoguePlugin, TalkTo};
 #[cfg(feature = "fields")]
-pub use fields::{FieldChannel, SocialFieldPlugin, SocialFieldSettings, SocialFields};
+pub use fields::{SocialFieldPlugin, SocialFieldSettings, SocialFields};
+// The two value types the fields are configured with, re-exported so a host names one crate. Both are
+// `bevy_stigmergy` types now: `ChannelDef` because the crate's own mirror type had no reason to exist
+// once `bevy_stigmergy` 0.2 added `Reflect`, and `CellFrame` because it is the shared world↔cell
+// mapping this crate and Sanctuary both used to carry their own copy of.
+#[cfg(feature = "fields")]
+pub use bevy_stigmergy::{CellFrame, ChannelDef};
 pub use groups::{
     FactionStat, FactionStats, GroupsPlugin, Memberships, STANDING_FAMILIARITY, Status,
     contest_win_chance, standing_from,

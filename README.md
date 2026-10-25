@@ -174,10 +174,10 @@ app.world_mut().write_message(TalkTo { npc: bram, player });
 | Crate | Used for | Source |
 |---|---|---|
 | Bevy | the engine | <https://github.com/bevyengine/bevy> |
-| bevy_speech_bubbles | barks and conversations (`dialogue`) | <https://github.com/Ladvien/bevy_speech_bubbles> |
-| bevy_stigmergy | per-cell presence and commotion fields (`fields`) | <https://github.com/Ladvien/bevy_stigmergy> |
-| bevy_orca | reciprocal collision avoidance for walkers (`steering`) | <https://github.com/Ladvien/bevy_orca> |
-| bevy_emerge_rng | the seeded ChaCha8 stream | <https://github.com/Ladvien/bevy_emerge> |
+| bevy_speech_bubbles | barks and conversations (`dialogue`) | <https://crates.io/crates/bevy_speech_bubbles> |
+| bevy_stigmergy | per-cell presence and commotion fields (`fields`) | <https://crates.io/crates/bevy_stigmergy> |
+| bevy_orca | reciprocal collision avoidance for walkers (`steering`) | <https://crates.io/crates/bevy_orca> |
+| bevy_emerge_rng | the seeded ChaCha8 stream | <https://crates.io/crates/bevy_emerge_rng> |
 | Rhai | trigger and effect scripts | <https://github.com/rhaiscript/rhai> |
 | serde | authored definitions | <https://github.com/serde-rs/serde> |
 | RON | the definitions' file format | <https://github.com/ron-rs/ron> |
