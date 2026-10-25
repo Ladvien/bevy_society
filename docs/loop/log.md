@@ -3947,3 +3947,63 @@ grace-window arm was **dropped on this measurement**, not shipped on a guess.
 3. **Raise the rate of friendly interaction** — unchanged; still needs three axes.
 4. **Split arrival radius from contact radius** — schema change.
 5. **`rumor-crosses-a-cluster`** — still `pending` on the arrival-gate cause.
+
+## 2026-10-25-04 — A relationship is mutual
+
+**Pick.** Last iteration's item 1 (`last_exchange_day`) needs a save-version bump, so I went after item 2
+instead, which turned out to be the same defect from the other end: measuring *why* 38.9% of approaches are
+refused showed the crate had no mechanism making a **relationship** mutual at all.
+
+**The measurement that opened it.** All 276 pairs at the end of a 16.4-game-day run, seed 7: **27% of
+directed friend ties unreciprocated**, and the two directions of a pair disagreeing by **0.133** — against a
+`friend_band` of 0.05. It reaches behaviour because the decision reads the *actor's* tie
+(`Signal::Affinity`) while the acceptance draw reads the *target's*.
+
+**The citation was already in the corpus.** "In a dyadic relation, balance basically means reciprocity:
+feeling positive about a person who doesn't reciprocate this feeling is unbalanced" — Heider, via
+Schweighofer & Schweitzer (`10.18564_jasss.5323`). The crate implemented the **triadic** half of the same
+theory and not the dyadic one.
+
+**The change.** `Tuning::dyad_balance_per_day` 0.5, each pair's two affinities pulled toward their mean.
+Gap **0.133 → 0.048** (seed 7), **0.123 → 0.046** (42), **0.130 → 0.050** (11). Cost, stated: rivals
+42 → 24 at seed 7 and 10-18 everywhere, because two people who disagree cannot be one friend and one rival.
+
+**Three things I got wrong, all caught by measuring.**
+1. **`O(n^2)` over all pairs** took 5 000 people from 495.7 to **942.0 ms** a tick — a real regression in a
+   scenario the change did not target.
+2. **`Perception::contact`** fixed the cost and was *wrong*: only people within `contact_radius` got
+   balanced, so the gap closed to 0.069 instead of 0.048 and rivals fell to 17 instead of 24.
+3. **"The refusal rate will fall"** — it does not (35.2% before and after). The acceptance draw is
+   dominated by `accept.base` 0.50: mean P 0.656, mean affinity term **+0.058**. That decomposition is now
+   the top remaining item.
+
+The shipped version iterates each person's **tie list** — the exact set of pairs that have a relationship,
+capped by `max_ties`: identical results to all pairs at **507.9 ms** at 5 000 (+2.5%, inside the spread).
+
+**Clips, which the brief made critical.** Six re-recorded and every one inspected at frames 0 / 120 / 239.
+Three defects found by *looking*: the camera framed on the villagers' centroid so **two of four stalls were
+out of shot**; the capture used the crate's 2-hour travel timeout instead of the scenario's 4; and the
+README promised "**rivalries red**" while **no clip has ever drawn one** — six game-hours is too short, and
+widening the settle to 9 000 and 8 000 still read 0. Framing re-measured through three values (2.7 lost two
+stalls, 3.2 kept four but made people specks, 2.5 plus a tilt bias is readable); the caption now says what
+the clip shows and `docs/DEMOS.md` records why.
+
+**Verdicts.** Pass 1 GREAT. Pass 2 GREAT, after three measured rejections. Pass 3 GREAT.
+
+**Dead-code delta.** Zero. **Tests:** 74 binaries green in both feature sets; clippy/fmt/doc clean; new
+`tests/reciprocity.rs` pins convergence, both labels surviving, determinism and the exact `0.0` off-switch.
+
+**Commit** `9938002`.
+
+**Top 5 remaining.**
+
+1. **The refusal rate is `accept.base` 0.50**, not asymmetry: mean P 0.656, mean affinity term +0.058. The
+   single most host-visible number in the crate is one default nobody has measured against a target.
+2. **`last_exchange_day` on `Tie`** — the only way to fix the 43 drift endings without lying; needs the save
+   version bump. `needs-decision/which-tie-field-says-someone-spoke.md`.
+3. **A one-way friendship is mostly a *trust* asymmetry**: five of six one-way pairs at rate 2.0 differed
+   only on `trust` (0.478, 0.438, 0.373 against the 0.50 bar) while affinity agreed to 0.01. The dyad step
+   cannot move it, so balance theory's dyadic case is only half done.
+4. **Professions and economics** — requested this iteration. Recorded with three options in
+   `needs-decision/professions-and-economics.md`; the recommendation is a profession tag first, no money.
+5. **A clip that shows rivalries** — needs its own scenario at a faster clock, not a longer settle.
