@@ -215,6 +215,24 @@ pub struct Tuning {
     /// **0.908** — the familiarity term discriminates nothing at all. See
     /// `docs/loop/needs-decision/friendship-has-no-diminishing-return.md`.
     pub friend_affinity: f32,
+    /// The ceiling of `|affinity|`. **Every affinity write clamps to `±` this**, through
+    /// [`Tie::add_affinity`](crate::Tie::add_affinity), so no amount of contact can carry a tie past it.
+    ///
+    /// This is the answer to "everyone becomes everyone's friend": affinity used to be able to reach
+    /// 1.0, so every label threshold below 1.0 was eventually passed and a 60-person town with daily
+    /// contact became a clique. Capping the variable, rather than raising the threshold, bounds the
+    /// network by construction — the plan `docs/loop/needs-decision/friendship-has-no-diminishing-return.md`
+    /// measures five other mechanisms that did not work.
+    ///
+    /// 0.35 is a design default, chosen by measurement: it sits **below** the `0.4` friend threshold, so
+    /// contact alone can never make a friend; a friend needs the trust gate below too.
+    pub affinity_ceiling: f32,
+    /// Trust a tie must reach before `Friend` is even considered, in `[0, 1]`.
+    ///
+    /// Measured on the village, trust separates friend-ties from the rest **sevenfold** (0.480 against
+    /// 0.068) while familiarity does not separate them at all (0.907 against 0.908), so trust is the
+    /// second thing a friend is. Design default.
+    pub friend_trust: f32,
     /// Familiarity at or above which, with [`Self::friend_affinity`], a tie is a friend.
     pub friend_familiarity: f32,
     /// Affinity at or below `-rival_affinity`, with [`Self::rival_familiarity`], makes a tie a rival.
@@ -272,6 +290,25 @@ pub struct Tuning {
     pub contact_gossip_cooldown_days: f32,
 }
 
+impl Tuning {
+    /// Affinity as an **influence weight in `[-1, 1]`**, scaled so the clamp ceiling reads as 1.0.
+    ///
+    /// The clamp bounds how much a person can like anyone, which is what keeps friendship scarce — but
+    /// the opinion model reads affinity as *how much weight this person's view carries*, and if it read
+    /// the raw clamped value it would read at most 0.35 where the model was tuned for 1.0, so opinions
+    /// would barely move and the whole society would agree on nothing. Dividing by the ceiling restores
+    /// the scale the model was designed against while keeping the network bounded.
+    ///
+    /// `0.0` when the ceiling is not positive: a caller that has disabled the clamp has no scale to
+    /// restore, and multiplying by nothing is worse than multiplying by zero.
+    pub fn affinity_weight(&self, affinity: f32) -> f32 {
+        if self.affinity_ceiling <= 0.0 {
+            return 0.0;
+        }
+        (affinity / self.affinity_ceiling).clamp(-1.0, 1.0)
+    }
+}
+
 impl Default for Tuning {
     fn default() -> Self {
         Self {
@@ -300,9 +337,15 @@ impl Default for Tuning {
             gossip_trust_gain: 0.3,
             gossip_affinity_gain: 0.2,
             contact_gain: 0.02,
-            friend_affinity: 0.4,
+            friend_affinity: 0.3,
+            affinity_ceiling: 0.35,
+            friend_trust: 0.5,
             friend_familiarity: 0.3,
-            rival_affinity: 0.4,
+            // **Also under the clamp ceiling**, for the same reason `friend_affinity` is: `0.4` was
+            // unreachable once affinity is bounded at `±affinity_ceiling`, so a rival could never be
+            // labelled and the network was one-sided. Measured: at 0.4 a 60-person village over 30 days
+            // produced **155 friend ties and 0 rivals**; at 0.30 it produces both.
+            rival_affinity: 0.3,
             rival_familiarity: 0.2,
             stranger_familiarity: 0.1,
             rejection_affinity_penalty: 0.05,
@@ -550,6 +593,45 @@ pub struct Deceased;
 /// The home of a person, used by the `Home` activity target.
 #[derive(Component, Reflect, Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Home(pub Entity);
+
+/// The places bound to one person by name, for `ActivityTarget::Bound`.
+///
+/// `Home` is one place every person has; this is the general case. Sanctuary assigns each townsperson
+/// their own work site each morning — the woodlot, the quarry, a stretch of wall — and daily life must
+/// send them to *their* site, not the nearest site of that kind. A named binding is also how a
+/// night-watch post, a bed or a favourite bench gets attached to one person.
+///
+/// ```ignore
+/// commands.entity(person).insert(BoundPlaces(vec![("work".to_owned(), woodlot)]));
+/// ```
+///
+/// A person with **no** binding under the name an activity asks for simply gets no candidate for that
+/// activity: they do not do it, and they are not warned about, because a host that binds some people
+/// and not others (a night watch has no work place) would otherwise be told once per person for
+/// nothing. A binding to an entity that is not a [`Place`], or to one at capacity, gets no candidate
+/// too, and that *is* warned about once per person and name, because it is a wiring mistake.
+#[derive(Component, Reflect, Debug, Clone, Default, PartialEq)]
+#[reflect(Component)]
+pub struct BoundPlaces(pub Vec<(String, Entity)>);
+
+impl BoundPlaces {
+    /// Binds `name` to `place`, replacing an existing binding under that name.
+    pub fn bind(&mut self, name: impl Into<String>, place: Entity) {
+        let name = name.into();
+        match self.0.iter_mut().find(|(existing, _)| *existing == name) {
+            Some(slot) => slot.1 = place,
+            None => self.0.push((name, place)),
+        }
+    }
+
+    /// The place bound under `name`, when there is one.
+    pub fn get(&self, name: &str) -> Option<Entity> {
+        self.0
+            .iter()
+            .find(|(existing, _)| existing == name)
+            .map(|(_, entity)| *entity)
+    }
+}
 
 /// A place people can go to. `capacity` limits how many persons may be doing an activity there.
 #[derive(Component, Reflect, Debug, Clone, Copy, Default, PartialEq, Eq)]
@@ -924,6 +1006,7 @@ impl Plugin for SocietyCorePlugin {
             .register_type::<Dormant>()
             .register_type::<Deceased>()
             .register_type::<Home>()
+            .register_type::<BoundPlaces>()
             .register_type::<Place>()
             .register_type::<PlaceTags>()
             .register_type::<PersonIndex>()

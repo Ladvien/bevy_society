@@ -38,5 +38,9 @@ jobs:
       # people, which is 4 m 26 s in a debug build and 33 s optimised. It measures a performance
       # property, so an optimised build is also the only build where the measurement means anything.
       - run: cargo test --release --test rumor_book
+      # Release-only like `rumor_book`: the friendship bound is a measurement over 60 people and 30
+      # game-days, which is minutes in a debug build, and an optimised build is the only one where the
+      # measurement means anything.
+      - run: cargo test --release --test friendship_bound
       # Examples need a font at run time, so building them is the check that fits in CI.
       - run: cargo build --examples

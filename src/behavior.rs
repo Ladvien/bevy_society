@@ -1218,6 +1218,7 @@ struct Decider<'w> {
     mood: &'w Mood,
     emotions: &'w Emotions,
     home: Option<&'w crate::Home>,
+    bound: Option<&'w crate::BoundPlaces>,
 }
 
 /// Everything a `Signal::Script` consideration needs to be evaluated (plan D7).
@@ -1244,6 +1245,24 @@ struct Candidate {
     score: f32,
 }
 
+/// The four queries a decision reads. Bundled because Bevy's system-parameter limit is a hard cap and
+/// `decide_activities` was already at it before the bound-place check joined.
+#[derive(bevy::ecs::system::SystemParam)]
+struct DecisionQueries<'w, 's> {
+    people: Query<'w, 's, Decider<'static>>,
+    places: Query<
+        'w,
+        's,
+        (
+            Entity,
+            &'static crate::Place,
+            &'static crate::PlaceTags,
+            &'static Transform,
+        ),
+    >,
+    doing: Query<'w, 's, &'static Doing>,
+}
+
 /// Chooses an activity for every autonomous person that has none (plan D7).
 ///
 /// Each consideration `s` is compensated to `s′ = s + (1 − s)·(1 − 1/n)·s` and the option scores
@@ -1261,18 +1280,24 @@ fn decide_activities(
     index: Res<PersonIndex>,
     mut rng: ResMut<crate::SocietyRng>,
     mut commands: Commands,
-    people: Query<Decider>,
-    places: Query<(Entity, &crate::Place, &crate::PlaceTags, &Transform)>,
-    doing: Query<&Doing>,
-    // Two markers in one query, so the system stays under Bevy's system-parameter cap once the
-    // dormancy check joins the autonomy one. `Has` reads both without a second query.
+    world: DecisionQueries,
+    // Two markers in one query: `Has` reads both without a second one, which is what keeps this
+    // system inside Bevy's system-parameter cap.
     marks: Query<(Has<crate::Autonomous>, Has<crate::Dormant>)>,
     mut started: MessageWriter<ActivityStarted>,
     engine: Option<Res<crate::script::ScriptEngine>>,
     cell: Res<crate::snapshot::SnapshotCell>,
     fields: Option<Res<FieldGrids>>,
     mut trace: Option<ResMut<crate::trace::DecisionTrace>>,
+    // Bindings already warned about, by `(PersonId, name)`. A `Local` rather than a resource because
+    // it is this system's own bookkeeping, and a `BTreeSet` so its iteration can never matter.
+    mut warned_bindings: Local<std::collections::BTreeSet<(u32, String)>>,
 ) {
+    let DecisionQueries {
+        people,
+        places,
+        doing,
+    } = world;
     use bevy_emerge_rng::DetRng;
 
     // (person, scored options) for the trace; only filled when a host added the resource.
@@ -1365,7 +1390,7 @@ fn decide_activities(
         let Ok(view) = people.get(person) else {
             continue;
         };
-        let (ties, memberships, needs, personality, mood, emotions, home) = (
+        let (ties, memberships, needs, personality, mood, emotions, home, bound) = (
             view.ties,
             view.memberships,
             view.needs,
@@ -1373,6 +1398,7 @@ fn decide_activities(
             view.mood,
             view.emotions,
             view.home,
+            view.bound,
         );
         let position = perception.pos.get(slot).copied().unwrap_or(Vec2::ZERO);
         // `near` and `near_ids` are built from one pass over `perception.near`, so index `k` of
@@ -1438,6 +1464,31 @@ fn decide_activities(
             (Some(engine), Some(snapshot)) => Some((snapshot, engine)),
             _ => None,
         };
+        // **A binding to something that is not a place is a wiring mistake, and it is warned about
+        // once per person and name.** An unbound person is not warned about at all: a host that binds
+        // some people and not others (a night watch has no work place) would otherwise be told once per
+        // person for nothing.
+        if let Some(bindings) = bound {
+            let actor_id = index
+                .sorted
+                .iter()
+                .find(|(_, e)| *e == person)
+                .map(|(id, _)| id.0)
+                .unwrap_or(u32::MAX);
+            for (name, entity) in &bindings.0 {
+                if place_views.iter().any(|place| place.entity == *entity) {
+                    continue;
+                }
+                if !warned_bindings.insert((actor_id, name.clone())) {
+                    continue;
+                }
+                warn!(
+                    "bevy_society: person {actor_id} has \"{name}\" bound to {entity:?}, which is not a \
+                     place; the activity has no target"
+                );
+            }
+        }
+
         let mut best: Option<(u8, Vec<Candidate>)> = None;
         // Every option that scored, for the trace only. `best` keeps the winning rank tier, so
         // without this a host would never see the lower-rank activities a choice ruled out.
@@ -1453,6 +1504,7 @@ fn decide_activities(
                 &near,
                 &place_views,
                 home.map(|h| h.0),
+                bound,
                 &own_factions,
                 fields.as_deref(),
                 &mut rng.0,
@@ -1745,6 +1797,7 @@ fn targets_for(
     near: &[(Entity, Vec2)],
     places: &[PlaceView],
     home: Option<Entity>,
+    bound: Option<&crate::BoundPlaces>,
     own_factions: &[crate::FactionId],
     fields: Option<&FieldGrids>,
     rng: &mut rand_chacha::ChaCha8Rng,
@@ -1765,6 +1818,16 @@ fn targets_for(
             .filter(|place| place.used < place.capacity && place.tags.iter().any(|t| t == tag))
             .map(|place| DoingTarget::Place(place.entity))
             .collect(),
+        // The place this person bound under the name, when they have one and it is a place with
+        // room. No binding means no candidate at all: the activity simply does not apply to them.
+        ActivityTarget::Bound(name) => bound
+            .and_then(|bindings| bindings.get(name))
+            .filter(|entity| {
+                places
+                    .iter()
+                    .any(|place| place.entity == *entity && place.used < place.capacity)
+            })
+            .map_or_else(Vec::new, |entity| vec![DoingTarget::Place(entity)]),
         ActivityTarget::Person => near.iter().map(|(e, _)| DoingTarget::Person(*e)).collect(),
         // A gradient target walks toward the slope of the named field. Without the `fields` feature, or
         // before the grid exists on the first tick, there is no slope and the option has no target —
@@ -2136,8 +2199,10 @@ fn exchange(
         // (5) Rejection penalty.
         if let Some(mut ties) = world.get_mut::<Ties>(actor) {
             let tie = ties.entry(target);
-            tie.affinity =
-                (tie.affinity - settings.tuning.rejection_affinity_penalty).clamp(-1.0, 1.0);
+            tie.add_affinity(
+                -settings.tuning.rejection_affinity_penalty,
+                &settings.tuning,
+            );
         }
         // **The definition's own `on_reject` emotion wins.** A pack that says what a refusal feels
         // like is not second-guessed; the crate's number is the fallback for a pack that says nothing,
@@ -2234,6 +2299,10 @@ fn apply_effects(
     _interaction: &str,
     _now: f64,
 ) {
+    // Read once: the affinity clamp is `Tuning::affinity_ceiling`, so every writer needs it.
+    let tuning = world
+        .get_resource::<SocietySettings>()
+        .map_or_else(Default::default, |settings| settings.tuning.clone());
     // Tie deltas, clamped exactly as `fx.adjust` clamps them.
     for (owner, other, delta) in [
         (actor, target, effects.actor_to_target),
@@ -2243,7 +2312,7 @@ fn apply_effects(
             continue;
         };
         let tie = ties.entry(other);
-        tie.affinity = (tie.affinity + delta.affinity).clamp(-1.0, 1.0);
+        tie.add_affinity(delta.affinity, &tuning);
         tie.trust = (tie.trust + delta.trust).clamp(0.0, 1.0);
         tie.respect = (tie.respect + delta.respect).clamp(-1.0, 1.0);
         if delta.familiarity != 0.0 {

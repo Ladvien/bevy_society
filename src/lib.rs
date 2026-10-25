@@ -151,7 +151,8 @@ pub use behavior::{
 };
 pub use beliefs::{BeliefsPlugin, Knowledge, Known, Opinion, Opinions, belief_after_hearing};
 pub use core::{
-    AssessmentNorm, Autonomous, ClockSource, Deceased, Dormant, Home, HostClock, Locomotion,
+    AssessmentNorm, Autonomous, BoundPlaces, ClockSource, Deceased, Dormant, Home, HostClock,
+    Locomotion,
     NextPersonId, Perception, Person, PersonId, PersonIndex, Place, PlaceTags, SocietyClock,
     SocietyCorePlugin, SocietyPlane, SocietyRng, SocietySettings, SocietySystems, SocietyTick,
     Tuning, society_tick_due,
