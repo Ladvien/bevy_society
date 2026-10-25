@@ -111,6 +111,11 @@ Curves turn that number into utility:
 and `Distance` is valid on `Place`, `Home` and `Person`. A definition that breaks that rule is
 rejected with the offending consideration named.
 
+`Field(input)` reads a social field, and needs the `fields` feature. `Commotion` is the one to reach for
+when a town should drift toward trouble: it is written by a witnessed deed's `|harm|` and by any host
+that writes a `Commotion { at, amount }` message, and a `Gradient(Commotion, true)` target walks a
+person up the slope toward it.
+
 ## Interactions
 
 ```ron

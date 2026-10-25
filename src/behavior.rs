@@ -980,10 +980,15 @@ fn end_activities(
                     timeout_hours.is_some_and(|hours| (now - doing.started_day) * 24.0 > hours);
                 // A `Person` target that no longer exists can never be reached, so the activity ends
                 // now rather than at a timeout that may not exist at all.
+                // **`contains`, not `binary_search`.** `Perception::persons` is filled in
+                // `PersonIndex.sorted` order — by `PersonId` — while an `Entity`'s ordering is by index
+                // and generation. `binary_search` therefore reports "gone" for people who are present,
+                // and every activity targeting them is interrupted on the very tick it starts. Measured
+                // on `village-evening`: **1 045 of 1 045** `compliment` interruptions took this branch
+                // with the target standing in a list of 24; `binary_search` said gone and `contains` said
+                // present on the same call.
                 let gone = match doing.target {
-                    DoingTarget::Person(target) => {
-                        perception.persons.binary_search(&target).is_err()
-                    }
+                    DoingTarget::Person(target) => !perception.persons.contains(&target),
                     _ => false,
                 };
                 (timed_out || gone, false)
@@ -2381,6 +2386,21 @@ fn witness(
                 .collect()
         })
         .unwrap_or_default();
+
+    // **A deed deposits its harm into the commotion field, at the actor's cell.** The channel is what
+    // `FieldInput::Commotion` reads and what a `Gradient(Commotion, true)` activity climbs, and until
+    // this line nothing wrote it: the field was always zero, so a `gawk` activity had no direction and
+    // every `Commotion` consideration scored 0. `at` is a plane position, which is what the message
+    // takes, so a host writing one needs no grid geometry and neither does this.
+    #[cfg(feature = "fields")]
+    if deed_spec.harm != 0.0
+        && let Some(transform) = world.get::<GlobalTransform>(actor)
+    {
+        world.write_message(crate::fields::Commotion {
+            at: settings.plane.project(transform.translation()),
+            amount: deed_spec.harm.abs(),
+        });
+    }
 
     let mut approvals: Vec<(Entity, f32)> = Vec::new();
     // Everyone who saw it, for `Tuning::witness_dilution`; the crowd is the same for every witness.
