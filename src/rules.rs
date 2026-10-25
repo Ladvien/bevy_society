@@ -135,14 +135,20 @@ impl TriggerState {
     }
 }
 
-/// The hour the clock had at the previous tick, so `Hour` triggers fire on the crossing rather than
+/// The clock's `now_days` at the previous tick, so `Hour` triggers fire on the crossing rather than
 /// for every tick inside the hour.
+///
+/// **Days, not an hour**, because the previous hour is a whole number only for a clock that steps
+/// whole hours: at `dt_days = 1/960` it is `8.002`, and `ceil` of it re-crosses hour 9 on every tick
+/// inside hour 9. Keeping the previous *instant* and asking which hour boundaries lie in
+/// `(previous, now]` is exact for any step size, which is what makes a fractional `Hour(5.5)` fire at
+/// all — the old whole-hour walk could never emit one.
 #[derive(Resource, Debug, Clone, Copy)]
-pub(crate) struct LastHour(pub(crate) f32);
+pub(crate) struct LastDays(pub(crate) Option<f64>);
 
-impl Default for LastHour {
+impl Default for LastDays {
     fn default() -> Self {
-        Self(-1.0)
+        Self(None)
     }
 }
 
@@ -167,7 +173,7 @@ impl Plugin for RulesPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<TriggerQueue>()
             .init_resource::<TriggerState>()
-            .init_resource::<LastHour>()
+            .init_resource::<LastDays>()
             .init_resource::<NeedArmed>()
             .init_resource::<RumorReported>()
             .add_message::<FireTrigger>()
@@ -234,7 +240,7 @@ fn thresholds(defs: &SocietyDefs, need: u16) -> Vec<f32> {
 struct TriggerBookkeeping<'w> {
     queue: Option<ResMut<'w, TriggerQueue>>,
     state: Option<ResMut<'w, TriggerState>>,
-    last_hour: Option<ResMut<'w, LastHour>>,
+    last_days: Option<ResMut<'w, LastDays>>,
     armed: Option<ResMut<'w, NeedArmed>>,
     reported: Option<ResMut<'w, RumorReported>>,
     pending: Option<ResMut<'w, PendingActions>>,
@@ -283,12 +289,24 @@ fn evaluate_triggers(
 
     events.push((EventKey::Tick, Bindings::of_actor(None)));
 
-    if let Some(last) = book.last_hour.as_mut() {
-        let previous = last.0;
-        for hour in hours_crossed(previous, clock.hour()) {
-            events.push((EventKey::Hour(hour), Bindings::of_actor(None)));
+    if let Some(last) = book.last_days.as_mut() {
+        match last.0 {
+            // The baseline tick: it says where the clock starts and fires nothing, so a trigger
+            // standing at the start hour does not fire on the first tick of every run.
+            None => last.0 = Some(now),
+            Some(previous) => {
+                if now > previous {
+                    events.push((
+                        EventKey::Hours {
+                            from: previous,
+                            to: now,
+                        },
+                        Bindings::of_actor(None),
+                    ));
+                }
+                last.0 = Some(now);
+            }
         }
-        last.0 = clock.hour();
     }
 
     events.extend(queue.0.drain(..).map(|event| match event {
@@ -456,34 +474,6 @@ fn evaluate_triggers(
     }
 }
 
-/// Every hour `h` in `[0, 24)` the clock passed between `previous` and `now`, wrap-aware, ascending
-/// within each pass of midnight.
-fn hours_crossed(previous: f32, now: f32) -> Vec<f32> {
-    if previous < 0.0 {
-        // The first tick sets the baseline; crossing into it is not a crossing.
-        return Vec::new();
-    }
-    let mut out = Vec::new();
-    let mut h = previous.ceil();
-    if now >= previous {
-        while h <= now {
-            out.push(h);
-            h += 1.0;
-        }
-    } else {
-        while h < 24.0 {
-            out.push(h);
-            h += 1.0;
-        }
-        let mut h = 0.0;
-        while h <= now {
-            out.push(h);
-            h += 1.0;
-        }
-    }
-    out
-}
-
 /// Whether a trigger's `if` holds. An error is an `error!` and a `ScriptError`, and the condition
 /// counts as false (plan D8).
 fn condition_holds(
@@ -521,7 +511,14 @@ pub(crate) fn report(
 /// The part of an event a trigger's `on` is matched against.
 enum EventKey {
     Tick,
-    Hour(f32),
+    /// A span of game time `(from, to]` in days, during which some hour boundary may have been crossed.
+    /// One event per tick rather than one per hour: a host clock that jumps from 05:00 to 06:00 in one
+    /// frame still has to fire an `Hour` trigger once, and `matches` asks the question per trigger so
+    /// the answer is about the trigger's own hour, fractional or not.
+    Hours {
+        from: f64,
+        to: f64,
+    },
     Custom(String),
     Interaction(InteractionId),
     Activity(ActivityId),
@@ -536,7 +533,16 @@ impl EventKey {
     fn matches(&self, on: &TriggerKind) -> bool {
         match (self, on) {
             (Self::Tick, TriggerKind::Tick) => true,
-            (Self::Hour(h), TriggerKind::Hour(want)) => (*h - want).abs() < 1e-3,
+            // Does the hour `want` lie in `(from, to]`? Scaled to hours, `want` is crossed when
+            // `floor((to*24 - want)/24) > floor((from*24 - want)/24)` — the count of whole days between
+            // `want` and the instant, which increments exactly once as the clock passes `want` and
+            // never again until the next day. Written this way it holds for a fractional `want`, for a
+            // span longer than a day (a slow tick, a host jump across midnight), and for a span that
+            // crosses midnight going up.
+            (Self::Hours { from, to }, TriggerKind::Hour(want)) => {
+                let want = f64::from(*want);
+                ((to * 24.0 - want) / 24.0).floor() > ((from * 24.0 - want) / 24.0).floor()
+            }
             (Self::Custom(name), TriggerKind::Custom(want)) => name == want,
             (Self::Interaction(id), TriggerKind::Interaction(want)) => id == want,
             (Self::Activity(id), TriggerKind::Activity(want)) => id == want,

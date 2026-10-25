@@ -31,6 +31,24 @@ Every rate in `Tuning` is **per game-day**, and every duration is converted to g
 `SocietyClock::dt_days`. `SocietySettings::seconds_per_day` (240 by default) is what makes a game-day
 long or short; it changes how much happens per real second, never what happens.
 
+### Where the clock's time comes from
+
+`SocietySettings::clock` chooses between two sources. The tick **rate** is the same either way — one
+tick per `tick_secs` of fixed-step time, so simulation cost stays bounded — and only how much game time
+a tick represents changes:
+
+| `clock` | `dt_days` each tick | use |
+|---|---|---|
+| `ClockSource::Fixed` (default) | `tick_secs / seconds_per_day` | a society whose day is a constant length |
+| `ClockSource::Host` | the change in `HostClock::now_days` since the previous tick, never negative | a game whose day has phases of unequal length |
+
+With `Host`, insert a `HostClock` resource and write `now_days` every frame — the crate never inserts
+one. A host clock that stands still is a pause: `dt_days` is 0, so no need decays and no walk times out.
+One that jumps forward (a phase skipped) applies the whole jump in one tick with no catch-up ticks, and
+every `Hour` trigger the jump crossed fires once. One that goes backward (a reload) takes the host's
+time and applies no negative `dt`, so nothing fires twice. A `Host` clock with **no** `HostClock`
+freezes and warns once, rather than inventing time.
+
 Because a society tick is many fixed steps apart, Bevy's message buffers (two swaps) would drop a
 message written between ticks. So every **game-written input message** — `PlantRumor`, `Interact`,
 `FireTrigger` — is drained by an ungated system in `Clock`. A game may write one at any time and it is
