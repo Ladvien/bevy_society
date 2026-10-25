@@ -143,14 +143,8 @@ impl TriggerState {
 /// inside hour 9. Keeping the previous *instant* and asking which hour boundaries lie in
 /// `(previous, now]` is exact for any step size, which is what makes a fractional `Hour(5.5)` fire at
 /// all — the old whole-hour walk could never emit one.
-#[derive(Resource, Debug, Clone, Copy)]
+#[derive(Resource, Debug, Clone, Copy, Default)]
 pub(crate) struct LastDays(pub(crate) Option<f64>);
-
-impl Default for LastDays {
-    fn default() -> Self {
-        Self(None)
-    }
-}
 
 /// Which need thresholds are currently armed (plan D8): a `NeedBelow` trigger fires on crossing
 /// below and re-arms once the need is back above `below + 0.05`, so a level hovering at the
