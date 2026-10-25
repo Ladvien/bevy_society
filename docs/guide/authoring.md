@@ -1,8 +1,8 @@
 # Authoring definitions
 
-Everything the crate simulates is data the host hands in: needs, topics, deeds, factions, activities,
-interactions, triggers, conversation rules and node effects. The crate never reads a file — the host
-loads the text and passes it in.
+Everything the crate simulates is data the host hands in: needs, signals, topics, deeds, factions,
+activities, interactions, triggers, conversation rules and node effects. The crate never reads a file
+— the host loads the text and passes it in.
 
 ```rust,ignore
 use bevy_society::{DefsFile, SocietyDefs};
@@ -31,6 +31,7 @@ like `activity 'eat' consideration 2`.
 | List | Defines | Read by |
 |---|---|---|
 | `needs` | what decays and what activities restore | mind |
+| `signals` | a value the host writes and the crate only reads | behaviour, scripts |
 | `topics` | what opinions are about | beliefs, deeds |
 | `deeds` | an act one person does to another, and its harm | interaction, reputation |
 | `factions` | groups, with an in-group affinity bias | groups, ties |
@@ -40,7 +41,7 @@ like `activity 'eat' consideration 2`.
 | `conversations` | which conversation a talk opens | dialogue |
 | `node_effects` | a Rhai rule that fires when a dialogue node is entered | dialogue |
 
-## Needs, topics, deeds, factions
+## Needs, signals, topics, deeds, factions
 
 ```ron
 (
@@ -48,6 +49,7 @@ like `activity 'eat' consideration 2`.
         (id: "social", decay_per_day: 1.0),
         (id: "rest", decay_per_day: 0.7),
     ],
+    signals: [(id: "day_job"), (id: "on_watch"), (id: "grieving")],
     topics: [(id: "kindness"), (id: "honesty")],
     deeds: [
         (id: "help", topic: "kindness", harm: 0.5),
@@ -59,6 +61,12 @@ like `activity 'eat' consideration 2`.
 
 - A **need** level is 1 when satisfied and 0 when desperate. `initial` (default 1.0) is what a new
   person starts at.
+- A **signal** is a number the **host** owns: the game writes it on the person's `Signals`
+  component and the crate never changes it. A value the host never wrote reads `0.0`, and a person
+  spawned before the signal existed reads `0.0` too. Reads through `Signals::get(id)` (an index
+  resolved once with `SocietyDefs::signal_id`) or `Signals::set(defs, "name", value)`, and in
+  scripts through `ctx.signal(a, id)`. Because it neither decays nor is paid by an activity, it is
+  the right carrier for a fact that is true or false today — a day job, a night watch, grief.
 - A **deed** has a `harm` in `[-1, 1]`; positive helps the patient. Its `topic` is the norm a witness
   judges it by, so an opinion above zero approves the deed.
 - A **faction**'s `ingroup_bias` (default 0.2) is the affinity two co-members start a new tie with,
@@ -95,7 +103,14 @@ between 22:00 and 06:00, more so when tired, and rest while there":
 
 A consideration's `input` is normalised to `[0, 1]` before its `curve` sees it: `Hour` is `h / 24`,
 mood axes and `Affinity`/`Respect` are `(x + 1) / 2`, `Distance` is `d / perception_radius`. `Trust`,
-`Familiarity` and `SocialProof` are already in `[0, 1]`.
+`Familiarity` and `SocialProof` are already in `[0, 1]`, and `Need`/`Signal` are read as they stand,
+so a signal the host writes outside `[0, 1]` is clamped after the curve. `Signal("x")` names a
+signal declared in `signals`; an undeclared name is a `DefsError::UnknownId` at load, not a score of
+zero at run time.
+
+A `Signal` consideration scores as written, with no target-dependent arm — it reads the actor's own
+component — so it is valid on every target kind. `Step(0.5)` on a signal of `1.0` scores 1 and on
+`0.0` scores 0.
 
 Curves turn that number into utility:
 

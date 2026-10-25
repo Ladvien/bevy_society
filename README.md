@@ -93,7 +93,7 @@ Font paths: macOS `/System/Library/Fonts/Supplemental/Arial.ttf`; Linux `/usr/sh
 
 ```rust,ignore
 app.world_mut().spawn((
-    Person,            // brings personality, mood, emotions, needs, ties, opinions, knowledge,
+    Person,            // brings personality, mood, emotions, needs, signals, ties, opinions, knowledge,
     Autonomous,        // memories, memberships and status
     Name::new("Bram"),
     Home(well),

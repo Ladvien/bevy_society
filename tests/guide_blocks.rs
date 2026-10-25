@@ -44,6 +44,10 @@ fn the_guides_first_definitions_file_parses() {
         "the block declares `social`"
     );
     assert!(defs.need_id("rest").is_some());
+    assert!(
+        defs.signal_id("day_job").is_some(),
+        "the block declares `day_job`"
+    );
     assert!(defs.topic_id("kindness").is_some());
     assert!(defs.deed_id("help").is_some());
     assert!(defs.faction_id("millers").is_some());

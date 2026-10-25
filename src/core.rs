@@ -25,7 +25,7 @@ use rand_chacha::ChaCha8Rng;
 use crate::beliefs::{Knowledge, Opinions};
 use crate::defs::{SocietyDefs, size_person_state};
 use crate::groups::{Memberships, Status};
-use crate::mind::{Emotions, Memories, Mood, Needs, Personality};
+use crate::mind::{Emotions, Memories, Mood, Needs, Personality, Signals};
 use crate::relationships::Ties;
 use crate::rumor::RumorBook;
 
@@ -476,6 +476,7 @@ pub struct PersonId(pub u32);
     Mood,
     Emotions,
     Needs,
+    Signals,
     Ties,
     Opinions,
     Knowledge,

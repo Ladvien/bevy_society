@@ -401,6 +401,49 @@ impl Needs {
     }
 }
 
+/// Host-written signal values, indexed by [`SignalId`](crate::SignalId). The crate only reads them;
+/// a value the host never wrote is `0.0`.
+#[derive(Component, Clone, Debug, Default, PartialEq, Reflect)]
+pub struct Signals(pub Vec<f32>);
+
+impl Signals {
+    /// The value of signal `id`, or `0.0` when the vector does not reach it.
+    pub fn get(&self, id: crate::defs::SignalId) -> f32 {
+        self.0.get(usize::from(id.0)).copied().unwrap_or(0.0)
+    }
+
+    /// Writes `value` for signal `id`, growing the vector to fit. A non-finite value is stored as
+    /// `0.0`, so a consideration never sees a NaN.
+    pub fn set_id(&mut self, id: crate::defs::SignalId, value: f32) {
+        let index = usize::from(id.0);
+        if self.0.len() <= index {
+            self.0.resize(index + 1, 0.0);
+        }
+        if let Some(slot) = self.0.get_mut(index) {
+            *slot = if value.is_finite() { value } else { 0.0 };
+        }
+    }
+
+    /// Writes `value` for the signal named `name`. An unknown name is
+    /// [`DefsError::UnknownId`](crate::DefsError::UnknownId).
+    pub fn set(
+        &mut self,
+        defs: &SocietyDefs,
+        name: &str,
+        value: f32,
+    ) -> Result<(), crate::defs::DefsError> {
+        let id = defs
+            .signal_id(name)
+            .ok_or_else(|| crate::defs::DefsError::UnknownId {
+                kind: "signal",
+                id: name.to_owned(),
+                owner: "person signals".to_owned(),
+            })?;
+        self.set_id(id, value);
+        Ok(())
+    }
+}
+
 /// What a memory is about.
 #[derive(Clone, Debug, PartialEq, Reflect)]
 pub enum MemoryKind {
@@ -559,6 +602,7 @@ impl Plugin for MindPlugin {
             .register_type::<ActiveEmotion>()
             .register_type::<Emotions>()
             .register_type::<Needs>()
+            .register_type::<Signals>()
             .register_type::<Memory>()
             .register_type::<MemoryKind>()
             .register_type::<Memories>()
