@@ -408,6 +408,7 @@ impl Needs {
 /// Host-written signal values, indexed by [`SignalId`](crate::SignalId). The crate only reads them;
 /// a value the host never wrote is `0.0`.
 #[derive(Component, Clone, Debug, Default, PartialEq, Reflect)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Signals(pub Vec<f32>);
 
 impl Signals {
@@ -634,7 +635,10 @@ fn set_baseline_mood(add: On<Add<Person>>, mut people: Query<(&Personality, &mut
 
 /// Merges every pending [`Appraise`] into its person's [`Emotions`]. Runs in the ungated clock set,
 /// so a message written between ticks is not lost.
-fn apply_appraisals(mut reader: MessageReader<Appraise>, mut emotions: Query<&mut Emotions>) {
+pub(crate) fn apply_appraisals(
+    mut reader: MessageReader<Appraise>,
+    mut emotions: Query<&mut Emotions>,
+) {
     for msg in reader.read() {
         if let Ok(mut e) = emotions.get_mut(msg.person) {
             e.appraise(msg.kind, msg.intensity, msg.toward);

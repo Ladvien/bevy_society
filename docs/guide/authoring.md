@@ -183,6 +183,7 @@ Any other `{...}` is rejected at compile time rather than printed literally.
 |---|---|
 | `Tick` | every society tick |
 | `Hour(h)` | the clock crosses hour `h`; `h` may be fractional (`5.5` is 05:30) |
+| `PersonDied` | a person dies; the deceased is bound as the actor |
 | `Interaction("name")` | that interaction resolves |
 | `TieLabel(Friend)` | a tie's label changes to it |
 | `RumorReach(deed: "steal", fraction: 0.5)` | a rumor of that deed reaches that fraction of the living |

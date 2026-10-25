@@ -149,14 +149,14 @@ mod trace;
 
 pub use behavior::{
     ActivityEnded, ActivityStarted, BehaviorPlugin, Destination, Doing, DoingTarget, EndActivity,
-    InteractionResolved, ReportDeed, TravelFailed,
+    InteractionResolved, PersonDied, ReportDeed, TravelFailed,
 };
 pub use beliefs::{BeliefsPlugin, Knowledge, Known, Opinion, Opinions, belief_after_hearing};
 pub use core::{
-    AssessmentNorm, Autonomous, BoundPlaces, ClockSource, Dormant, Home, HostClock, Locomotion,
-    NextPersonId, Perception, Person, PersonId, PersonIndex, PersonKey, Place, PlaceKey, PlaceTags,
-    SocietyClock, SocietyCorePlugin, SocietyPlane, SocietyRng, SocietySettings, SocietySystems,
-    SocietyTick, Tuning, society_tick_due,
+    AssessmentNorm, Autonomous, BoundPlaces, ClockSource, Deceased, Dormant, Home, HostClock,
+    Locomotion, NextPersonId, Perception, Person, PersonId, PersonIndex, PersonKey, Place,
+    PlaceKey, PlaceTags, SocietyClock, SocietyCorePlugin, SocietyPlane, SocietyRng,
+    SocietySettings, SocietySystems, SocietyTick, Tuning, society_tick_due,
 };
 pub use defs::{
     AcceptDef, ActivityDef, ActivityId, ActivityTarget, Consideration, ConversationRuleDef,

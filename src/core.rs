@@ -265,6 +265,14 @@ pub struct Tuning {
     /// village. Measured over 6 000 ticks and 8 people, **112 distress appraisals against 10 joy**, and
     /// the ratio, not the magnitude, is what leaves every mood's pleasure at or below zero.
     pub rejection_distress: f32,
+    /// Familiarity with the dead that counts as close enough to grieve them, even without a `Friend`
+    /// label. A design default: the papers state that grief follows the loss of a close relationship
+    /// (Prigerson et al. 2009, DOI `10.1371/journal.pmed.1000121`) rather than what familiarity number
+    /// that is, so this is the crate's own line between an acquaintance and someone you knew.
+    ///
+    /// It exists so a **family member** grieves: they are spawned with high familiarity and no time to
+    /// reach the affinity a `Friend` label needs, and losing a parent should not be a stranger's death.
+    pub bereavement_familiarity: f32,
     /// Hours a person may travel toward an activity before giving up.
     /// Game hours a person may travel toward an activity before giving up, or `None` for a walk that
     /// never times out.
@@ -367,6 +375,7 @@ impl Default for Tuning {
             contest_steepness: 4.0,
             tier_cutoff: 0.25,
             rejection_distress: 0.3,
+            bereavement_familiarity: 0.3,
             travel_timeout_hours: Some(2.0),
             walk_speed: 1.4,
             // **A design default, set by measurement.** Not from a paper; the *gate* is the paper. Every
@@ -603,10 +612,29 @@ pub struct Autonomous;
 /// Removing the marker lets them re-decide on the next tick. Removing `Person` instead destroys them:
 /// `on_person_removed` deletes every tie to and from them.
 ///
-/// Compare `Deceased`, which is this plus forever.
+/// Compare [`Deceased`], which is this plus forever.
 #[derive(Component, Reflect, Debug, Clone, Copy, Default, PartialEq, Eq)]
 #[reflect(Component)]
 pub struct Dormant;
+
+/// Marker: this person is dead, and stays dead.
+///
+/// It implies everything [`Dormant`] does — out of its daily life, out of everyone's perception, no
+/// exchanges — and additionally **freezes the ties that point at them and the ties they hold**: they are
+/// kept, never relaxed, never trimmed, and stay readable through [`Ties::get`](crate::Ties::get). That is
+/// what lets a game keep the town roster intact (Sanctuary's dead come back as the walking dead under
+/// their own names) and what lets the living grieve someone the social graph still remembers.
+///
+/// Inserting it writes [`crate::PersonDied`] once and makes everyone close to them grieve. Removing it is
+/// not required to restore anything: a death is not an undo.
+///
+/// Prigerson et al. 2009 (DOI `10.1371/journal.pmed.1000121`) is the mechanism for *why* the reaction is
+/// proportional to closeness: prolonged grief disorder's own criteria are keyed to the loss of a close
+/// relationship, not to any death.
+#[derive(Component, Reflect, Debug, Clone, Copy, Default, PartialEq, Eq)]
+#[reflect(Component)]
+#[require(Dormant)]
+pub struct Deceased;
 
 /// The home of a person, used by the `Home` activity target.
 #[derive(Component, Reflect, Debug, Clone, Copy, PartialEq, Eq)]
@@ -1024,6 +1052,7 @@ impl Plugin for SocietyCorePlugin {
             .register_type::<Person>()
             .register_type::<Autonomous>()
             .register_type::<Dormant>()
+            .register_type::<Deceased>()
             .register_type::<Home>()
             .register_type::<BoundPlaces>()
             .register_type::<Place>()

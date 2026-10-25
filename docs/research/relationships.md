@@ -60,6 +60,12 @@ Each person keeps a `Ties` component: one `Tie` per person they know. A tie hold
 - Cartwright, D. & Harary, F. (1956). https://doi.org/10.1037/h0046049 · not converted
 - Byrne, D. (1961). https://doi.org/10.1037/h0044721 · not converted
 
+## Bereavement (issue #6)
+
+- **Prigerson, H. G. et al. (2009).** Prolonged Grief Disorder: psychometric validation of criteria proposed for DSM-V and ICD-11. *PLoS Medicine* 6(8): e1000121. https://doi.org/10.1371/journal.pmed.1000121 · `10.1371_journal.pmed.1000121` (in the corpus).
+
+  The model's mechanism, not its rate. The paper's own criteria are keyed to the loss of a **close relationship** rather than to any death — bereavement is a fact for everyone who knew the person and a wound in proportion to how close they were. `Tuning::bereavement_familiarity` (0.3, a design default) is the crate's line between an acquaintance and someone you knew, and it exists so a **family member** grieves: they are spawned with high familiarity and no time to reach the affinity that a `Friend` label needs.
+
 ## The clamp and the influence weight (issue #10)
 
 - **Deffuant, G., Neau, D., Amblard, F. & Weisbuch, G. (2000).** Mixing beliefs among interacting agents. *Advances in Complex Systems* 3: 87–98. DOI `10.1142/S0219525900000078`.
