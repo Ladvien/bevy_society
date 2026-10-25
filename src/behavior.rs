@@ -208,6 +208,12 @@ impl Plugin for BehaviorPlugin {
             )
             .init_resource::<EndRequests>()
             .add_message::<TravelFailed>()
+            .add_message::<ReportDeed>()
+            .init_resource::<DeedReportQueue>()
+            .add_systems(
+                FixedUpdate,
+                queue_reported_deeds.in_set(crate::SocietySystems::Clock),
+            )
             .add_systems(
                 FixedUpdate,
                 // Ungated, in `Clock`: a host writes `TravelFailed` whenever it likes, and a
@@ -228,7 +234,11 @@ impl Plugin for BehaviorPlugin {
             )
             .add_systems(
                 FixedUpdate,
-                (arrive_and_satisfy, resolve_interactions)
+                (
+                    arrive_and_satisfy,
+                    resolve_interactions,
+                    resolve_reported_deeds,
+                )
                     .chain()
                     .in_set(crate::SocietySystems::Interact),
             )
@@ -703,6 +713,56 @@ fn walk_toward_destination(
             crate::SocietyPlane::XZ => Vec3::new(here.x, transform.translation.y, here.y),
             crate::SocietyPlane::XY => Vec3::new(here.x, here.y, transform.translation.z),
         };
+    }
+}
+
+/// The host reports a deed the society could not see, naming the people who saw it.
+///
+/// Sanctuary resolves events the society has no eyes for: a townsperson found afflicted at dawn, a
+/// person accused by a crowd at the well. They must enter reputation and rumor as seen by **the people
+/// the game names** — the family, the work crew, the crowd at the well — and then spread person to
+/// person. A deed that enters through an accepted `Interact` gets its witnesses from perception; this is
+/// the same path with the witness list supplied instead.
+///
+/// ```ignore
+/// commands.write_message(ReportDeed {
+///     actor,
+///     patient: Some(found_afflicted),
+///     deed: "affliction".to_owned(),
+///     witnesses: vec![kin, neighbour, priest],
+/// });
+/// ```
+///
+/// An unknown deed is a `warn!` and nothing happens. A witness that is not a person is dropped with one
+/// warning per report. The actor and the patient are never witnesses of their own deed. With no
+/// witnesses left, there is no rumor and no reaction — a deed nobody saw is not a deed.
+#[derive(Message, Debug, Clone, PartialEq)]
+pub struct ReportDeed {
+    /// Who did it.
+    pub actor: Entity,
+    /// Who it was done to, when there was someone.
+    pub patient: Option<Entity>,
+    /// The deed's id, as the defs declare it.
+    pub deed: String,
+    /// The people who saw it, by name from the game. Order does not matter.
+    pub witnesses: Vec<Entity>,
+}
+
+/// Host-reported deeds waiting for the next society tick.
+///
+/// **Drained by an ungated system in `Clock`**, the pattern `queue_interacts` and `EndRequests` use: a
+/// society tick is many fixed steps apart and Bevy keeps a message for two buffer swaps, so a
+/// `ReportDeed` written in `Update` would be gone before the tick that resolves it.
+#[derive(Resource, Debug, Clone, Default)]
+pub(crate) struct DeedReportQueue(pub(crate) Vec<ReportDeed>);
+
+/// Drains every host-written [`ReportDeed`] into [`DeedReportQueue`] on every fixed step.
+fn queue_reported_deeds(
+    mut reports: MessageReader<ReportDeed>,
+    mut queue: ResMut<DeedReportQueue>,
+) {
+    for report in reports.read() {
+        queue.0.push(report.clone());
     }
 }
 
@@ -1795,9 +1855,21 @@ fn exchange(
             winner = contest(world, actor, target, &settings.tuning, perception, index);
         }
         if let Some(deed) = spec.deed {
-            witness(
-                world, deed, actor, target, defs, settings, perception, index, now,
-            );
+            // The witnesses of an observed exchange are whoever was within perception of the actor,
+            // excluding the two parties. That is `Perception`'s job; a host-reported deed brings its own
+            // list, which is why `witness_deed` takes one rather than computing it.
+            let seen_by: Vec<Entity> = index
+                .iter()
+                .position(|(_, e)| *e == actor)
+                .and_then(|slot| perception.near.get(slot))
+                .map(|list| {
+                    list.iter()
+                        .filter_map(|(j, _)| perception.persons.get(*j as usize).copied())
+                        .filter(|w| *w != actor && *w != target)
+                        .collect()
+                })
+                .unwrap_or_default();
+            witness_deed(world, deed, actor, target, defs, settings, now, &seen_by);
         }
         close_the_triad(world, actor, target, perception, index, settings, now);
         if !shared_faction
@@ -2081,6 +2153,9 @@ fn tell(world: &mut World, teller: Entity, listener: Entity, settings: &SocietyS
         world.write_message(crate::rumor::RumorLearned {
             person: listener,
             rumor,
+            // **This is the gossip path, so the teller is known.** What a listener makes of a rumor
+            // depends on who told them, and a rumor learned by seeing the deed is not someone's word.
+            from: Some(teller),
         });
     }
     world.insert_resource(book);
@@ -2166,33 +2241,19 @@ fn contest(
 /// (4d) One deed and its witnesses (plan D5): each witness judges it, a harsh judgement is a
 /// `NormViolated`, and a heavy enough deed becomes a rumor every witness already knows.
 #[allow(clippy::too_many_arguments)]
-fn witness(
+fn witness_deed(
     world: &mut World,
     deed: crate::defs::DeedId,
     actor: Entity,
     patient: Entity,
     defs: &SocietyDefs,
     settings: &SocietySettings,
-    perception: &Perception,
-    index: &[(crate::PersonId, Entity)],
     now: f64,
+    witnesses: &[Entity],
 ) {
     let Some(deed_spec) = defs.deeds.get(usize::from(deed.0)).cloned() else {
         return;
     };
-    let Some(actor_slot) = index.iter().position(|(_, e)| *e == actor) else {
-        return;
-    };
-    let witnesses: Vec<Entity> = perception
-        .near
-        .get(actor_slot)
-        .map(|list| {
-            list.iter()
-                .filter_map(|(j, _)| perception.persons.get(*j as usize).copied())
-                .filter(|w| *w != actor && *w != patient)
-                .collect()
-        })
-        .unwrap_or_default();
 
     // **A deed deposits its harm into the commotion field, at the actor's cell.** The channel is what
     // `FieldInput::Commotion` reads and what a `Gradient(Commotion, true)` activity climbs, and until
@@ -2212,7 +2273,7 @@ fn witness(
     let mut approvals: Vec<(Entity, f32)> = Vec::new();
     // Everyone who saw it, for `Tuning::witness_dilution`; the crowd is the same for every witness.
     let watcher_count = witnesses.len();
-    for watcher in witnesses {
+    for &watcher in witnesses {
         let opinions = world
             .get::<crate::Opinions>(watcher)
             .cloned()
@@ -2328,10 +2389,93 @@ fn witness(
                 world.write_message(crate::rumor::RumorLearned {
                     person: *watcher,
                     rumor,
+                    // A witnessed deed: nobody told them, they saw it.
+                    from: None,
                 });
             }
         }
         world.insert_resource(book);
+    }
+}
+
+/// Resolves every host-reported deed (issue #8), after the exchanges have run.
+///
+/// Exclusive because [`witness_deed`] writes to whoever it likes, the same as the exchange path.
+///
+/// The named witnesses are the point: perception is not consulted at all, so a host can report what its
+/// own rules saw. Ordering is fixed for determinism — the witnesses are deduped and ordered by
+/// [`PersonId`](crate::PersonId) before the deed is reported, so two runs with the same witness set give
+/// the same society however the host's `Vec` happened to be ordered.
+fn resolve_reported_deeds(world: &mut World) {
+    let (now, defs, reports, index) = {
+        let now = world.resource::<SocietyClock>().now_days;
+        let defs = world.resource::<SocietyDefs>().clone();
+        let index = world.resource::<PersonIndex>().sorted.clone();
+        let mut queue = world
+            .remove_resource::<DeedReportQueue>()
+            .unwrap_or_default();
+        let reports = std::mem::take(&mut queue.0);
+        world.insert_resource(queue);
+        (now, defs, reports, index)
+    };
+    if reports.is_empty() {
+        return;
+    }
+    let settings = world.resource::<SocietySettings>().clone();
+
+    for report in reports {
+        let Some(deed) = defs.deed_id(&report.deed) else {
+            warn!(
+                "bevy_society: ReportDeed names unknown deed '{}'; ignored",
+                report.deed
+            );
+            continue;
+        };
+        // **The named witnesses, deduped and in `PersonId` order.** The actor and the patient are never
+        // witnesses of their own deed, and a dormant person still counts if the host named them: the
+        // host saw something the crate cannot, and `Dormant` is about daily life, not about eyes.
+        let mut witnesses: Vec<Entity> = Vec::new();
+        let mut not_people = 0usize;
+        for &entity in &report.witnesses {
+            if entity == report.actor || Some(entity) == report.patient {
+                continue;
+            }
+            if !index.iter().any(|(_, e)| *e == entity) {
+                not_people += 1;
+                continue;
+            }
+            if !witnesses.contains(&entity) {
+                witnesses.push(entity);
+            }
+        }
+        if not_people > 0 {
+            warn!(
+                "bevy_society: ReportDeed for '{}' names {not_people} witness(es) that are not persons; \
+                 dropped",
+                report.deed
+            );
+        }
+        if witnesses.is_empty() {
+            // A deed nobody saw is not a deed: no reactions and no rumor.
+            continue;
+        }
+        witnesses.sort_unstable_by_key(|entity| {
+            index
+                .iter()
+                .find(|(_, e)| e == entity)
+                .map_or(u32::MAX, |(id, _)| id.0)
+        });
+        let patient = report.patient.unwrap_or(report.actor);
+        witness_deed(
+            world,
+            deed,
+            report.actor,
+            patient,
+            &defs,
+            &settings,
+            now,
+            &witnesses,
+        );
     }
 }
 

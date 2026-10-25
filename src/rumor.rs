@@ -60,6 +60,12 @@ pub struct RumorLearned {
     pub person: Entity,
     /// The rumor they learned.
     pub rumor: RumorId,
+    /// Who told them, when they heard it rather than saw it.
+    ///
+    /// `Some(teller)` through gossip; `None` when the listener witnessed the deed itself, or when the
+    /// host planted the rumor. Sanctuary's belief system needs the difference: what a listener makes of
+    /// a rumor depends on the teller, and a rumor learned by seeing is not someone's word.
+    pub from: Option<Entity>,
 }
 
 /// Every rumor in the society, in creation order (plan D5). `RumorId(i)` addresses `rumors[i]`.
