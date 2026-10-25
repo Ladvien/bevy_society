@@ -13,9 +13,9 @@ use bevy::ecs::lifecycle::{Add, Remove};
 use bevy::ecs::observer::On;
 use bevy::ecs::resource::Resource;
 use bevy::ecs::schedule::{IntoScheduleConfigs, SystemSet};
-use bevy::ecs::system::{Commands, Query, Res, ResMut};
+use bevy::ecs::system::{Commands, Local, Query, Res, ResMut};
 use bevy::ecs::world::World;
-use bevy::log::error;
+use bevy::log::{error, warn};
 use bevy::math::{Vec2, Vec3};
 use bevy::reflect::Reflect;
 use bevy::time::{Fixed, Time};
@@ -312,6 +312,29 @@ impl Default for Tuning {
     }
 }
 
+/// Where the society clock's time comes from.
+#[derive(Reflect, Debug, Clone, Copy, Default, PartialEq, Eq)]
+pub enum ClockSource {
+    /// The crate's own: each tick advances `now_days` by `tick_secs / seconds_per_day`.
+    #[default]
+    Fixed,
+    /// The host's. Each tick reads [`HostClock`] and takes the change since the last tick, so a day of
+    /// unequal-length phases (a dawn of 5 s for one game hour, a night of 180 s for ten) stays in step
+    /// with the game's own hour.
+    Host,
+}
+
+/// The host's game time, in days. Write it every frame; the crate never inserts it.
+///
+/// Only read when [`SocietySettings::clock`] is [`ClockSource::Host`]. Ticks still fire every
+/// `tick_secs` of fixed-step time, so a host that jumps its clock forward (skipping a phase) applies the
+/// whole jump in one tick rather than catching up tick by tick.
+#[derive(Resource, Reflect, Debug, Clone, Copy, Default, PartialEq)]
+pub struct HostClock {
+    /// Game time in days. The hour of the day is its fractional part times 24.
+    pub now_days: f64,
+}
+
 /// Global settings of the society. Insert before adding [`SocietyCorePlugin`] to override defaults.
 #[derive(Resource, Reflect, Debug, Clone)]
 pub struct SocietySettings {
@@ -323,6 +346,8 @@ pub struct SocietySettings {
     pub seconds_per_day: f32,
     /// Hour of the game-day at which the clock starts.
     pub start_hour: f32,
+    /// Where the clock's time comes from.
+    pub clock: ClockSource,
     /// Plane on which positions are projected.
     pub plane: SocietyPlane,
     /// Radius within which a person perceives others (metres on the plane).
@@ -360,6 +385,7 @@ impl Default for SocietySettings {
             tick_secs: 0.25,
             seconds_per_day: 240.0,
             start_hour: 8.0,
+            clock: ClockSource::Fixed,
             plane: SocietyPlane::XZ,
             perception_radius: 8.0,
             contact_radius: 4.0,
@@ -508,32 +534,74 @@ pub fn society_tick_due(tick: Res<SocietyTick>) -> bool {
 }
 
 /// Advances [`SocietyClock`] by one tick each time enough fixed-step time has accumulated.
+///
+/// The **tick gate is the same for both clock sources**: a tick still costs one `tick_secs` of
+/// fixed-step time, so a host cannot make the simulation run faster by speeding its own clock up. Only
+/// how much game time that tick represents changes.
 fn advance_clock(
     settings: Res<SocietySettings>,
     fixed: Res<Time<Fixed>>,
+    host: Option<Res<HostClock>>,
+    mut warned: Local<bool>,
     mut tick: ResMut<SocietyTick>,
     mut clock: ResMut<SocietyClock>,
 ) {
     tick.accumulator += fixed.delta_secs();
-    if tick.accumulator + 1e-6 >= settings.tick_secs {
-        tick.accumulator -= settings.tick_secs;
-        tick.due = true;
-        clock.tick += 1;
-        clock.dt_days = settings.tick_secs / settings.seconds_per_day;
-        clock.now_days += f64::from(clock.dt_days);
-    } else {
+    if tick.accumulator + 1e-6 < settings.tick_secs {
         tick.due = false;
+        return;
+    }
+    tick.accumulator -= settings.tick_secs;
+    tick.due = true;
+    clock.tick += 1;
+
+    match settings.clock {
+        ClockSource::Fixed => {
+            clock.dt_days = settings.tick_secs / settings.seconds_per_day;
+            clock.now_days += f64::from(clock.dt_days);
+        }
+        ClockSource::Host => {
+            let Some(host) = host.as_deref() else {
+                // No host clock at all is a wiring mistake, not a per-tick event: freeze and say so
+                // once. Freezing is the safe answer, because inventing time would decay needs and
+                // time out walks against a clock nobody is actually running.
+                if !*warned {
+                    *warned = true;
+                    warn!(
+                        "bevy_society: ClockSource::Host but no HostClock resource; the society clock \
+                         is frozen. Insert a HostClock and write now_days every frame."
+                    );
+                }
+                clock.dt_days = 0.0;
+                return;
+            };
+            // A host may stand still (a pause, a cutscene) or go backward (a reload). Neither is an
+            // error: the first decays nothing, the second takes the host's time and applies no
+            // negative dt, so nothing fires twice for hours already crossed.
+            clock.dt_days = (host.now_days - clock.now_days).max(0.0) as f32;
+            clock.now_days = host.now_days;
+        }
     }
 }
 
-/// Seeds the RNG and sets the clock to the configured start hour.
+/// Seeds the RNG and sets the clock to the configured start hour — or, when the host owns the clock, to
+/// the host's own time, so the first tick does not look like a jump from `start_hour`.
 fn setup_society(
     mut commands: Commands,
     settings: Res<SocietySettings>,
+    host: Option<Res<HostClock>>,
     mut clock: ResMut<SocietyClock>,
 ) {
     commands.insert_resource(SocietyRng(bevy_emerge_rng::seeded(settings.seed)));
-    clock.now_days = f64::from(settings.start_hour) / 24.0;
+    clock.now_days = match (settings.clock, host.as_deref()) {
+        (ClockSource::Host, Some(host)) => host.now_days,
+        _ => f64::from(settings.start_hour) / 24.0,
+    };
+    // **The hour trigger's baseline is the clock's start instant, not its first tick.** The first
+    // tick arrives one `tick_secs` of fixed-step time later, by which point a host that jumped its
+    // clock (or a fixed clock that started just before an hour boundary) has already crossed one — and
+    // taking the baseline there would swallow that crossing silently.
+    commands.insert_resource(crate::rules::LastDays(Some(clock.now_days)));
 }
 
 /// Gives each new [`Person`] the next id and records it in the index.

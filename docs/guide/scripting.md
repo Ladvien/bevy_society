@@ -125,7 +125,12 @@ step, so a game may write it from `Update`.
 Events are reported in a fixed order, so the same inputs give the same society:
 
 1. `Tick`, actor −1.
-2. `Hour(h)` for each hour crossed since the previous tick, wrap-aware, actor −1.
+2. `Hour(h)` for every trigger whose hour lies in the game time since the previous tick, wrap-aware,
+   actor −1. Fractional hours work: `Hour(5.5)` fires when the clock passes 05:30. A host clock that
+   jumps from 05:00 to 06:00 in one frame still fires an `Hour(5.5)` trigger exactly once, and a clock
+   that goes backward fires nothing — the hours it recrosses on the way back were already crossed going
+   forward. The baseline is the clock's start instant (`start_hour`, or the first `HostClock` value), so
+   a trigger standing at the start hour does not fire on the first tick.
 3. Queued events (interactions, activities, dialogue nodes), in push order.
 4. `TieLabelChanged`, in message order.
 5. `NormViolated`, actor = actor, target = witness.

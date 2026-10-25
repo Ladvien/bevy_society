@@ -156,7 +156,7 @@ Any other `{...}` is rejected at compile time rather than printed literally.
 | `on` | fires when |
 |---|---|
 | `Tick` | every society tick |
-| `Hour(h)` | the clock crosses hour `h` |
+| `Hour(h)` | the clock crosses hour `h`; `h` may be fractional (`5.5` is 05:30) |
 | `Interaction("name")` | that interaction resolves |
 | `TieLabel(Friend)` | a tie's label changes to it |
 | `RumorReach(deed: "steal", fraction: 0.5)` | a rumor of that deed reaches that fraction of the living |

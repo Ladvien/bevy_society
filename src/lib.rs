@@ -151,9 +151,9 @@ pub use behavior::{
 };
 pub use beliefs::{BeliefsPlugin, Knowledge, Known, Opinion, Opinions, belief_after_hearing};
 pub use core::{
-    AssessmentNorm, Autonomous, Home, NextPersonId, Perception, Person, PersonId, PersonIndex,
-    Place, PlaceTags, SocietyClock, SocietyCorePlugin, SocietyPlane, SocietyRng, SocietySettings,
-    SocietySystems, SocietyTick, Tuning, society_tick_due,
+    AssessmentNorm, Autonomous, ClockSource, Home, HostClock, NextPersonId, Perception, Person,
+    PersonId, PersonIndex, Place, PlaceTags, SocietyClock, SocietyCorePlugin, SocietyPlane,
+    SocietyRng, SocietySettings, SocietySystems, SocietyTick, Tuning, society_tick_due,
 };
 pub use defs::{
     AcceptDef, ActivityDef, ActivityId, ActivityTarget, Consideration, ConversationRuleDef,

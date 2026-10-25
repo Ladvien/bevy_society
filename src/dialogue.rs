@@ -314,7 +314,10 @@ fn finish_conversations(
         };
         let now = clock.now_days;
         let day = now as f32;
-        let dt = settings.tick_secs / settings.seconds_per_day;
+        // The tick's own length, not one derived from `seconds_per_day`: under `ClockSource::Host`
+        // the host's clock decides how much game time a tick carries, so a conversation's effects
+        // must scale by the same `dt_days` every other model uses.
+        let dt = clock.dt_days;
         let Ok(
             [
                 (mut npc_ties, mut npc_memories),
