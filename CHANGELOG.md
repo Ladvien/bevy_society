@@ -6,6 +6,16 @@ All notable changes to bevy_society. The format follows [Keep a Changelog](https
 
 ### Added
 
+- **`summary.json` now reports whether the village ever makes up, not just how many rivalries exist.** `rivals` alone cannot distinguish a society that holds grudges from one that never releases them — both show a rising count. `examples/evidence.rs` now drains `TieLabelChanged` and reports `became_rival` and `left_rival`, whose difference is exactly the standing ties: `became_rival - left_rival == 2 * rivals`. Measured on `village-evening` (24 people, 17 game-days):
+
+  | seed | became rival | left rival | ratio | final rivals | friends |
+  |---|---|---|---|---|---|
+  | 7 | 272 | **188** | 1.45 | 42 | 18 |
+  | 42 | 308 | **238** | 1.29 | 35 | 19 |
+  | 11 | 377 | **297** | 1.27 | 40 | 14 |
+
+  **The village does reconcile** — roughly a quarter of rivalries end — but it forms them 1.3-1.45x faster than it dissolves them and settles at **15% of all pairs being rivals against 6.5% being friends**. The count decelerates (second-half growth 0.68x the first), so it saturates rather than running away. **No `Tuning` value ships with this, deliberately:** the only lever, `affinity_relax_per_day`, moves rivals and friends *together* — 0.01 gives 42 rivals and 18 friends, 0.02 gives 25 and 7, 0.03 gives **10 and 5** — because relaxation pulls all affinity toward zero and cannot tell a grudge from a fondness. Choosing a point is choosing a village's temperament, so it is recorded with three options in `docs/loop/needs-decision/what-does-the-village-owe-its-grudges.md`; the structural fix is separate forgetting rates for positive and negative affinity, which would need a cited default rather than a reparameterisation. `tests/reconciliation.rs` pins the identity (a swapped counter reads −84 against +84) and that reconciliation exists at all. A first version of that test asserted the ratio responds to `affinity_relax_per_day`; it passed at both 0.0 and 0.02, so it was **deleted rather than kept as false coverage**.
+
 - **A crowded place admits its own residents, and the clamp is what made that affordable.** Everyone goes to bed at the same hour, so every resident of a home aims at the same coordinate inside `interaction_radius`; ORCA holds two people's centres one body diameter apart, so the disc packs solid and the queue behind it expires its whole `travel_timeout_hours`. Measured: at every timed-out `sleep` in `village-evening` the goal already held a **median of 6 bodies**, and a 1.5 m disc seats only about `(1.5 / 0.7)^2 = 4.6`. New `Tuning::crowded_arrival_growth` (0.7) grows a `Place`'s accepted arrival boundary by one body diameter per `sqrt(occupants)` — the square root because a crowd occupies *area*. Measured on three seeds, same village, 17 game-days:
 
   | seed | interrupted | `sleep` | friends | rivals |

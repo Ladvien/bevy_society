@@ -3739,3 +3739,51 @@ the environment.
    measured to make things worse (400 → 440), so it needs an overflow destination first.
 4. **The clock decision** - 5.4-hour walks against 0.75-hour activities; a breaking change.
 5. **`rumor-crosses-a-cluster`** - honestly `pending`; restate the observable or build a bridge activity.
+
+## 2026-12-27-01 - Does the village ever make up?
+
+**Pick.** Items 1, 3, 4 and 5 are decisions and item 2 closed last iteration, so I looked at the village instead of
+the list. The interruption work has landed — **4.8% of endings interrupted**, down from 22.8% — but the tie network
+reads **18 friends against 42 rivals**.
+
+**The question nobody could answer.** `rivals` says how many exist. It says nothing about whether any ever **end** —
+and a village that holds grudges and one that never releases them look identical. Nothing drained
+`TieLabelChanged`.
+
+**The instrument.** `became_rival` and `left_rival` now count both sides, with the identity
+`became − left == 2 × standing`. Verified by swapping the counters: it reads **−84 against +84**.
+
+**Measured, three seeds:**
+
+| seed | became | left | ratio | rivals | friends |
+|---|---|---|---|---|---|
+| 7 | 272 | **188** | 1.45 | 42 | 18 |
+| 42 | 308 | **238** | 1.29 | 35 | 19 |
+| 11 | 377 | **297** | 1.27 | 40 | 14 |
+
+**The village reconciles** — a quarter of rivalries end — but forms them 1.3-1.45x faster, saturating at 15% rival
+pairs against 6.5% friend pairs. Tense, not broken.
+
+**The lever, measured and not pulled.** `affinity_relax_per_day` 0.01 → 0.03 takes rivals 42 → 10 **and friends
+18 → 5**. Monotone on the target, wrong on the neighbour, because relaxation cannot tell a grudge from a fondness.
+That is a temperament choice for the host, recorded with three options. The structural answer is **separate
+forgetting rates**, which would need a cited default rather than a reparameterisation.
+
+**Verdicts.** Pass 1 GREAT. Pass 2 GREAT. Pass 3 GREAT.
+
+**A test deleted, not kept.** A version asserting the ratio responds to `affinity_relax_per_day` **passed at 0.0 and
+at 0.02** — the fixture does not depend on relaxation the way the village does. Replaced with the identity check,
+which is arithmetic and holds for any dynamics.
+
+**Dead-code delta.** Zero. **Tests:** 70 binaries, both feature sets; clippy, docs, fmt clean.
+
+**Commit** `pending`.
+
+**Top 5 remaining.**
+
+1. **Separate forgetting rates for positive and negative affinity** — the only shape that fixes the rival/friend
+   ratio without emptying the village. Needs a cited default (negativity bias), not a reparameterisation.
+2. **Split arrival radius from contact radius** — schema change. In `needs-decision/people-cannot-reach-their-beds.md`.
+3. **`Place::capacity` is used only to filter candidates**, never enforced at arrival; needs an overflow destination first.
+4. **The clock decision** - 5.4-hour walks against 0.75-hour activities; a breaking change.
+5. **`rumor-crosses-a-cluster`** - honestly `pending`; restate the observable or build a bridge activity.
