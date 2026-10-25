@@ -4130,7 +4130,7 @@ GIFs: three faction colours distinct, all four stalls in frame, captions and HUD
 **Dead-code delta.** Zero. **Tests:** `tests/economy.rs` is new (6); both feature sets green; clippy/fmt/doc
 clean. Perf: 0.762 ms/tick at 100 and 517.0 at 5 000, inside a ~10% spread.
 
-**Commit** `PENDING`.
+**Commit** `3bc33b5`.
 
 **Top 5 remaining.**
 
