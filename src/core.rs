@@ -523,6 +523,45 @@ pub struct Dormant;
 #[derive(Component, Reflect, Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Home(pub Entity);
 
+/// The places bound to one person by name, for `ActivityTarget::Bound`.
+///
+/// `Home` is one place every person has; this is the general case. Sanctuary assigns each townsperson
+/// their own work site each morning — the woodlot, the quarry, a stretch of wall — and daily life must
+/// send them to *their* site, not the nearest site of that kind. A named binding is also how a
+/// night-watch post, a bed or a favourite bench gets attached to one person.
+///
+/// ```ignore
+/// commands.entity(person).insert(BoundPlaces(vec![("work".to_owned(), woodlot)]));
+/// ```
+///
+/// A person with **no** binding under the name an activity asks for simply gets no candidate for that
+/// activity: they do not do it, and they are not warned about, because a host that binds some people
+/// and not others (a night watch has no work place) would otherwise be told once per person for
+/// nothing. A binding to an entity that is not a [`Place`], or to one at capacity, gets no candidate
+/// too, and that *is* warned about once per person and name, because it is a wiring mistake.
+#[derive(Component, Reflect, Debug, Clone, Default, PartialEq)]
+#[reflect(Component)]
+pub struct BoundPlaces(pub Vec<(String, Entity)>);
+
+impl BoundPlaces {
+    /// Binds `name` to `place`, replacing an existing binding under that name.
+    pub fn bind(&mut self, name: impl Into<String>, place: Entity) {
+        let name = name.into();
+        match self.0.iter_mut().find(|(existing, _)| *existing == name) {
+            Some(slot) => slot.1 = place,
+            None => self.0.push((name, place)),
+        }
+    }
+
+    /// The place bound under `name`, when there is one.
+    pub fn get(&self, name: &str) -> Option<Entity> {
+        self.0
+            .iter()
+            .find(|(existing, _)| existing == name)
+            .map(|(_, entity)| *entity)
+    }
+}
+
 /// A place people can go to. `capacity` limits how many persons may be doing an activity there.
 #[derive(Component, Reflect, Debug, Clone, Copy, Default, PartialEq, Eq)]
 pub struct Place {
@@ -895,6 +934,7 @@ impl Plugin for SocietyCorePlugin {
             .register_type::<Autonomous>()
             .register_type::<Dormant>()
             .register_type::<Home>()
+            .register_type::<BoundPlaces>()
             .register_type::<Place>()
             .register_type::<PlaceTags>()
             .register_type::<PersonIndex>()

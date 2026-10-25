@@ -164,6 +164,10 @@ pub enum ActivityTarget {
     Place(String),
     /// The person's home.
     Home,
+    /// The place this person has bound under this name, from
+    /// [`BoundPlaces`](crate::BoundPlaces). A person with no such binding has no candidate: they do not
+    /// do the activity.
+    Bound(String),
     /// Another person nearby.
     Person,
     /// Toward (or away from, when false) a field's gradient. Needs the `fields` feature.
@@ -1522,6 +1526,11 @@ fn register(
 }
 
 fn check_target(owner: &str, target: &ActivityTarget) -> Result<(), DefsError> {
+    if let ActivityTarget::Bound(name) = target
+        && name.trim().is_empty()
+    {
+        return Err(invalid(owner, "a Bound target needs a name"));
+    }
     if let ActivityTarget::Wander(radius) = target
         && (radius.is_nan() || *radius < 0.0)
     {
@@ -1547,12 +1556,15 @@ fn check_input(owner: &str, input: &Input, target: &ActivityTarget) -> Result<()
     if matches!(input, Input::Distance)
         && !matches!(
             target,
-            ActivityTarget::Place(_) | ActivityTarget::Home | ActivityTarget::Person
+            ActivityTarget::Place(_)
+                | ActivityTarget::Home
+                | ActivityTarget::Bound(_)
+                | ActivityTarget::Person
         )
     {
         return Err(invalid(
             owner,
-            "Distance needs a Place, Home or Person target",
+            "Distance needs a Place, Home, Bound or Person target",
         ));
     }
     if matches!(input, Input::Field(_)) && !FIELDS_ENABLED {

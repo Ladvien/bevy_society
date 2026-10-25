@@ -83,8 +83,14 @@ between 22:00 and 06:00, more so when tired, and rest while there":
 )
 ```
 
-- `target` is one of `Itself`, `Wander(radius)`, `Place(tag)`, `Home`, `Person`, or `Gradient(field,
-  toward)` with the `fields` feature.
+- `target` is one of `Itself`, `Wander(radius)`, `Place(tag)`, `Home`, `Bound(name)`, `Person`, or
+  `Gradient(field, toward)` with the `fields` feature.
+  - `Place(tag)` is the nearest place carrying the tag, the same for everyone.
+  - `Home` is the one place a person's `Home` component names.
+  - `Bound(name)` is the place *that person* has bound under `name` in their `BoundPlaces` component, so
+    each person can be sent to their own site. A person with no such binding simply does not do the
+    activity — that is not an error, and it is not warned about. A binding to something that is not a
+    `Place` is a wiring mistake and warns once per person and name.
 - `rank` groups options into tiers; the highest rank with any viable option wins. Within a tier,
   options below `Tuning::tier_cutoff` × the best score are dropped and one is drawn by weight.
 - `weight` (default 1.0) multiplies the whole score.
