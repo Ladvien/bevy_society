@@ -3829,7 +3829,7 @@ paper says "counts".
 
 **Dead-code delta.** Zero; `git diff src/ assets/ tests/` is empty. **Tests:** 71 binaries green at baseline.
 
-**Commit** `pending`.
+**Commit** `51139cd`.
 
 **Top 5 remaining.**
 
