@@ -3589,3 +3589,58 @@ out of shipping a lever three times.
 4. **`Place::capacity` is used only to filter candidates**, never enforced at arrival. Now documented as a known
    gap rather than an accident.
 5. **The clock decision** - 5.4-hour walks against 0.75-hour activities; a breaking change.
+
+## 2026-12-24-01 - A crowded place admits its own residents
+
+**Pick.** My top item was "split arrival radius from contact radius". Re-reading my own blocker first showed it had
+**expired**: the user's `bounded-ties` merge shipped `Tuning::affinity_ceiling`, the clamp six earlier iterations
+argued for, and the cost I had measured two iterations ago (38 -> 61 rivals) was measured without it.
+
+**The baseline moved:**
+
+| | before the clamp | after |
+|---|---|---|
+| friends | 31 | **15** |
+| rivals | 38 | **28** |
+| sleep interrupted | 150 | **169** |
+
+**The same fix, re-measured under the clamp — three seeds:**
+
+| seed | interrupted | `sleep` | friends | rivals |
+|---|---|---|---|---|
+| 7 | 401 → **329** | 169 → **129** | 15 → 18 | 28 → 42 |
+| 42 | 417 → **369** | 176 → **139** | 19 → 14 | 25 → 35 |
+| 11 | 438 → **383** | 187 → **148** | 14 → 9 | 30 → 40 |
+
+Interruptions down 12-18%, `sleep` down 21-24%, consistently. Rivalries up 10-14 — where the pre-clamp measurement
+saw a rise of 23. The clamp did what it was for: it bounds other mechanisms' side effects.
+
+**`crowded_arrival_growth = 0.0` reproduces the baseline exactly** (401 / 169 / 15 / 28), and a test asserts the
+guard case. A host can turn it off with one number.
+
+**The lesson I want to keep.** My own log said "the choice belongs to the host". That was true when written and had
+stopped being true, and trusting it would have produced a third warning-only iteration. **Re-measure a blocker
+before honouring it.**
+
+**The test took five attempts.** Four end-to-end fixtures — 12 people in a roomy place, 24 at a 1.0 m disc, six
+residents at the village's ratio, one matching its geometry — all gave **identical numbers with the feature on and
+off**, because a single crowded disc does not reproduce what four homes and a shared gathering place do together.
+The shipped test asserts the gate directly, with a stationary walker and **no `Destination`**; with one,
+`walk_toward_destination` walks them in and the test passes with the gate disabled, which is how the earlier
+attempts failed silently.
+
+**Verdicts.** Pass 1 GREAT. Pass 2 GREAT (three seeds, cost shown at full size). Pass 3 GREAT.
+
+**Dead-code delta.** Zero. **Tests:** 66 binaries, both feature sets; clippy, docs, fmt clean. New test bites.
+
+**Commit** `10e143c`.
+
+**Top 5 remaining.**
+
+1. **Split arrival radius from contact radius** — still the cleaner structural answer, but the clamp made the
+   numeric fix affordable, so it is no longer urgent. Recorded in `needs-decision/people-cannot-reach-their-beds.md`.
+2. **The guide's scale curve is unverified** for an eighth iteration; the machine has never been idle enough.
+3. **The harness's village builder should move where `tests/` can reach it** — carried over four iterations, and
+   it is why four fixtures this iteration could not reproduce the village.
+4. **`Place::capacity` is used only to filter candidates**, never enforced at arrival. Now documented.
+5. **The clock decision** - 5.4-hour walks against 0.75-hour activities; a breaking change.
