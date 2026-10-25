@@ -3469,7 +3469,7 @@ rather than rounding it up. Pass 3 GREAT.
 
 **Dead-code delta.** Zero. **Tests:** 60 binaries, both feature sets; clippy, docs, fmt clean.
 
-**Commit** `pending`.
+**Commit** `1bc2388`.
 
 **Top 5 remaining.**
 
