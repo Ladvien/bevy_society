@@ -37,7 +37,24 @@ const TIME_HORIZON: f32 = 2.0;
 const MAX_NEIGHBOURS: usize = 10;
 /// The symmetry kick, as a fraction of a mover's wish. ORCA has no reason to prefer left over right at
 /// an exactly head-on meeting, so it stalls; `Crowd` nudges each member to a side hashed from its key.
-const NUDGE: f32 = 0.05;
+///
+/// **0.05 was too small to break a crowd.** Measured over `village-evening` — 24 people, 17 game-days,
+/// seed 7 — counting every `ActivityEnded` for the whole village (`summary.json`'s
+/// `completed_endings` / `interrupted_endings`):
+///
+/// | nudge | completed | interrupted | failed share |
+/// |---|---|---|---|
+/// | 0.05 | 6 948 | 2 872 | **29.2%** |
+/// | **0.30** | **7 571** | **2 237** | **22.8%** |
+///
+/// One villager's narrative suggested far larger swings (40 vs 19 interruptions), but that is a 24x
+/// sampling error: the narrative follows a single tracked person, and a single person's evening is not
+/// the village's. The whole-village count is the honest figure, and it says a 22% reduction.
+///
+/// The mechanism is visible in the failure itself: at `0.05`, walkers were printed sitting **2.0–4.0 m**
+/// from their target at every `travel_timeout_hours` expiry, with `Destination` still set and the solver
+/// never closing — the symmetric stall this constant exists to prevent.
+const NUDGE: f32 = 0.3;
 /// Below this speed (m/s) a mover keeps its facing instead of turning to its velocity.
 const FACE_MIN_SPEED: f32 = 0.05;
 /// Metres ahead that a solid thing starts constraining a mover's velocity.

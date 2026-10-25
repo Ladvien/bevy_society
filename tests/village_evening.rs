@@ -19,8 +19,8 @@ mod common;
 
 use bevy::prelude::*;
 use bevy_society::{
-    Autonomous, Home, Knowledge, Person, PersonIndex, Place, PlaceTags, PlantRumor, RumorBook,
-    SocietyDefs,
+    ActivityEnded, Autonomous, Home, Knowledge, Person, PersonIndex, Place, PlaceTags, PlantRumor,
+    RumorBook, SocietyDefs,
 };
 use common::{headless, settings, spawn_person};
 
@@ -185,5 +185,52 @@ fn a_planted_rumor_is_told_to_someone_else_at_most_seeds() {
          competes with the ~39 the village creates each day; if it usually loses, the observable is describing \
          a lottery rather than a working gossip model",
         reached.len()
+    );
+}
+
+#[test]
+fn most_of_the_village_s_activities_run_to_completion() {
+    // **A guard on the observable, not a reproduction of the bug.** It pins that the village's activities
+    // mostly complete: measured over `village-evening` at seed 7 before the fix, **2 237 of 9 808 endings were
+    // interrupted (22.8%)**, with `compliment` accounting for 1 045 of them; after, **400 of 6 768 (5.9%)**.
+    //
+    // **This test does not reproduce that bug.** Six attempts did not — this village, a hand-built village, a
+    // ring of twelve movers, a ring of twenty-four, and two variants that churned entity slots. The reason is
+    // that the defect needs the *specific* `PersonId` order `examples/evidence.rs` produces, which comes out
+    // strictly descending (`4294967234, 4294967233, ...`) because the `On<Add<Person>>` observer fires in an
+    // order that need not match spawn order. Reproducing it here would mean duplicating that builder, and a
+    // fixture that has to imitate a spawn order is a fixture that will drift from it.
+    //
+    // So this stays as a cheap threshold instead: if the village ever returns to failing a fifth of its
+    // activities, this fails, and whoever sees it can reach for `summary.json`'s `interrupted_by_activity`.
+    let mut app = village(7);
+    let mut completed = 0usize;
+    let mut interrupted = 0usize;
+    for _ in 0..9_000 {
+        app.update();
+        for ended in app
+            .world_mut()
+            .resource_mut::<bevy::ecs::message::Messages<ActivityEnded>>()
+            .drain()
+        {
+            if ended.completed {
+                completed += 1;
+            } else {
+                interrupted += 1;
+            }
+        }
+    }
+    let total = completed + interrupted;
+    assert!(
+        total >= 500,
+        "the village must live its day ({total} endings)"
+    );
+    let share = interrupted as f64 / total as f64;
+    assert!(
+        share < 0.15,
+        "{interrupted} of {total} endings interrupted ({:.1}%): the village is cancelling activities it \
+         should be running. Reproduce with `cargo run --example evidence -- --scenario village-evening` and \
+         read `interrupted_by_activity` in `summary.json` to see which one",
+        share * 100.0
     );
 }
