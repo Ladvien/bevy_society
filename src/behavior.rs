@@ -15,6 +15,7 @@ use crate::defs::{ActivityId, ActivityTarget, Signal, SocietyDefs, Term};
 use crate::groups::Memberships;
 use crate::mind::{Emotions, Mood, Needs, Personality};
 use crate::relationships::Ties;
+use crate::rumor::RumorBook;
 
 /// The target of a [`Doing`] activity.
 #[derive(Reflect, Debug, Clone, Copy, PartialEq)]
@@ -197,6 +198,12 @@ impl Plugin for BehaviorPlugin {
             .add_systems(
                 FixedUpdate,
                 activity_barks.in_set(crate::SocietySystems::Interact),
+            )
+            // Contact gossip reads the contact list `expose_contacts` has just written, so it runs in
+            // `Relate` and queues into the same `InteractQueue` the arrival path uses.
+            .add_systems(
+                FixedUpdate,
+                contact_gossip.in_set(crate::SocietySystems::Relate),
             )
             .add_systems(
                 FixedUpdate,
@@ -2567,5 +2574,111 @@ fn report_to_triggers(
             actor: id_of(activity.person),
             target: activity.target.map_or(-1, id_of),
         });
+    }
+}
+
+/// The reads [`contact_gossip`] needs, grouped so the system stays inside clippy's argument limit.
+#[derive(bevy::ecs::system::SystemParam)]
+struct ContactGossipWorld<'w> {
+    clock: Res<'w, SocietyClock>,
+    settings: Res<'w, SocietySettings>,
+    perception: Res<'w, Perception>,
+    index: Res<'w, PersonIndex>,
+    book: Res<'w, RumorBook>,
+    defs: Res<'w, SocietyDefs>,
+    queue: Option<ResMut<'w, InteractQueue>>,
+}
+
+/// **People speak when they have news** (plan D7b). Two people who share a place and are not otherwise
+/// exchanging still talk *if the speaker has a rumor the listener does not know* — the gate the
+/// `how-can-two-groups-ever-meet` decision never tried.
+///
+/// The earlier attempt queued a `chat` for every pair in contact, which nearly tripled all social contact
+/// (13 742 requests over 17 game-days against a 7 500 baseline) and turned the village into a clique: 267
+/// friend pairs out of 276 possible. The fault was not the rate but the *gate*: a `chat` is offered
+/// whether or not either person has anything to say.
+///
+/// [`Knowledge::best_telling`] is self-limiting in exactly the way contact-chat was not. It requires a rumor
+/// that is `alive`, whose subject is not the listener, that the teller still `spreader`s, and it ranks by
+/// `|valence| · belief · 0.995^(hours since heard)` (Park et al. 2023, DOI 10.48550/arXiv.2304.03442). Once
+/// the listener knows the rumor the telling stifles (Daley & Kendall 1964, DOI 10.1038/2041118a0), so the
+/// pair stops speaking. Contact carries *news*, not company: a village with nothing to say stays quiet.
+///
+/// Proximity is the channel because that is what proximity is for — Eckland 1968, quoted in Buss 1993
+/// (DOI 10.1037/0033-295x.100.2.204): "the chances are about 50-50 that the 'one and only' lives within
+/// walking distance."
+///
+/// Determinism: iterates [`PersonIndex::sorted`] and each person's `contact` list in index order; draws
+/// nothing from `SocietyRng`.
+fn contact_gossip(
+    world: ContactGossipWorld,
+    knowledge: Query<&crate::Knowledge>,
+    mut ties: Query<&mut Ties>,
+) {
+    let ContactGossipWorld {
+        clock,
+        settings,
+        perception,
+        index,
+        book,
+        defs,
+        queue,
+    } = world;
+    let Some(mut queue) = queue else {
+        return;
+    };
+    let Some(gossip_id) = defs.interaction_id("gossip") else {
+        return;
+    };
+    let tuning = &settings.tuning;
+    let now = clock.now_days as f32;
+    for (i, &(_, entity)) in index.sorted.iter().enumerate() {
+        let Ok(mine) = knowledge.get(entity) else {
+            continue;
+        };
+        let Some(contacts) = perception.contact.get(i) else {
+            continue;
+        };
+        for &j in contacts {
+            let Some(&other) = perception.persons.get(j as usize) else {
+                continue;
+            };
+            // **Never tell someone who already knows.** The Daley–Kendall rule *stifles* a teller that
+            // repeats itself, and that is measured harm here: without this check every contact-tell to a
+            // neighbour who already heard burns a spreader, and village rumor reach fell **0.58 -> 0.375**.
+            // The check protects the spreader pool; the pair goes quiet because there is no news between
+            // them, not because one of them has been silenced.
+            let Ok(theirs) = knowledge.get(other) else {
+                continue;
+            };
+            let telling = mine.best_telling(now, |rumor| {
+                let entry = book.get(rumor)?;
+                if !entry.alive || entry.subject == other || theirs.knows(rumor) {
+                    return None;
+                }
+                Some(entry.valence)
+            });
+            if telling.is_none() {
+                continue;
+            }
+            // A cooldown per directed tie: sharing a bench for a whole activity is one conversation,
+            // not one per fixed step.
+            let Ok(mut owned) = ties.get_mut(entity) else {
+                continue;
+            };
+            let Some(tie) = owned.get_mut(other) else {
+                continue;
+            };
+            if now - tie.last_contact_day < tuning.contact_gossip_cooldown_days {
+                continue;
+            }
+            tie.last_contact_day = now;
+            queue.0.push(crate::interact::Interact {
+                actor: entity,
+                target: other,
+                interaction: "gossip".to_owned(),
+            });
+            let _ = gossip_id;
+        }
     }
 }

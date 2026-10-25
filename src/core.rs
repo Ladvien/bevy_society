@@ -251,6 +251,9 @@ pub struct Tuning {
     /// toward its `Destination` when no `SocialMover` is steering. 1.4 m/s is an ordinary human
     /// walking speed. `SocialMover::speed` overrides it per person.
     pub walk_speed: f32,
+    /// Game-days between two contact-gossips along one directed tie. A shared place is one
+    /// conversation, not one per fixed step; the gate is the teller having news, this is only pacing.
+    pub contact_gossip_cooldown_days: f32,
 }
 
 impl Default for Tuning {
@@ -292,6 +295,19 @@ impl Default for Tuning {
             rejection_distress: 0.3,
             travel_timeout_hours: 2.0,
             walk_speed: 1.4,
+            // **A design default, set by measurement.** Not from a paper; the *gate* is the paper. Every
+            // contact-tell that finds an informed neighbour stifles the teller (Daley–Kendall), so pacing
+            // is what protects the spreader pool. Measured on the village, same seed:
+            //
+            //   cooldown | friends | rivals | rumor reach
+            //   0.5 d    |      23 |     45 |       0.375   <- burns spreaders, reach *falls* 35%
+            //   2.0 d    |      25 |     28 |       0.875   <- better than baseline on both axes
+            //   6.0 d    |      22 |     33 |       0.583   <- identical to no contact gossip at all
+            //   none     |      22 |     33 |       0.583
+            //
+            // Two days is the setting where contact gossip *adds* something: reach 50% above the shipped
+            // 0.583 while rivals fall from 33 to 28. At six days the system costs compute and changes nothing.
+            contact_gossip_cooldown_days: 2.0,
         }
     }
 }
