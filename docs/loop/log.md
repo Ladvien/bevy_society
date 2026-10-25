@@ -3777,7 +3777,7 @@ which is arithmetic and holds for any dynamics.
 
 **Dead-code delta.** Zero. **Tests:** 70 binaries, both feature sets; clippy, docs, fmt clean.
 
-**Commit** `pending`.
+**Commit** `30a9534`.
 
 **Top 5 remaining.**
 
