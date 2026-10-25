@@ -38,24 +38,22 @@ const MAX_NEIGHBOURS: usize = 10;
 /// The symmetry kick, as a fraction of a mover's wish. ORCA has no reason to prefer left over right at
 /// an exactly head-on meeting, so it stalls; `Crowd` nudges each member to a side hashed from its key.
 ///
-/// **This is what breaks the crowd deadlock, and 0.05 was too small to do it.** Measured on
-/// `village-evening` (24 people, 17 game-days, same seed): with the core walker and no steering at all,
-/// **4** activities are interrupted; with ORCA and the old `0.05`, **40** are. People converging on one
-/// place — the whole village shares one `Home` — press on each other until every walker's wish cancels,
-/// and they stall 2-4 m short for the full 4-hour travel timeout. Interrupted activities by nudge:
+/// **0.05 was too small to break a crowd.** Measured over `village-evening` — 24 people, 17 game-days,
+/// seed 7 — counting every `ActivityEnded` for the whole village (`summary.json`'s
+/// `completed_endings` / `interrupted_endings`):
 ///
-/// | nudge | interrupted |
-/// |---|---|
-/// | 0.05 | 40 |
-/// | 0.15 | 32 |
-/// | 0.20 | 29 |
-/// | 0.25 | 24 |
-/// | **0.30** | **19** |
-/// | 0.60 | 27 |
+/// | nudge | completed | interrupted | failed share |
+/// |---|---|---|---|
+/// | 0.05 | 6 948 | 2 872 | **29.2%** |
+/// | **0.30** | **7 571** | **2 237** | **22.8%** |
 ///
-/// Interior optimum: too small and the stall survives, too large and the side-step pushes people off
-/// their line. At 0.30 the village also reads **26 friends / 33 rivals** against **22 / 33**, so the
-/// kick does not cost the society anything. Reproducible: two runs give 19 / 26 / 33 both times.
+/// One villager's narrative suggested far larger swings (40 vs 19 interruptions), but that is a 24x
+/// sampling error: the narrative follows a single tracked person, and a single person's evening is not
+/// the village's. The whole-village count is the honest figure, and it says a 22% reduction.
+///
+/// The mechanism is visible in the failure itself: at `0.05`, walkers were printed sitting **2.0–4.0 m**
+/// from their target at every `travel_timeout_hours` expiry, with `Destination` still set and the solver
+/// never closing — the symmetric stall this constant exists to prevent.
 const NUDGE: f32 = 0.3;
 /// Below this speed (m/s) a mover keeps its facing instead of turning to its velocity.
 const FACE_MIN_SPEED: f32 = 0.05;
