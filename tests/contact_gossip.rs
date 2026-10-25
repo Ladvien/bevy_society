@@ -180,7 +180,7 @@ fn the_rumor_crosses_the_gap_only_when_the_two_groups_actually_meet() {
     settings.seconds_per_day = 64.0;
     settings.start_hour = 15.0;
     settings.contact_radius = 4.0;
-    settings.tuning.travel_timeout_hours = 12.0;
+    settings.tuning.travel_timeout_hours = Some(12.0);
     let mut app = headless(SocietyDefs::starter().expect("the pack parses"), settings);
     let mut villagers = Vec::new();
     for group in 0..2 {

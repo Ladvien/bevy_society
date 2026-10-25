@@ -147,12 +147,12 @@ mod trace;
 
 pub use behavior::{
     ActivityEnded, ActivityStarted, BehaviorPlugin, Destination, Doing, DoingTarget,
-    InteractionResolved,
+    InteractionResolved, TravelFailed,
 };
 pub use beliefs::{BeliefsPlugin, Knowledge, Known, Opinion, Opinions, belief_after_hearing};
 pub use core::{
-    AssessmentNorm, Autonomous, ClockSource, Home, HostClock, NextPersonId, Perception, Person,
-    PersonId, PersonIndex, Place, PlaceTags, SocietyClock, SocietyCorePlugin, SocietyPlane,
+    AssessmentNorm, Autonomous, ClockSource, Home, HostClock, Locomotion, NextPersonId, Perception,
+    Person, PersonId, PersonIndex, Place, PlaceTags, SocietyClock, SocietyCorePlugin, SocietyPlane,
     SocietyRng, SocietySettings, SocietySystems, SocietyTick, Tuning, society_tick_due,
 };
 pub use defs::{

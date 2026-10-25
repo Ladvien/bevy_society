@@ -80,3 +80,24 @@ means by speed.
 
 Until then, this iteration records the coupling in `docs/guide/concepts.md` and sets the
 demonstration's `seconds_per_day` such that the numbers do correspond.
+
+## Decided by the owner, 2026-10-24
+
+**A host may own locomotion, and the timeout is optional.** `SocietySettings::locomotion` is
+`Locomotion::Builtin` (the default, unchanged) or `Locomotion::Host`, and
+`Tuning::travel_timeout_hours` is `Option<f32>`.
+
+This dissolves the coupling this file describes rather than choosing between its options. The coupling
+exists because the crate walks people at a *real*-time speed while every duration is in *game* time, so
+`seconds_per_day` silently rescales every journey against every activity. Under `Host` there is no crate
+walk at all: the host walks its own figures on its own ground, and both `warn_short_travel_reach` and
+`warn_walk_outlasts_activity` skip, because neither has anything left to measure.
+
+The timeout becomes optional for the same reason. Under `Host` only the host can see whether a path
+exists, so a crate timeout would end activities the host was still walking toward; it reports the
+impossible ones with `TravelFailed` instead. `None` means a walk never times out.
+
+`Builtin` hosts keep today's numbers exactly: the default is still `Some(2.0)` and the same warnings
+fire.
+
+Implemented in the `host-locomotion` branch, `Closes #1`.

@@ -24,7 +24,7 @@ fn sleep_at_home() -> (App, Entity) {
     let mut day = settings();
     day.seconds_per_day = 240.0;
     day.start_hour = 23.0;
-    day.tuning.travel_timeout_hours = 4.0;
+    day.tuning.travel_timeout_hours = Some(4.0);
     let mut app = headless(SocietyDefs::starter().expect("the pack parses"), day);
     let home = app
         .world_mut()
@@ -121,7 +121,7 @@ fn most_nights_in_a_village_end_in_a_completed_sleep() {
     let mut day = settings();
     day.seconds_per_day = 64.0;
     day.start_hour = 15.0;
-    day.tuning.travel_timeout_hours = 4.0;
+    day.tuning.travel_timeout_hours = Some(4.0);
     let mut app = headless(SocietyDefs::starter().expect("the pack parses"), day);
 
     // Three faction places, 6 m apart, and each person's home is its own faction's place — the layout
