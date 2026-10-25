@@ -12,6 +12,13 @@
     // read from one personality trait, so it needs no stored state: two people with the same
     // conscientiousness are equally good at the same craft, and nobody carries a skill vector to save.
     // The three groups are the crate's own choice (a design default) — no paper assigns traits to trades.
+    // **Goods are quantities, not currency.** "Meat and honey are meticulously shared among the Ache, but
+    // goods purchased by money are not" — Henrich et al. 2005 (`10.1017/S0140525X05000142`). There is no
+    // money and no exchange rate here: a good is a level a person holds, and the price is an observation of
+    // what the village produced against what it ate.
+    goods: [
+        (id: "bread"),
+    ],
     skills: [
         (id: "craft", group: Craft),
         (id: "invention", group: Creative),
@@ -49,6 +56,10 @@
                 (input: Need("food"), curve: Logistic(-10.0, 0.35)),
             ],
             satisfies: [("food", 1.2)],
+            // **Eating uses up bread when there is any**, and never refuses when there is not: the store
+            // changes what a person prefers, never what they may do. Gating a dominant activity on a new
+            // condition was measured to wreck the village (rivals 29 -> 55 at seed 42).
+            consumes: [("bread", 1.0)],
             interaction: None,
             barks: ["Mmm, bread."],
         ),

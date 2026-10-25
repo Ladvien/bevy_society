@@ -4,7 +4,20 @@ All notable changes to bevy_society. The format follows [Keep a Changelog](https
 
 ## [Unreleased]
 
+### Breaking
+
+- **`SocietySave::VERSION` is 2, because `Stock` is the first per-person state added since the format was written.** A version-1 save now comes back as `RestoreError::Version` and is refused rather than misread — which is what `VERSION` exists for. A host with saved societies must discard or migrate them.
+
 ### Added
+
+- **A basic economy: goods, stock, and a price that rests when the village is fed and moves when it is not.** `goods: [(id: "bread")]` declares a quantity; `Stock` holds one level per good per person; an activity gains `produces` and `consumes` per **completed** use; and `Prices` moves by `Δprice = price_speed_per_day · (produced − consumed)` each pricing step, clamped to a band.
+
+  **The acceptance test is the literature's own, not a flourish.** The production/consumption model in *Games and AI* (corpus `eth-cgl-ar_games-Zun16a`) states it: "if the parameters are chosen such that the **inflow of resources into the system equals the outflow**, then the economy is **stable and prices fluctuate around a constant value** ... **shortages and oversupply**" move it. `tests/economy.rs` runs the same village twice — balanced and starved — and asserts the price sits in the first and rises in the second.
+
+  **Two bugs the test caught, both mine.** The delta was multiplied by `dt_days`, so a price integrated one tick of imbalance against thirty of zero and moved by `0.0016` in a 1 200-tick run; and scarcity was written `consumed − produced`, so an undersupplied village showed its price *falling*, because eaters who cannot find bread stop eating. Both are in the diff's history and in `docs/research/economics.md`.
+
+  **Nothing gates, and that was measured.** An empty store never stops a villager eating. A `bake` task at `Hours(6, 18)` out-competed `work` for the whole day and the village lost its rivalries entirely (seed 7: 26 → 1; seed 42: 33 → 0). It is a one-hour dawn errand at `Hours(6, 7)` instead: rivals 24 / 17 / 21 against a 26 / 33 / 27 baseline, with rumor reach **up** at seed 7 (0.33 → 0.79). The cost is real and is recorded, not argued away.
+
 
 - **A task is not a skill, and now the crate knows the difference.** Acemoglu & Autor (2010, DOI `10.3386/w16082`): "a task is a unit of work activity that produces output ... a skill is a worker's endowment of capabilities for performing various tasks", and "workers have different comparative advantages". Before this, `work` was one `Hour(8, 17)` gate at any place tagged `work`, so a miller and a weaver were the same person in a different colour. The definitions file gains `skills: [(id, group)]`, an activity may declare the `profession` it is a task for, and a consideration may read `Input::Skill("craft")`.
 

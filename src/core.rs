@@ -163,6 +163,28 @@ pub struct Tuning {
     /// **Design default, chosen by measurement**: the source is qualitative and gives no rate.
     /// `0.0` disables the step exactly.
     pub dyad_balance_per_day: f32,
+    /// The most of any one good a person can hold.
+    ///
+    /// **Design default, chosen by measurement.** No source paper gives a stock ceiling; the game-economy
+    /// model in the corpus uses "a maximum capacity of 500 units" for its gnomes (`eth-cgl-ar_games-Zun16a`),
+    /// which is a number for a different simulation. This one is sized so a completed task is a visible
+    /// fraction of a full store rather than a rounding error.
+    pub stock_ceiling: f32,
+    /// How fast a good's price responds to an imbalance between what the village consumed and produced,
+    /// in price units per unit of imbalance per game-day.
+    ///
+    /// **Design default, chosen by measurement.** The *shape* is the literature's: "if the inflow of
+    /// resources into the system equals the outflow, then the economy is stable and prices fluctuate around a
+    /// constant value ... shortages and oversupply" move it (`eth-cgl-ar_games-Zun16a`). The paper supplies
+    /// no rate.
+    pub price_speed_per_day: f32,
+    /// The lowest a price may fall.
+    ///
+    /// **Design default.** A clamp, not a model: without it a permanently oversupplied good would run to
+    /// zero and stop carrying information.
+    pub price_floor: f32,
+    /// The highest a price may rise. **Design default**, for the same reason as [`Self::price_floor`].
+    pub price_ceiling: f32,
     /// Familiarity added to two people by a mutual close friend's introduction. Design default (no
     /// source paper gives this number); mechanism: triadic closure, Kossinets & Watts 2006,
     /// DOI 10.1126/science.1116869.
@@ -416,6 +438,11 @@ impl Default for Tuning {
             // 0.133 -> 0.048 over 16 game-days while leaving the village's shape recognisable; the
             // sweep and the trade it makes are in `docs/loop/runs/2026-10-25-04/eval.md`.
             dyad_balance_per_day: 0.5,
+            // **Design defaults, chosen by measurement** — `docs/loop/runs/2026-10-25-07/eval.md`.
+            stock_ceiling: 6.0,
+            price_speed_per_day: 0.5,
+            price_floor: 0.25,
+            price_ceiling: 4.0,
             introduction_familiarity: 0.1,
             confidence_base: 0.2,
             confidence_openness: 0.6,
@@ -1198,7 +1225,9 @@ impl Plugin for SocietyCorePlugin {
             )
             .add_systems(
                 FixedUpdate,
-                (advance_clock, size_person_state).in_set(SocietySystems::Clock),
+                (advance_clock, size_person_state)
+                    .chain()
+                    .in_set(SocietySystems::Clock),
             )
             .add_systems(
                 FixedUpdate,

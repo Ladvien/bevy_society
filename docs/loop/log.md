@@ -4091,3 +4091,54 @@ clippy/fmt/doc clean. Perf unchanged: 0.730 ms/tick at 100, 508.8 at 5 000, insi
 4. **Romance and pairing** — `needs-decision/romance-and-pairing.md`, after professions.
 5. **A skill cannot improve.** The level is a trait reading, constant for a life; learning needs stored state
    and a save field.
+
+## 2026-10-25-07 — A basic economy
+
+**Pick.** Item 1, the request made three times: goods, stock and a price. Last iteration shipped the
+task/skill distinction that the economy needs underneath it; this one puts an economy on top.
+
+**The acceptance test is the literature's, not mine.** The production/consumption model in *Games and AI*
+(corpus `eth-cgl-ar_games-Zun16a`): "if the inflow of resources into the system equals the outflow, then the
+economy is stable and prices fluctuate around a constant value ... shortages and oversupply." So
+`tests/economy.rs` runs one village twice — balanced and starved — and asserts the price rests in the first and
+rises in the second.
+
+**What shipped.** `goods:` in the definitions file, `Stock` per person, `produces`/`consumes` per completed use,
+and `Prices` moved by `Δprice = price_speed_per_day · (produced − consumed)` per pricing step. `SocietySave::VERSION`
+is **2**, because `Stock` is the first per-person state added since the format was written; a version-1 save is
+refused with `RestoreError::Version`, and that is tested.
+
+**Two bugs of mine, both caught by the test.**
+
+1. **The delta was per tick** (`· dt_days`). An activity ends every few dozen ticks, so the price integrated one
+   tick of imbalance against thirty of zero and moved by **0.0016** in a 1 200-tick run. It looked exactly like
+   a model that does nothing.
+2. **Scarcity was inverted.** `consumed − produced` made an undersupplied village's price **fall** (1.000 →
+   0.550): in a shared store, eaters who cannot find bread stop eating, so consumption drops faster than
+   production. It is `produced − consumed` now.
+
+**The village paid, and the numbers are in the eval.** `bake` at `Hours(6,18)` for 2 hours out-competed `work`
+and rivals went **26 → 1**, **33 → 0**, **27 → 2**. Removing `bake` restores 26 / 33, so the activity is the
+cause. The shipped version is a one-hour dawn errand at `Hours(6,7)`: rivals **24 / 17 / 21** against a
+26 / 33 / 27 baseline, with rumor reach **up** at seed 7 (0.33 → 0.79) and down at seed 11 (0.67 → 0.08).
+
+**Clips.** All six re-recorded after the economy landed and inspected at frames 0 / 120 / 239, plus the encoded
+GIFs: three faction colours distinct, all four stalls in frame, captions and HUD legible.
+
+**Verdicts.** Pass 1 GREAT. Pass 2 GREAT, after two measured bugs. Pass 3 GREAT.
+
+**Dead-code delta.** Zero. **Tests:** `tests/economy.rs` is new (6); both feature sets green; clippy/fmt/doc
+clean. Perf: 0.762 ms/tick at 100 and 517.0 at 5 000, inside a ~10% spread.
+
+**Commit** `PENDING`.
+
+**Top 5 remaining.**
+
+1. **No trade between villagers** — Edgeworth barter is the honest shape and `Interact` already is it, but a
+   `trade` interaction needs a resistance price and a profit rule, neither sourced.
+2. **`produce_and_consume` scans `PersonIndex` per ending** — `O(n·endings)`, unexercised by the benchmark
+   because it declares no goods. Wants the index lookup the rest of the crate uses.
+3. **The refusal rate is `accept.base` 0.50** — mean P 0.656, affinity term +0.058. Still the most host-visible
+   unmeasured number.
+4. **`last_exchange_day` on `Tie`** — needs the save version bump, which is now a familiar shape. One field.
+5. **A skill cannot improve**, and a price has no counterparty. Both in `docs/research/economics.md`.

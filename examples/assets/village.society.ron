@@ -16,6 +16,25 @@
     // `docs/loop/runs/2026-10-25-06/eval.md`.
     activities: [
         (
+            // **The village's one producer.** A task that makes a good, so the store moves and the price has
+            // something to be an observation of. Nothing consumes bread but `eat`, which the starter pack
+            // declares, so production and consumption can be balanced or not by tuning one rate.
+            id: "bake",
+            target: Place("food"),
+            duration_hours: 1.0,
+            produces: [("bread", 1.0)],
+            // **A dawn errand, not a second job.** At `Hours(6, 18)` and 2 hours a bake, it out-competed
+            // `work` for the whole day and the village lost its rivalries entirely (seed 7: 26 -> 1, seed
+            // 42: 33 -> 0, measured). An hour at first light sits where `work`'s `Hours(8, 17)` window is
+            // shut, so it adds a morning without taking the day.
+            considerations: [
+                (input: Hour, curve: Hours(6.0, 7.0)),
+            ],
+            satisfies: [],
+            interaction: None,
+            barks: ["Fresh loaves."],
+        ),
+        (
             id: "craft",
             target: Place("work"),
             duration_hours: 3.0,

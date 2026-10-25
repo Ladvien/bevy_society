@@ -9,7 +9,7 @@ use std::fmt;
 use bevy::ecs::entity::Entity;
 use bevy::ecs::query::With;
 use bevy::ecs::resource::Resource;
-use bevy::ecs::system::{Query, Res};
+use bevy::ecs::system::{Commands, Query, Res};
 use bevy::log::error;
 use bevy::reflect::Reflect;
 use serde::Deserialize;
@@ -39,6 +39,11 @@ pub struct NeedId(pub u16);
 /// Index of a host signal, in definition order.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default, Reflect)]
 pub struct SignalId(pub u16);
+
+/// Index of a good, in definition order.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default, Reflect)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct GoodId(pub u16);
 
 /// Index of a skill, in definition order.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default, Reflect)]
@@ -80,6 +85,8 @@ pub struct DefsFile {
     pub signals: Vec<SignalDef>,
     /// Named capabilities, each read from one personality trait.
     pub skills: Vec<SkillDef>,
+    /// Tradeable quantities persons hold.
+    pub goods: Vec<GoodDef>,
     /// Opinion topics.
     pub topics: Vec<TopicDef>,
     /// Deeds that witnesses judge and that can become rumors.
@@ -149,6 +156,17 @@ impl SkillGroup {
     }
 }
 
+/// A tradeable quantity. Not a currency: there is no exchange rate and no `Good` is worth another.
+///
+/// "Meat and honey are meticulously shared among the Ache, but goods purchased by money are not" —
+/// Henrich et al. 2005 (DOI `10.1017/S0140525X05000142`). A good is a level a person holds, nothing more.
+#[derive(Debug, Clone, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct GoodDef {
+    /// Unique name.
+    pub id: String,
+}
+
 /// A named capability. Level comes from personality, not from stored state.
 #[derive(Debug, Clone, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -214,6 +232,16 @@ pub struct ActivityDef {
     pub satisfies: Vec<(String, f32)>,
     /// Interaction performed on arrival; requires a `Person` target.
     pub interaction: Option<String>,
+    /// Goods this activity makes, **per completed use**, with the amount.
+    ///
+    /// Per use, not per game-hour: a stock is a quantity, while `satisfies` is the rate-shaped field. A
+    /// task that is interrupted produces nothing, which is the same rule `satisfies` follows.
+    #[serde(default)]
+    pub produces: Vec<(String, f32)>,
+    /// Goods this activity uses up, per completed use. A person without them still does the activity —
+    /// a good changes what someone prefers, never what they may do.
+    #[serde(default)]
+    pub consumes: Vec<(String, f32)>,
     /// The skill this activity is a **task** for, when it is one.
     ///
     /// A task is "a unit of work activity that produces output" and a skill is "a worker's endowment of
@@ -689,6 +717,8 @@ pub struct SocietyDefs {
     pub(crate) signals: Vec<String>,
     /// Named capabilities, in definition order.
     pub(crate) skills: Vec<SkillGroup>,
+    /// Goods, in definition order. Public so a host can count what its pack declares.
+    pub goods: Vec<String>,
     pub(crate) topics: Vec<TopicSpec>,
     pub(crate) deeds: Vec<DeedSpec>,
     pub(crate) factions: Vec<FactionSpec>,
@@ -701,6 +731,7 @@ pub struct SocietyDefs {
     need_ids: HashMap<String, u16>,
     signal_ids: HashMap<String, u16>,
     skill_ids: HashMap<String, u16>,
+    good_ids: HashMap<String, u16>,
     topic_ids: HashMap<String, u16>,
     deed_ids: HashMap<String, u16>,
     faction_ids: HashMap<String, u16>,
@@ -722,6 +753,8 @@ impl SocietyDefs {
             needs: Vec::new(),
             signals: Vec::new(),
             skills: Vec::new(),
+            goods: Vec::new(),
+            good_ids: HashMap::new(),
             topics: Vec::new(),
             deeds: Vec::new(),
             factions: Vec::new(),
@@ -734,6 +767,8 @@ impl SocietyDefs {
                 considerations: Vec::new(),
                 satisfies: Vec::new(),
                 interaction: None,
+                produces: Vec::new(),
+                consumes: Vec::new(),
                 barks: Vec::new(),
             }],
             interactions: Vec::new(),
@@ -764,6 +799,9 @@ impl SocietyDefs {
         }
         for def in file.skills {
             defs.add_skill(def)?;
+        }
+        for def in file.goods {
+            defs.add_good(def)?;
         }
         for def in file.topics {
             defs.add_topic(def)?;
@@ -807,6 +845,17 @@ impl SocietyDefs {
     /// The id of a need, if defined.
     pub fn need_id(&self, name: &str) -> Option<NeedId> {
         self.need_ids.get(name).copied().map(NeedId)
+    }
+
+    /// The id of a good, if defined.
+    pub fn good_id(&self, name: &str) -> Option<GoodId> {
+        self.good_ids.get(name).copied().map(GoodId)
+    }
+
+    /// An activity's compiled specification, by its authored name.
+    pub(crate) fn activity_by_name(&self, name: &str) -> Option<&ActivitySpec> {
+        self.activity_id(name)
+            .and_then(|id| self.activities.get(usize::from(id.0)))
     }
 
     /// The id of a skill, if defined.
@@ -1090,6 +1139,12 @@ impl SocietyDefs {
         Ok(())
     }
 
+    fn add_good(&mut self, def: GoodDef) -> Result<(), DefsError> {
+        register(&mut self.good_ids, "good", &def.id, self.goods.len())?;
+        self.goods.push(def.id);
+        Ok(())
+    }
+
     fn add_topic(&mut self, def: TopicDef) -> Result<(), DefsError> {
         register(&mut self.topic_ids, "topic", &def.id, self.topics.len())?;
         self.topics.push(TopicSpec { name: def.id });
@@ -1258,6 +1313,10 @@ impl SocietyDefs {
         for line in &def.barks {
             check_template(&barks_owner, line)?;
         }
+        // Goods, resolved against the definitions file. An unknown name is an error rather than a
+        // silent no-op: a task that produces nothing because of a typo is a bug a host cannot see.
+        let produces = self.good_list(&owner, &def.produces)?;
+        let consumes = self.good_list(&owner, &def.consumes)?;
         self.activities.push(ActivitySpec {
             name: def.id,
             target: def.target,
@@ -1267,9 +1326,30 @@ impl SocietyDefs {
             considerations,
             satisfies,
             interaction,
+            produces,
+            consumes,
             barks: def.barks,
         });
         Ok(())
+    }
+
+    /// Resolves `(name, amount)` pairs to goods, refusing an unknown name or a negative amount.
+    fn good_list(
+        &self,
+        owner: &str,
+        list: &[(String, f32)],
+    ) -> Result<Vec<(GoodId, f32)>, DefsError> {
+        let mut out = Vec::with_capacity(list.len());
+        for (name, amount) in list {
+            if *amount < 0.0 {
+                return Err(invalid(
+                    owner,
+                    format!("good '{name}' has a negative amount"),
+                ));
+            }
+            out.push((require(self.good_id(name), "good", name, owner)?, *amount));
+        }
+        Ok(out)
     }
 
     fn compile_term(
@@ -1423,17 +1503,51 @@ impl SocietyDefs {
     }
 }
 
-/// Keeps every person's `Needs`, `Signals` and `Opinions` the length of the defs (plan D2). A short
-/// vector grows with the defs' starting values; a long one is an error and is truncated. `Mut` changes
-/// only when a length actually differs.
+/// The per-person state [`size_person_state`] sizes, bundled to stay inside clippy's type-complexity limit.
+type PersonStateQuery<'w, 's> = Query<
+    'w,
+    's,
+    (
+        Entity,
+        &'static mut Needs,
+        &'static mut Signals,
+        &'static mut Opinions,
+        Option<&'static mut crate::Stock>,
+    ),
+    With<Person>,
+>;
+
+/// Keeps every person's `Needs`, `Signals`, `Opinions` and `Stock` the length of the defs (plan D2). A
+/// short vector grows with the defs' starting values; a long one is an error and is truncated. `Mut`
+/// changes only when a length actually differs.
+///
+/// **`Stock` is added here too**, as a `Component` when the pack declares goods, so a host that adds a good
+/// to its definitions file does not also have to remember to spawn one.
 pub fn size_person_state(
     defs: Res<SocietyDefs>,
-    mut people: Query<(Entity, &mut Needs, &mut Signals, &mut Opinions), With<Person>>,
+    mut commands: Commands,
+    mut people: PersonStateQuery,
 ) {
     let need_count = defs.needs.len();
     let signal_count = defs.signals.len();
     let topic_count = defs.topics.len();
-    for (entity, mut needs, mut signals, mut opinions) in &mut people {
+    let good_count = defs.goods.len();
+    for (entity, mut needs, mut signals, mut opinions, stock) in &mut people {
+        // **Stock is sized with the rest of the per-person state**, so a host that adds a good to its
+        // definitions file does not have to remember to spawn a component for it.
+        match stock {
+            Some(mut stock) => {
+                if stock.0.len() != good_count {
+                    stock.0.resize(good_count, 0.0);
+                }
+            }
+            None if good_count > 0 => {
+                commands
+                    .entity(entity)
+                    .insert(crate::Stock(vec![0.0; good_count]));
+            }
+            None => {}
+        }
         let have = needs.0.len();
         if have > need_count {
             error!(
@@ -1510,6 +1624,10 @@ pub(crate) struct ActivitySpec {
     pub(crate) considerations: Vec<Term>,
     pub(crate) satisfies: Vec<(NeedId, f32)>,
     pub(crate) interaction: Option<InteractionId>,
+    /// Goods made per completed use.
+    pub(crate) produces: Vec<(GoodId, f32)>,
+    /// Goods used up per completed use.
+    pub(crate) consumes: Vec<(GoodId, f32)>,
     pub(crate) barks: Vec<String>,
 }
 

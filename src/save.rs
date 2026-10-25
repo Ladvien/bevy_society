@@ -60,7 +60,7 @@ use crate::rumor::{Rumor, RumorBook, RumorId};
 /// [`restore`] refuses any other version rather than guessing at an older or newer layout, so a
 /// host that ships a save and later upgrades the crate gets a `Version` error it can act on instead
 /// of a silently wrong society.
-pub const VERSION: u32 = 1;
+pub const VERSION: u32 = 2;
 
 // -------------------------------------------------------------------------------------------------
 // The saved shape: plain fields, no `Entity`
@@ -268,6 +268,9 @@ pub struct PersonSave {
     /// The last ORCA velocity, when the steering feature is on.
     #[cfg(feature = "steering")]
     pub velocity: Option<[f32; 2]>,
+    /// Goods held, one level per good in definition order. `VERSION` 2.
+    #[serde(default)]
+    pub stock: Vec<f32>,
 }
 
 /// One rumor, with every person reference as a [`PersonKey`].
@@ -431,6 +434,8 @@ struct PersonCapture {
     destination: Option<&'static Destination>,
     #[cfg(feature = "steering")]
     velocity: Option<&'static crate::steering::SocialVelocity>,
+    /// Goods held, when the pack defines any.
+    stock: Option<&'static crate::Stock>,
 }
 
 /// Entity to [`PlaceKey`], for the places the host keyed.
@@ -609,6 +614,7 @@ pub fn capture(world: &mut World) -> SocietySave {
                 .map(|destination| [destination.0.x, destination.0.y]),
             #[cfg(feature = "steering")]
             velocity: person.velocity.map(|velocity| [velocity.0.x, velocity.0.y]),
+            stock: person.stock.map_or_else(Vec::new, |stock| stock.0.clone()),
         };
         rows.push((person.id.0, key, person.entity, save));
     }
@@ -1102,6 +1108,12 @@ fn write_person(
         person.memberships.clone(),
         person.status,
     ));
+    // Goods come back exactly as saved, so a village's stores survive a reload the way its ties do.
+    if person.stock.is_empty() {
+        em.remove::<crate::Stock>();
+    } else {
+        em.insert(crate::Stock(person.stock.clone()));
+    }
     if person.dormant {
         em.insert(Dormant);
     } else {

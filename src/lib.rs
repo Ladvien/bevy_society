@@ -130,6 +130,7 @@ mod steering;
 mod beliefs;
 mod core;
 mod defs;
+mod economy;
 #[cfg(feature = "fields")]
 mod fields;
 mod groups;
@@ -160,13 +161,14 @@ pub use core::{
 };
 pub use defs::{
     AcceptDef, ActivityDef, ActivityId, ActivityTarget, Consideration, ConversationRuleDef,
-    DeedDef, DeedId, DefsError, DefsFile, EffectsDef, FactionDef, FactionId, FieldInput,
-    IDLE_ACTIVITY, Input, InteractionBarks, InteractionDef, InteractionId, NeedDef, NeedId,
+    DeedDef, DeedId, DefsError, DefsFile, EffectsDef, FactionDef, FactionId, FieldInput, GoodDef,
+    GoodId, IDLE_ACTIVITY, Input, InteractionBarks, InteractionDef, InteractionId, NeedDef, NeedId,
     NodeEffectDef, Signal, SignalDef, SignalId, SkillDef, SkillGroup, SkillId, SocietyDefs,
     TieDelta, TopicDef, TopicId, TriggerDef, TriggerOn, size_person_state,
 };
 #[cfg(feature = "dialogue")]
 pub use dialogue::{DialoguePlugin, TalkTo};
+pub use economy::{EconomyPlugin, Flow, Prices, Stock};
 #[cfg(feature = "fields")]
 pub use fields::{Commotion, SocialFieldPlugin, SocialFieldSettings, SocialFields};
 // The two value types the fields are configured with, re-exported so a host names one crate. Both are

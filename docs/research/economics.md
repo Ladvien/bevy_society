@@ -66,6 +66,57 @@ The corpus has the market model, and it is recorded rather than built:
 All three are written up in `docs/loop/needs-decision/professions-and-economics.md` with the measurements
 that must precede them.
 
+## The economy: goods, stock and a price that rests
+
+### The acceptance test is the literature's own
+
+**Games and AI** (corpus doc `eth-cgl-ar_games-Zun16a`, converted), on its production/consumption model:
+
+> "If the parameters are chosen such that the **inflow of resources into the system equals the outflow**, then
+> the economy is **stable and prices fluctuate around a constant value**. However, by upsetting this balance
+> we can simulate a variety of interesting real market phenomenon, such as **shortages and oversupply**."
+
+So a price here is not decoration: it is asserted to rest when production matches consumption and to move
+when it does not, in `tests/economy.rs`.
+
+### What is implemented
+
+- **A good** (`goods: [(id: "bread")]`) is a quantity, not a currency. "Meat and honey are meticulously
+  shared among the Ache, but goods purchased by money are not" — Henrich et al. 2005. No exchange rate.
+- **`Stock`** — one level per good per person, in `[0, Tuning::stock_ceiling]`. It is **state**, so it is in
+  `PersonSave` and `SocietySave::VERSION` is **2**.
+- **`produces` / `consumes` on an activity**, per **completed** use. An interrupted task produces nothing,
+  the same rule `satisfies` follows.
+- **`Prices`**, one per good, moved by
+  `Δprice = price_speed_per_day · (produced − consumed)` **per interval**, clamped to
+  `[price_floor, price_ceiling]`.
+
+**Why the delta is per interval and not per tick.** The first version multiplied by `dt_days`, and an activity
+ends only every few dozen ticks — so the price integrated one tick of imbalance against thirty of zero and
+moved by `0.0016` in a 1 200-tick run. The counters accumulate between price updates and are cleared by the
+update, which makes the price an integral of what the village did rather than of the last tick.
+
+**Why scarcity is `produced − consumed` and not the reverse.** The first version had it inverted and an
+undersupplied village showed its price *falling*: with a shared store the eaters who cannot find bread stop
+eating, so consumption drops faster than production and the raw difference turns negative.
+
+### What it is not
+
+- **No trade between villagers.** Parunak et al. note that "a less-studied alternative to auction systems is
+  the pattern of **Edgeworth barter**, in which buyers and sellers interact directly with each other in
+  repeated pairwise transactions, **without the benefit of an auctioneer**" (corpus `10.1007_11678809_10`).
+  `Interact` is already that shape, but a `trade` interaction needs a resistance price and a profit rule and
+  neither has a source.
+- **No money**, per Henrich above.
+- **Nothing gates.** An empty store never stops a villager eating; measured, gating a dominant activity is
+  what wrecked the village in the professions iteration.
+
+### Design defaults, all of them
+
+`stock_ceiling` (6.0), `price_speed_per_day` (0.5), `price_floor` (0.25) and `price_ceiling` (4.0) have **no
+source**. The paper's own `w = 6.0` and "500 units" are for its gnomes. They are chosen by measurement — see
+`docs/loop/runs/2026-10-25-07/eval.md`.
+
 ## What the model leaves out
 
 - Money, prices, wages, inventories and trade. No good is scarce and nothing is exchanged for anything.
