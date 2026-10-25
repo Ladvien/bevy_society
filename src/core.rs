@@ -11,10 +11,7 @@ use bevy::ecs::component::Component;
 use bevy::ecs::entity::Entity;
 use bevy::ecs::lifecycle::{Add, Remove};
 use bevy::ecs::observer::On;
-<<<<<<< HEAD
-=======
 use bevy::ecs::query::Has;
->>>>>>> origin/main
 use bevy::ecs::reflect::ReflectComponent;
 use bevy::ecs::resource::Resource;
 use bevy::ecs::schedule::{IntoScheduleConfigs, SystemSet};

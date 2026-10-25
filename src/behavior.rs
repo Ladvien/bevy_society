@@ -1129,7 +1129,6 @@ struct DecisionQueries<'w, 's> {
         ),
     >,
     doing: Query<'w, 's, &'static Doing>,
-    autonomous: Query<'w, 's, (), With<crate::Autonomous>>,
 }
 
 /// Chooses an activity for every autonomous person that has none (plan D7).
@@ -1149,16 +1148,10 @@ fn decide_activities(
     index: Res<PersonIndex>,
     mut rng: ResMut<crate::SocietyRng>,
     mut commands: Commands,
-<<<<<<< HEAD
     world: DecisionQueries,
-=======
-    people: Query<Decider>,
-    places: Query<(Entity, &crate::Place, &crate::PlaceTags, &Transform)>,
-    doing: Query<&Doing>,
-    // Two markers in one query, so the system stays under Bevy's system-parameter cap once the
-    // dormancy check joins the autonomy one. `Has` reads both without a second query.
+    // Two markers in one query: `Has` reads both without a second one, which is what keeps this
+    // system inside Bevy's system-parameter cap.
     marks: Query<(Has<crate::Autonomous>, Has<crate::Dormant>)>,
->>>>>>> origin/main
     mut started: MessageWriter<ActivityStarted>,
     engine: Option<Res<crate::script::ScriptEngine>>,
     cell: Res<crate::snapshot::SnapshotCell>,
@@ -1172,7 +1165,6 @@ fn decide_activities(
         people,
         places,
         doing,
-        autonomous,
     } = world;
     use bevy_emerge_rng::DetRng;
 
