@@ -22,10 +22,13 @@ rhai = { version = "1.27", features = ["sync", "f32_float"] }                   
 serde = { version = "1", features = ["derive"] }                                         # https://github.com/serde-rs/serde — authored definitions
 ron = "0.12"                                                                             # https://github.com/ron-rs/ron — the definitions' file format
 rand_chacha = "0.10"   # https://github.com/rust-random/rand — names ChaCha8Rng; the stream comes from bevy_emerge_rng
-bevy_emerge_rng = { git = "https://github.com/Ladvien/bevy_emerge", rev = "a5dcbb08b228dae8678b886dd3e54c5e2d098e3b" }  # https://github.com/Ladvien/bevy_emerge — the seeded ChaCha8 stream and DetRng draws
-bevy_orca = { git = "https://github.com/Ladvien/bevy_orca", rev = "88168eb19c15712c6b6f97ba024635804c346cbe", optional = true }  # https://github.com/Ladvien/bevy_orca — ORCA reciprocal collision avoidance for walking persons (steering feature)
-bevy_stigmergy = { git = "https://github.com/Ladvien/bevy_stigmergy", rev = "9d17e8607ec8ecf8b0b9b2b7e6361217efdf637a", optional = true }  # https://github.com/Ladvien/bevy_stigmergy — per-cell presence and commotion fields (fields feature)
-bevy_speech_bubbles = { git = "https://github.com/Ladvien/bevy_speech_bubbles", rev = "7cdd67b830bf35238cd22e0a88154b8063df61f0", optional = true }  # https://github.com/Ladvien/bevy_speech_bubbles — barks and conversations (dialogue feature)
+# The ladvien dependencies are crates.io versions rather than git revs, so a consumer needs no
+# `[patch]` and the whole family can be published. They move together: `bevy_orca` and
+# `bevy_stigmergy` are 0.2, which is the interface release that added `Crowd` and `CellFrame`.
+bevy_emerge_rng = "0.1"                                                                  # https://github.com/Ladvien/bevy_emerge — the seeded ChaCha8 stream and DetRng draws
+bevy_orca = { version = "0.2", optional = true }                                          # https://github.com/Ladvien/bevy_orca — ORCA reciprocal collision avoidance for walking persons (steering feature)
+bevy_stigmergy = { version = "0.2", optional = true, features = ["reflect"] }             # https://github.com/Ladvien/bevy_stigmergy — per-cell presence and commotion fields (fields feature)
+bevy_speech_bubbles = { version = "0.2", optional = true }                                # https://github.com/Ladvien/bevy_speech_bubbles — barks and conversations (dialogue feature)
 
 [[example]]
 name = "benchmark"
@@ -68,3 +71,4 @@ all-features = true
 
 [profile.dev.package."*"]
 opt-level = 3
+

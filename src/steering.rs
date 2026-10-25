@@ -15,10 +15,15 @@
 //!
 //! Movers must be root entities: the system reads and writes `Transform` (the local transform),
 //! which is the value the simulation owns. `GlobalTransform` lags behind between fixed steps.
-//! Neighbour search is brute force over the movers, so it is O(n²) in the number of movers.
+//!
+//! **Neighbour search is [`bevy_orca::Crowd`]'s.** It owns the spatial hash, the scratch buffers and
+//! the deterministic tie-break, so a crowd of a few hundred persons costs no per-tick allocation and
+//! does not depend on the order the movers happen to be read in. Before 0.2 this module hand-rolled an
+//! O(n²) all-pairs scan, which is the shape every ORCA host writes and none of them needs to.
 
 use bevy::prelude::*;
-use bevy_orca::{Agent, new_velocity};
+use bevy_orca::Crowd;
+use bevy_orca::{CrowdMember, CrowdParams};
 
 use crate::behavior::Destination;
 use crate::core::require_core;
@@ -28,6 +33,11 @@ use crate::{PersonIndex, SocietyPlane, SocietySettings, SocietySystems};
 const NEIGHBOUR_RANGE: f32 = 3.0;
 /// Seconds ahead that agent-agent collisions are anticipated.
 const TIME_HORIZON: f32 = 2.0;
+/// At most this many neighbours per mover, nearest first.
+const MAX_NEIGHBOURS: usize = 10;
+/// The symmetry kick, as a fraction of a mover's wish. ORCA has no reason to prefer left over right at
+/// an exactly head-on meeting, so it stalls; `Crowd` nudges each member to a side hashed from its key.
+const NUDGE: f32 = 0.05;
 /// Below this speed (m/s) a mover keeps its facing instead of turning to its velocity.
 const FACE_MIN_SPEED: f32 = 0.05;
 /// Metres ahead that a solid thing starts constraining a mover's velocity.
@@ -161,18 +171,7 @@ fn push_out_of_obstacles(
     }
 }
 
-/// One mover's state read before any velocity is computed, so that neighbours see the same
-/// positions regardless of iteration order.
-struct Snap {
-    entity: Entity,
-    pos: Vec2,
-    vel: Vec2,
-    radius: f32,
-    speed: f32,
-    face: bool,
-    dest: Option<Vec2>,
-}
-
+#[allow(clippy::too_many_arguments)]
 fn steer_movers(
     index: Res<PersonIndex>,
     settings: Res<SocietySettings>,
@@ -184,6 +183,11 @@ fn steer_movers(
         &mut Transform,
         Option<&Destination>,
     )>,
+    // The batch solver, and the members slice it is handed, both persist between ticks:
+    // `Crowd` clears its buffers rather than dropping them and `members` is a `Vec` reused the same
+    // way, so a steady crowd allocates nothing per tick.
+    mut crowd: Local<Crowd>,
+    mut members: Local<Vec<CrowdMember>>,
 ) {
     let dt = time.delta_secs();
     let plane = &settings.plane;
@@ -195,93 +199,93 @@ fn steer_movers(
         .map(|(obstacle, transform)| (to_plane(transform.translation, plane), obstacle.radius))
         .collect();
 
-    // Pass 1: read every mover in sorted order. A mover without a destination reports zero
-    // velocity, so it is an obstacle that stands still.
-    let mut snaps: Vec<Snap> = Vec::with_capacity(index.sorted.len());
-    for &(_, entity) in &index.sorted {
+    // Build one member per mover, in sorted order. A mover without a destination is still a member:
+    // its `pref_vel` is `None`, which means "another system moves this one this step", so everyone
+    // takes the full avoidance against it rather than walking through it — the same meaning the
+    // hand-written code gave a zero velocity.
+    members.clear();
+    members.reserve(index.sorted.len());
+    for &(id, entity) in &index.sorted {
         let Ok((mover, velocity, transform, dest)) = movers.get(entity) else {
             continue;
         };
-        snaps.push(Snap {
-            entity,
-            pos: to_plane(transform.translation, plane),
-            vel: if dest.is_some() {
+        let pos = to_plane(transform.translation, plane);
+        let wish = dest.map(|d| {
+            let to_dest = d.0 - pos;
+            if to_dest.length() <= stop_radius {
+                Vec2::ZERO
+            } else {
+                to_dest.normalize_or_zero() * mover.speed
+            }
+        });
+        members.push(CrowdMember {
+            key: u64::from(id.0),
+            pos,
+            vel: if wish.is_some() {
                 velocity.0
             } else {
                 Vec2::ZERO
             },
             radius: mover.radius,
-            speed: mover.speed,
-            face: mover.face_motion,
-            dest: dest.map(|d| d.0),
+            max_speed: mover.speed,
+            pref_vel: wish,
         });
     }
+    if members.is_empty() {
+        return;
+    }
 
-    // Pass 2: compute every velocity against the pass-1 snapshot.
-    let mut velocities: Vec<Vec2> = Vec::with_capacity(snaps.len());
-    for (i, me) in snaps.iter().enumerate() {
-        let Some(dest) = me.dest else {
-            velocities.push(Vec2::ZERO);
-            continue;
-        };
-        let to_dest = dest - me.pos;
-        let pref = if to_dest.length() <= stop_radius {
-            Vec2::ZERO
-        } else {
-            to_dest.normalize_or_zero() * me.speed
-        };
-        let agent = Agent {
-            pos: me.pos,
-            vel: me.vel,
-            radius: me.radius,
-            avoids: true,
-        };
-        let neighbours: Vec<Agent> = snaps
-            .iter()
-            .enumerate()
-            .filter(|(j, other)| *j != i && other.pos.distance(me.pos) <= NEIGHBOUR_RANGE)
-            .map(|(_, other)| Agent {
-                pos: other.pos,
-                vel: other.vel,
-                radius: other.radius,
-                avoids: true,
-            })
-            .collect();
-        // Walls, as `(b, approach)`: `b` points from the mover at the solid, and `approach` is the
-        // fastest it may still close on it this step — the gap it has left, divided by `dt`. Only
-        // solids within `WALL_RANGE` matter; a distant block cannot be reached this step.
-        let walls: Vec<(Vec2, f32)> = solids
-            .iter()
-            .filter_map(|(centre, radius)| {
+    let params = CrowdParams {
+        time_horizon: TIME_HORIZON,
+        neighbour_range: NEIGHBOUR_RANGE,
+        max_neighbours: MAX_NEIGHBOURS,
+        nudge: NUDGE,
+    };
+    // Every mover is a neighbour of every other: society has no layers or teams to hide one from
+    // another. Walls are `(b, approach)`, where `b` points from the mover at the solid and `approach`
+    // is the fastest it may still close on it this step — the gap it has left, divided by `dt`. Only
+    // solids within `WALL_RANGE` matter; a distant block cannot be reached this step.
+    let solved = crowd.solve(
+        &members,
+        &params,
+        dt,
+        |_, _| true,
+        |i, walls| {
+            walls.clear();
+            let Some(me) = members.get(i) else {
+                return;
+            };
+            for (centre, radius) in &solids {
                 let to_solid = *centre - me.pos;
                 let gap = to_solid.length() - radius - me.radius;
                 if gap > WALL_RANGE {
-                    return None;
+                    continue;
                 }
-                let b = to_solid.normalize_or_zero();
                 // Already overlapping: no closing at all, which lets it slide or back off.
-                Some((b, if gap <= 0.0 { 0.0 } else { gap / dt }))
-            })
-            .collect();
-        velocities.push(new_velocity(
-            &agent,
-            pref,
-            &neighbours,
-            &walls,
-            TIME_HORIZON,
-            dt,
-            me.speed,
-        ));
-    }
+                walls.push((
+                    to_solid.normalize_or_zero(),
+                    if gap <= 0.0 { 0.0 } else { gap / dt },
+                ));
+            }
+        },
+    );
+    let velocities: Vec<Option<Vec2>> = solved.to_vec();
 
-    // Pass 3: store each velocity, move by it over this step, and face the direction of travel.
-    for (me, velocity) in snaps.iter().zip(velocities) {
-        let Ok((_, mut stored, mut transform, _)) = movers.get_mut(me.entity) else {
+    // Store each velocity, move by it over this step, and face the direction of travel.
+    for (&(_, entity), velocity) in index.sorted.iter().zip(velocities) {
+        let Ok((mover, mut stored, mut transform, dest)) = movers.get_mut(entity) else {
             continue;
         };
+        // A mover with no destination keeps its stored zero and does not move; `Crowd` reports `None`
+        // for it, and a `Some` that came back non-finite is a solver bug rather than a position.
+        let velocity = velocity.filter(|v| v.is_finite()).unwrap_or(Vec2::ZERO);
+        if dest.is_none() {
+            stored.0 = Vec2::ZERO;
+            continue;
+        }
         stored.0 = velocity;
         step_on_plane(&mut transform, velocity * dt, plane);
-        if me.face && velocity.length() > FACE_MIN_SPEED {
+        if mover.face_motion && velocity.length() > FACE_MIN_SPEED {
             transform.rotation = facing(velocity, plane);
         }
     }
