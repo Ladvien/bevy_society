@@ -210,7 +210,7 @@ fn society_defs(scenario: &str) -> Result<SocietyDefs, String> {
 struct Spec {
     seconds_per_day: f32,
     start_hour: f32,
-    travel_timeout_hours: f32,
+    travel_timeout_hours: Option<f32>,
     /// The scenario's `ticks:`, counted at **its own** `seconds_per_day`.
     ticks: usize,
     /// The scenario's `seed:`. Unread until iteration 2026-11-17: every scenario ran at the crate
@@ -284,7 +284,7 @@ fn scenario_spec(name: &str) -> Spec {
             match key.trim() {
                 "seconds_per_day" => spec.seconds_per_day = number,
                 "start_hour" => spec.start_hour = number,
-                "travel_timeout_hours" => spec.travel_timeout_hours = number,
+                "travel_timeout_hours" => spec.travel_timeout_hours = Some(number),
                 "contact_radius" => spec.contact_radius = Some(number),
                 other => {
                     // Once per parse, and `scenario_spec` is called a handful of times per run.

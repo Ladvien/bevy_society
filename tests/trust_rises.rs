@@ -41,7 +41,7 @@ fn mean_trust(defs: SocietyDefs, ticks: usize) -> (f32, f32, f32) {
     let mut day = settings();
     day.seconds_per_day = 64.0;
     day.start_hour = 15.0;
-    day.tuning.travel_timeout_hours = 4.0;
+    day.tuning.travel_timeout_hours = Some(4.0);
     let mut app = headless(defs, day);
     let at = [(0.0_f32, 0.0), (6.5, -5.0), (-6.5, -5.0), (6.5, 5.0)];
     let places: Vec<Entity> = at

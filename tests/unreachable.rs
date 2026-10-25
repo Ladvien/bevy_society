@@ -77,7 +77,7 @@ fn a_short_travel_reach_is_named_and_a_long_one_is_not() {
         seconds_per_day: 4.0,
         tick_secs: 1.0 / 64.0,
         tuning: bevy_society::Tuning {
-            travel_timeout_hours: 40.0,
+            travel_timeout_hours: Some(40.0),
             ..Default::default()
         },
         ..common::settings()
@@ -111,12 +111,12 @@ fn a_short_travel_reach_is_named_and_a_long_one_is_not() {
         seconds_per_day: 240.0,
         tick_secs: 1.0 / 64.0,
         tuning: bevy_society::Tuning {
-            travel_timeout_hours: 40.0,
+            travel_timeout_hours: Some(40.0),
             ..Default::default()
         },
         ..common::settings()
     };
-    let ticks = f64::from(long_day.tuning.travel_timeout_hours)
+    let ticks = f64::from(long_day.tuning.travel_timeout_hours.unwrap_or_default())
         / 24.0
         / (f64::from(long_day.tick_secs) / f64::from(long_day.seconds_per_day));
     let metres = 1.4 * f64::from(long_day.tick_secs) * ticks;

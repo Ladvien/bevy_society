@@ -44,7 +44,7 @@ fn second_group_peak(seconds_per_day: f32) -> usize {
     day.seconds_per_day = seconds_per_day;
     day.start_hour = 15.0;
     day.contact_radius = 4.0;
-    day.tuning.travel_timeout_hours = 12.0;
+    day.tuning.travel_timeout_hours = Some(12.0);
     let mut app = headless(SocietyDefs::starter().expect("the pack parses"), day);
     let mut villagers = Vec::new();
     for group in 0..2 {

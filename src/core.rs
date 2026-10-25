@@ -246,7 +246,13 @@ pub struct Tuning {
     /// the ratio, not the magnitude, is what leaves every mood's pleasure at or below zero.
     pub rejection_distress: f32,
     /// Hours a person may travel toward an activity before giving up.
-    pub travel_timeout_hours: f32,
+    /// Game hours a person may travel toward an activity before giving up, or `None` for a walk that
+    /// never times out.
+    ///
+    /// `None` is what a host wants under [`Locomotion::Host`]: it owns the path, so only it can say a
+    /// destination is unreachable, and it says so with [`TravelFailed`](crate::TravelFailed). A timeout
+    /// left in place would end activities the host was still walking toward.
+    pub travel_timeout_hours: Option<f32>,
     /// Walking speed in metres per **real** second, used by the core walker that moves a person
     /// toward its `Destination` when no `SocialMover` is steering. 1.4 m/s is an ordinary human
     /// walking speed. `SocialMover::speed` overrides it per person.
@@ -293,7 +299,7 @@ impl Default for Tuning {
             contest_steepness: 4.0,
             tier_cutoff: 0.25,
             rejection_distress: 0.3,
-            travel_timeout_hours: 2.0,
+            travel_timeout_hours: Some(2.0),
             walk_speed: 1.4,
             // **A design default, set by measurement.** Not from a paper; the *gate* is the paper. Every
             // contact-tell that finds an informed neighbour stifles the teller (Daley–Kendall), so pacing
@@ -335,6 +341,20 @@ pub struct HostClock {
     pub now_days: f64,
 }
 
+/// Who moves a person's `Transform` toward its [`Destination`](crate::Destination).
+#[derive(Reflect, Debug, Clone, Copy, Default, PartialEq, Eq)]
+pub enum Locomotion {
+    /// The crate's own: every person with a `Destination` is walked at
+    /// [`Tuning::walk_speed`](crate::Tuning) metres per real second, straight at the target.
+    #[default]
+    Builtin,
+    /// The host's. The society decides *where* a person goes and the host decides *how* they get
+    /// there — along its street grid, on terrain height, around its houses, and avoiding figures the
+    /// society does not own. **No crate system writes a person's `Transform`**; `Destination` is the
+    /// request to read, and the arrival check still reads the `Transform` the host moved.
+    Host,
+}
+
 /// Global settings of the society. Insert before adding [`SocietyCorePlugin`] to override defaults.
 #[derive(Resource, Reflect, Debug, Clone)]
 pub struct SocietySettings {
@@ -348,6 +368,8 @@ pub struct SocietySettings {
     pub start_hour: f32,
     /// Where the clock's time comes from.
     pub clock: ClockSource,
+    /// Who moves a person toward its `Destination`.
+    pub locomotion: Locomotion,
     /// Plane on which positions are projected.
     pub plane: SocietyPlane,
     /// Radius within which a person perceives others (metres on the plane).
@@ -386,6 +408,7 @@ impl Default for SocietySettings {
             seconds_per_day: 240.0,
             start_hour: 8.0,
             clock: ClockSource::Fixed,
+            locomotion: Locomotion::Builtin,
             plane: SocietyPlane::XZ,
             perception_radius: 8.0,
             contact_radius: 4.0,

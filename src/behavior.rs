@@ -206,6 +206,14 @@ impl Plugin for BehaviorPlugin {
                 FixedUpdate,
                 queue_interacts.in_set(crate::SocietySystems::Clock),
             )
+            .init_resource::<EndRequests>()
+            .add_message::<TravelFailed>()
+            .add_systems(
+                FixedUpdate,
+                // Ungated, in `Clock`: a host writes `TravelFailed` whenever it likes, and a
+                // message written between two society ticks must survive to the tick that reads it.
+                queue_end_requests.in_set(crate::SocietySystems::Clock),
+            )
             .add_systems(
                 FixedUpdate,
                 (end_activities, decide_activities)
@@ -339,13 +347,20 @@ const MAX_USES_PER_DAY: f32 = 4.0;
 /// layout can be smaller than and still be a village. Above that the crate stays quiet: the reachable
 /// distance depends on the host's layout, which `finish` cannot see.
 fn warn_short_travel_reach(settings: &SocietySettings) {
+    // **Walking is the host's under `Locomotion::Host`, and there may be no timeout at all.** Either
+    // way this check has nothing to say: its whole subject is a crate walk bounded by a crate timeout.
+    if settings.locomotion != crate::Locomotion::Builtin {
+        return;
+    }
+    let Some(timeout_hours) = settings.tuning.travel_timeout_hours else {
+        return;
+    };
     let seconds_per_tick = f64::from(settings.tick_secs);
     let day_seconds = f64::from(settings.seconds_per_day);
     if seconds_per_tick <= 0.0 || day_seconds <= 0.0 {
         return;
     }
-    let ticks_available =
-        f64::from(settings.tuning.travel_timeout_hours) / 24.0 / (seconds_per_tick / day_seconds);
+    let ticks_available = f64::from(timeout_hours) / 24.0 / (seconds_per_tick / day_seconds);
     // The default walking speed. Named here because the warning must speak for the default a host
     // gets; a host that sets its own `SocialMover::speed` is beyond what this check can see.
     let speed = 1.4_f64;
@@ -358,7 +373,7 @@ fn warn_short_travel_reach(settings: &SocietySettings) {
          {speed} m/s is only {:.1} metres of walking — less than {MIN_WALK_METRES:.0} m. People whose \
          activity is further away will always time out, and the needs those activities satisfy will \
          never be met. Raise travel_timeout_hours or shorten the walks.",
-        settings.tuning.travel_timeout_hours, settings.seconds_per_day, ticks_available, metres
+        timeout_hours, settings.seconds_per_day, ticks_available, metres
     );
 }
 
@@ -390,6 +405,11 @@ fn warn_short_travel_reach(settings: &SocietySettings) {
 /// villagers spend **58.9%** of their ticks travelling; and the shipped 240-second default, where the
 /// walk is 0.71 h and the same measure is 46.8% with every need met.
 fn warn_walk_outlasts_activity(defs: &SocietyDefs, settings: &SocietySettings) {
+    // Walking is the host's under `Locomotion::Host`: how long a journey takes is its business, not a
+    // consequence of `seconds_per_day`, so this warning would be about a walk the crate never takes.
+    if settings.locomotion != crate::Locomotion::Builtin {
+        return;
+    }
     let day_seconds = f64::from(settings.seconds_per_day);
     if day_seconds <= 0.0 {
         return;
@@ -555,6 +575,16 @@ fn arrive_and_satisfy(
                 // A `Person` target that despawned: the activity is over.
                 continue;
             };
+            // **A `Person` target moves, so its `Destination` is rewritten every tick**, whichever
+            // locomotion the host chose. Otherwise a chase would follow where the target *was* when the
+            // activity started, which under `Locomotion::Host` means the host is asked to walk to a
+            // stale point and reports failure for a walk that was never impossible.
+            //
+            // This is before the arrival gate below on purpose: a person still far away is exactly the
+            // one that needs its Destination updated, and the gate `continue`s.
+            if let DoingTarget::Person(_) = doing.target {
+                commands.entity(person).insert(Destination(target_pos));
+            }
             if here.distance(target_pos) > radius {
                 continue;
             }
@@ -644,6 +674,11 @@ fn walk_toward_destination(
     time: Res<Time<Fixed>>,
     mut walkers: Query<(&Destination, &mut Transform), NotSteered>,
 ) {
+    // **No crate system writes a person's `Transform` under `Locomotion::Host`.** That is the whole
+    // contract of the setting: the host walks them, on its own ground, around its own houses.
+    if settings.locomotion != crate::Locomotion::Builtin {
+        return;
+    }
     let step = (settings.tuning.walk_speed * time.delta_secs()) as f64;
     if step <= 0.0 {
         return;
@@ -671,6 +706,36 @@ fn walk_toward_destination(
     }
 }
 
+/// The host reports that it cannot walk a person to its `Destination`.
+///
+/// Under [`Locomotion::Host`](crate::Locomotion::Host) the crate cannot see the host's paths, so it
+/// cannot tell a slow walk from an impossible one. This is how the host says which. The activity ends
+/// with `ActivityEnded { completed: false }` in the same tick, and the person re-decides.
+#[derive(Message, Debug, Clone, Copy, PartialEq, Eq)]
+pub struct TravelFailed {
+    /// The person whose walk failed.
+    pub person: Entity,
+}
+
+/// Requests to end an activity, drained from host-written messages so a request written between two
+/// society ticks is never lost to a buffer swap.
+///
+/// **Ungated, in `Clock`**, because Bevy keeps a message for two buffer swaps and a society tick is
+/// many fixed steps apart: a `TravelFailed` written in `Update` would be gone before the tick that
+/// consumes it. The same pattern `queue_interacts` uses.
+#[derive(Resource, Debug, Clone, Default)]
+pub(crate) struct EndRequests(pub(crate) Vec<Entity>);
+
+/// Drains every host-written end-request message into [`EndRequests`] on every fixed step.
+fn queue_end_requests(
+    mut travel_failed: MessageReader<TravelFailed>,
+    mut requests: ResMut<EndRequests>,
+) {
+    for failed in travel_failed.read() {
+        requests.0.push(failed.person);
+    }
+}
+
 /// Ends every activity that is over (plan D7): its duration passed, its `Person` target left
 /// perception, or it never arrived within `travel_timeout_hours`.
 ///
@@ -686,10 +751,42 @@ fn end_activities(
     mut commands: Commands,
     people: Query<&Doing>,
     mut ended: MessageWriter<ActivityEnded>,
+    mut requests: ResMut<EndRequests>,
 ) {
     let now = clock.now_days;
-    let timeout_hours = f64::from(settings.tuning.travel_timeout_hours);
+    // `None` means a walk never times out: only the host may declare it impossible, through
+    // `TravelFailed`, because only the host can see whether a path exists.
+    let timeout_hours = settings.tuning.travel_timeout_hours.map(f64::from);
     let mut endings: Vec<(Entity, String, bool)> = Vec::new();
+
+    // **Host end-requests come first**, so a `TravelFailed` written this tick ends its activity in
+    // this tick rather than a tick later, and so a person the host cancelled is not also counted as a
+    // timeout below. `BTreeSet` order by `PersonId`, so several requests in one tick give the same
+    // society however the host's vec happened to be ordered.
+    let cancelled: std::collections::BTreeSet<u32> = std::mem::take(&mut requests.0)
+        .into_iter()
+        .filter_map(|entity| {
+            index
+                .sorted
+                .iter()
+                .find(|(_, e)| *e == entity)
+                .map(|(id, _)| id.0)
+        })
+        .collect();
+    for id in &cancelled {
+        let Some(&(person_id, person)) = index.sorted.iter().find(|(p, _)| p.0 == *id) else {
+            continue;
+        };
+        let _ = person_id;
+        let Ok(doing) = people.get(person) else {
+            // A request about a person with no activity, or one that no longer exists, is ignored:
+            // the host reports what it observes, and a despawn mid-walk is not an error.
+            continue;
+        };
+        if let Some(spec) = defs.activities.get(usize::from(doing.activity.0)) {
+            endings.push((person, spec.name.clone(), false));
+        }
+    }
 
     for &(_, person) in &index.sorted {
         let Ok(doing) = people.get(person) else {
@@ -698,8 +795,23 @@ fn end_activities(
         let Some(spec) = defs.activities.get(usize::from(doing.activity.0)) else {
             continue;
         };
+        if endings.iter().any(|(ended, _, _)| *ended == person) {
+            continue;
+        }
         let (finished, completed) = match doing.arrived_day {
-            None => ((now - doing.started_day) * 24.0 > timeout_hours, false),
+            None => {
+                let timed_out =
+                    timeout_hours.is_some_and(|hours| (now - doing.started_day) * 24.0 > hours);
+                // A `Person` target that no longer exists can never be reached, so the activity ends
+                // now rather than at a timeout that may not exist at all.
+                let gone = match doing.target {
+                    DoingTarget::Person(target) => {
+                        perception.persons.binary_search(&target).is_err()
+                    }
+                    _ => false,
+                };
+                (timed_out || gone, false)
+            }
             Some(arrived) => {
                 let done = (now - arrived) * 24.0 >= f64::from(spec.duration_hours);
                 if done {

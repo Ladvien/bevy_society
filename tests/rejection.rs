@@ -22,7 +22,7 @@ fn village(distress: f32, ticks: usize) -> (f32, u32, u32) {
     let mut day = settings();
     day.seconds_per_day = 64.0;
     day.start_hour = 15.0;
-    day.tuning.travel_timeout_hours = 4.0;
+    day.tuning.travel_timeout_hours = Some(4.0);
     day.tuning.rejection_distress = distress;
     let mut app = headless(SocietyDefs::starter().expect("the pack parses"), day);
     let places: Vec<Entity> = [(-3.0_f32, 0.0), (3.0, 0.0), (0.0, 3.0)]
