@@ -3884,7 +3884,7 @@ Fagan & Browne 1994, corpus doc `10.1007_0-306-47586-3_8`. The width is a design
 **Tests:** 72 binaries, both feature sets, clippy/fmt/doc clean; `tests/label_hysteresis.rs` is new and
 bites — its first two assertions failed on real behaviour and were corrected, not the code.
 
-**Commit** `0d5f2c1`.
+**Commit** `5e81a1b`.
 
 **Top 5 remaining.**
 
