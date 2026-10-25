@@ -3787,3 +3787,56 @@ which is arithmetic and holds for any dynamics.
 3. **`Place::capacity` is used only to filter candidates**, never enforced at arrival; needs an overflow destination first.
 4. **The clock decision** - 5.4-hour walks against 0.75-hour activities; a breaking change.
 5. **`rumor-crosses-a-cluster`** - honestly `pending`; restate the observable or build a bridge activity.
+
+## 2026-12-28-01 - Good is outweighed by bad, and the paper says it should win by numbers
+
+**Pick.** Last iteration's top item: separate forgetting rates, "needs a cited default". Going to the corpus for
+that default found something better than a rate.
+
+**The citation.** The crate already cites **Baumeister et al. 2001**, *Bad Is Stronger Than Good*
+(DOI `10.1037/1089-2680.5.4.323`), in `snub`. It makes **two** claims and the crate honours one:
+
+> bad impressions ... are quicker to form and **more resistant to disconfirmation** than good ones
+> **good may prevail over bad by superior force of numbers**
+
+**The arithmetic.** A `compliment` moves one person **+0.10**. An `insult` (harm -0.4) moves **every witness** by
+`witness_gain 0.2 x -0.4 = -0.08`; with ~6 in perception that is **-0.48 of total affinity**. Bad outweighs good
+**4.8:1 per event**. And good is only **3:1** by count (`compliment` 11.3% of person-ticks against `snub`'s 3.8%).
+Good needs 4.8x by count and has 3x, so friendship cannot accumulate — the village settles at **18 friends / 42
+rivals**.
+
+**Three levers, all rejected:**
+
+| lever | rivals | friends |
+|---|---|---|
+| shipped (symmetric) | 42 | 18 |
+| grudge fades 2x slower | **82** | 11 |
+| `compliment` +0.20 | 44 | 7 |
+
+The asymmetric decay was **my prediction and it is backwards**. Isolating it — `balance_rate_per_day = 0` gives 64
+rivals — shows structural balance explains only 18 of the 40. Persisting grudges persist while friendship keeps
+fading at the same rate, so the counterweight does not grow. Applying half a theory amplified the half that already
+dominated.
+
+**Nothing shipped.** The shape the paper prescribes — raise the **rate** of friendly interaction, not its weight —
+is authored content and needs a three-axis measurement (ties, needs, interruptions) first. Recorded with three
+options in `needs-decision/good-is-outweighed-by-bad.md`.
+
+**Verdicts.** Pass 1 FAIL (no lever worked). Pass 2 GREAT for measurement, FAIL for the fix. Pass 3 GREAT.
+
+**Third iteration running where re-reading the primary source beat the plan** — the log said "decay rates"; the
+paper says "counts".
+
+**Dead-code delta.** Zero; `git diff src/ assets/ tests/` is empty. **Tests:** 71 binaries green at baseline.
+
+**Commit** `pending`.
+
+**Top 5 remaining.**
+
+1. **Raise the rate of friendly interaction** — the paper's own mechanism. Authored content; needs a three-axis
+   measurement before shipping.
+2. **`witness_gain` makes one insult cost the whole crowd.** Cutting it would fix the per-event weight but weakens
+   reputation and rumor formation; also needs a three-axis measurement.
+3. **Split arrival radius from contact radius** — schema change. In `needs-decision/people-cannot-reach-their-beds.md`.
+4. **The clock decision** - 5.4-hour walks against 0.75-hour activities; a breaking change.
+5. **`rumor-crosses-a-cluster`** - honestly `pending`; restate the observable or build a bridge activity.

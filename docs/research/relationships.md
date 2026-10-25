@@ -73,3 +73,31 @@ Each person keeps a `Ties` component: one `Tie` per person they know. A tie hold
   The influence term. `Tuning::affinity_weight` scales affinity by `1/affinity_ceiling` so that this model keeps the `[-1, 1]` scale it was defined on: the clamp bounds how much a person can *like* anyone, which is what keeps friendship scarce, but the opinion model reads affinity as *how much weight this person's view carries*, and the raw clamped value would put every weight at a third of what the model expects.
 - **Byrne, D. (1961).** Interpersonal attraction and attitude similarity. DOI `10.1037/h0044721`. The affinity-from-similarity mechanism the clamp modifies; the ceiling itself is a **design default**, chosen by the measurement in `docs/loop/needs-decision/friendship-has-no-diminishing-return.md` rather than supplied by a paper.
 - **Trust as the discriminator.** Measured on the village: friend-ties average affinity 0.792 against -0.223 for the rest, but familiarity is **0.907 against 0.908** — no separation at all — while trust separates **sevenfold** (0.480 against 0.068). That is why `Tuning::friend_trust` is the second thing a friend is. Design default; the paper supplies the mechanism (Zajonc 1968, above) and none of the numbers.
+
+## Bad is stronger than good, per event — and good should win by numbers (issue #10)
+
+- **Baumeister, R. F., Bratslavsky, E., Finkenauer, C. & Vohs, K. D. (2001).** Bad is stronger than good.
+  *Review of General Psychology* 5(4): 323–370. DOI `10.1037/1089-2680.5.4.323` · `10.1037_1089-2680.5.4.323`
+  (in the corpus).
+
+  The crate cites this already, in `snub`'s consideration, for the grudge mechanism. The review makes **two**
+  claims and the crate currently honours one:
+
+  > "bad impressions and bad stereotypes are quicker to form and **more resistant to disconfirmation** than good
+  > ones"
+
+  > "**good may prevail over bad by superior force of numbers**: Many good events can overcome the psychological
+  > effects of a single bad one."
+
+  The second is conditional, and it is the one the starter pack does not satisfy. Measured: a `compliment` moves
+  one person **+0.10**; an `insult` (deed harm `-0.4`) moves **every witness** by `witness_gain 0.2 x -0.4 =
+  -0.08`, so with roughly six people in perception a single insult is **-0.48 of total affinity** — bad outweighs
+  good about **5:1 per event**. And good does not make up the difference by count: `compliment` holds **11.3%** of
+  person-ticks against `snub`'s **3.8%**, only **3:1**. Good is outnumbered 3:1 while outweighed 5:1, so
+  friendship cannot accumulate, and the village settles at **18 friend pairs against 42 rival pairs**.
+
+  **The asymmetry is a design default the crate does not yet have.** It is recorded rather than shipped, because
+  the obvious implementation — making negative affinity decay more slowly — was measured and it **doubles**
+  rivalries (42 -> 82): persisting grudges persist while friendship keeps fading at the same rate, so the
+  counterweight is unchanged. What the paper actually prescribes is more friendly *events*, not stickier ones.
+  See `docs/loop/needs-decision/good-is-outweighed-by-bad.md`.
