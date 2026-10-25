@@ -3936,7 +3936,7 @@ grace-window arm was **dropped on this measurement**, not shipped on a guess.
 `tests/label_hysteresis.rs` gains the band and the village test, and deletes last iteration's
 "single line at the friend bar" assertion, which this iteration's measurement overturned.
 
-**Commit** `PENDING`.
+**Commit** `897e068`.
 
 **Top 5 remaining.**
 
