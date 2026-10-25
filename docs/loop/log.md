@@ -3423,3 +3423,112 @@ one-off.
 3. **The guide's scale curve is unverified** for a fourth iteration.
 4. **The clock decision** - 5.4-hour walks against 0.75-hour activities; a breaking change.
 5. **`rumor-crosses-a-cluster`** - honestly `pending`; restate the observable or build a bridge activity.
+
+## 2026-12-21-01 - The crate can say whether its own layout is walkable
+
+**Pick.** My top item was a testability refactor. Before doing it I re-read the failure breakdown, which had
+changed under it: `sleep` was now **150 of 400** failures (37.5%), and instrumenting all four exit paths for it
+gave **150 of 150 on `timed_out=true`** — no target-gone, no suspension, no lost-perception. So the question was
+reachability.
+
+**The arithmetic.** Reachable distance is `speed * seconds_per_day * timeout_hours / 24`:
+
+| timeout | reachable at 64 s/day |
+|---|---|
+| 4 h | **14.9 m** |
+| 5 h | 18.6 m |
+| 6 h | 22.4 m |
+
+The village's farthest place pair (`market -> workshop`) is **16.4 m**. A 4 h timeout misses it by **1.5 m**.
+
+**Why nothing said so.** `warn_short_travel_reach` fires only below a 10 m floor, and its doc comment says why:
+*"above it the crate cannot tell, because it does not know the layout."* True in `finish()`; false in a system —
+every `Place` has a `Transform`. `warn_unreachable_places` now measures every pairwise distance at `Startup` and
+warns with the **pair by name and the number to set**:
+
+```
+'market' -> 'workshop' at 16.4 m ... Raise travel_timeout_hours to at least 4.4
+```
+
+**The correction that keeps this honest.** Raising the timeout to 5 h silences the warning and moves
+interruptions 400 → 312 — but `sleep` only **150 → 142**. So reachability is **5% of the sleep problem**, not the
+cause. I had a clean story and the measurement cut it to a fifth of its size. The surviving 142 time out with an
+18.6 m budget against a 16.4 m worst case: they are not walking a straight line, and that is next iteration's
+item, not this one's claim.
+
+**Value shipped.** A host with their own layout now gets a specific diagnosis — which two places, how far apart,
+what number to set — where before they got silence, because a 16.4 m village is above a generic 10 m floor.
+
+**Test coverage, finally real.** The test asserts both halves (fires at 30 m, silent at 5 m) and **fails when the
+system is removed**, printing the old warning as the only output. That ends two iterations of shipping changes I
+could not test. It is one test rather than two because `tracing` permits a single global subscriber per process;
+a second test in the binary would have read an empty string and passed for the wrong reason.
+
+**Verdicts.** Pass 1 GREAT. Pass 2 **GREAT** — the plot's right panel states the partial result at full size
+rather than rounding it up. Pass 3 GREAT.
+
+**Dead-code delta.** Zero. **Tests:** 60 binaries, both feature sets; clippy, docs, fmt clean.
+
+**Commit** `1bc2388`.
+
+**Top 5 remaining.**
+
+1. **142 sleeps time out with a budget that covers the village.** Not reachability: walkers never complete a
+   straight line. Crowd blocking or re-targeting mid-walk; needs the same instrument-then-measure treatment.
+2. **The harness's village builder should move where `tests/` can reach it** — carried over.
+3. **`ActivityTarget::Home` ignores `Place::capacity`** — untested as a cause; sleep is the activity it touches.
+4. **The guide's scale curve is unverified** for a fifth iteration.
+5. **The clock decision** - 5.4-hour walks against 0.75-hour activities; a breaking change.
+
+## 2026-12-22-01 - Seven levers on the sleep jam, none of them work
+
+**Pick.** The previous iteration's top item: 142 of 150 sleep failures survive a travel budget that covers the whole
+village. My own loose end, 37.5% of all remaining failures, and already half-diagnosed.
+
+**The diagnosis I started from, all measured:**
+
+- all 150 are `timed_out` — no `gone`, `suspended` or `lost` on any exit path;
+- they stall at **min 1.52 m, median 2.06 m, p75 2.33 m** against an `interaction_radius` of 1.5;
+- 150 of 150 hold a `Destination` and a `SocialMover`, and **84 still have velocity > 0.01 m/s** — pressing, not idle.
+
+**The seven levers, all dead:**
+
+| lever | interrupted | sleep | rivals |
+|---|---|---|---|
+| baseline | 400 | 150 | 38 |
+| scatter (RNG) | 456 | 173 | 42 |
+| scatter (deterministic) | **484** | 174 | 36 |
+| `stop_radius` 0.75 → 1.5 | **400** | **150** | 38 |
+| `interaction_radius` → 2.2 | 378 | 160 | **90** |
+| `interaction_radius` → 2.6 | 364 | 136 | **82** |
+| `Home` honours capacity | **440** | 155 | **69** |
+
+**The key negative result: `stop_radius` is a no-op — byte-identical output.** A change to how far walkers push
+that changes nothing rules out the entire "tune the walker" family and points at what the *solver* is handed.
+
+**Two levers that help pay in rivalries.** `interaction_radius` is also what decides contact, so enlarging it turns
+38 rivalries into 90. Same coupling six clamp iterations already mapped.
+
+**A methodology error I caught.** The first scatter test drew from `SocietyRng`, so 456 vs 400 compared two
+different simulations. Re-run deterministically it gave 484. The plot marks the invalid run rather than quietly
+presenting it.
+
+**Nothing shipped.** Seven levers is past the loop's five-round limit, so the blocker is logged with its ruled-out
+list and the tree reverted — `git diff src/` is empty — rather than a seventh constant nudged in because the
+iteration was supposed to produce something.
+
+**Verdicts.** Pass 1 FAIL (no lever worked). Pass 2 GREAT for measurement, FAIL for the fix. Pass 3 GREAT.
+
+**Dead-code delta.** Zero. **Tests:** 60 binaries green at baseline.
+
+**Commit** `40d551f`.
+
+**Top 5 remaining.**
+
+1. **Instrument the ORCA solver for stuck walkers** — `pref_vel`, neighbour count, member radius. The `stop_radius`
+   no-op says the answer is in those numbers, not in the geometry.
+2. **Separate arrival radius from contact radius** — the one fix that cannot damage the tie network; recorded as
+   option 1 in `needs-decision/people-cannot-reach-their-beds.md`.
+3. **The guide's scale curve is unverified** for a sixth iteration; same binary gave 50.9 / 51.1 / 54.7 ms at 1 000.
+4. **The harness's village builder should move where `tests/` can reach it** — carried over.
+5. **The clock decision** - 5.4-hour walks against 0.75-hour activities; a breaking change.

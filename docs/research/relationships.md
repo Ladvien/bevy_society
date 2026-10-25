@@ -59,3 +59,11 @@ Each person keeps a `Ties` component: one `Tie` per person they know. A tie hold
 - Heider, F. (1946). https://doi.org/10.1080/00223980.1946.9917275 · not converted
 - Cartwright, D. & Harary, F. (1956). https://doi.org/10.1037/h0046049 · not converted
 - Byrne, D. (1961). https://doi.org/10.1037/h0044721 · not converted
+
+## The clamp and the influence weight (issue #10)
+
+- **Deffuant, G., Neau, D., Amblard, F. & Weisbuch, G. (2000).** Mixing beliefs among interacting agents. *Advances in Complex Systems* 3: 87–98. DOI `10.1142/S0219525900000078`.
+
+  The influence term. `Tuning::affinity_weight` scales affinity by `1/affinity_ceiling` so that this model keeps the `[-1, 1]` scale it was defined on: the clamp bounds how much a person can *like* anyone, which is what keeps friendship scarce, but the opinion model reads affinity as *how much weight this person's view carries*, and the raw clamped value would put every weight at a third of what the model expects.
+- **Byrne, D. (1961).** Interpersonal attraction and attitude similarity. DOI `10.1037/h0044721`. The affinity-from-similarity mechanism the clamp modifies; the ceiling itself is a **design default**, chosen by the measurement in `docs/loop/needs-decision/friendship-has-no-diminishing-return.md` rather than supplied by a paper.
+- **Trust as the discriminator.** Measured on the village: friend-ties average affinity 0.792 against -0.223 for the rest, but familiarity is **0.907 against 0.908** — no separation at all — while trust separates **sevenfold** (0.480 against 0.068). That is why `Tuning::friend_trust` is the second thing a friend is. Design default; the paper supplies the mechanism (Zajonc 1968, above) and none of the numbers.

@@ -107,7 +107,8 @@ The messages worth knowing:
 | `ActivityStarted` / `ActivityEnded` | A person began or finished a daily-life activity. |
 | `SocietyBark` | A line a person said or thought, ready to display. |
 | `TieLabelChanged` | A relationship became a friendship, a rivalry, and so on. |
-| `RumorLearned` | A person heard a rumor. |
+| `RumorLearned` | A person heard a rumor; `from` is the teller when they were told, `None` when they saw it themselves or the host planted it. |
+| `ReportDeed` (write) | A host reports a deed its own rules saw: actor, patient, deed id and the witnesses **by name**, so reputation and rumor enter as seen by the people the game names. |
 | `NormViolated` | A witness judged someone's deed harshly. |
 | `ScriptEvent` | A Rhai script emitted a named event. |
 | `FireTrigger` | **You** write this to fire the `Custom` triggers with that name. |

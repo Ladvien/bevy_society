@@ -256,9 +256,13 @@ pub fn belief_after_hearing(teller_belief: f32, trust: f32) -> f32 {
 
 /// The weight one side of an exchange gives the other: `0.5 · trust + 0.5 · max(0, affinity)`
 /// (plan D5), read from `ties` toward `other`, defaulting to a fresh [`Tie`] when there is none.
-pub(crate) fn influence_weight(ties: &Ties, other: Entity) -> f32 {
+/// **Affinity is read through [`Tuning::affinity_weight`]**, which divides it by the clamp ceiling.
+/// The opinion model was designed against `affinity ∈ [-1, 1]`; the clamp bounds it at `±0.35`, so
+/// reading the raw value would put every weight at a third of what the model expects and opinions would
+/// barely move. Scaling restores the model's own scale while the network stays bounded.
+pub(crate) fn influence_weight(ties: &Ties, other: Entity, tuning: &crate::Tuning) -> f32 {
     let tie = ties.get(other).copied().unwrap_or_else(|| Tie::new(other));
-    0.5 * tie.trust + 0.5 * tie.affinity.max(0.0)
+    0.5 * tie.trust + 0.5 * tuning.affinity_weight(tie.affinity).max(0.0)
 }
 
 /// One side of an accepted interaction's opinion exchange (plan D5), over `topics`.
@@ -279,7 +283,7 @@ pub(crate) fn exchange_opinions(
     other_values: &[(TopicId, f32)],
     tuning: &Tuning,
 ) {
-    let weight = influence_weight(ties, other);
+    let weight = influence_weight(ties, other, tuning);
     let mut delta = 0.0;
     for &(topic, other_value) in other_values {
         let t = usize::from(topic.0);
@@ -288,7 +292,7 @@ pub(crate) fn exchange_opinions(
         }
     }
     let tie = ties.entry(other);
-    tie.affinity = (tie.affinity + delta).clamp(-1.0, 1.0);
+    tie.add_affinity(delta, tuning);
 }
 
 /// One person's values on `topics`, read before any side of the exchange moves.
@@ -401,6 +405,7 @@ fn conformity_means(
     people: &Query<Conformer>,
     ties: &Query<&Ties>,
     topics: usize,
+    tuning: &crate::Tuning,
 ) -> Vec<(Vec<f32>, usize)> {
     let mut out = Vec::with_capacity(index.sorted.len());
     for (i, &(_, entity)) in index.sorted.iter().enumerate() {
@@ -421,7 +426,8 @@ fn conformity_means(
                 continue;
             };
             n += 1;
-            let affinity = owned.get(other).map_or(0.0, |t| t.affinity);
+            // Through `affinity_weight`, for the same reason as `influence_weight`.
+            let affinity = tuning.affinity_weight(owned.get(other).map_or(0.0, |t| t.affinity));
             let weight = (affinity + 1.0).max(0.1);
             for (t, slot) in sums.iter_mut().enumerate() {
                 slot.0 += view.opinions.value(t) * weight;
@@ -460,7 +466,14 @@ fn conform_opinions(
     }
     // One query, read in the first pass and written in the second: computing every mean from
     // pre-step values makes the result independent of the order persons conform in.
-    let means = conformity_means(&index, &perception, &people, &ties, topics);
+    let means = conformity_means(
+        &index,
+        &perception,
+        &people,
+        &ties,
+        topics,
+        &settings.tuning,
+    );
     let dt = clock.dt_days;
     for (i, &(_, entity)) in index.sorted.iter().enumerate() {
         let Some(&(ref topic_means, n)) = means.get(i) else {

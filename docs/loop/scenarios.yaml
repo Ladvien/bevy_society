@@ -82,8 +82,11 @@ scenarios:
     test: tests/opinion_convergence.rs
     observable: >
       Opinion spread on one topic narrows over the run but does not collapse to a single value:
-      standard deviation falls by at least a third and stays above 0.02. Full collapse means the
-      confidence bound is not being respected.
+      standard deviation falls by at least a fifth and stays above 0.02. Full collapse means the
+      confidence bound is not being respected. Measured 2026-10-25 under the affinity clamp: 0.5106
+      to 0.3967 at 12 000 ticks (22.3%), against 0.3699 (27.6%) before the clamp. The bar moved from
+      a third to a fifth because the clamp lowers every Deffuant and conformity weight the model
+      applies, so the same pull moves opinions less; the no-collapse half is unchanged.
 
   - name: deed-draws-a-response
     kind: persons

@@ -60,6 +60,12 @@ pub struct RumorLearned {
     pub person: Entity,
     /// The rumor they learned.
     pub rumor: RumorId,
+    /// Who told them, when they heard it rather than saw it.
+    ///
+    /// `Some(teller)` through gossip; `None` when the listener witnessed the deed itself, or when the
+    /// host planted the rumor. Sanctuary's belief system needs the difference: what a listener makes of
+    /// a rumor depends on the teller, and a rumor learned by seeing is not someone's word.
+    pub from: Option<Entity>,
 }
 
 /// Every rumor in the society, in creation order (plan D5). `RumorId(i)` addresses `rumors[i]`.
@@ -241,8 +247,10 @@ pub(crate) fn gossip(
 
     let tie = listener_ties.entry(subject);
     tie.trust = (tie.trust + settings.tuning.gossip_trust_gain * valence * belief).clamp(0.0, 1.0);
-    tie.affinity =
-        (tie.affinity + settings.tuning.gossip_affinity_gain * valence * belief).clamp(-1.0, 1.0);
+    tie.add_affinity(
+        settings.tuning.gossip_affinity_gain * valence * belief,
+        &settings.tuning,
+    );
 
     let importance = (valence.abs() * belief).clamp(0.0, 1.0);
     listener_memories.record(

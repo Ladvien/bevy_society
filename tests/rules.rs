@@ -187,12 +187,16 @@ fn an_infinite_loop_hits_the_operation_limit() {
 
 #[test]
 fn a_trigger_sees_the_tick_start_snapshot_not_its_own_writes() {
+    // **The bar is 0.2, not 0.5**, because `Tuning::affinity_ceiling` bounds `|affinity|` at 0.35
+    // (issue #10): a script asking for `> 0.5` would be asking for a value the model cannot produce, and
+    // the test would then fail for a reason that is not its subject. The write is 0.3 for the same
+    // reason — the subject is *when* a write becomes visible, not how large it is.
     let mut app = headless(
         defs(
             r##"(
                 triggers: [
-                    (id: "raise", on: Tick, then: "let p = ctx.persons(); fx.adjust(p[0], p[1], \"affinity\", 0.9)"),
-                    (id: "look", on: Tick, then: "let p = ctx.persons(); if ctx.affinity(p[0], p[1]) > 0.5 { fx.emit(\"saw\", #{}) }"),
+                    (id: "raise", on: Tick, then: "let p = ctx.persons(); fx.adjust(p[0], p[1], \"affinity\", 0.3)"),
+                    (id: "look", on: Tick, then: "let p = ctx.persons(); if ctx.affinity(p[0], p[1]) > 0.2 { fx.emit(\"saw\", #{}) }"),
                 ],
             )"##,
         ),
