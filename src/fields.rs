@@ -196,15 +196,40 @@ impl SocialFields {
     }
 }
 
-/// A witnessed deed's commotion, deposited at `actor`'s cell in the crowd's commotion channel. The
-/// belief system (D5) writes it during `Propagate` when the feature is enabled. This module reads it
-/// in `Relate`, so it works only while [`SocialFieldPlugin`] is in the app.
-#[derive(Message, Debug, Clone, Copy)]
-pub(crate) struct Commotion {
-    /// The acting person whose cell receives the deposit.
-    pub(crate) actor: Entity,
-    /// `|harm|` of the deed.
-    pub(crate) amount: f32,
+/// Raise the commotion field at a point on the society plane.
+///
+/// The channel is what `FieldInput::Commotion` reads and what a `Gradient(Commotion, true)` activity
+/// climbs, so it is how a town's people drift toward trouble. **Two kinds of writer:**
+///
+/// - a witnessed deed, which deposits `|harm|` at the actor's cell (this module's own writer);
+/// - a host, which writes this message directly for a disturbance the society cannot see — a
+///   townsperson found afflicted at dawn, a scuffle at the well, a house with a light on.
+///
+/// `at` is a position on [`SocietySettings::plane`](crate::SocietySettings::plane), not a cell:
+/// `SocialFields::world_to_cell` maps it, so a host never needs the grid's geometry. A non-finite or
+/// negative `amount`, and a point off the grid, deposit nothing — a commotion is a positive disturbance
+/// by definition, and `evaporate_diffuse` never reads a negative one as anything but absence.
+#[derive(Message, Debug, Clone, Copy, PartialEq)]
+pub struct Commotion {
+    /// Where on the society plane the trouble is.
+    pub at: Vec2,
+    /// How much commotion to add. Written as `|harm|` by a witnessed deed.
+    pub amount: f32,
+}
+
+/// Commotions waiting for the next society tick.
+///
+/// **Drained by an ungated system in `Clock`**, because Bevy keeps a message for two buffer swaps and a
+/// society tick is many fixed steps apart: a `Commotion` a host writes in `Update` would be gone before
+/// the tick that deposits it. The same pattern `queue_interacts` uses.
+#[derive(Resource, Debug, Clone, Default)]
+pub(crate) struct CommotionQueue(pub(crate) Vec<Commotion>);
+
+/// Drains every `Commotion` written since the last fixed step into [`CommotionQueue`].
+fn queue_commotion(mut commotions: MessageReader<Commotion>, mut queue: ResMut<CommotionQueue>) {
+    for commotion in commotions.read() {
+        queue.0.push(*commotion);
+    }
 }
 
 /// Installs the social fields: the crowd presence and commotion grids, plus one presence grid per
@@ -217,7 +242,9 @@ impl Plugin for SocialFieldPlugin {
         app.register_type::<SocialFieldSettings>()
             .init_resource::<SocialFieldSettings>()
             .add_message::<Commotion>()
+            .init_resource::<CommotionQueue>()
             .add_systems(FixedUpdate, sync_fields.in_set(SocietySystems::Clock))
+            .add_systems(FixedUpdate, queue_commotion.in_set(SocietySystems::Clock))
             .add_systems(FixedUpdate, deposit_fields.in_set(SocietySystems::Relate));
     }
 
@@ -260,7 +287,7 @@ fn deposit_fields(
     society: Res<SocietySettings>,
     index: Res<PersonIndex>,
     persons: Query<(&GlobalTransform, &Memberships), With<Person>>,
-    mut commotions: MessageReader<Commotion>,
+    mut commotions: ResMut<CommotionQueue>,
 ) {
     let Some(mut fields) = fields else {
         return;
@@ -278,11 +305,15 @@ fn deposit_fields(
             }
         }
     }
-    for commotion in commotions.read() {
-        let Ok((transform, _)) = persons.get(commotion.actor) else {
+    for commotion in commotions.0.drain(..) {
+        // **A commotion is a positive disturbance.** A negative or non-finite amount is not a commotion
+        // at all, and depositing one would read back as absence while still costing the channel a
+        // deposit walk — so it is dropped here rather than argued about downstream. An off-grid point
+        // needs no check: `deposit` is floor-masked and skips it.
+        if !commotion.at.is_finite() || !commotion.amount.is_finite() || commotion.amount <= 0.0 {
             continue;
-        };
-        let cell = fields.world_to_cell(society.plane.project(transform.translation()));
+        }
+        let cell = fields.world_to_cell(commotion.at);
         fields.crowd.deposit(1, cell, commotion.amount);
     }
     fields.crowd.evaporate_diffuse(clock.dt_days);
