@@ -208,6 +208,13 @@ impl Plugin for BehaviorPlugin {
             )
             .init_resource::<EndRequests>()
             .add_message::<TravelFailed>()
+            .add_message::<EndActivity>()
+            .add_message::<ReportDeed>()
+            .init_resource::<DeedReportQueue>()
+            .add_systems(
+                FixedUpdate,
+                queue_reported_deeds.in_set(crate::SocietySystems::Clock),
+            )
             .add_systems(
                 FixedUpdate,
                 // Ungated, in `Clock`: a host writes `TravelFailed` whenever it likes, and a
@@ -228,7 +235,11 @@ impl Plugin for BehaviorPlugin {
             )
             .add_systems(
                 FixedUpdate,
-                (arrive_and_satisfy, resolve_interactions)
+                (
+                    arrive_and_satisfy,
+                    resolve_interactions,
+                    resolve_reported_deeds,
+                )
                     .chain()
                     .in_set(crate::SocietySystems::Interact),
             )
@@ -263,6 +274,7 @@ impl Plugin for BehaviorPlugin {
         warn_short_travel_reach(&settings);
         warn_walk_outlasts_activity(defs, &settings);
         warn_unbalanced_needs(defs);
+        app.add_systems(Startup, warn_unreachable_places);
     }
 }
 
@@ -446,6 +458,63 @@ fn warn_walk_outlasts_activity(defs: &SocietyDefs, settings: &SocietySettings) {
 /// The shortest walk a village layout can reasonably ask for, in metres. Below this a timeout is
 /// certainly too short; above it the crate cannot tell, because it does not know the layout.
 const MIN_WALK_METRES: f64 = 10.0;
+
+/// Warns when `travel_timeout_hours` cannot cover a walk between two places the world actually has.
+///
+/// [`warn_short_travel_reach`] has to stay quiet above `MIN_WALK_METRES` because `finish` cannot see the
+/// layout. **A system can.** Every `Place` is an entity with a `Transform`, so at `Startup` the crate knows
+/// exactly how far apart the places are and can say whether the timeout reaches them.
+///
+/// Measured on the project's own `village-evening`: a 4-game-hour timeout at 64 s/day buys **14.9 m**, the
+/// farthest place-to-place walk in that village is **16.4 m**, and **150 of 400** interrupted activities
+/// were `sleep` walks that ran out of time before arrival — every one of them `timed_out=true`. The old
+/// warning stayed quiet throughout, because 14.9 m is above its 10 m threshold. Being above a generic floor
+/// and being able to reach your own tavern are different things.
+fn warn_unreachable_places(
+    settings: Res<SocietySettings>,
+    places: Query<(&Name, &Transform), With<crate::core::Place>>,
+) {
+    if settings.locomotion != crate::Locomotion::Builtin {
+        return;
+    }
+    let Some(timeout_hours) = settings.tuning.travel_timeout_hours else {
+        return;
+    };
+    let seconds_per_tick = f64::from(settings.tick_secs);
+    let day_seconds = f64::from(settings.seconds_per_day);
+    if seconds_per_tick <= 0.0 || day_seconds <= 0.0 {
+        return;
+    }
+    let ticks_available = f64::from(timeout_hours) / 24.0 / (seconds_per_tick / day_seconds);
+    // The default walking speed, for the same reason `warn_short_travel_reach` names it.
+    let speed = 1.4_f64;
+    let reachable = speed * seconds_per_tick * ticks_available;
+
+    let plane = settings.plane;
+    let mut worst = 0.0_f32;
+    let mut worst_pair = (String::new(), String::new());
+    for (name, transform) in &places {
+        for (other_name, other) in &places {
+            let here = plane.project(transform.translation);
+            let there = plane.project(other.translation);
+            let distance = here.distance(there);
+            if distance > worst {
+                worst = distance;
+                worst_pair = (name.as_str().to_owned(), other_name.as_str().to_owned());
+            }
+        }
+    }
+    if worst <= reachable as f32 || places.iter().len() < 2 {
+        return;
+    }
+    warn!(
+        "bevy_society: a travel_timeout_hours of {timeout_hours} at seconds_per_day {} buys {reachable:.1}          metres of walking, but the farthest pair of places is '{a}' -> '{b}' at {worst:.1} m. Every walk          between them times out before arrival, so the activities that need one end interrupted and the          needs they satisfy are never met. Raise travel_timeout_hours to at least {needed:.1}, or move the          places closer.",
+        settings.seconds_per_day,
+        a = worst_pair.0,
+        b = worst_pair.1,
+        needed = f64::from(worst) * 24.0 / (speed * day_seconds),
+    );
+}
 
 /// Warns when a definition reads a social field that **cannot be populated**.
 ///
@@ -706,6 +775,67 @@ fn walk_toward_destination(
     }
 }
 
+/// The host reports a deed the society could not see, naming the people who saw it.
+///
+/// Sanctuary resolves events the society has no eyes for: a townsperson found afflicted at dawn, a
+/// person accused by a crowd at the well. They must enter reputation and rumor as seen by **the people
+/// the game names** — the family, the work crew, the crowd at the well — and then spread person to
+/// person. A deed that enters through an accepted `Interact` gets its witnesses from perception; this is
+/// the same path with the witness list supplied instead.
+///
+/// ```ignore
+/// commands.write_message(ReportDeed {
+///     actor,
+///     patient: Some(found_afflicted),
+///     deed: "affliction".to_owned(),
+///     witnesses: vec![kin, neighbour, priest],
+/// });
+/// ```
+///
+/// An unknown deed is a `warn!` and nothing happens. A witness that is not a person is dropped with one
+/// warning per report. The actor and the patient are never witnesses of their own deed. With no
+/// witnesses left, there is no rumor and no reaction — a deed nobody saw is not a deed.
+#[derive(Message, Debug, Clone, PartialEq)]
+pub struct ReportDeed {
+    /// Who did it.
+    pub actor: Entity,
+    /// Who it was done to, when there was someone.
+    pub patient: Option<Entity>,
+    /// The deed's id, as the defs declare it.
+    pub deed: String,
+    /// The people who saw it, by name from the game. Order does not matter.
+    pub witnesses: Vec<Entity>,
+}
+
+/// Host-reported deeds waiting for the next society tick.
+///
+/// **Drained by an ungated system in `Clock`**, the pattern `queue_interacts` and `EndRequests` use: a
+/// society tick is many fixed steps apart and Bevy keeps a message for two buffer swaps, so a
+/// `ReportDeed` written in `Update` would be gone before the tick that resolves it.
+#[derive(Resource, Debug, Clone, Default)]
+pub(crate) struct DeedReportQueue(pub(crate) Vec<ReportDeed>);
+
+/// Drains every host-written [`ReportDeed`] into [`DeedReportQueue`] on every fixed step.
+fn queue_reported_deeds(
+    mut reports: MessageReader<ReportDeed>,
+    mut queue: ResMut<DeedReportQueue>,
+) {
+    for report in reports.read() {
+        queue.0.push(report.clone());
+    }
+}
+
+/// The host asks for a person's current activity to end, without dormancy.
+///
+/// The use a host has: a place that has closed for the night, a shift that ended, an activity the game
+/// has made impossible. The activity ends with `ActivityEnded { completed: false }` in the same tick
+/// and the person re-decides. A request about a person with no activity is ignored.
+#[derive(Message, Debug, Clone, Copy, PartialEq, Eq)]
+pub struct EndActivity {
+    /// The person whose activity should end.
+    pub person: Entity,
+}
+
 /// The host reports that it cannot walk a person to its `Destination`.
 ///
 /// Under [`Locomotion::Host`](crate::Locomotion::Host) the crate cannot see the host's paths, so it
@@ -729,10 +859,14 @@ pub(crate) struct EndRequests(pub(crate) Vec<Entity>);
 /// Drains every host-written end-request message into [`EndRequests`] on every fixed step.
 fn queue_end_requests(
     mut travel_failed: MessageReader<TravelFailed>,
+    mut end_activity: MessageReader<EndActivity>,
     mut requests: ResMut<EndRequests>,
 ) {
     for failed in travel_failed.read() {
         requests.0.push(failed.person);
+    }
+    for asked in end_activity.read() {
+        requests.0.push(asked.person);
     }
 }
 
@@ -742,6 +876,18 @@ fn queue_end_requests(
 /// Gathers first and writes after, so the messages and the removals happen outside any borrow of the
 /// people it read.
 #[allow(clippy::too_many_arguments)]
+/// The two per-person queries `end_activities` reads.
+///
+/// Bundled because Bevy's system-parameter limit is a hard cap and `end_activities` is close to it
+/// once the dormancy query joins the `Doing` one; this crate already bundles this way in
+/// `TriggerBookkeeping`.
+#[derive(bevy::ecs::system::SystemParam)]
+struct ActivityQueries<'w, 's> {
+    doing: Query<'w, 's, &'static Doing>,
+    dormant: Query<'w, 's, (), With<crate::Dormant>>,
+}
+
+#[allow(clippy::too_many_arguments)]
 fn end_activities(
     clock: Res<SocietyClock>,
     settings: Res<SocietySettings>,
@@ -749,10 +895,14 @@ fn end_activities(
     index: Res<PersonIndex>,
     perception: Res<Perception>,
     mut commands: Commands,
-    people: Query<&Doing>,
+    queries: ActivityQueries,
     mut ended: MessageWriter<ActivityEnded>,
     mut requests: ResMut<EndRequests>,
 ) {
+    let ActivityQueries {
+        doing: people,
+        dormant,
+    } = queries;
     let now = clock.now_days;
     // `None` means a walk never times out: only the host may declare it impossible, through
     // `TravelFailed`, because only the host can see whether a path exists.
@@ -798,16 +948,33 @@ fn end_activities(
         if endings.iter().any(|(ended, _, _)| *ended == person) {
             continue;
         }
+        // **A dormant person is out of its daily life, and an activity that targets a dormant person
+        // can no longer happen.** Both end now, `completed: false`: dormancy is a suspension, not a
+        // completion, and whoever was walking toward them has to choose again.
+        let suspended = dormant.get(person).is_ok()
+            || match doing.target {
+                DoingTarget::Person(target) => dormant.get(target).is_ok(),
+                _ => false,
+            };
+        if suspended {
+            endings.push((person, spec.name.clone(), false));
+            continue;
+        }
         let (finished, completed) = match doing.arrived_day {
             None => {
                 let timed_out =
                     timeout_hours.is_some_and(|hours| (now - doing.started_day) * 24.0 > hours);
                 // A `Person` target that no longer exists can never be reached, so the activity ends
                 // now rather than at a timeout that may not exist at all.
+                // **`contains`, not `binary_search`.** `Perception::persons` is filled in
+                // `PersonIndex.sorted` order — by `PersonId` — while an `Entity`'s ordering is by index
+                // and generation. `binary_search` therefore reports "gone" for people who are present,
+                // and every activity targeting them is interrupted on the very tick it starts. Measured
+                // on `village-evening`: **1 045 of 1 045** `compliment` interruptions took this branch
+                // with the target standing in a list of 24; `binary_search` said gone and `contains` said
+                // present on the same call.
                 let gone = match doing.target {
-                    DoingTarget::Person(target) => {
-                        perception.persons.binary_search(&target).is_err()
-                    }
+                    DoingTarget::Person(target) => !perception.persons.contains(&target),
                     _ => false,
                 };
                 (timed_out || gone, false)
@@ -982,7 +1149,16 @@ fn decide_activities(
     index: Res<PersonIndex>,
     mut rng: ResMut<crate::SocietyRng>,
     mut commands: Commands,
+<<<<<<< HEAD
     world: DecisionQueries,
+=======
+    people: Query<Decider>,
+    places: Query<(Entity, &crate::Place, &crate::PlaceTags, &Transform)>,
+    doing: Query<&Doing>,
+    // Two markers in one query, so the system stays under Bevy's system-parameter cap once the
+    // dormancy check joins the autonomy one. `Has` reads both without a second query.
+    marks: Query<(Has<crate::Autonomous>, Has<crate::Dormant>)>,
+>>>>>>> origin/main
     mut started: MessageWriter<ActivityStarted>,
     engine: Option<Res<crate::script::ScriptEngine>>,
     cell: Res<crate::snapshot::SnapshotCell>,
@@ -1081,7 +1257,10 @@ fn decide_activities(
     )> = Vec::new();
 
     for (slot, &(_, person)) in index.sorted.iter().enumerate() {
-        if autonomous.get(person).is_err() || doing.get(person).is_ok() {
+        // **A dormant person is out of its daily life**: it keeps its ties, memories and knowledge,
+        // but the crate stops choosing for it until the marker is removed.
+        let (autonomous, dormant) = marks.get(person).unwrap_or((false, false));
+        if !autonomous || dormant || doing.get(person).is_ok() {
             continue;
         }
         let Ok(view) = people.get(person) else {
@@ -1794,6 +1973,13 @@ fn exchange(
     if world.get::<Ties>(actor).is_none() || world.get::<Ties>(target).is_none() {
         return;
     }
+    // **A dormant person takes part in nothing**, and that includes an exchange the host asked for
+    // directly with `Interact`: dormancy is the host saying this person is not living their daily life
+    // right now, and honouring it only for crate-chosen exchanges would make the marker a suggestion.
+    if world.get::<crate::Dormant>(actor).is_some() || world.get::<crate::Dormant>(target).is_some()
+    {
+        return;
+    }
 
     // (1) `requires` first: a script that says no ends it with no draw and no effect.
     if let Some(requires) = spec.requires
@@ -1859,9 +2045,21 @@ fn exchange(
             winner = contest(world, actor, target, &settings.tuning, perception, index);
         }
         if let Some(deed) = spec.deed {
-            witness(
-                world, deed, actor, target, defs, settings, perception, index, now,
-            );
+            // The witnesses of an observed exchange are whoever was within perception of the actor,
+            // excluding the two parties. That is `Perception`'s job; a host-reported deed brings its own
+            // list, which is why `witness_deed` takes one rather than computing it.
+            let seen_by: Vec<Entity> = index
+                .iter()
+                .position(|(_, e)| *e == actor)
+                .and_then(|slot| perception.near.get(slot))
+                .map(|list| {
+                    list.iter()
+                        .filter_map(|(j, _)| perception.persons.get(*j as usize).copied())
+                        .filter(|w| *w != actor && *w != target)
+                        .collect()
+                })
+                .unwrap_or_default();
+            witness_deed(world, deed, actor, target, defs, settings, now, &seen_by);
         }
         close_the_triad(world, actor, target, perception, index, settings, now);
         if !shared_faction
@@ -2145,6 +2343,9 @@ fn tell(world: &mut World, teller: Entity, listener: Entity, settings: &SocietyS
         world.write_message(crate::rumor::RumorLearned {
             person: listener,
             rumor,
+            // **This is the gossip path, so the teller is known.** What a listener makes of a rumor
+            // depends on who told them, and a rumor learned by seeing the deed is not someone's word.
+            from: Some(teller),
         });
     }
     world.insert_resource(book);
@@ -2230,38 +2431,39 @@ fn contest(
 /// (4d) One deed and its witnesses (plan D5): each witness judges it, a harsh judgement is a
 /// `NormViolated`, and a heavy enough deed becomes a rumor every witness already knows.
 #[allow(clippy::too_many_arguments)]
-fn witness(
+fn witness_deed(
     world: &mut World,
     deed: crate::defs::DeedId,
     actor: Entity,
     patient: Entity,
     defs: &SocietyDefs,
     settings: &SocietySettings,
-    perception: &Perception,
-    index: &[(crate::PersonId, Entity)],
     now: f64,
+    witnesses: &[Entity],
 ) {
     let Some(deed_spec) = defs.deeds.get(usize::from(deed.0)).cloned() else {
         return;
     };
-    let Some(actor_slot) = index.iter().position(|(_, e)| *e == actor) else {
-        return;
-    };
-    let witnesses: Vec<Entity> = perception
-        .near
-        .get(actor_slot)
-        .map(|list| {
-            list.iter()
-                .filter_map(|(j, _)| perception.persons.get(*j as usize).copied())
-                .filter(|w| *w != actor && *w != patient)
-                .collect()
-        })
-        .unwrap_or_default();
+
+    // **A deed deposits its harm into the commotion field, at the actor's cell.** The channel is what
+    // `FieldInput::Commotion` reads and what a `Gradient(Commotion, true)` activity climbs, and until
+    // this line nothing wrote it: the field was always zero, so a `gawk` activity had no direction and
+    // every `Commotion` consideration scored 0. `at` is a plane position, which is what the message
+    // takes, so a host writing one needs no grid geometry and neither does this.
+    #[cfg(feature = "fields")]
+    if deed_spec.harm != 0.0
+        && let Some(transform) = world.get::<GlobalTransform>(actor)
+    {
+        world.write_message(crate::fields::Commotion {
+            at: settings.plane.project(transform.translation()),
+            amount: deed_spec.harm.abs(),
+        });
+    }
 
     let mut approvals: Vec<(Entity, f32)> = Vec::new();
     // Everyone who saw it, for `Tuning::witness_dilution`; the crowd is the same for every witness.
     let watcher_count = witnesses.len();
-    for watcher in witnesses {
+    for &watcher in witnesses {
         let opinions = world
             .get::<crate::Opinions>(watcher)
             .cloned()
@@ -2377,10 +2579,93 @@ fn witness(
                 world.write_message(crate::rumor::RumorLearned {
                     person: *watcher,
                     rumor,
+                    // A witnessed deed: nobody told them, they saw it.
+                    from: None,
                 });
             }
         }
         world.insert_resource(book);
+    }
+}
+
+/// Resolves every host-reported deed (issue #8), after the exchanges have run.
+///
+/// Exclusive because [`witness_deed`] writes to whoever it likes, the same as the exchange path.
+///
+/// The named witnesses are the point: perception is not consulted at all, so a host can report what its
+/// own rules saw. Ordering is fixed for determinism — the witnesses are deduped and ordered by
+/// [`PersonId`](crate::PersonId) before the deed is reported, so two runs with the same witness set give
+/// the same society however the host's `Vec` happened to be ordered.
+fn resolve_reported_deeds(world: &mut World) {
+    let (now, defs, reports, index) = {
+        let now = world.resource::<SocietyClock>().now_days;
+        let defs = world.resource::<SocietyDefs>().clone();
+        let index = world.resource::<PersonIndex>().sorted.clone();
+        let mut queue = world
+            .remove_resource::<DeedReportQueue>()
+            .unwrap_or_default();
+        let reports = std::mem::take(&mut queue.0);
+        world.insert_resource(queue);
+        (now, defs, reports, index)
+    };
+    if reports.is_empty() {
+        return;
+    }
+    let settings = world.resource::<SocietySettings>().clone();
+
+    for report in reports {
+        let Some(deed) = defs.deed_id(&report.deed) else {
+            warn!(
+                "bevy_society: ReportDeed names unknown deed '{}'; ignored",
+                report.deed
+            );
+            continue;
+        };
+        // **The named witnesses, deduped and in `PersonId` order.** The actor and the patient are never
+        // witnesses of their own deed, and a dormant person still counts if the host named them: the
+        // host saw something the crate cannot, and `Dormant` is about daily life, not about eyes.
+        let mut witnesses: Vec<Entity> = Vec::new();
+        let mut not_people = 0usize;
+        for &entity in &report.witnesses {
+            if entity == report.actor || Some(entity) == report.patient {
+                continue;
+            }
+            if !index.iter().any(|(_, e)| *e == entity) {
+                not_people += 1;
+                continue;
+            }
+            if !witnesses.contains(&entity) {
+                witnesses.push(entity);
+            }
+        }
+        if not_people > 0 {
+            warn!(
+                "bevy_society: ReportDeed for '{}' names {not_people} witness(es) that are not persons; \
+                 dropped",
+                report.deed
+            );
+        }
+        if witnesses.is_empty() {
+            // A deed nobody saw is not a deed: no reactions and no rumor.
+            continue;
+        }
+        witnesses.sort_unstable_by_key(|entity| {
+            index
+                .iter()
+                .find(|(_, e)| e == entity)
+                .map_or(u32::MAX, |(id, _)| id.0)
+        });
+        let patient = report.patient.unwrap_or(report.actor);
+        witness_deed(
+            world,
+            deed,
+            report.actor,
+            patient,
+            &defs,
+            &settings,
+            now,
+            &witnesses,
+        );
     }
 }
 

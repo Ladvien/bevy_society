@@ -72,6 +72,18 @@ for name in ["Bram", "Alys", "Corin"] {
 opinions, knowledge, memories, memberships and status. `Autonomous` is what makes a person choose its
 own activities; a player-controlled person is a `Person` without the marker.
 
+Two markers take a person further out of the simulation, and they are different things:
+
+| marker | effect | keeps |
+|---|---|---|
+| `Dormant` | out of daily life *for now*: no crate-chosen activity, in nobody's perception, its running activity and any activity targeting it end, no exchange with it | ties, memories, opinions, knowledge, memberships |
+| no `Person` | the person is gone: `on_person_removed` deletes every tie to and from them | nothing |
+
+`Dormant` is the one you want for a night watch, a spell indoors, an expedition or a conversation: the
+person is simply not living their daily life, and removing the marker lets them re-decide. And
+`EndActivity { person }` cancels one running activity without any of that, for a place that closed or a
+shift that ended.
+
 `Place` and `PlaceTags` are how activities find somewhere to go. A `Place`'s `capacity` limits how
 many people may use it at once, so a crowded tavern pushes the next villager to the market.
 
@@ -95,7 +107,8 @@ The messages worth knowing:
 | `ActivityStarted` / `ActivityEnded` | A person began or finished a daily-life activity. |
 | `SocietyBark` | A line a person said or thought, ready to display. |
 | `TieLabelChanged` | A relationship became a friendship, a rivalry, and so on. |
-| `RumorLearned` | A person heard a rumor. |
+| `RumorLearned` | A person heard a rumor; `from` is the teller when they were told, `None` when they saw it themselves or the host planted it. |
+| `ReportDeed` (write) | A host reports a deed its own rules saw: actor, patient, deed id and the witnesses **by name**, so reputation and rumor enter as seen by the people the game names. |
 | `NormViolated` | A witness judged someone's deed harshly. |
 | `ScriptEvent` | A Rhai script emitted a named event. |
 | `FireTrigger` | **You** write this to fire the `Custom` triggers with that name. |

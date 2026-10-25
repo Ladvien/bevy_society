@@ -89,6 +89,11 @@ fn main() {
     // The highest reach and knower count the planted rumor ever had. A rumor is forgotten as well as
     // spread — its knowers evict it once it ages past `knowledge_capacity` newer ones — so the final
     // state is not the answer to "did it spread".
+    let mut completed_endings = 0usize;
+    let mut interrupted_endings = 0usize;
+    // Which activity, not just how many. A total tells you there is a problem; the breakdown tells
+    // you whose it is, and a fix aimed at the wrong activity is a fix that does nothing.
+    let mut failed_by_activity: BTreeMap<String, usize> = BTreeMap::new();
     let mut peak_reach = 0.0_f32;
     let mut peak_known_by = 0_usize;
     // Every accepted gossip exchange per person, accumulated so the plant can choose a teller who has
@@ -127,6 +132,25 @@ fn main() {
         //
         // The first row is therefore written with no needs at all, and `needs` is empty in the CSV for
         // it. A reader, and any check, then skips it because there is nothing to average.
+        // **Whole-village ending counts.** The narrative tracks one person, so quoting its
+        // interrupted/completed split as if it were the village's was a 24x sampling error. These
+        // counters drain every `ActivityEnded` for everybody, which is what a steering change has to
+        // be judged on.
+        {
+            let mut ended = app
+                .world_mut()
+                .resource_mut::<bevy::ecs::message::Messages<ActivityEnded>>();
+            for message in ended.drain() {
+                if message.completed {
+                    completed_endings += 1;
+                } else {
+                    interrupted_endings += 1;
+                    *failed_by_activity
+                        .entry(message.activity.clone())
+                        .or_insert(0) += 1;
+                }
+            }
+        }
         let row = snapshot_row(&app, tick as f64, &world, planted);
         // The first row is the pre-society state: `size_person_state` has not run, so `Needs` is empty
         // and every need reads 0.000. Recording it made "all four needs cross below 0.35" true of the
@@ -154,6 +178,10 @@ fn main() {
         planted,
         peak_reach,
         peak_known_by,
+        Endings {
+            counts: (completed_endings, interrupted_endings),
+            failed_by_activity: &failed_by_activity,
+        },
     );
     println!(
         "evidence: {} ticks, {} people, {} places, wrote {}",
@@ -762,8 +790,8 @@ fn drain_narrative(app: &mut App, world: &World, tracked: Option<Entity>, lines:
         let mut ended = app
             .world_mut()
             .resource_mut::<bevy::ecs::message::Messages<ActivityEnded>>();
-        for message in ended.drain() {
-            if message.person == tracked {
+        for message in ended.drain().filter(|m| m.person == tracked) {
+            {
                 lines.push(format!(
                     "{:>5}: finished {} ({})",
                     clock_label(&clock),
@@ -938,6 +966,12 @@ fn series(rows: &[Row], out: &Path) {
     }
 }
 
+/// The ending counts `summary()` reports, grouped so the function stays inside clippy's argument limit.
+struct Endings<'a> {
+    counts: (usize, usize),
+    failed_by_activity: &'a BTreeMap<String, usize>,
+}
+
 /// Writes `summary.json`.
 fn summary(
     ecs: &EcsWorld,
@@ -946,7 +980,13 @@ fn summary(
     planted: Option<bevy_society::RumorId>,
     peak_reach: f32,
     peak_known_by: usize,
+    endings: Endings<'_>,
 ) {
+    let Endings {
+        counts: (completed_endings_unused, interrupted_endings_unused),
+        failed_by_activity,
+    } = endings;
+    let endings = (completed_endings_unused, interrupted_endings_unused);
     let world_ref = ecs;
     let living = world.villagers.len().max(1);
     let book = world_ref.resource::<RumorBook>();
@@ -971,7 +1011,7 @@ fn summary(
     }
     let clock = world_ref.resource::<SocietyClock>();
     let json = format!(
-        "{{\n  \"ticks\": {},\n  \"people\": {},\n  \"rumors\": {},\n  \"rumor_known_by\": {},\n  \"rumor_reach\": {:.3},\n  \"friends\": {},\n  \"rivals\": {},\n  \"game_days\": {:.2}\n}}\n",
+        "{{\n  \"ticks\": {},\n  \"people\": {},\n  \"rumors\": {},\n  \"rumor_known_by\": {},\n  \"rumor_reach\": {:.3},\n  \"friends\": {},\n  \"rivals\": {},\n  \"completed_endings\": {},\n  \"interrupted_endings\": {},\n  \"game_days\": {:.2}\n}}\n",
         clock.tick,
         living,
         book.rumors.len(),
@@ -979,7 +1019,22 @@ fn summary(
         peak_reach,
         friends / 2,
         rivals / 2,
+        endings.0,
+        endings.1,
         clock.now_days,
+    );
+    let mut failed = String::new();
+    for (index, (activity, count)) in failed_by_activity.iter().enumerate() {
+        let comma = if index + 1 == failed_by_activity.len() {
+            ""
+        } else {
+            ","
+        };
+        failed.push_str(&format!("\n    \"{activity}\": {count}{comma}"));
+    }
+    let json = json.replace(
+        "\n  \"game_days\"",
+        &format!("\n  \"interrupted_by_activity\": {{{failed}\n  }},\n  \"game_days\""),
     );
     let path = out.join("summary.json");
     if let Err(err) = std::fs::write(&path, json) {
