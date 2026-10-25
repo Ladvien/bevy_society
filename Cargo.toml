@@ -1,6 +1,6 @@
 [package]
 name = "bevy_society"
-version = "0.2.0"
+version = "0.3.0"
 edition = "2024"
 rust-version = "1.97.1"
 description = "Living societies for Bevy: personalities, moods, needs, memories, relationships, opinions, rumors, reputation and factions; utility-AI daily lives; Rhai triggers; dialogue through bevy_speech_bubbles."
@@ -9,7 +9,10 @@ repository = "https://github.com/Ladvien/bevy_society"
 keywords = ["bevy", "gamedev", "ai", "simulation", "npc"]
 categories = ["game-development", "simulation"]
 # Everything a consumer needs and nothing else. `docs/` is 623 MB of research notes and GIFs and never ships.
-include = ["src/**", "assets/**", "Cargo.toml", "README.md", "CHANGELOG.md", "LICENSE-*"]
+include = ["src/**", "assets/**", "examples/assets/**", "Cargo.toml", "CHANGELOG.md", "LICENSE-*"]
+# **Named explicitly, not as an `include` pattern.** `include = ["README.md"]` is a *glob* and pulls in
+# every `README.md` in the tree, which shipped four `docs/` files a consumer does not need.
+readme = "README.md"
 
 [features]
 default = ["dialogue", "steering", "fields"]

@@ -89,7 +89,7 @@ Every model comes from a paper in the home-still corpus. Search it with the home
 
 ## Design facts worth keeping
 
-- **Published on crates.io** as of 0.2.0 (2026-10-25). The ladvien dependencies are crates.io versions, so a consumer needs no `[patch]`; the crate can be published whenever any of them has a new release.
+- **Published on crates.io** as of 0.3.0 (2026-10-25). The ladvien dependencies are crates.io versions, so a consumer needs no `[patch]`; the crate can be published whenever any of them has a new release.
 
 ## Rules
 

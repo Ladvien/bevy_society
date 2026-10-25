@@ -4,6 +4,13 @@ All notable changes to bevy_society. The format follows [Keep a Changelog](https
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-10-25
+
+### Breaking
+
+- **Three fields were added to `Tuning`, which is not `#[non_exhaustive]`.** A host that constructs `Tuning` in full, or that `match`es on `TieLabel` exhaustively, needs a code change. The additions are `label_hysteresis` (0.02), `friend_band` (0.05) and `dyad_balance_per_day` (0.5). Hosts using `Tuning { ..Default::default() }` or `..SocietySettings::default()` are unaffected. Each field documents its measurement and each is switchable off: `label_hysteresis = 0.0` and `friend_band = 0.0` restore the single-bar label exactly, and `dyad_balance_per_day = 0.0` restores one-directional ties exactly, so a host that wants 0.2.0's behaviour can have it without pinning the version.
+- **Label behaviour changed for every host that does not opt out**, which is why this is 0.3 and not 0.2.1: a `Friend` label now survives a shallow dip in affinity and a `Stranger`/`Acquaintance` boundary has a band, so `TieLabelChanged` fires far less often. Measured on `village-evening` at seed 7 over 16.4 game-days: label messages **2 291 → 1 546**, friendships held a median **0.36 → 1.01 game-days**. A host that counted on the old churn is the one that needs the migration note.
+
 ### Added
 
 - **Persistence, decision traces and `Obstacle` are documented.** `docs/guide/persistence.md` covers `capture`, `restore`, `SocietySave`, `RestoreReport`, `RestoreError` and `VERSION` (feature `serde`), including what a save does not hold; `docs/guide/decisions.md` covers `DecisionTrace`, `Decision`, `ScoredOption` and their methods, led by "why did they do that?"; `docs/guide/getting-started.md` gains an `Obstacle` section next to `Place`. The README gains a Cargo features table (`dialogue`, `steering`, `fields`, `serde`, and none) and a bullet each for decision traces, obstacles and persistence; `docs/README.md` lists both new guides. Before this, none of the three appeared in any guide.

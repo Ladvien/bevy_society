@@ -4,7 +4,7 @@ A host that autosaves at dawn and continues from the file needs the society to c
 
 ```toml
 [dependencies]
-bevy_society = { git = "https://github.com/Ladvien/bevy_society", features = ["serde"] }
+bevy_society = { version = "0.3", features = ["serde"] }
 ```
 
 ## Two functions and one struct

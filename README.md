@@ -4,7 +4,7 @@ Give your Bevy world a living society: villagers who remember, gossip, take side
 
 [![CI](https://github.com/Ladvien/bevy_society/actions/workflows/ci.yml/badge.svg)](https://github.com/Ladvien/bevy_society/actions/workflows/ci.yml)
 
-![A rumor spreads through a village](https://raw.githubusercontent.com/Ladvien/bevy_society/main/docs/media/village.gif)
+![A rumor spreads through a village](https://github.com/Ladvien/bevy_society/raw/main/docs/media/village.gif)
 
 One afternoon in a village of twenty-four people: a weaver tells the rumor that Bram stole bread, and in the six game-hours the clip covers (14:00 to 20:00) it passes to a second villager — known by **2 of 24** at the end, as the counter in the corner shows. The same run recorded twice as long, twelve game-hours, reaches 3. A rumor crosses a village in game-days, not hours, because each telling is one choice among many and the Daley–Kendall rule stifles a teller whose listener already knew. Tie lines show friendships green; the magenta ring marks whoever knows the rumor. (No clip draws a rivalry — six game-hours is too short for one to form; the full 16-game-day run forms 24.) Every clip below is the same village, same seed, same run — only the overlay changes.
 
@@ -12,9 +12,9 @@ One afternoon in a village of twenty-four people: a weaver tells the rumor that 
 
 | | |
 |---|---|
-| ![Mood](https://raw.githubusercontent.com/Ladvien/bevy_society/main/docs/media/mood.gif) **Mood** — a halo on every villager. Green is pleased, amber neutral, red displeased; halo size is arousal. The colour scale is normalised to the ±0.4 the model actually produces, so a small mood shift is visible. | ![Opinion](https://raw.githubusercontent.com/Ladvien/bevy_society/main/docs/media/opinions.gif) **Opinions** — one bar per villager on the honesty topic, green above the midpoint and red below, length by strength. |
-| ![Needs](https://raw.githubusercontent.com/Ladvien/bevy_society/main/docs/media/needs.gif) **Needs** — a full green halo is a fed villager, a small red one is hungry. | ![Ties](https://raw.githubusercontent.com/Ladvien/bevy_society/main/docs/media/ties.gif) **Relationships** — the tie graph alone: green friendship, red rivalry, brightness by familiarity. |
-| ![Factions](https://raw.githubusercontent.com/Ladvien/bevy_society/main/docs/media/factions.gif) **Factions** — orange millers, green weavers, violet watch, no ties, so the group structure is the only thing on screen. | The clip above is the same run with every overlay on. |
+| ![Mood](https://github.com/Ladvien/bevy_society/raw/main/docs/media/mood.gif) **Mood** — a halo on every villager. Green is pleased, amber neutral, red displeased; halo size is arousal. The colour scale is normalised to the ±0.4 the model actually produces, so a small mood shift is visible. | ![Opinion](https://github.com/Ladvien/bevy_society/raw/main/docs/media/opinions.gif) **Opinions** — one bar per villager on the honesty topic, green above the midpoint and red below, length by strength. |
+| ![Needs](https://github.com/Ladvien/bevy_society/raw/main/docs/media/needs.gif) **Needs** — a full green halo is a fed villager, a small red one is hungry. | ![Ties](https://github.com/Ladvien/bevy_society/raw/main/docs/media/ties.gif) **Relationships** — the tie graph alone: green friendship, red rivalry, brightness by familiarity. |
+| ![Factions](https://github.com/Ladvien/bevy_society/raw/main/docs/media/factions.gif) **Factions** — orange millers, green weavers, violet watch, no ties, so the group structure is the only thing on screen. | The clip above is the same run with every overlay on. |
 
 ## Cargo features
 
@@ -28,18 +28,18 @@ One afternoon in a village of twenty-four people: a weaver tells the rumor that 
 
 ## What you get
 
-- **People with a mind** — Big Five personalities, moods on a pleasure/arousal/dominance axis, an OCC emotion set, needs that decay, and memories that fade. [personality-and-mood](docs/research/personality-and-mood.md), [memory](docs/research/memory.md)
-- **Daily life** — utility-AI decisions over tagged places and other people, with travel, arrival, durations and need satisfaction. [needs-and-utility](docs/research/needs-and-utility.md)
-- **Relationships** — directed ties carrying affinity, trust, respect and familiarity, with power-law forgetting, structural balance, a Dunbar-style cap and friend/rival labels. Affinity is **clamped to `±Tuning::affinity_ceiling` (0.35)** and a `Friend` needs trust as well, so a large town with daily contact keeps friendship scarce: measured, 60 people over 30 game-days reach 155 friend ties of 3 540 ordered pairs (**4.4%**) and 656 rivals. [relationships](docs/research/relationships.md), [the measurement](docs/loop/needs-decision/friendship-has-no-diminishing-return.md)
-- **Opinions** — bounded-confidence influence, stubborn anchors and conformity to a clear group majority. [opinion-dynamics](docs/research/opinion-dynamics.md)
-- **Rumors and reputation** — gossip with the Daley–Kendall stifling rule, belief scaled by trust, witnesses who judge deeds and hold grudges. [rumor-and-reputation](docs/research/rumor-and-reputation.md)
-- **Factions and status** — in-group affinity, standing as conferred respect, contests and intergroup contact. [groups-and-status](docs/research/groups-and-status.md)
-- **Crowd fields** — a stigmergy grid of presence and commotion per cell, readable as a `Field(Crowd)` consideration and walkable as a `Gradient` target, so an activity can be "join the crowd" without naming a place. [needs-and-utility](docs/research/needs-and-utility.md)
-- **Scripts** — Rhai triggers over a per-tick snapshot, with a `ctx` reader and an `fx` writer that cannot see its own writes. [scripting](docs/guide/scripting.md)
-- **Dialogue** — barks and conversations through `bevy_speech_bubbles`. [dialogue](docs/guide/dialogue.md)
-- **Decision traces** — why a person chose what they did: every option weighed, its score, and how far the chosen one fell short of the best. Insert a `DecisionTrace` and read it; recording changes no outcome. [decisions](docs/guide/decisions.md)
-- **Obstacles** — solid buildings that walkers path around, as hard walls in the ORCA solver, with a resolver that pushes anyone who lands inside back out. [getting started](docs/guide/getting-started.md#solid-buildings-obstacle)
-- **Persistence** — the whole society captured and restored through `serde`: ties, memories, rumors, the clock, the random stream and every trigger's bookkeeping, keyed by your own ids, so the ticks after a reload are the ticks that would have followed. [persistence](docs/guide/persistence.md)
+- **People with a mind** — Big Five personalities, moods on a pleasure/arousal/dominance axis, an OCC emotion set, needs that decay, and memories that fade. [personality-and-mood](https://github.com/Ladvien/bevy_society/blob/main/docs/research/personality-and-mood.md), [memory](https://github.com/Ladvien/bevy_society/blob/main/docs/research/memory.md)
+- **Daily life** — utility-AI decisions over tagged places and other people, with travel, arrival, durations and need satisfaction. [needs-and-utility](https://github.com/Ladvien/bevy_society/blob/main/docs/research/needs-and-utility.md)
+- **Relationships** — directed ties carrying affinity, trust, respect and familiarity, with power-law forgetting, structural balance, a Dunbar-style cap and friend/rival labels. Affinity is **clamped to `±Tuning::affinity_ceiling` (0.35)** and a `Friend` needs trust as well, so a large town with daily contact keeps friendship scarce: measured, 60 people over 30 game-days reach 155 friend ties of 3 540 ordered pairs (**4.4%**) and 656 rivals. [relationships](https://github.com/Ladvien/bevy_society/blob/main/docs/research/relationships.md), [the measurement](https://github.com/Ladvien/bevy_society/blob/main/docs/loop/needs-decision/friendship-has-no-diminishing-return.md)
+- **Opinions** — bounded-confidence influence, stubborn anchors and conformity to a clear group majority. [opinion-dynamics](https://github.com/Ladvien/bevy_society/blob/main/docs/research/opinion-dynamics.md)
+- **Rumors and reputation** — gossip with the Daley–Kendall stifling rule, belief scaled by trust, witnesses who judge deeds and hold grudges. [rumor-and-reputation](https://github.com/Ladvien/bevy_society/blob/main/docs/research/rumor-and-reputation.md)
+- **Factions and status** — in-group affinity, standing as conferred respect, contests and intergroup contact. [groups-and-status](https://github.com/Ladvien/bevy_society/blob/main/docs/research/groups-and-status.md)
+- **Crowd fields** — a stigmergy grid of presence and commotion per cell, readable as a `Field(Crowd)` consideration and walkable as a `Gradient` target, so an activity can be "join the crowd" without naming a place. [needs-and-utility](https://github.com/Ladvien/bevy_society/blob/main/docs/research/needs-and-utility.md)
+- **Scripts** — Rhai triggers over a per-tick snapshot, with a `ctx` reader and an `fx` writer that cannot see its own writes. [scripting](https://github.com/Ladvien/bevy_society/blob/main/docs/guide/scripting.md)
+- **Dialogue** — barks and conversations through `bevy_speech_bubbles`. [dialogue](https://github.com/Ladvien/bevy_society/blob/main/docs/guide/dialogue.md)
+- **Decision traces** — why a person chose what they did: every option weighed, its score, and how far the chosen one fell short of the best. Insert a `DecisionTrace` and read it; recording changes no outcome. [decisions](https://github.com/Ladvien/bevy_society/blob/main/docs/guide/decisions.md)
+- **Obstacles** — solid buildings that walkers path around, as hard walls in the ORCA solver, with a resolver that pushes anyone who lands inside back out. [getting started](https://github.com/Ladvien/bevy_society/blob/main/docs/guide/getting-started.md#solid-buildings-obstacle)
+- **Persistence** — the whole society captured and restored through `serde`: ties, memories, rumors, the clock, the random stream and every trigger's bookkeeping, keyed by your own ids, so the ticks after a reload are the ticks that would have followed. [persistence](https://github.com/Ladvien/bevy_society/blob/main/docs/guide/persistence.md)
 
 Every formula traces to a paper; every rate is a named field on `Tuning`; every default either comes from a paper or says it is a design default.
 
@@ -47,7 +47,7 @@ Every formula traces to a paper; every rate is a named field on `Tuning`; every 
 
 ```toml
 [dependencies]
-bevy_society = { git = "https://github.com/Ladvien/bevy_society" }
+bevy_society = "0.3"
 ```
 
 ```rust,no_run
@@ -201,16 +201,16 @@ app.world_mut().write_message(TalkTo { npc: bram, player });
 
 | Module | Key papers | Note |
 |---|---|---|
-| Personality and mood | Mehrabian 1996 · Gebhard 2005 (ALMA) | [note](docs/research/personality-and-mood.md) |
-| Needs and utility | Mark & Dill (Game AI Pro 3 ch. 13) · Dill 2015 | [note](docs/research/needs-and-utility.md) |
-| Relationships | Heider 1946 · Zajonc 1968 · Dunbar 1992 | [note](docs/research/relationships.md) |
-| Opinions | Deffuant et al. 2000 · Friedkin & Johnsen 1990 · Asch 1956 | [note](docs/research/opinion-dynamics.md) |
-| Rumors and reputation | Daley & Kendall 1964 · Nowak & Sigmund 1998 · Ohtsuki & Iwasa 2004 | [note](docs/research/rumor-and-reputation.md) |
-| Factions and status | Tajfel et al. 1971 · Pettigrew & Tropp 2006 · Bonabeau et al. 1995 | [note](docs/research/groups-and-status.md) |
-| Memory | Park et al. 2023 · Anderson & Schooler 1991 | [note](docs/research/memory.md) |
-| Social simulation in games | Game AI Pro chapters · McCoy et al. 2014 | [note](docs/research/social-simulation-games.md) |
+| Personality and mood | Mehrabian 1996 · Gebhard 2005 (ALMA) | [note](https://github.com/Ladvien/bevy_society/blob/main/docs/research/personality-and-mood.md) |
+| Needs and utility | Mark & Dill (Game AI Pro 3 ch. 13) · Dill 2015 | [note](https://github.com/Ladvien/bevy_society/blob/main/docs/research/needs-and-utility.md) |
+| Relationships | Heider 1946 · Zajonc 1968 · Dunbar 1992 | [note](https://github.com/Ladvien/bevy_society/blob/main/docs/research/relationships.md) |
+| Opinions | Deffuant et al. 2000 · Friedkin & Johnsen 1990 · Asch 1956 | [note](https://github.com/Ladvien/bevy_society/blob/main/docs/research/opinion-dynamics.md) |
+| Rumors and reputation | Daley & Kendall 1964 · Nowak & Sigmund 1998 · Ohtsuki & Iwasa 2004 | [note](https://github.com/Ladvien/bevy_society/blob/main/docs/research/rumor-and-reputation.md) |
+| Factions and status | Tajfel et al. 1971 · Pettigrew & Tropp 2006 · Bonabeau et al. 1995 | [note](https://github.com/Ladvien/bevy_society/blob/main/docs/research/groups-and-status.md) |
+| Memory | Park et al. 2023 · Anderson & Schooler 1991 | [note](https://github.com/Ladvien/bevy_society/blob/main/docs/research/memory.md) |
+| Social simulation in games | Game AI Pro chapters · McCoy et al. 2014 | [note](https://github.com/Ladvien/bevy_society/blob/main/docs/research/social-simulation-games.md) |
 
-The papers were gathered with [home-still](docs/research/corpus/README.md), a local corpus pipeline; `docs/research/README.md` lists a DOI and a corpus id for every mechanism.
+The papers were gathered with [home-still](https://github.com/Ladvien/bevy_society/blob/main/docs/research/corpus/README.md), a local corpus pipeline; `docs/research/README.md` lists a DOI and a corpus id for every mechanism.
 
 ## Bevy compatibility
 
@@ -220,7 +220,7 @@ The papers were gathered with [home-still](docs/research/corpus/README.md), a lo
 
 ## Documentation
 
-[Getting started](docs/guide/getting-started.md) · [Concepts](docs/guide/concepts.md) · [Authoring](docs/guide/authoring.md) · [Scripting](docs/guide/scripting.md) · [Dialogue](docs/guide/dialogue.md) · [Decisions](docs/guide/decisions.md) · [Persistence](docs/guide/persistence.md) · [Research](docs/research/README.md) · [Demos](docs/DEMOS.md)
+[Getting started](https://github.com/Ladvien/bevy_society/blob/main/docs/guide/getting-started.md) · [Concepts](https://github.com/Ladvien/bevy_society/blob/main/docs/guide/concepts.md) · [Authoring](https://github.com/Ladvien/bevy_society/blob/main/docs/guide/authoring.md) · [Scripting](https://github.com/Ladvien/bevy_society/blob/main/docs/guide/scripting.md) · [Dialogue](https://github.com/Ladvien/bevy_society/blob/main/docs/guide/dialogue.md) · [Decisions](https://github.com/Ladvien/bevy_society/blob/main/docs/guide/decisions.md) · [Persistence](https://github.com/Ladvien/bevy_society/blob/main/docs/guide/persistence.md) · [Research](https://github.com/Ladvien/bevy_society/blob/main/docs/research/README.md) · [Demos](https://github.com/Ladvien/bevy_society/blob/main/docs/DEMOS.md)
 
 ## Contributing
 
