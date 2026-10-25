@@ -1,6 +1,6 @@
 [package]
 name = "bevy_society"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2024"
 rust-version = "1.97.1"
 description = "Living societies for Bevy: personalities, moods, needs, memories, relationships, opinions, rumors, reputation and factions; utility-AI daily lives; Rhai triggers; dialogue through bevy_speech_bubbles."
@@ -8,7 +8,8 @@ license = "MIT OR Apache-2.0"
 repository = "https://github.com/Ladvien/bevy_society"
 keywords = ["bevy", "gamedev", "ai", "simulation", "npc"]
 categories = ["game-development", "simulation"]
-publish = false   # its ladvien dependencies are publish = false git dependencies
+# Everything a consumer needs and nothing else. `docs/` is 623 MB of research notes and GIFs and never ships.
+include = ["src/**", "assets/**", "Cargo.toml", "README.md", "CHANGELOG.md", "LICENSE-*"]
 
 [features]
 default = ["dialogue", "steering", "fields"]

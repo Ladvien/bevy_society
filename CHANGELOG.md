@@ -4,6 +4,8 @@ All notable changes to bevy_society. The format follows [Keep a Changelog](https
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-10-25
+
 ### Added
 
 - **The crate names a home that cannot seat its residents, which is what interrupts 150 sleeps in its own village.** Everyone goes to bed at the same hour, so every resident of a place aims at the same coordinate inside `interaction_radius`; ORCA holds two people one body diameter apart, so the disc packs solid and the queue behind it times out. Instrumenting the arrival gate found the mechanism: at every one of the **150** timed-out sleeps the goal already held a **median of 6 bodies, maximum 10** — and those homes declare `capacity: 6`, while a 1.5 m disc seats only about `(1.5 / 0.7)² ≈ 4.6`. The failures are not lost walkers; they are the queue behind a full disc. `warn_unreachable_places` — already a `Startup` system measuring the layout — now counts residents per home and says so:
