@@ -514,6 +514,27 @@ pub struct NextPersonId(pub u32);
 #[derive(Component, Reflect, Debug, Clone, Copy, Default, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct PersonId(pub u32);
 
+/// The host's own stable identity for a person, written by the host before a save is taken.
+///
+/// A [`PersonId`] is an index into one session's spawn order, so it cannot address anybody across a
+/// reload; a `PersonKey` is Sanctuary's roster id, which the host already has and which outlives the
+/// session. Everything the crate saves as a reference to a person — a tie's target, an emotion's or
+/// memory's subject, a rumor's people, the person a `Doing` is directed at — is stored as this key.
+///
+/// The crate never writes one. A person spawned without a key is simply not saved: see
+/// [`capture`](crate::capture).
+#[derive(Component, Reflect, Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
+#[reflect(Component)]
+pub struct PersonKey(pub u64);
+
+/// The host's own stable identity for a [`Place`], written by the host before a save is taken.
+///
+/// A `Doing` directed at a place is saved as this key, because a place's `Entity` is as
+/// session-local as a person's. Like [`PersonKey`], the crate never writes one.
+#[derive(Component, Reflect, Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
+#[reflect(Component)]
+pub struct PlaceKey(pub u64);
+
 /// Marker of a simulated person. Adding it gives the person every per-person component.
 #[derive(Component, Reflect, Debug, Clone, Copy, Default, PartialEq, Eq)]
 #[require(
@@ -934,6 +955,8 @@ impl Plugin for SocietyCorePlugin {
             .register_type::<SocietyTick>()
             .register_type::<NextPersonId>()
             .register_type::<PersonId>()
+            .register_type::<PersonKey>()
+            .register_type::<PlaceKey>()
             .register_type::<Person>()
             .register_type::<Autonomous>()
             .register_type::<Dormant>()

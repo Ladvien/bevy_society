@@ -184,8 +184,9 @@ impl SocialFields {
             })
     }
 
-    /// Recomputes the cached peaks. Called once per tick, after evaporation and diffusion.
-    fn refresh_peaks(&mut self) {
+    /// Recomputes the cached peaks. Called once per tick, after evaporation and diffusion, and once
+    /// after a restore so the restored values are readable without waiting for a tick.
+    pub(crate) fn refresh_peaks(&mut self) {
         self.peaks.presence = self.crowd.hotspot_cell(0).1;
         self.peaks.commotion = self.crowd.hotspot_cell(1).1;
         self.peaks.factions = self

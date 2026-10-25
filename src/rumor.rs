@@ -11,6 +11,7 @@ use crate::relationships::Ties;
 
 /// Index of a rumor in the [`RumorBook`] (plan D5).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Reflect)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct RumorId(pub u32);
 
 /// One rumor about one person's deed (plan D5). `valence` is the deed's `harm`: negative means damaging
