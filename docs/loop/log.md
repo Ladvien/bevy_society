@@ -3128,3 +3128,64 @@ aimed at, found the cost). Pass 3 GREAT (the coupling is the lesson).
 3. **Meeting and befriending share one verb** - blocked behind (1) and (2).
 4. **`Doing` names the target activity while travelling** - 49.8% of person-ticks; host-facing, escalated.
 5. **The clock decision** - 5.4-hour walks against 0.75-hour activities.
+
+## 2026-12-16-01 - Both clamp remedies are dead; the lever is the anchor
+
+**Pick.** Item 1 — but the previous decision file listed two options that had **never been run**. Measuring them
+was the valuable step.
+
+**Option 1, longer `ticks:` — dead.** Under the clamp, spread asymptotes:
+
+| ticks | spread | required |
+|---|---|---|
+| 12 000 | 0.3813 | <= 0.3405 |
+| 18 000 | 0.4036 | |
+| 24 000 | **0.4036** | |
+| 36 000 | 0.4005 | |
+
+18 000 and 24 000 identical to four decimals: a fixed point, not slow convergence.
+
+**Option 2, compensating `influence_mu` — dead.** 0.3 -> 0.6 gave **0.4337**, *worse*. Convergence has two
+affinity-scaled paths and `mu` scales only one:
+
+| path | weight | clamped | unclamped |
+|---|---|---|---|
+| Deffuant | `0.5*trust + 0.5*max(0, affinity)` | 0.425 | 0.645 |
+| Conformity | `max(0.1, affinity + 1)` | **1.35** | **1.79** |
+
+**The mechanism.** `anchor_step` has **no affinity term**. The equilibrium is `social / anchor`, so the clamp
+halves the numerator and moves each person toward their own anchor — which predicts the ~0.40 asymptote exactly.
+
+**The lever that works, and its price.**
+
+| `anchor_pull` | spread |
+|---|---|
+| 0.10 (shipped) | 0.3813 fail |
+| 0.05 | 0.3426 fail |
+| **0.045 / 0.04** | **pass** |
+| 0.03 | 0.3720 fail |
+
+Non-monotonic, interior band. **0.04 is a 2.5x cut to Friedkin-Johnsen** — tuning a cited model to clear a test.
+
+**The village with everything on: 16 friends / 10 rivals / -0.052** against **22 / 33 / -0.054.** Rivals down 70%,
+mood unchanged. Better as a society, worse as one scenario's threshold.
+
+**The real conclusion.** `affinity` has **four readers** — tie labels, Deffuant, conformity, acceptance — in three
+different formulas. Three are invisible from the scenarios the clamp targets. That is why nine attempts failed.
+
+**Reverted.** Options recorded: cut the anchor (no), re-state the observable (honest), or separate the influence
+weight (the schema change).
+
+**Verdicts.** Pass 1 GREAT. Pass 2 GREAT. Pass 3 **NOT YET** for shipping, GREAT for the decision.
+
+**Dead-code delta.** Zero. **Tests:** 53 binaries clean.
+
+**Commit** `pending`.
+
+**Top 5 remaining.**
+
+1. **`affinity` has four readers.** Only separating the influence weight fixes it once; a schema change.
+2. **Decide the clamp trade** — three measured options, recommendation: never tune the anchor.
+3. **Accept rate sits under its own midpoint** (`trust_rises`: 0.538 against 0.542, mean trust rising).
+4. **`Doing` names the target activity while travelling** - 49.8% of person-ticks; escalated.
+5. **The clock decision** - 5.4-hour walks against 0.75-hour activities.

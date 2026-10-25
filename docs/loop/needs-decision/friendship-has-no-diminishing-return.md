@@ -316,3 +316,75 @@ chosen because unclamped convergence crosses a third around 9 000. Any clamp nee
 
 **This is the thing to decide**, and it is bigger than the earlier trade: bounding the tie network means
 re-tuning the opinion scenario, because influence and liking share one variable.
+
+## All three levers measured, 2026-12-16
+
+Both options the file previously offered are **dead**, and a third lever works only by weakening a cited model.
+This is the full map.
+
+### Option 1 (longer `ticks:`) — dead
+
+Under the clamp, opinion spread **asymptotes**, so no duration reaches the bar:
+
+| ticks | spread | required |
+|---|---|---|
+| 12 000 | 0.3813 | ≤ 0.3405 |
+| 18 000 | 0.4036 | |
+| 24 000 | **0.4036** | |
+| 36 000 | 0.4005 | |
+
+18 000 and 24 000 are *identical*: it is a fixed point at **~0.40**, not slow convergence. The scenario can never
+pass however long it runs.
+
+### Option 2 (compensating `influence_mu`) — dead, and the reason is instructive
+
+Doubling `influence_mu` to 0.6 made spread **worse** (0.3813 → 0.4337), because convergence has **two** paths and
+`mu` scales only one:
+
+| path | weight | clamped 0.35 | unclamped 0.79 |
+|---|---|---|---|
+| Deffuant | `0.5·trust + 0.5·max(0, affinity)` | 0.425 (trust 0.5) | 0.645 |
+| Conformity | `max(0.1, affinity + 1)` | **1.35** | **1.79** |
+
+`mu` governs Deffuant only. Raising it changes the *ratio* between the two paths, which is why the result moved
+the wrong way.
+
+### The real mechanism: the equilibrium is social-pull against anchor-pull
+
+`anchor_step = rate · stubbornness · (anchor − x)` is **not** affinity-weighted. Clamping social weight therefore
+shifts every person's equilibrium **toward their own anchor** — a village of individually stubborn people.
+Equilibrium spread is set by `social pull ÷ anchor pull`, and the clamp halves the numerator without touching the
+denominator.
+
+### Option 3 (lower `anchor_pull`) — works, but weakens the cited model
+
+| `anchor_pull` | spread | passes |
+|---|---|---|
+| 0.10 (shipped) | 0.3813 | no |
+| 0.07 | 0.3611 | no |
+| 0.06 | 0.3525 | no |
+| 0.05 | 0.3426 | no |
+| **0.045** | — | **yes** |
+| **0.04** | — | **yes** |
+| 0.03 | 0.3720 | no |
+
+Non-monotonic, with an interior band around 0.04–0.045. **0.04 is a 2.5× cut to the Friedkin–Johnsen term**, and
+an anchor pull is what makes opinions *persist* rather than follow the last person spoken to. Cutting it to pass a
+scenario is tuning a cited model to a test, which is the failure mode the crate's honesty rule exists to prevent.
+
+### The full configuration, and what it costs
+
+With all four changes the village reads **16 friends / 10 rivals / -0.052** against the shipped **22 / 33 /
+-0.054** — rivals down 70%, mood unchanged. It also breaks `trust_rises`: accept rate 0.538 against 0.542, because
+the trust second input makes *more* ties label as friends, and the accept curve centres on trust 0.5.
+
+### What needs deciding
+
+1. **Cut `anchor_pull` to reach the opinion bar.** Works, but tunes a cited model to a test.
+2. **Accept the opinion scenario as a casualty** and re-state its observable to match a clamped, anchor-held
+   village (~0.40). Honest, and the village is better on ties and mood either way.
+3. **Separate the influence weight from affinity** — the schema change. The only option where each number keeps
+   one meaning.
+
+The measurement says the clamp is **good for the village** and **bad for one scenario's threshold**. Options 2 and
+3 keep the crate honest; option 1 does not.
