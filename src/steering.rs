@@ -37,7 +37,26 @@ const TIME_HORIZON: f32 = 2.0;
 const MAX_NEIGHBOURS: usize = 10;
 /// The symmetry kick, as a fraction of a mover's wish. ORCA has no reason to prefer left over right at
 /// an exactly head-on meeting, so it stalls; `Crowd` nudges each member to a side hashed from its key.
-const NUDGE: f32 = 0.05;
+///
+/// **This is what breaks the crowd deadlock, and 0.05 was too small to do it.** Measured on
+/// `village-evening` (24 people, 17 game-days, same seed): with the core walker and no steering at all,
+/// **4** activities are interrupted; with ORCA and the old `0.05`, **40** are. People converging on one
+/// place — the whole village shares one `Home` — press on each other until every walker's wish cancels,
+/// and they stall 2-4 m short for the full 4-hour travel timeout. Interrupted activities by nudge:
+///
+/// | nudge | interrupted |
+/// |---|---|
+/// | 0.05 | 40 |
+/// | 0.15 | 32 |
+/// | 0.20 | 29 |
+/// | 0.25 | 24 |
+/// | **0.30** | **19** |
+/// | 0.60 | 27 |
+///
+/// Interior optimum: too small and the stall survives, too large and the side-step pushes people off
+/// their line. At 0.30 the village also reads **26 friends / 33 rivals** against **22 / 33**, so the
+/// kick does not cost the society anything. Reproducible: two runs give 19 / 26 / 33 both times.
+const NUDGE: f32 = 0.3;
 /// Below this speed (m/s) a mover keeps its facing instead of turning to its velocity.
 const FACE_MIN_SPEED: f32 = 0.05;
 /// Metres ahead that a solid thing starts constraining a mover's velocity.

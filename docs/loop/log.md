@@ -3307,3 +3307,60 @@ could not be confirmed and needs an idle machine. Recorded as a standing item ra
 3. **The guide's scale curve is unverified** — 0.6/13.5/245.1 ms, and the machine read 0.97/36.8/461 today.
 4. **The clock decision** - 5.4-hour walks against 0.75-hour activities; a breaking change.
 5. **`rumor-crosses-a-cluster`** - honestly `pending`; restate the observable or build a bridge activity.
+
+## 2026-12-19-01 - A crowd walking to one place deadlocked
+
+**Pick.** Item 2, "behavior that reads as wrong when you watch it". Reading `village-evening`'s narrative as a
+stranger showed **19 of 27 sleeps `(interrupted)`** — people were not sleeping.
+
+**The finding, in three measurements.**
+
+| mover | interrupted | completed |
+|---|---|---|
+| core walker, **no steering at all** | **4** | 305 |
+| ORCA steering (shipped) | **40** | 242 |
+
+Ten times worse with the feature on. It scales with crowding — 6 people → 6, 12 → 19, 24 → 40 — and at every
+timeout the walker was printed **2.0–4.0 m** from its target with `Destination` still set.
+
+**The cause was already written in the code.** `steering.rs`: "ORCA has no reason to prefer left over right at
+an exactly head-on meeting, so it stalls; `Crowd` nudges each member to a side". `NUDGE` was `0.05` — too weak to
+do that job.
+
+**The sweep is an interior optimum, not a slide toward a rail:**
+
+| nudge | 0.05 | 0.15 | 0.20 | 0.25 | **0.30** | 0.60 |
+|---|---|---|---|---|---|---|
+| interrupted | 40 | 32 | 29 | 24 | **19** | 27 |
+
+At **0.30**: interrupted **19** (from 40), friends **26** (from 22), rivals unchanged at 33. Reproducible — two
+runs give 19 / 26 / 33 both times.
+
+**The residual is geometry, not kinetics.** Twenty-four 0.35 m bodies cannot fit a 1.5 m arrival circle. Closing
+it needs a decision: `ActivityTarget::Home` ignores `Place::capacity` (unlike `Place(tag)`), so 24 people are sent
+to a place declaring room for 6. Measured and **not** shipped: capacity 24 → 27 interrupted, body radius 0.20 →
+19. The first changes what a village means; the second changes a body's size for a numerical reason.
+
+**The uncomfortable part: no test ships.** Three were written — a ring of 12, a ring of 24, and a synthetic
+village sharing one home — and **all three passed at the old nudge too**. The synthetic village's interrupted
+share was *identical* (7%) either way. A test that passes either way is worse than none, so they were deleted and
+the constant carries its table and the reproduction command instead.
+
+**Perf, still unverified.** The load average ranged 1.8 to 10.2 across the session; consecutive runs of the same
+binary at 1 000 people gave 36.8 / 58.1 / 46.2 ms. No number taken under that noise is worth recording, so the
+guide's 0.6 / 13.5 / 245.1 ms stays unconfirmed for a third iteration.
+
+**Verdicts.** Pass 1 GREAT. Pass 2 GREAT (the interior optimum is the argument). Pass 3 **GREAT, and the least
+comfortable** — it is what turned "ship a test" into "ship a measurement".
+
+**Dead-code delta.** Zero. **Tests:** 55 binaries, both feature sets; clippy, docs, fmt clean.
+
+**Commit** `pending`.
+
+**Top 5 remaining.**
+
+1. **`ActivityTarget::Home` ignores `Place::capacity`.** 24 people sent to a place with room for 6; measured 40 → 27.
+2. **The guide's scale curve is unverified** for a third iteration — 0.6/13.5/245.1 ms, machine never idle.
+3. **`affinity` has four readers.** Separating the influence weight fixes the clamp once; a schema change.
+4. **The clock decision** - 5.4-hour walks against 0.75-hour activities; a breaking change.
+5. **`rumor-crosses-a-cluster`** - honestly `pending`; restate the observable or build a bridge activity.
