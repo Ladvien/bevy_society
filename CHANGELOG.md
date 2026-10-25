@@ -4,6 +4,8 @@ All notable changes to bevy_society. The format follows [Keep a Changelog](https
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-10-25
+
 ### Added
 
 - **`summary.json` now reports whether the village ever makes up, not just how many rivalries exist.** `rivals` alone cannot distinguish a society that holds grudges from one that never releases them — both show a rising count. `examples/evidence.rs` now drains `TieLabelChanged` and reports `became_rival` and `left_rival`, whose difference is exactly the standing ties: `became_rival - left_rival == 2 * rivals`. Measured on `village-evening` (24 people, 17 game-days):
