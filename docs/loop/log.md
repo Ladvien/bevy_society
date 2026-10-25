@@ -3352,7 +3352,7 @@ the village. Pass 3 GREAT.
 
 **Dead-code delta.** Zero. **Tests:** 57 binaries, both feature sets; clippy, docs, fmt clean.
 
-**Commit** `TBD`.
+**Commit** `cc285c9`.
 
 **Top 5 remaining.**
 
