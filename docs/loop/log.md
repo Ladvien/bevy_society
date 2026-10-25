@@ -3727,7 +3727,7 @@ the environment.
 
 **Dead-code delta.** Zero. **Tests:** 69 binaries, both feature sets; clippy, docs, fmt clean. New test bites.
 
-**Commit** `pending`.
+**Commit** `0bc8826`.
 
 **Top 5 remaining.**
 
