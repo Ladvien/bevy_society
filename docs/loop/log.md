@@ -3362,3 +3362,64 @@ the village. Pass 3 GREAT.
 3. **`affinity` has four readers.** Separating the influence weight fixes the clamp once; a schema change.
 4. **The clock decision** - 5.4-hour walks against 0.75-hour activities; a breaking change.
 5. **`rumor-crosses-a-cluster`** - honestly `pending`; restate the observable or build a bridge activity.
+
+## 2026-12-20-01 - A person-targeted activity was cancelled on its first tick
+
+**Pick.** Last iteration's top item was `Place::capacity`. Before building it I added an
+`interrupted_by_activity` breakdown to `summary.json` — and the breakdown said the fix would move nothing.
+
+| activity | interrupted |
+|---|---|
+| **compliment** | **1 045** |
+| snub | 598 |
+| work | 164 |
+| sleep | 162 |
+
+`compliment` — a **person**-targeted activity — was **47% of every failure**. `sleep` was 7%.
+
+**The cause, instrumented rather than guessed.** Every exit path instrumented at once: all 1 045 took the same
+branch, `gone=true`. The check was `perception.persons.binary_search(&target).is_err()`; `binary_search` needs the
+slice sorted by `Entity`, and `persons` is ordered by `PersonId`. Printing the raw ids:
+
+```
+[4294967234, 4294967233, 4294967232, 4294967231, ...]
+```
+
+**Strictly descending.** `binary_search` and `contains` disagreed on the same call — "gone" versus present, in a
+list of 24.
+
+**Measured:**
+
+| | interrupted | share | `compliment` | friends | rivals |
+|---|---|---|---|---|---|
+| before | 2 237 | 22.8% | 1 045 | 22 | 46 |
+| after | **400** | **5.9%** | **11** | **31** | **38** |
+
+83% fewer interruptions, 99% fewer `compliment` failures, friends up 41%, rivals down 17%. Reverting the one
+expression restores 2 237/1 045 exactly.
+
+**Explained, not waved through.** Total endings fall 9 808 → 6 768. The activity mix keeps its shape (sleep 40%,
+work 24%, eat 10%, `compliment` now *visible* at 7%) — an activity that died instantly and was re-chosen is now
+one completed activity. Fewer, longer things.
+
+**The uncomfortable part, again: no reproduction test.** Six attempts — the real village fixture, a hand-built
+village, a ring of 12, a ring of 24, two churn variants — **all passed under the bug**. It needs the exact
+`PersonId` order the evidence harness produces. The shipped test is a **threshold guard on the observable**, and
+its doc comment says so. Second iteration in a row where I could not test what I shipped; that is a trend, not a
+one-off.
+
+**Verdicts.** Pass 1 GREAT. Pass 2 GREAT (the falling total needed explaining). Pass 3 GREAT for the change,
+**NOT YET** for coverage, recorded rather than hidden.
+
+**Dead-code delta.** Zero. **Tests:** 58 binaries, both feature sets; clippy, docs, fmt clean.
+
+**Commit** `pending`.
+
+**Top 5 remaining.**
+
+1. **Reproduction coverage is slipping.** Two iterations, two shipped changes I could not test. The harness's
+   village builder should move somewhere `tests/` can reach, so the exact spawn order is reproducible.
+2. **`ActivityTarget::Home` ignores `Place::capacity`** — still real, no longer first: sleep was 162 failures.
+3. **The guide's scale curve is unverified** for a fourth iteration.
+4. **The clock decision** - 5.4-hour walks against 0.75-hour activities; a breaking change.
+5. **`rumor-crosses-a-cluster`** - honestly `pending`; restate the observable or build a bridge activity.
