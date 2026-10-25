@@ -3355,7 +3355,7 @@ comfortable** — it is what turned "ship a test" into "ship a measurement".
 
 **Dead-code delta.** Zero. **Tests:** 55 binaries, both feature sets; clippy, docs, fmt clean.
 
-**Commit** `pending`.
+**Commit** `90b2248`.
 
 **Top 5 remaining.**
 
