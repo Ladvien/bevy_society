@@ -147,7 +147,7 @@ mod trace;
 
 pub use behavior::{
     ActivityEnded, ActivityStarted, BehaviorPlugin, Destination, Doing, DoingTarget, EndActivity,
-    InteractionResolved, TravelFailed,
+    InteractionResolved, ReportDeed, TravelFailed,
 };
 pub use beliefs::{BeliefsPlugin, Knowledge, Known, Opinion, Opinions, belief_after_hearing};
 pub use core::{
