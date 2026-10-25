@@ -33,6 +33,7 @@ const IDLE: &str = "idle";
 
 /// Index of a need, in definition order.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default, Reflect)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct NeedId(pub u16);
 
 /// Index of a host signal, in definition order.
@@ -41,22 +42,27 @@ pub struct SignalId(pub u16);
 
 /// Index of a topic, in definition order.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default, Reflect)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct TopicId(pub u16);
 
 /// Index of a deed, in definition order.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default, Reflect)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct DeedId(pub u16);
 
 /// Index of a faction, in definition order.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default, Reflect)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct FactionId(pub u16);
 
 /// Index of an activity, in definition order. `IDLE_ACTIVITY` is always `ActivityId(0)`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default, Reflect)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ActivityId(pub u16);
 
 /// Index of an interaction, in definition order.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default, Reflect)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct InteractionId(pub u16);
 
 /// Everything a host hands in, as one RON document. Every list is optional.

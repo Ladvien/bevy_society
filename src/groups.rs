@@ -20,6 +20,7 @@ pub const STANDING_FAMILIARITY: f32 = 0.2;
 
 /// The factions a person belongs to, sorted by `FactionId` (plan D6).
 #[derive(Component, Debug, Clone, Default, PartialEq, Reflect)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Memberships(pub Vec<FactionId>);
 
 impl Memberships {
@@ -77,6 +78,7 @@ pub(crate) fn shared_faction_bias(
 /// A person's standing: the mean respect others hold for them (plan D6). Magee & Galinsky 2008,
 /// DOI 10.5465/19416520802211628, on status as conferred respect; Berger et al. 1972, DOI 10.2307/2093465.
 #[derive(Component, Debug, Clone, Copy, Default, PartialEq, Reflect)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Status {
     /// Mean respect received, over those who know this person well enough.
     pub standing: f32,
@@ -183,6 +185,7 @@ pub(crate) fn intergroup_contact(a_to_b: &mut Tie, b_to_a: &mut Tie, tuning: &Tu
 
 /// Per-faction aggregates, indexed by `FactionId` (plan D6). Recomputed each tick by the groups system.
 #[derive(Debug, Clone, Default, PartialEq, Reflect)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct FactionStat {
     /// Number of living members.
     pub members: u32,
@@ -196,6 +199,7 @@ pub struct FactionStat {
 
 /// All factions' aggregates (plan D6). Index `i` is `FactionId(i)`.
 #[derive(Resource, Debug, Clone, Default, PartialEq, Reflect)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct FactionStats(pub Vec<FactionStat>);
 
 impl FactionStats {
