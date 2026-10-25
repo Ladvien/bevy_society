@@ -3413,7 +3413,7 @@ one-off.
 
 **Dead-code delta.** Zero. **Tests:** 58 binaries, both feature sets; clippy, docs, fmt clean.
 
-**Commit** `pending`.
+**Commit** `43c2212`.
 
 **Top 5 remaining.**
 
