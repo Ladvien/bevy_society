@@ -3479,3 +3479,56 @@ rather than rounding it up. Pass 3 GREAT.
 3. **`ActivityTarget::Home` ignores `Place::capacity`** — untested as a cause; sleep is the activity it touches.
 4. **The guide's scale curve is unverified** for a fifth iteration.
 5. **The clock decision** - 5.4-hour walks against 0.75-hour activities; a breaking change.
+
+## 2026-12-22-01 - Seven levers on the sleep jam, none of them work
+
+**Pick.** The previous iteration's top item: 142 of 150 sleep failures survive a travel budget that covers the whole
+village. My own loose end, 37.5% of all remaining failures, and already half-diagnosed.
+
+**The diagnosis I started from, all measured:**
+
+- all 150 are `timed_out` — no `gone`, `suspended` or `lost` on any exit path;
+- they stall at **min 1.52 m, median 2.06 m, p75 2.33 m** against an `interaction_radius` of 1.5;
+- 150 of 150 hold a `Destination` and a `SocialMover`, and **84 still have velocity > 0.01 m/s** — pressing, not idle.
+
+**The seven levers, all dead:**
+
+| lever | interrupted | sleep | rivals |
+|---|---|---|---|
+| baseline | 400 | 150 | 38 |
+| scatter (RNG) | 456 | 173 | 42 |
+| scatter (deterministic) | **484** | 174 | 36 |
+| `stop_radius` 0.75 → 1.5 | **400** | **150** | 38 |
+| `interaction_radius` → 2.2 | 378 | 160 | **90** |
+| `interaction_radius` → 2.6 | 364 | 136 | **82** |
+| `Home` honours capacity | **440** | 155 | **69** |
+
+**The key negative result: `stop_radius` is a no-op — byte-identical output.** A change to how far walkers push
+that changes nothing rules out the entire "tune the walker" family and points at what the *solver* is handed.
+
+**Two levers that help pay in rivalries.** `interaction_radius` is also what decides contact, so enlarging it turns
+38 rivalries into 90. Same coupling six clamp iterations already mapped.
+
+**A methodology error I caught.** The first scatter test drew from `SocietyRng`, so 456 vs 400 compared two
+different simulations. Re-run deterministically it gave 484. The plot marks the invalid run rather than quietly
+presenting it.
+
+**Nothing shipped.** Seven levers is past the loop's five-round limit, so the blocker is logged with its ruled-out
+list and the tree reverted — `git diff src/` is empty — rather than a seventh constant nudged in because the
+iteration was supposed to produce something.
+
+**Verdicts.** Pass 1 FAIL (no lever worked). Pass 2 GREAT for measurement, FAIL for the fix. Pass 3 GREAT.
+
+**Dead-code delta.** Zero. **Tests:** 60 binaries green at baseline.
+
+**Commit** `pending`.
+
+**Top 5 remaining.**
+
+1. **Instrument the ORCA solver for stuck walkers** — `pref_vel`, neighbour count, member radius. The `stop_radius`
+   no-op says the answer is in those numbers, not in the geometry.
+2. **Separate arrival radius from contact radius** — the one fix that cannot damage the tie network; recorded as
+   option 1 in `needs-decision/people-cannot-reach-their-beds.md`.
+3. **The guide's scale curve is unverified** for a sixth iteration; same binary gave 50.9 / 51.1 / 54.7 ms at 1 000.
+4. **The harness's village builder should move where `tests/` can reach it** — carried over.
+5. **The clock decision** - 5.4-hour walks against 0.75-hour activities; a breaking change.
