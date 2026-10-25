@@ -3644,3 +3644,47 @@ attempts failed silently.
    it is why four fixtures this iteration could not reproduce the village.
 4. **`Place::capacity` is used only to filter candidates**, never enforced at arrival. Now documented.
 5. **The clock decision** - 5.4-hour walks against 0.75-hour activities; a breaking change.
+
+## 2026-12-25-01 - The village existed three times, and one copy had drifted
+
+**Pick.** Item 3, carried for four iterations: "the harness's village builder should move where `tests/` can reach
+it — it is why four fixtures last iteration could not reproduce the village."
+
+**Every clause of that was wrong.** The builder had already been extracted to `tests/common/village.rs`;
+`tests/` could reach it. The real defect was the opposite: a **third copy had drifted**.
+
+| | tavern | market | workshop | farthest pair |
+|---|---|---|---|---|
+| canonical (`examples/common/scene.rs`) | (6.5, -5.0) | (-6.5, -5.0) | (6.5, 5.0) | **16.4 m** |
+| drifted (`tests/common/village.rs`) | (8.0, -6.0) | (-8.0, -6.0) | (8.0, 8.0) | **21.3 m** |
+
+At the scenario's 64 s/day, 16.4 m needs `travel_timeout_hours` **4.4**; 21.3 m needs **5.7**; the scenario declares
+4.0. So `tests/determinism.rs`, `tests/friendship_bound.rs` and `tests/save.rs` were walking a village **29% wider**
+than the one the clip renders — and they **passed**, which is exactly why nobody noticed. A passing test on the
+wrong village is worse than a failing test on the right one.
+
+**Shipped.** The test builder matches the canonical coordinates; `examples/evidence.rs` stops keeping a copy and
+reads `common::scene::PLACES[..].1` (`series.csv` **byte-identical**); `tests/village_layout.rs` pins the table,
+the 16.4 m span and the shared builder's agreement.
+
+**The lesson.** Four iterations of carrying an item I had described incorrectly, resolved in ten minutes by reading
+the code instead of the log. Last iteration's lesson was "re-measure a blocker before honouring it"; this one is
+the same lesson one level down — **re-read the item, not just the measurement.**
+
+**Verdicts.** Pass 1 GREAT. Pass 2 GREAT (the plot shows the drifted village is visibly looser). Pass 3 GREAT.
+
+**Dead-code delta.** Zero. **Tests:** 68 binaries, both feature sets; clippy, docs, fmt clean. New test bites with a
+message naming both coordinates.
+
+**Commit** `pending`.
+
+**Top 5 remaining.**
+
+1. **Split arrival radius from contact radius** — schema change, non-urgent since the clamp made the numeric fix
+   affordable. Recorded in `needs-decision/people-cannot-reach-their-beds.md`.
+2. **The guide's scale curve** — ninth iteration unverified. Stop waiting for a quiet machine; re-measure with
+   median-of-N and a reported spread, or on another host.
+3. **`Place::capacity` is used only to filter candidates**, never enforced at arrival. Enforcing it alone was
+   measured to make the village worse (400 → 440), so it needs an overflow destination first.
+4. **The clock decision** - 5.4-hour walks against 0.75-hour activities; a breaking change.
+5. **`rumor-crosses-a-cluster`** - honestly `pending`; restate the observable or build a bridge activity.
