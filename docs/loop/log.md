@@ -3521,7 +3521,7 @@ iteration was supposed to produce something.
 
 **Dead-code delta.** Zero. **Tests:** 60 binaries green at baseline.
 
-**Commit** `pending`.
+**Commit** `40d551f`.
 
 **Top 5 remaining.**
 
