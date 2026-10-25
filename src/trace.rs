@@ -41,6 +41,9 @@ pub struct Decision {
     /// The person's name, when it had one. Copied here because the entity may despawn before a host
     /// reads the trace, and a name outlives the entity.
     pub name: Option<String>,
+    /// The host-written signal values the decision scored with, indexed by
+    /// [`SignalId`](crate::SignalId). Empty when the person had no `Signals` to copy.
+    pub signals: Vec<f32>,
     /// Every option that scored above zero, best first. The idle fallback is included when nothing
     /// else scored.
     pub options: Vec<ScoredOption>,
@@ -197,6 +200,7 @@ mod tests {
             tick,
             person: who,
             name: None,
+            signals: Vec::new(),
             options: vec![
                 ScoredOption {
                     activity: "eat".to_owned(),
@@ -242,6 +246,7 @@ mod tests {
             tick: 0,
             person: person(),
             name: None,
+            signals: Vec::new(),
             options: vec![
                 ScoredOption {
                     activity: "snub".to_owned(),
@@ -271,6 +276,7 @@ mod tests {
             tick: 0,
             person: person(),
             name: None,
+            signals: Vec::new(),
             options: vec![ScoredOption {
                 activity: "sleep".to_owned(),
                 score: 1.0,

@@ -68,9 +68,9 @@ for name in ["Bram", "Alys", "Corin"] {
 }
 ```
 
-`Person` brings every per-person component with it: personality, mood, emotions, needs, ties,
-opinions, knowledge, memories, memberships and status. `Autonomous` is what makes a person choose its
-own activities; a player-controlled person is a `Person` without the marker.
+`Person` brings every per-person component with it: personality, mood, emotions, needs, signals,
+ties, opinions, knowledge, memories, memberships and status. `Autonomous` is what makes a person
+choose its own activities; a player-controlled person is a `Person` without the marker.
 
 Two markers take a person further out of the simulation, and they are different things:
 

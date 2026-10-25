@@ -162,8 +162,8 @@ pub use defs::{
     AcceptDef, ActivityDef, ActivityId, ActivityTarget, Consideration, ConversationRuleDef,
     DeedDef, DeedId, DefsError, DefsFile, EffectsDef, FactionDef, FactionId, FieldInput,
     IDLE_ACTIVITY, Input, InteractionBarks, InteractionDef, InteractionId, NeedDef, NeedId,
-    NodeEffectDef, Signal, SocietyDefs, TieDelta, TopicDef, TopicId, TriggerDef, TriggerOn,
-    size_person_state,
+    NodeEffectDef, Signal, SignalDef, SignalId, SocietyDefs, TieDelta, TopicDef, TopicId,
+    TriggerDef, TriggerOn, size_person_state,
 };
 #[cfg(feature = "dialogue")]
 pub use dialogue::{DialoguePlugin, TalkTo};
@@ -182,7 +182,7 @@ pub use groups::{
 pub use interact::{Feeling, Interact, SocietyBark};
 pub use mind::{
     ActiveEmotion, Appraise, EmotionKind, Emotions, Memories, Memory, MemoryKind, Mood, MoodRates,
-    Needs, Personality, Trait,
+    Needs, Personality, Signals, Trait,
 };
 pub use plugins::SocietyPlugins;
 pub use relationships::{RelationshipsPlugin, Tie, TieLabel, TieLabelChanged, Ties};
