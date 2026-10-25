@@ -24,6 +24,7 @@ use crate::rumor::{PlantRumor, RumorBook, RumorId, RumorLearned, plant_rumor};
 
 /// One opinion on one topic (plan D5). `value` is in `[-1, 1]`, `stubbornness` in `[0, 1]`.
 #[derive(Debug, Clone, Copy, PartialEq, Reflect)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Opinion {
     /// Current opinion in `[-1, 1]`.
     pub value: f32,
@@ -104,6 +105,7 @@ impl Opinion {
 
 /// A person's opinions, indexed by `TopicId` (plan D5). Sized to the defs by `size_person_state`.
 #[derive(Component, Debug, Clone, Default, PartialEq, Reflect)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Opinions(pub Vec<Opinion>);
 
 impl Opinions {
@@ -125,6 +127,7 @@ impl Opinions {
 
 /// What one person knows about one rumor (plan D5).
 #[derive(Debug, Clone, Copy, PartialEq, Reflect)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Known {
     /// The rumor known.
     pub rumor: RumorId,
@@ -138,6 +141,7 @@ pub struct Known {
 
 /// Everything a person knows about rumors, sorted by `RumorId` (plan D5).
 #[derive(Component, Debug, Clone, Default, PartialEq, Reflect)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Knowledge(pub Vec<Known>);
 
 impl Knowledge {

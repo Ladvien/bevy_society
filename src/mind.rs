@@ -55,6 +55,7 @@ impl Trait {
 
 /// The five traits, each in `[0, 1]`; default 0.5 on every trait.
 #[derive(Component, Clone, Copy, Debug, PartialEq, Reflect)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Personality {
     /// Openness to experience, in `[0, 1]`.
     pub openness: f32,
@@ -128,6 +129,7 @@ impl Personality {
 /// Mehrabian 1996 mapping this crate uses is DOI 10.1080/00049539608259510, the one `model::pad`
 /// implements).
 #[derive(Component, Clone, Copy, Debug, Default, PartialEq, Reflect)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Mood {
     /// Pleasure (valence).
     pub pleasure: f32,
@@ -223,6 +225,7 @@ impl Mood {
 /// The OCC emotion subset (Ortony, Clore & Collins; via Gratch & Marsella 2004, DOI
 /// 10.1016/j.cogsys.2004.02.002, and Dias & Paiva 2005, DOI 10.1007/11595014_13).
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Deserialize, Reflect)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub enum EmotionKind {
     /// Joy.
     Joy,
@@ -377,6 +380,7 @@ impl Emotions {
 
 /// Need levels, indexed by `NeedId`. Level 1 is satisfied, 0 is desperate.
 #[derive(Component, Clone, Debug, Default, PartialEq, Reflect)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Needs(pub Vec<f32>);
 
 impl Needs {

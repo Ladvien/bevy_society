@@ -140,6 +140,8 @@ mod relationships;
 mod reputation;
 mod rules;
 mod rumor;
+#[cfg(feature = "serde")]
+mod save;
 mod script;
 mod script_apply;
 mod snapshot;
@@ -152,10 +154,9 @@ pub use behavior::{
 pub use beliefs::{BeliefsPlugin, Knowledge, Known, Opinion, Opinions, belief_after_hearing};
 pub use core::{
     AssessmentNorm, Autonomous, BoundPlaces, ClockSource, Deceased, Dormant, Home, HostClock,
-    Locomotion,
-    NextPersonId, Perception, Person, PersonId, PersonIndex, Place, PlaceTags, SocietyClock,
-    SocietyCorePlugin, SocietyPlane, SocietyRng, SocietySettings, SocietySystems, SocietyTick,
-    Tuning, society_tick_due,
+    Locomotion, NextPersonId, Perception, Person, PersonId, PersonIndex, PersonKey, Place, PlaceKey,
+    PlaceTags, SocietyClock, SocietyCorePlugin, SocietyPlane, SocietyRng, SocietySettings,
+    SocietySystems, SocietyTick, Tuning, society_tick_due,
 };
 pub use defs::{
     AcceptDef, ActivityDef, ActivityId, ActivityTarget, Consideration, ConversationRuleDef,
@@ -188,6 +189,12 @@ pub use relationships::{RelationshipsPlugin, Tie, TieLabel, TieLabelChanged, Tie
 pub use reputation::NormViolated;
 pub use rules::{FireTrigger, RulesPlugin};
 pub use rumor::{PlantRumor, Rumor, RumorBook, RumorId, RumorLearned};
+#[cfg(feature = "serde")]
+pub use save::{
+    ClockSave, DoingSave, DoingTargetSave, EmotionSave, FieldsSave, MemoryKindSave, MemorySave,
+    NamesSave, PersonSave, RestoreError, RestoreReport, RngSave, RumorSave, SocietySave, TieSave,
+    TriggersSave, VERSION, capture, restore,
+};
 pub use script::{ScriptEngine, ScriptError, ScriptEvent, ScriptId, ScriptValue};
 #[cfg(feature = "steering")]
 pub use steering::{Obstacle, SocialMover, SocialVelocity, SteeringPlugin};

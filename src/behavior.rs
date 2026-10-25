@@ -484,7 +484,8 @@ const MIN_WALK_METRES: f64 = 10.0;
 /// and being able to reach your own tavern are different things.
 fn warn_unreachable_places(
     settings: Res<SocietySettings>,
-    places: Query<(&Name, &Transform), With<crate::core::Place>>,
+    places: Query<(Entity, &Name, &Transform), With<crate::core::Place>>,
+    homes: Query<&crate::Home>,
 ) {
     if settings.locomotion != crate::Locomotion::Builtin {
         return;
@@ -505,8 +506,8 @@ fn warn_unreachable_places(
     let plane = settings.plane;
     let mut worst = 0.0_f32;
     let mut worst_pair = (String::new(), String::new());
-    for (name, transform) in &places {
-        for (other_name, other) in &places {
+    for (_, name, transform) in &places {
+        for (_, other_name, other) in &places {
             let here = plane.project(transform.translation);
             let there = plane.project(other.translation);
             let distance = here.distance(there);
@@ -515,6 +516,40 @@ fn warn_unreachable_places(
                 worst_pair = (name.as_str().to_owned(), other_name.as_str().to_owned());
             }
         }
+    }
+    // **Homes holding more people than their arrival disc can seat.** Everyone goes to bed at the same hour,
+    // so every resident of one place aims at the same coordinate inside `interaction_radius`. ORCA holds two
+    // centres one body diameter apart, so the disc packs solid and the queue behind it times out. Measured on
+    // the project's own village: **150 sleeps interrupted**, and at every one the goal already held a median of
+    // **6** bodies — exactly that home's declared capacity.
+    let mut residents: std::collections::BTreeMap<Entity, usize> =
+        std::collections::BTreeMap::new();
+    for home in &homes {
+        *residents.entry(home.0).or_insert(0) += 1;
+    }
+    let body_diameter = 0.7_f32;
+    for (entity, name, _) in &places {
+        let Some(&count) = residents.get(&entity) else {
+            continue;
+        };
+        // How many bodies the arrival disc can seat, and the radius that would seat them all. Hex
+        // packing overestimates what ORCA manages (everyone aims at the centre rather than around it), so
+        // this is a lower bound on the crowding, not a simulation of it.
+        let seats = (settings.interaction_radius / body_diameter).powi(2);
+        if (count as f32) <= seats || count < 3 {
+            continue;
+        }
+        let needed = body_diameter * (count as f32).sqrt();
+        warn!(
+            "bevy_society: '{place}' is home to {count} people, but an arrival disc of radius {radius} seats \
+             about {seats}. They all go to bed at the same hour, so the queue behind the disc times out and \
+             their sleeps are interrupted. Give them more room: raise `interaction_radius` to about {needed:.1} \
+             or spread the residents over more homes.",
+            place = name.as_str(),
+            radius = settings.interaction_radius,
+            seats = seats as usize,
+            needed = needed,
+        );
     }
     if worst <= reachable as f32 || places.iter().len() < 2 {
         return;

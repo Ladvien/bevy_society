@@ -129,6 +129,29 @@ impl TriggerState {
         true
     }
 
+    /// The once-fired keys, for [`capture`](crate::capture).
+    #[cfg(feature = "serde")]
+    pub(crate) fn fired_set(&self) -> &BTreeSet<(usize, i64)> {
+        &self.fired
+    }
+
+    /// The cooling map, for [`capture`](crate::capture).
+    #[cfg(feature = "serde")]
+    pub(crate) fn cooling_map(&self) -> &BTreeMap<(usize, i64), f64> {
+        &self.cooling
+    }
+
+    /// Replaces both maps wholesale, for [`restore`](crate::restore).
+    #[cfg(feature = "serde")]
+    pub(crate) fn replace(
+        &mut self,
+        fired: BTreeSet<(usize, i64)>,
+        cooling: BTreeMap<(usize, i64), f64>,
+    ) {
+        self.fired = fired;
+        self.cooling = cooling;
+    }
+
     fn record(&mut self, index: usize, actor: i64, spec: &TriggerSpec, now_days: f64) {
         let key = (index, actor);
         if spec.once {

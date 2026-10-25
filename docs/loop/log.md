@@ -3532,3 +3532,60 @@ iteration was supposed to produce something.
 3. **The guide's scale curve is unverified** for a sixth iteration; same binary gave 50.9 / 51.1 / 54.7 ms at 1 000.
 4. **The harness's village builder should move where `tests/` can reach it** — carried over.
 5. **The clock decision** - 5.4-hour walks against 0.75-hour activities; a breaking change.
+
+## 2026-12-23-01 - The village is provisioned exactly at capacity
+
+**Pick.** Last iteration's blocker instruction: instrument what the solver is handed. Doing that found the
+mechanism, and then showed that every fix costs the tie network, so the deliverable is the diagnosis.
+
+**The instrument.** At every timed-out `sleep`, count bodies already inside `interaction_radius` of the goal:
+
+| in the disc | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 |
+|---|---|---|---|---|---|---|---|---|---|
+| timed-out sleeps | 1 | 1 | 8 | 40 | **55** | 36 | 4 | 2 | 3 |
+
+Median **6**, and the homes declare `capacity: 6`. A 1.5 m disc seats `(1.5/0.7)² ≈ 4.6` bodies, so six residents
+already do not fit. The failures are the **queue behind a full disc**, not lost walkers — which is why last
+iteration's `stop_radius` change was byte-identical: there is no room to walk into.
+
+**Three more levers, same trade:**
+
+| lever | interrupted | rivals |
+|---|---|---|
+| baseline | 400 | 38 |
+| crowd allowance 0.35 | 349 | **59** |
+| crowd allowance 0.70 | 290 | **51** |
+| physical gate `r + d·√n` | 316 | **61** |
+
+Interruptions fall **21-28%**, rivalries rise **13-23%**, every time. The cause is **time**, not radius:
+`contact_radius` is 4.0 m and the arrival disc is ~2 m, so arriving earlier does not widen contact — it means the
+activity starts earlier and spends its full duration standing still instead of walking. More exposure ticks.
+
+**Shipped: the warning, not a lever.** `warn_unreachable_places` now counts residents per home:
+
+```
+'well' is home to 8 people, but an arrival disc of radius 1.5 seats about 4 ... raise interaction_radius to
+about 2.0 or spread the residents over more homes.
+```
+
+**Why a warning and not a fix.** Every fix changes the village's social structure as a side effect, and the choice
+between "more rivalries" and "interrupted sleeps" belongs to the host. Shipping either silently would choose for
+them. The seat count is labelled a **lower bound** — ORCA queues at the centre rather than packing around it, so
+hex packing understates the crowding — and the message says "about".
+
+**Verdicts.** Pass 1 GREAT. Pass 2 GREAT (the instrument produced the answer). Pass 3 GREAT after talking myself
+out of shipping a lever three times.
+
+**Dead-code delta.** Zero. **Tests:** 62 binaries, both feature sets; clippy, docs, fmt clean. New test bites.
+
+**Commit** `9a6c6f1`.
+
+**Top 5 remaining.**
+
+1. **Split arrival radius from contact radius** — the only fix that cannot cost the tie network. Recorded in
+   `needs-decision/people-cannot-reach-their-beds.md`; a schema change, so a host decision.
+2. **The guide's scale curve is unverified** for a seventh iteration; same binary gave 50.9 / 51.1 / 54.7 ms.
+3. **The harness's village builder should move where `tests/` can reach it** — carried over three iterations.
+4. **`Place::capacity` is used only to filter candidates**, never enforced at arrival. Now documented as a known
+   gap rather than an accident.
+5. **The clock decision** - 5.4-hour walks against 0.75-hour activities; a breaking change.
