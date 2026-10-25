@@ -49,6 +49,7 @@ use crate::core::{
 };
 use crate::defs::{ActivityId, DeedId, InteractionId, SocietyDefs};
 use crate::groups::{FactionStats, Memberships, Status};
+use crate::mind::Signals;
 use crate::mind::{EmotionKind, Emotions, Memories, MemoryKind, Mood, Needs, Personality};
 use crate::relationships::{Tie, Ties};
 use crate::rules::{LastDays, NeedArmed, RumorReported, TriggerState};
@@ -202,10 +203,28 @@ pub struct DoingSave {
     pub activity: ActivityId,
     /// What it is directed at.
     pub target: DoingTargetSave,
-    /// Game-day the activity started.
-    pub started_day: f64,
-    /// Game-day the person reached the target, or `None` while travelling.
-    pub arrived_day: Option<f64>,
+    /// Game-day the activity started, as its IEEE-754 bits.
+    ///
+    /// **Bits, not the number.** `serde_json` writes an `f64` with the shortest representation that
+    /// round-trips, and for a few day values that shortest form reads back one ULP off — measured:
+    /// `0.3906250029879933` came back as `0.3906250029879932`. A save must survive its own file format
+    /// exactly, so the values a caller compares are stored as bits. `started_day()` and
+    /// `arrived_day()` turn them back.
+    pub started_day_bits: u64,
+    /// Game-day the person reached the target as its IEEE-754 bits, or `None` while travelling.
+    pub arrived_day_bits: Option<u64>,
+}
+
+impl DoingSave {
+    /// The game-day the activity started.
+    pub fn started_day(&self) -> f64 {
+        f64::from_bits(self.started_day_bits)
+    }
+
+    /// The game-day the person reached the target, or `None` while travelling.
+    pub fn arrived_day(&self) -> Option<f64> {
+        self.arrived_day_bits.map(f64::from_bits)
+    }
 }
 
 /// Everything the crate keeps per person, as plain fields.
@@ -233,10 +252,15 @@ pub struct PersonSave {
     pub memories: Vec<MemorySave>,
     /// Faction memberships.
     pub memberships: Memberships,
+    /// The host-owned signal values, one per declared signal.
+    pub signals: Signals,
     /// Standing.
     pub status: Status,
     /// Whether the person is out of their daily life.
     pub dormant: bool,
+    /// Whether the person is dead. `Deceased` requires `Dormant`, so both are stored: the marker is
+    /// re-inserted as it was, and `dormant` alone would silently revive a person on a reload.
+    pub deceased: bool,
     /// The running activity, when its target could be keyed.
     pub doing: Option<DoingSave>,
     /// The walk target, when the person was walking.
@@ -401,6 +425,8 @@ struct PersonCapture {
     memberships: &'static Memberships,
     status: &'static Status,
     dormant: Has<Dormant>,
+    deceased: Has<crate::Deceased>,
+    signals: &'static Signals,
     doing: Option<&'static Doing>,
     destination: Option<&'static Destination>,
     #[cfg(feature = "steering")]
@@ -557,8 +583,8 @@ pub fn capture(world: &mut World) -> SocietySave {
             Some(DoingSave {
                 activity: doing.activity,
                 target,
-                started_day: doing.started_day,
-                arrived_day: doing.arrived_day,
+                started_day_bits: doing.started_day.to_bits(),
+                arrived_day_bits: doing.arrived_day.map(f64::to_bits),
             })
         });
         let save = PersonSave {
@@ -575,6 +601,8 @@ pub fn capture(world: &mut World) -> SocietySave {
             memberships: person.memberships.clone(),
             status: *person.status,
             dormant: person.dormant,
+            deceased: person.deceased,
+            signals: person.signals.clone(),
             doing,
             destination: person
                 .destination
@@ -1050,8 +1078,8 @@ fn write_person(
         Some(Doing {
             activity: doing.activity,
             target,
-            started_day: doing.started_day,
-            arrived_day: doing.arrived_day,
+            started_day: doing.started_day(),
+            arrived_day: doing.arrived_day(),
         })
     });
     if person.doing.is_some() && doing.is_none() {
@@ -1079,6 +1107,12 @@ fn write_person(
     } else {
         em.remove::<Dormant>();
     }
+    if person.deceased {
+        em.insert(crate::Deceased);
+    } else {
+        em.remove::<crate::Deceased>();
+    }
+    em.insert(person.signals.clone());
     if let Some(doing) = doing {
         em.insert(doing);
     } else {

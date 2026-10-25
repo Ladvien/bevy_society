@@ -408,6 +408,7 @@ impl Needs {
 /// Host-written signal values, indexed by [`SignalId`](crate::SignalId). The crate only reads them;
 /// a value the host never wrote is `0.0`.
 #[derive(Component, Clone, Debug, Default, PartialEq, Reflect)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Signals(pub Vec<f32>);
 
 impl Signals {
