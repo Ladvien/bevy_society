@@ -3240,7 +3240,7 @@ Pass 3 GREAT (second seed: 22 / 50 / -0.047, same shape).
 **Dead-code delta.** Zero — the system is registered and covered by four tests, each verified to fail when its
 behaviour is removed. **Tests:** 54 binaries, both feature sets; clippy and docs clean.
 
-**Commit** `pending`.
+**Commit** `3de81b9`.
 
 **Top 5 remaining.**
 
