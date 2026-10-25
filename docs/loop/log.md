@@ -3180,7 +3180,7 @@ weight (the schema change).
 
 **Dead-code delta.** Zero. **Tests:** 53 binaries clean.
 
-**Commit** `pending`.
+**Commit** `1caf203`.
 
 **Top 5 remaining.**
 
