@@ -264,6 +264,7 @@ impl Plugin for BehaviorPlugin {
         warn_short_travel_reach(&settings);
         warn_walk_outlasts_activity(defs, &settings);
         warn_unbalanced_needs(defs);
+        app.add_systems(Startup, warn_unreachable_places);
     }
 }
 
@@ -447,6 +448,63 @@ fn warn_walk_outlasts_activity(defs: &SocietyDefs, settings: &SocietySettings) {
 /// The shortest walk a village layout can reasonably ask for, in metres. Below this a timeout is
 /// certainly too short; above it the crate cannot tell, because it does not know the layout.
 const MIN_WALK_METRES: f64 = 10.0;
+
+/// Warns when `travel_timeout_hours` cannot cover a walk between two places the world actually has.
+///
+/// [`warn_short_travel_reach`] has to stay quiet above `MIN_WALK_METRES` because `finish` cannot see the
+/// layout. **A system can.** Every `Place` is an entity with a `Transform`, so at `Startup` the crate knows
+/// exactly how far apart the places are and can say whether the timeout reaches them.
+///
+/// Measured on the project's own `village-evening`: a 4-game-hour timeout at 64 s/day buys **14.9 m**, the
+/// farthest place-to-place walk in that village is **16.4 m**, and **150 of 400** interrupted activities
+/// were `sleep` walks that ran out of time before arrival — every one of them `timed_out=true`. The old
+/// warning stayed quiet throughout, because 14.9 m is above its 10 m threshold. Being above a generic floor
+/// and being able to reach your own tavern are different things.
+fn warn_unreachable_places(
+    settings: Res<SocietySettings>,
+    places: Query<(&Name, &Transform), With<crate::core::Place>>,
+) {
+    if settings.locomotion != crate::Locomotion::Builtin {
+        return;
+    }
+    let Some(timeout_hours) = settings.tuning.travel_timeout_hours else {
+        return;
+    };
+    let seconds_per_tick = f64::from(settings.tick_secs);
+    let day_seconds = f64::from(settings.seconds_per_day);
+    if seconds_per_tick <= 0.0 || day_seconds <= 0.0 {
+        return;
+    }
+    let ticks_available = f64::from(timeout_hours) / 24.0 / (seconds_per_tick / day_seconds);
+    // The default walking speed, for the same reason `warn_short_travel_reach` names it.
+    let speed = 1.4_f64;
+    let reachable = speed * seconds_per_tick * ticks_available;
+
+    let plane = settings.plane;
+    let mut worst = 0.0_f32;
+    let mut worst_pair = (String::new(), String::new());
+    for (name, transform) in &places {
+        for (other_name, other) in &places {
+            let here = plane.project(transform.translation);
+            let there = plane.project(other.translation);
+            let distance = here.distance(there);
+            if distance > worst {
+                worst = distance;
+                worst_pair = (name.as_str().to_owned(), other_name.as_str().to_owned());
+            }
+        }
+    }
+    if worst <= reachable as f32 || places.iter().len() < 2 {
+        return;
+    }
+    warn!(
+        "bevy_society: a travel_timeout_hours of {timeout_hours} at seconds_per_day {} buys {reachable:.1}          metres of walking, but the farthest pair of places is '{a}' -> '{b}' at {worst:.1} m. Every walk          between them times out before arrival, so the activities that need one end interrupted and the          needs they satisfy are never met. Raise travel_timeout_hours to at least {needed:.1}, or move the          places closer.",
+        settings.seconds_per_day,
+        a = worst_pair.0,
+        b = worst_pair.1,
+        needed = f64::from(worst) * 24.0 / (speed * day_seconds),
+    );
+}
 
 /// Warns when a definition reads a social field that **cannot be populated**.
 ///
