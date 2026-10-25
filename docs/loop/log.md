@@ -4006,4 +4006,7 @@ the clip shows and `docs/DEMOS.md` records why.
    cannot move it, so balance theory's dyadic case is only half done.
 4. **Professions and economics** — requested this iteration. Recorded with three options in
    `needs-decision/professions-and-economics.md`; the recommendation is a profession tag first, no money.
-5. **A clip that shows rivalries** — needs its own scenario at a faster clock, not a longer settle.
+5. **Romance and pairing** — also requested this iteration. Recorded in
+   `needs-decision/romance-and-pairing.md`; the recommendation is a `Partners` component after professions,
+   and only if a measurement shows it moves something a very good friendship does not. Both this and
+   professions are definitions-schema changes and neither was started.
