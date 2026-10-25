@@ -570,10 +570,10 @@ fn village_with(app: &mut App, people: usize) -> World {
 /// Where the village's four places stand, in `PLACES` order, mirrored from
 /// `examples/common/scene.rs` so the harness and the capture frame the same village.
 const PLACE_POSITIONS: [Vec2; 4] = [
-    Vec2::new(0.0, 0.0),
-    Vec2::new(6.5, -5.0),
-    Vec2::new(-6.5, -5.0),
-    Vec2::new(6.5, 5.0),
+    common::scene::PLACES[0].1,
+    common::scene::PLACES[1].1,
+    common::scene::PLACES[2].1,
+    common::scene::PLACES[3].1,
 ];
 
 /// Two groups far apart, so a rumor has to cross a gap.

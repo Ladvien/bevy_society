@@ -1,7 +1,7 @@
-//! Authored definitions: the data a host hands in (needs, topics, deeds, factions, activities,
-//! interactions, triggers, conversation rules and node effects). `DefsFile` is the RON-shaped
-//! input; `SocietyDefs` is the compiled resource the simulation reads, with ids and Rhai scripts
-//! resolved. The crate never reads a file: the host passes in text it has already loaded.
+//! Authored definitions: the data a host hands in (needs, signals, topics, deeds, factions,
+//! activities, interactions, triggers, conversation rules and node effects). `DefsFile` is the
+//! RON-shaped input; `SocietyDefs` is the compiled resource the simulation reads, with ids and Rhai
+//! scripts resolved. The crate never reads a file: the host passes in text it has already loaded.
 
 use std::collections::{HashMap, HashSet};
 use std::fmt;
@@ -17,7 +17,7 @@ use serde::Deserialize;
 use crate::beliefs::{Opinion, Opinions};
 use crate::core::Person;
 use crate::groups::Memberships;
-use crate::mind::{EmotionKind, Needs, Trait};
+use crate::mind::{EmotionKind, Needs, Signals, Trait};
 use crate::model::curves::Curve;
 use crate::relationships::TieLabel;
 use crate::script::{CompiledScript, ScriptCompiler, ScriptId};
@@ -35,6 +35,10 @@ const IDLE: &str = "idle";
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default, Reflect)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct NeedId(pub u16);
+
+/// Index of a host signal, in definition order.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default, Reflect)]
+pub struct SignalId(pub u16);
 
 /// Index of a topic, in definition order.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default, Reflect)]
@@ -67,6 +71,8 @@ pub struct InteractionId(pub u16);
 pub struct DefsFile {
     /// Needs persons carry; they decay per game-day.
     pub needs: Vec<NeedDef>,
+    /// Signals the host writes and the crate only reads.
+    pub signals: Vec<SignalDef>,
     /// Opinion topics.
     pub topics: Vec<TopicDef>,
     /// Deeds that witnesses judge and that can become rumors.
@@ -97,6 +103,14 @@ pub struct NeedDef {
     /// Starting level.
     #[serde(default = "one")]
     pub initial: f32,
+}
+
+/// A host signal. The crate never changes its value; the host sets it.
+#[derive(Debug, Clone, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct SignalDef {
+    /// Unique name.
+    pub id: String,
 }
 
 /// An opinion topic.
@@ -195,6 +209,8 @@ pub struct Consideration {
 pub enum Input {
     /// The actor's level of a need.
     Need(String),
+    /// A value the host wrote for the actor.
+    Signal(String),
     /// The clock hour divided by 24.
     Hour,
     /// The actor's mood pleasure, rescaled to [0, 1].
@@ -535,6 +551,11 @@ impl DefsFile {
             other.needs.iter().map(|d| d.id.as_str()),
         )?;
         check_disjoint(
+            "signal",
+            self.signals.iter().map(|d| d.id.as_str()),
+            other.signals.iter().map(|d| d.id.as_str()),
+        )?;
+        check_disjoint(
             "topic",
             self.topics.iter().map(|d| d.id.as_str()),
             other.topics.iter().map(|d| d.id.as_str()),
@@ -565,6 +586,7 @@ impl DefsFile {
             other.triggers.iter().map(|d| d.id.as_str()),
         )?;
         self.needs.extend(other.needs);
+        self.signals.extend(other.signals);
         self.topics.extend(other.topics);
         self.deeds.extend(other.deeds);
         self.factions.extend(other.factions);
@@ -607,6 +629,7 @@ fn check_disjoint<'a>(
 #[derive(Resource, Clone)]
 pub struct SocietyDefs {
     pub(crate) needs: Vec<NeedSpec>,
+    pub(crate) signals: Vec<String>,
     pub(crate) topics: Vec<TopicSpec>,
     pub(crate) deeds: Vec<DeedSpec>,
     pub(crate) factions: Vec<FactionSpec>,
@@ -617,6 +640,7 @@ pub struct SocietyDefs {
     pub(crate) node_effects: Vec<NodeEffectSpec>,
     pub(crate) scripts: Vec<CompiledScript>,
     need_ids: HashMap<String, u16>,
+    signal_ids: HashMap<String, u16>,
     topic_ids: HashMap<String, u16>,
     deed_ids: HashMap<String, u16>,
     faction_ids: HashMap<String, u16>,
@@ -636,6 +660,7 @@ impl SocietyDefs {
         activity_ids.insert(IDLE.to_owned(), IDLE_ACTIVITY.0);
         Self {
             needs: Vec::new(),
+            signals: Vec::new(),
             topics: Vec::new(),
             deeds: Vec::new(),
             factions: Vec::new(),
@@ -656,6 +681,7 @@ impl SocietyDefs {
             node_effects: Vec::new(),
             scripts: Vec::new(),
             need_ids: HashMap::new(),
+            signal_ids: HashMap::new(),
             topic_ids: HashMap::new(),
             deed_ids: HashMap::new(),
             faction_ids: HashMap::new(),
@@ -670,6 +696,9 @@ impl SocietyDefs {
         let mut scripts = ScriptCompiler::new();
         for def in file.needs {
             defs.add_need(def)?;
+        }
+        for def in file.signals {
+            defs.add_signal(def)?;
         }
         for def in file.topics {
             defs.add_topic(def)?;
@@ -715,6 +744,11 @@ impl SocietyDefs {
         self.need_ids.get(name).copied().map(NeedId)
     }
 
+    /// The id of a signal, if defined.
+    pub fn signal_id(&self, name: &str) -> Option<SignalId> {
+        self.signal_ids.get(name).copied().map(SignalId)
+    }
+
     /// The id of a topic, if defined.
     pub fn topic_id(&self, name: &str) -> Option<TopicId> {
         self.topic_ids.get(name).copied().map(TopicId)
@@ -745,6 +779,13 @@ impl SocietyDefs {
         self.needs
             .get(usize::from(id.0))
             .map_or("", |spec| spec.name.as_str())
+    }
+
+    /// The name of a signal, or `""` for an id this definition set does not contain.
+    pub fn signal_name(&self, id: SignalId) -> &str {
+        self.signals
+            .get(usize::from(id.0))
+            .map_or("", String::as_str)
     }
 
     /// The name of a topic, or `""` for an unknown id.
@@ -897,6 +938,22 @@ impl SocietyDefs {
         Ok(Needs(levels))
     }
 
+    /// Signals for a new person: one slot per defined signal, every value `0.0`, then the named
+    /// values replace theirs. The crate never changes them afterwards.
+    pub fn signals<'a>(
+        &self,
+        values: impl IntoIterator<Item = (&'a str, f32)>,
+    ) -> Result<Signals, DefsError> {
+        let mut levels = vec![0.0; self.signals.len()];
+        for (name, value) in values {
+            let id = require(self.signal_id(name), "signal", name, "person signals")?;
+            if let Some(slot) = levels.get_mut(usize::from(id.0)) {
+                *slot = if value.is_finite() { value } else { 0.0 };
+            }
+        }
+        Ok(Signals(levels))
+    }
+
     /// Opinions for a new person. Each named topic starts at its value, which is also its
     /// Friedkin–Johnsen anchor (DOI 10.1080/0022250X.1990.9990069); the others start neutral.
     pub fn opinions<'a>(
@@ -943,6 +1000,12 @@ impl SocietyDefs {
             decay_per_day: def.decay_per_day,
             initial: def.initial,
         });
+        Ok(())
+    }
+
+    fn add_signal(&mut self, def: SignalDef) -> Result<(), DefsError> {
+        register(&mut self.signal_ids, "signal", &def.id, self.signals.len())?;
+        self.signals.push(def.id);
         Ok(())
     }
 
@@ -1141,6 +1204,9 @@ impl SocietyDefs {
         }
         let signal = match &term.input {
             Input::Need(name) => Signal::Need(require(self.need_id(name), "need", name, owner)?),
+            Input::Signal(name) => {
+                Signal::Host(require(self.signal_id(name), "signal", name, owner)?)
+            }
             Input::Hour => Signal::Hour,
             Input::Pleasure => Signal::Pleasure,
             Input::Arousal => Signal::Arousal,
@@ -1273,16 +1339,17 @@ impl SocietyDefs {
     }
 }
 
-/// Keeps every person's `Needs` and `Opinions` the length of the defs (plan D2). A short vector
-/// grows with the defs' starting values; a long one is an error and is truncated. `Mut` changes
+/// Keeps every person's `Needs`, `Signals` and `Opinions` the length of the defs (plan D2). A short
+/// vector grows with the defs' starting values; a long one is an error and is truncated. `Mut` changes
 /// only when a length actually differs.
 pub fn size_person_state(
     defs: Res<SocietyDefs>,
-    mut people: Query<(Entity, &mut Needs, &mut Opinions), With<Person>>,
+    mut people: Query<(Entity, &mut Needs, &mut Signals, &mut Opinions), With<Person>>,
 ) {
     let need_count = defs.needs.len();
+    let signal_count = defs.signals.len();
     let topic_count = defs.topics.len();
-    for (entity, mut needs, mut opinions) in &mut people {
+    for (entity, mut needs, mut signals, mut opinions) in &mut people {
         let have = needs.0.len();
         if have > need_count {
             error!(
@@ -1293,6 +1360,17 @@ pub fn size_person_state(
             needs
                 .0
                 .extend(defs.needs.iter().skip(have).map(|spec| spec.initial));
+        }
+        let have = signals.0.len();
+        if have > signal_count {
+            error!(
+                "bevy_society: {entity} has {have} signals but the defs define {signal_count}; truncating"
+            );
+            signals.0.truncate(signal_count);
+        } else if have < signal_count {
+            signals
+                .0
+                .extend(std::iter::repeat_n(0.0, signal_count - have));
         }
         let have = opinions.0.len();
         if have > topic_count {
@@ -1363,6 +1441,8 @@ pub(crate) struct Term {
 pub enum Signal {
     /// A need's level.
     Need(NeedId),
+    /// A host-written signal value.
+    Host(SignalId),
     /// Clock hour / 24.
     Hour,
     /// Mood pleasure.

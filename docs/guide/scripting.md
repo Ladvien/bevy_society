@@ -38,6 +38,7 @@ that names it.
 | `ctx.mood(a)` | `#{ p, a, d }` |
 | `ctx.emotion(a, kind)` | summed intensity of one emotion, `[0, 1]` |
 | `ctx.need(a, id)` | a need's level, `[0, 1]` |
+| `ctx.signal(a, id)` | a host-written signal value; `0.0` when the host never wrote it |
 | `ctx.opinion(a, topic)` | an opinion, `[-1, 1]` |
 | `ctx.trait(a, name)` | a personality trait, `[0, 1]` |
 | `ctx.knows(a, rumor)` | whether `a` knows that rumor |

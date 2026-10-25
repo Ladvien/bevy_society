@@ -15,11 +15,17 @@ use bevy_society::{
 };
 
 /// The village's four places: (name, position, tags, capacity).
+///
+/// **These must match `examples/evidence.rs`**, which builds the village the README's clip is rendered from.
+/// They had drifted — `(8.0, -6.0)` here against `(6.5, -5.0)` there — so a test built on this layout was
+/// asserting things about a village nobody watches. The farthest pair is **16.4 m** here, which at the
+/// scenario's 64 s/day needs a `travel_timeout_hours` of at least 4.4; a 21.3 m layout needed 5.7 and made the
+/// village unwalkable at its own declared settings.
 pub const PLACES: &[(&str, Vec2, &[&str], u32)] = &[
     ("well", Vec2::new(0.0, 0.0), &["gathering"], 6),
-    ("tavern", Vec2::new(8.0, -6.0), &["gathering", "food"], 10),
-    ("market", Vec2::new(-8.0, -6.0), &["food", "work"], 8),
-    ("workshop", Vec2::new(8.0, 8.0), &["work"], 6),
+    ("tavern", Vec2::new(6.5, -5.0), &["gathering", "food"], 10),
+    ("market", Vec2::new(-6.5, -5.0), &["food", "work"], 8),
+    ("workshop", Vec2::new(6.5, 5.0), &["work"], 6),
 ];
 
 /// The village's factions, one per column of villagers.
