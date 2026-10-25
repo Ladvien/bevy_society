@@ -208,6 +208,9 @@ impl Plugin for BehaviorPlugin {
             )
             .init_resource::<EndRequests>()
             .add_message::<TravelFailed>()
+            .add_message::<PersonDied>()
+            .init_resource::<DeathQueue>()
+            .add_observer(on_deceased_added)
             .add_message::<EndActivity>()
             .add_systems(
                 FixedUpdate,
@@ -226,6 +229,15 @@ impl Plugin for BehaviorPlugin {
                 // The walk runs every fixed step, not only on society ticks, so motion stays smooth
                 // while the simulation ticks slowly — the same rule `steer_movers` follows.
                 walk_toward_destination.after(crate::SocietySystems::Rules),
+            )
+            .add_systems(
+                FixedUpdate,
+                // **Before `apply_appraisals`**, so the grief a death produces counts in the tick it
+                // happened. `apply_appraisals` is in `Clock`, which is earlier than `Interact`, so this
+                // joins `Clock` and orders itself against that system explicitly.
+                announce_deaths
+                    .in_set(crate::SocietySystems::Clock)
+                    .before(crate::mind::apply_appraisals),
             )
             .add_systems(
                 FixedUpdate,
@@ -716,6 +728,126 @@ fn walk_toward_destination(
 pub struct EndActivity {
     /// The person whose activity should end.
     pub person: Entity,
+}
+
+/// A person died: written once, when [`Deceased`](crate::Deceased) is inserted.
+///
+/// The crate writes it itself, from an `On<Add<Deceased>>` observer, so a host gets it by inserting the
+/// marker and nothing else. Use it to keep a roster, to spawn an undead under the dead person's name, or
+/// to mark the town in mourning.
+#[derive(Message, Debug, Clone, Copy, PartialEq, Eq)]
+pub struct PersonDied {
+    /// The person who died.
+    pub person: Entity,
+}
+
+/// Deaths waiting for the next society tick.
+///
+/// **A resource rather than the message alone**, for the same reason `EndRequests` is one: an observer
+/// runs whenever the world is mutated — possibly in `Update`, between two fixed steps — and the
+/// bereavement pass must run inside the tick. The queue is drained once by [`announce_deaths`].
+#[derive(Resource, Debug, Clone, Default)]
+pub(crate) struct DeathQueue(pub(crate) Vec<Entity>);
+
+/// Records a death the moment `Deceased` lands.
+fn on_deceased_added(add: On<Add<crate::Deceased>>, mut queue: ResMut<DeathQueue>) {
+    queue.0.push(add.entity);
+}
+
+/// Announces every death recorded since the last tick: the message, its trigger, and the bereavement.
+///
+/// **Runs before `apply_appraisals`**, so the grief a death produces counts in the tick it happened rather
+/// than a tick later.
+///
+/// Bereavement is proportional to closeness, because that is what the literature says it is: Prigerson et
+/// al. 2009 (DOI `10.1371/journal.pmed.1000121`) key prolonged grief disorder to the loss of a **close
+/// relationship** rather than to any death, so a stranger's death is a fact and a friend's is a wound.
+/// Intensity is `(0.5 · (1 + affinity)).clamp(0, 1)`: an enemy's death is not a grief, a tie at affinity 0
+/// is half a grief, and a friend at 1.0 is a full one.
+#[allow(clippy::too_many_arguments)]
+fn announce_deaths(
+    clock: Res<SocietyClock>,
+    settings: Res<SocietySettings>,
+    index: Res<PersonIndex>,
+    deceased: Query<(), With<crate::Deceased>>,
+    mut queue: ResMut<DeathQueue>,
+    mut died: MessageWriter<PersonDied>,
+    mut triggers: Option<ResMut<crate::rules::TriggerQueue>>,
+    mut appraisals: MessageWriter<crate::Appraise>,
+    mut memories: Query<&mut crate::Memories>,
+    ties: Query<&Ties>,
+) {
+    let deaths = std::mem::take(&mut queue.0);
+    if deaths.is_empty() {
+        return;
+    }
+    let now = clock.now_days;
+    // Sorted and deduped by `PersonId`, so two deaths in one tick give the same society however the
+    // observer happened to fire, and a death recorded twice is announced once.
+    let mut ordered: Vec<(u32, Entity)> = deaths
+        .into_iter()
+        .filter_map(|entity| {
+            index
+                .sorted
+                .iter()
+                .find(|(_, e)| *e == entity)
+                .map(|(id, _)| (id.0, entity))
+        })
+        .collect();
+    ordered.sort_unstable();
+    ordered.dedup();
+
+    for (_, person) in ordered {
+        died.write(PersonDied { person });
+        if let Some(triggers) = triggers.as_mut() {
+            let actor = index
+                .sorted
+                .iter()
+                .find(|(_, e)| *e == person)
+                .map_or(-1, |(id, _)| i64::from(id.0));
+            triggers
+                .0
+                .push(crate::rules::TriggerEvent::Deceased { actor });
+        }
+
+        // Everyone living who was close to the dead person grieves.
+        for &(_, other) in &index.sorted {
+            if other == person || deceased.get(other).is_ok() {
+                continue;
+            }
+            let Ok(their_ties) = ties.get(other) else {
+                continue;
+            };
+            let Some(tie) = their_ties.get(person) else {
+                continue;
+            };
+            let close = tie.label == crate::TieLabel::Friend
+                || tie.familiarity_peak >= settings.tuning.bereavement_familiarity;
+            if !close {
+                continue;
+            }
+            let intensity = (0.5 * (1.0 + tie.affinity)).clamp(0.0, 1.0);
+            appraisals.write(crate::Appraise {
+                person: other,
+                kind: crate::EmotionKind::Distress,
+                intensity,
+                toward: Some(person),
+            });
+            if let Ok(mut theirs) = memories.get_mut(other) {
+                theirs.record(
+                    crate::Memory {
+                        day: now as f32,
+                        kind: crate::MemoryKind::Custom("bereaved".to_owned()),
+                        other: Some(person),
+                        valence: -intensity,
+                        importance: 1.0,
+                    },
+                    now,
+                    settings.memory_capacity,
+                );
+            }
+        }
+    }
 }
 
 /// The host reports that it cannot walk a person to its `Destination`.
