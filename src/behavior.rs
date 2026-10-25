@@ -2194,6 +2194,21 @@ fn witness(
         })
         .unwrap_or_default();
 
+    // **A deed deposits its harm into the commotion field, at the actor's cell.** The channel is what
+    // `FieldInput::Commotion` reads and what a `Gradient(Commotion, true)` activity climbs, and until
+    // this line nothing wrote it: the field was always zero, so a `gawk` activity had no direction and
+    // every `Commotion` consideration scored 0. `at` is a plane position, which is what the message
+    // takes, so a host writing one needs no grid geometry and neither does this.
+    #[cfg(feature = "fields")]
+    if deed_spec.harm != 0.0
+        && let Some(transform) = world.get::<GlobalTransform>(actor)
+    {
+        world.write_message(crate::fields::Commotion {
+            at: settings.plane.project(transform.translation()),
+            amount: deed_spec.harm.abs(),
+        });
+    }
+
     let mut approvals: Vec<(Entity, f32)> = Vec::new();
     // Everyone who saw it, for `Tuning::witness_dilution`; the crowd is the same for every witness.
     let watcher_count = witnesses.len();
