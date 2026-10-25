@@ -182,9 +182,20 @@ fn a_non_place_binding_warns_once_and_an_unbound_person_is_silent() {
     // Autonomous with no `BoundPlaces` at all: the ordinary case for a host that binds only some.
     app.world_mut().entity_mut(unbound).insert(Autonomous);
 
-    for _ in 0..100 {
+    // **Enough updates for several society ticks.** A tick is many fixed steps apart (the crate counts
+    // one per `tick_secs`), and the warning is written by `decide_activities`, which only runs on a
+    // tick. 100 updates at this app's settings is one tick, which is why the count has to be driven by
+    // the clock rather than guessed.
+    let start = app.world().resource::<bevy_society::SocietyClock>().tick;
+    let mut updates = 0;
+    while app.world().resource::<bevy_society::SocietyClock>().tick < start + 3 && updates < 4_000 {
         app.update();
+        updates += 1;
     }
+    assert!(
+        app.world().resource::<bevy_society::SocietyClock>().tick >= start + 3,
+        "the society must actually tick for the decision to run"
+    );
 
     let captured = app.world().resource::<LogCapture>().drain();
     let misplaced: Vec<String> = captured
@@ -195,7 +206,7 @@ fn a_non_place_binding_warns_once_and_an_unbound_person_is_silent() {
     assert_eq!(
         misplaced.len(),
         1,
-        "a binding to a non-place should warn once over 100 ticks, warned {} time(s): {misplaced:?}",
+        "a binding to a non-place should warn once, warned {} time(s) over {updates} updates: {misplaced:?}",
         misplaced.len()
     );
     assert!(
