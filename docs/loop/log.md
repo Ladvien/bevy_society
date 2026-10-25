@@ -3298,7 +3298,7 @@ could not be confirmed and needs an idle machine. Recorded as a standing item ra
 
 **Dead-code delta.** Zero. **Tests:** 55 binaries, both feature sets; clippy and docs clean.
 
-**Commit** `pending`.
+**Commit** `ebeacc5`.
 
 **Top 5 remaining.**
 
