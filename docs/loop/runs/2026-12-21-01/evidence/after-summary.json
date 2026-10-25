@@ -1,0 +1,20 @@
+{
+  "ticks": 67200,
+  "people": 24,
+  "rumors": 631,
+  "rumor_known_by": 5,
+  "rumor_reach": 0.208,
+  "friends": 26,
+  "rivals": 30,
+  "completed_endings": 5873,
+  "interrupted_endings": 312,
+  "interrupted_by_activity": {
+    "compliment": 10,
+    "eat": 49,
+    "relax": 20,
+    "sleep": 142,
+    "snub": 2,
+    "work": 89
+  },
+  "game_days": 17.03
+}
