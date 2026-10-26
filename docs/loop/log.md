@@ -4272,3 +4272,65 @@ crowd per deed rises. Pass 3 GREAT.
    Either scale the places or refuse.
 4. **A deed's hostility still grows linearly with the crowd** — real, measured, and unfixable until 1 is settled.
 5. **The refusal rate is `accept.base` 0.50**, still the most host-visible unmeasured number.
+
+## 2026-10-25-10 — A full place costs something
+
+**Pick.** Last iteration's top item, and the one it measured but could not decide: a `Place(tag)` target whose
+`used >= capacity` was **dropped before scoring**, so a full workshop made `work` an option that did not exist. In a
+30-seat village given 48 people that took `work` from 10.3% to 3.6% of a life and rival density from 7.8% to 20.1%
+of pairs. It beats the runner-up (the price model, deferred twice) because it is host-visible behaviour rather than
+a number.
+
+**What shipped.** `Tuning::crowding_penalty` (**0.6**) and one multiply in the per-target scoring loop: a place with
+no free seat keeps `1 - penalty` of its score. `capacity: 0` stays a **prohibition**. No definitions-file change, no
+new state, no draw.
+
+**The numbers, five seeds, three populations** (before → after): rival density **7.83% → 2.90%** at 24 people,
+**23.08% → 6.10%** at 36, **20.11% → 3.94%** at 48; `work` **10.4% → 12.9%**, **5.8% → 11.3%**, **3.7% → 9.6%**;
+interrupted arrivals 318 → 352, 711 → 669, 1 325 → 1 278. `evidence/plots/capacity-price.png`.
+
+**Three designs built; two rejected by their own measurements.**
+
+1. **A proportional price** (`1 - p · fill`) is the more faithful reading of a congestion *map* — cost proportional
+   to density — and it is wrong here: it diverts people from a place that is merely 9/10 full, where nobody queues,
+   and took `work` from 10.3% to **6.6%** at 48 people, reintroducing the defect it was meant to cure. A map prices
+   a *route*, where any crowding slows the walk; `capacity` prices a *seat*, where the queue exists only at full.
+2. **Removing the veto with no price** flattens density to 0.9% at 36 people (the graph empties) and raises
+   interruptions **34%** at 24, because more people aim at a place that cannot seat them.
+3. **A step price at "no room"**, 0.6 — shipped.
+
+**A prediction of mine was wrong, and it is in the eval.** I wrote "an uncrowded village is unchanged". At 24 people
+density is 7.83% → 2.90% and `work` 10.4% → **12.9%**, because `craft` shares the workshop place with `work`, so the
+workshop is already full part of the day and the price shifts time from craft (5.1% → 3.6%) to work. Every earlier
+nine-seed baseline therefore moves; the changelog says so.
+
+**Two tests were lying and are fixed.** `tests/bound_places.rs`'s `a_full_bound_place_gives_no_candidate` was really
+asserting the `capacity: 0` prohibition (its fixture was always `capacity: 0`) — renamed, and the `Place(tag)` half is
+now pinned in `tests/crowded_place.rs`. `tests/label_hysteresis.rs` pinned a demotion **count** (`<= 1`) and used
+`demotions_without / 20`, an integer division that made a bar of 6 pass for 6; both now assert the rate their prose
+already stated. Neither weakening is hidden.
+
+**Verdicts.** Pass 1 GREAT (two of three predictions held; the third is recorded). Pass 2 GREAT (the middle panel
+shows my wrong prediction and is kept). Pass 3 GREAT.
+
+**Verified on the final tree.** 77 of 77 test binaries in **both** feature sets, `clippy --all-targets --all-features
+-D warnings`, `fmt --check` and `doc -D warnings` all exit 0.
+
+**Dead-code delta.** Zero. **Tests:** `tests/crowded_place.rs` is new (4) and `crowding_tests` in `src/behavior.rs`
+(4); the suite is green. **Perf:** one multiply per scored target; 0.80/1.60 ms at 100 people and 434/535 ms at 5 000,
+inside the noise at both. **`big` was unusable this iteration** — load average 21-30 from other users, two `cargo
+test` runs killed by the connection dropping mid-compile — so the suite ran on the laptop; `tools/big-cargo.sh`
+itself works.
+
+**Commit** `87f357d`.
+
+**Top 5 remaining.**
+
+1. **The price model follows net stock and counts units, not heads** — now deferred three times. Needs unmet demand.
+2. **`--people` scales people and not the village**, and the trap has produced two false results. Either scale the
+   places or refuse.
+3. **A deed's hostility still grows linearly with the crowd** — `src/reputation.rs` dilutes trust and not affinity,
+   respect or memory importance. Measured, unfixable until 1 and 2 are settled.
+4. **Interruptions rise at 24 people** (318 → 352) and are not fixed by capacity at any size; they are a
+   travel-time constant.
+5. **The refusal rate is `accept.base` 0.50**, still the most host-visible unmeasured number.
