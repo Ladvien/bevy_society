@@ -130,5 +130,5 @@ used as evidence, and the seated `fresh24/s23_p24` run carrying Pass 3.
 
 ## Verification on the final tree
 
-See `docs/loop/runs/2026-10-26-11/eval.md` for the test inventory; the gate re-run is recorded in the run
-`log.md` entry. Both feature sets, `clippy -D warnings`, `fmt --check` and `doc -D warnings`.
+Recorded in the run `log.md` entry: both feature sets, `clippy -D warnings`, `fmt --check` and
+`doc -D warnings`. The test inventory is in `eval.md`.
