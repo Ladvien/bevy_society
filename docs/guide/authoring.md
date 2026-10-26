@@ -106,6 +106,10 @@ between 22:00 and 06:00, more so when tired, and rest while there":
 - `interaction` runs a social exchange on arrival; it requires a `Person` target.
 - `barks` are thought lines, one per activity start with probability `SocietySettings::bark_chance`.
 - `duration_hours` must be above zero.
+- A place that is **full** is not unavailable — it costs `Tuning::crowding_penalty` (0.6) of the option's score, so a
+  person with another place to go takes it and a person with nowhere else still arrives. `capacity: 0` means
+  **closed**: nobody ever goes. A full place used to produce no target at all, which was measured to remove a
+  village's working day once it outgrew its seats (`docs/loop/runs/2026-10-25-10/eval.md`).
 
 A consideration's `input` is normalised to `[0, 1]` before its `curve` sees it: `Hour` is `h / 24`,
 mood axes and `Affinity`/`Respect` are `(x + 1) / 2`, `Distance` is `d / perception_radius`. `Trust`,

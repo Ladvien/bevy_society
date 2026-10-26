@@ -1219,6 +1219,7 @@ struct PlaceView {
     entity: Entity,
     tags: Vec<String>,
     capacity: u32,
+    /// How many people are already aiming at this place, from the decisions already running.
     used: u32,
     position: Vec2,
 }
@@ -1625,7 +1626,7 @@ fn decide_activities(
                     actor: actor_id,
                     target: target_id,
                 });
-                let score = score_option(
+                let mut score = score_option(
                     &spec.considerations,
                     &decision,
                     target,
@@ -1634,6 +1635,9 @@ fn decide_activities(
                     fields.as_deref(),
                     &defs.skills,
                 );
+                // **What a place with no room costs.** The price belongs to the target, not to a consideration, so
+                // every activity pays it — including ones a host wrote — without a definitions-file change.
+                score *= crowding_price(target, &place_views, tuning.crowding_penalty);
                 if score <= 0.0 {
                     continue;
                 }
@@ -1875,7 +1879,37 @@ impl ScriptContext<'_> {
     }
 }
 
-/// The targets an activity offers this decision (plan D7), with full places excluded.
+/// What a place-targeted option keeps after paying for a place that has no room left.
+///
+/// `1 - penalty` when the place is **full**, `1.0` when it has a seat to spare, and `1.0` for any other target.
+/// A place that seats nobody is never offered, so it is not priced here. `penalty == 0` makes this exactly `1.0`
+/// everywhere, which is how the un-priced ranking is restored.
+///
+/// A **step**, not a ramp: the queue exists only when there is no seat, so that is where the cost is charged. A
+/// proportional price was measured and rejected because it diverts people from a place that is merely nearly full,
+/// where nobody queues, and took `work` from 10.3% to 6.6% at 48 people. See
+/// [`Tuning::crowding_penalty`](crate::Tuning).
+fn crowding_price(target: DoingTarget, places: &[PlaceView], penalty: f32) -> f32 {
+    if penalty <= 0.0 {
+        return 1.0;
+    }
+    let DoingTarget::Place(entity) = target else {
+        return 1.0;
+    };
+    let Some(place) = places.iter().find(|place| place.entity == entity) else {
+        return 1.0;
+    };
+    if place.used < place.capacity {
+        return 1.0;
+    }
+    (1.0 - penalty).clamp(0.0, 1.0)
+}
+
+/// The targets an activity offers this decision (plan D7), with closed places excluded.
+///
+/// **Closed, not full.** A place with no free seat is still offered: `capacity` says how many people it is
+/// *sized* for, and a host that wants a crowd to be unattractive expresses that as a consideration. Deleting the
+/// target was measured to cost far more than it bought — see the note on `Place(tag)` below.
 ///
 /// `Wander` draws its point here, from the two `unit()` draws the SPEC names: radius · √u₁ at angle
 /// 2πu₂, which is uniform over the disc rather than bunched at its centre.
@@ -1902,19 +1936,31 @@ fn targets_for(
                 position + Vec2::new(r * angle.cos(), r * angle.sin()),
             )]
         }
+        // **A full place is still a place.** Filtering on `used < capacity` deleted the option entirely, so a
+        // full workshop made `work` something that did not exist — and the consequence was not a lost activity
+        // but a different village: measured, a 30-seat village given 48 people took `work` from 10.3% to 3.6% of
+        // a life and rival density from 7.8% to 20.1% of directed pairs, because the same hostile events landed
+        // on a contact graph made dense by unemployment. Pentheny, *Game AI Pro 2* ch. 17 (corpus
+        // `gameaipro2-ch17-advanced-techniques-robust-efficient-crowds`) names the failure — "agents fight the
+        // rest of the crowd to follow their ideal path as closely as possible, seemingly ignoring all other
+        // possible routes" — and congestion maps fix it by making a crowd *cost*; with `Place(tag)` already
+        // picking the nearest place a host can express that cost itself, and the crate's job is not to delete
+        // the option. Only a place that seats **nobody** is impossible: `capacity: 0` is a closed door, not a
+        // queue.
         ActivityTarget::Place(tag) => places
             .iter()
-            .filter(|place| place.used < place.capacity && place.tags.iter().any(|t| t == tag))
+            .filter(|place| place.capacity > 0 && place.tags.iter().any(|t| t == tag))
             .map(|place| DoingTarget::Place(place.entity))
             .collect(),
-        // The place this person bound under the name, when they have one and it is a place with
-        // room. No binding means no candidate at all: the activity simply does not apply to them.
+        // The place this person bound under the name, when they have one. No binding means no candidate at
+        // all: the activity simply does not apply to them. Room is not required — see `Place(tag)` — but a
+        // place that seats nobody is closed.
         ActivityTarget::Bound(name) => bound
             .and_then(|bindings| bindings.get(name))
             .filter(|entity| {
                 places
                     .iter()
-                    .any(|place| place.entity == *entity && place.used < place.capacity)
+                    .any(|place| place.entity == *entity && place.capacity > 0)
             })
             .map_or_else(Vec::new, |entity| vec![DoingTarget::Place(entity)]),
         ActivityTarget::Person => near.iter().map(|(e, _)| DoingTarget::Person(*e)).collect(),
@@ -3451,6 +3497,84 @@ fn contact_gossip(
                 interaction: "gossip".to_owned(),
             });
             let _ = gossip_id;
+        }
+    }
+}
+
+#[cfg(test)]
+mod crowding_tests {
+    use super::*;
+
+    /// A place view at a given fill. Only the fields the price reads are set.
+    fn place(capacity: u32, used: u32) -> PlaceView {
+        PlaceView {
+            entity: Entity::from_bits(7),
+            tags: Vec::new(),
+            capacity,
+            used,
+            position: Vec2::ZERO,
+        }
+    }
+
+    /// **The price is charged only when there is no room.** A place with a seat to spare costs nothing, which is
+    /// what keeps every uncrowded village bit-identical to the build before this rule; a full one costs `penalty`.
+    #[test]
+    fn a_place_with_room_is_free_and_a_full_one_is_priced() {
+        let views = [place(4, 3)];
+        let target = DoingTarget::Place(Entity::from_bits(7));
+        assert_eq!(
+            crowding_price(target, &views, 0.6),
+            1.0,
+            "three of four seats is a place with room: no price"
+        );
+        assert!(
+            (crowding_price(
+                DoingTarget::Place(Entity::from_bits(7)),
+                &[place(4, 4)],
+                0.6
+            ) - 0.4)
+                .abs()
+                < 1.0e-6,
+            "a full place must cost the penalty"
+        );
+    }
+
+    /// **The price is a step, not a ramp, and it never becomes a wall.** Over-full still costs exactly `penalty`;
+    /// a penalty of 1.0 is the only value that reaches zero.
+    #[test]
+    fn the_price_is_a_step_and_never_a_wall() {
+        let target = DoingTarget::Place(Entity::from_bits(7));
+        let full = crowding_price(target, &[place(2, 12)], 0.6);
+        assert!(
+            (full - 0.4).abs() < 1.0e-6,
+            "twelve people at two seats costs the same as two: {full}"
+        );
+        assert!(
+            crowding_price(target, &[place(2, 12)], 0.99) > 0.0,
+            "a price below 1.0 must leave the option reachable, however full the place"
+        );
+    }
+
+    /// **A penalty of zero is the identity**, for every target and every place, which is how a host (and this
+    /// crate's own regression tests) can switch the mechanism off.
+    #[test]
+    fn a_zero_penalty_changes_nothing() {
+        for target in [
+            DoingTarget::Place(Entity::from_bits(7)),
+            DoingTarget::Place(Entity::from_bits(9)),
+            DoingTarget::Itself,
+            DoingTarget::Point(Vec2::new(1.0, 2.0)),
+        ] {
+            assert_eq!(crowding_price(target, &[place(1, 99)], 0.0), 1.0);
+        }
+    }
+
+    /// **Anything that is not a place pays nothing** — a person, a wander point, the person itself.
+    #[test]
+    fn a_non_place_target_is_free() {
+        let views = [place(1, 1)];
+        for target in [DoingTarget::Itself, DoingTarget::Point(Vec2::new(3.0, 4.0))] {
+            assert_eq!(crowding_price(target, &views, 0.9), 1.0);
         }
     }
 }

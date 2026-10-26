@@ -82,8 +82,14 @@ person is simply not living their daily life, and removing the marker lets them 
 `EndActivity { person }` cancels one running activity without any of that, for a place that closed or a
 shift that ended.
 
-`Place` and `PlaceTags` are how activities find somewhere to go. A `Place`'s `capacity` limits how
-many people may use it at once, so a crowded tavern pushes the next villager to the market.
+`Place` and `PlaceTags` are how activities find somewhere to go. A `Place`'s `capacity` says how many people it is
+**sized** for, and `capacity: 0` means closed — nobody ever goes. A place that is merely **full** still takes
+people; it used to produce no target at all, and that was measured to be a large, invisible change to a village: a
+30-seat village given 48 people lost its working day (`work` 10.3% → 3.6% of a life) and rival density rose from
+7.8% to 20.1% of pairs, because the same hostile events landed on a contact graph made dense by unemployment. If
+you want a crowd to be *unattractive* rather than impossible, say so in a consideration — `Place(tag)` already
+picks the nearest place, so a host can price a busy one itself. The measurement is
+[`runs/2026-10-25-10`](https://github.com/Ladvien/bevy_society/blob/main/docs/loop/runs/2026-10-25-10/eval.md).
 
 ### Solid buildings: `Obstacle`
 

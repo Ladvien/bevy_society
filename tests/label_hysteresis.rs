@@ -257,13 +257,24 @@ fn the_band_stops_the_low_end_flapping_and_moves_no_relationship() {
     // One is not zero, and that is the measurement: a pair that genuinely went unseen for long enough
     // to decay past the band *did* become strangers again, at tick 6 016 of 6 400. A band must not make
     // a label a lie in the other direction.
+    // A **rate**, not an integer division: `demotions_without / 20` truncates, so 127 gave a bar of 6 and a
+    // measured 6 failed a test whose stated property ("the exception rather than the rule") it satisfied.
     assert!(
-        demotions_with < demotions_without / 20,
-        "a band must make a demotion the exception rather than the rule: {demotions_with} with,          {demotions_without} without"
+        demotions_with as f32 / demotions_without.max(1) as f32 <= 0.05,
+        "a band must make a demotion the exception rather than the rule: {demotions_with} with, \
+         {demotions_without} without"
     );
+    // **A ratio, not a count.** This asserted `demotions_with <= 1`, which was one measurement of one trajectory:
+    // when the capacity veto was removed (a full place is still a place — `tests/crowded_place.rs`) the village's
+    // day changed and the same fixture produced **6** demotions instead of 1. Six against 127 is still the
+    // property the test exists to state — a band turns a demotion into the exception — so the assertion is the
+    // rate, and the absolute count is reported rather than pinned.
+    let kept = 1.0 - demotions_with as f32 / demotions_without.max(1) as f32;
     assert!(
-        demotions_with <= 1,
-        "measured, the low-end band leaves at most one genuine demotion in this window: {demotions_with}"
+        kept > 0.90,
+        "a band must remove at least 90% of the low-end churn: {demotions_with} of {demotions_without} kept, \
+         {:.0}% removed",
+        kept * 100.0
     );
     let (n_with, n_without) = (changed_with.len(), changed_without.len());
     assert!(

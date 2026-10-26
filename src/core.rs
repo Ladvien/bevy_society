@@ -414,6 +414,32 @@ pub struct Tuning {
     /// which `Tuning::affinity_ceiling` bounds — before the clamp the same change took 38 rivals to 61.
     /// Set this to `0.0` to restore plain `interaction_radius` arrival exactly.
     pub crowded_arrival_growth: f32,
+    /// What a place with **no free seat** costs an option's score: the fraction of the score removed.
+    ///
+    /// **A price, not a prohibition.** Target expansion used to drop a place whose `used >= capacity`, so a full
+    /// workshop made `work` an option that did not exist. Measured, a 30-seat village given 48 people took `work`
+    /// from 10.3% to 3.6% of a life and rival density from 7.8% to 20.1% of directed pairs. Removing the veto
+    /// fixes both — and raises interrupted arrivals 34% at 24 people, because more people now aim at a place that
+    /// cannot seat them.
+    ///
+    /// The repair is the one Pentheny names in *Game AI Pro 2* ch. 17 (corpus
+    /// `gameaipro2-ch17-advanced-techniques-robust-efficient-crowds`): "agents fight the rest of the crowd to follow
+    /// their ideal path as closely as possible, **seemingly ignoring all other possible routes**", and with a
+    /// congestion map "agents ... **reconsider their current path choice if a less-congested alternative
+    /// exists**". A full place is *expensive*, so a person with an alternative takes it and a person with none
+    /// still arrives.
+    ///
+    /// **The price is a step at "no room", not a ramp.** A proportional price (`1 - penalty · fill`) was measured
+    /// first and rejected: it diverts people from a place that is merely 9/10 full, where nobody queues, and cost
+    /// `work` **10.3% → 6.6%** at 48 people — reintroducing the defect it was meant to cure. The queue exists only
+    /// at full, so the price is charged there.
+    ///
+    /// `capacity: 0` stays a **prohibition**: a place that seats nobody has no room at any price.
+    ///
+    /// **Design default, chosen by measurement** (`docs/loop/runs/2026-10-25-10/eval.md`). `0.0` restores the
+    /// un-priced ranking; `1.0` makes a full place score nothing, which is close to the old veto but keeps it
+    /// available when it is the only option.
+    pub crowding_penalty: f32,
 }
 
 impl Tuning {
@@ -514,6 +540,7 @@ impl Default for Tuning {
             // 0.583 while rivals fall from 33 to 28. At six days the system costs compute and changes nothing.
             contact_gossip_cooldown_days: 2.0,
             crowded_arrival_growth: 0.7,
+            crowding_penalty: 0.6,
         }
     }
 }

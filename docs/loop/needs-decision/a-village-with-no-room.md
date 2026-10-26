@@ -77,3 +77,24 @@ importance — see `docs/loop/runs/2026-10-25-09/eval.md`) is real, and it was t
 exponent emptied the 24-person village's rivalries, because that village's crowd is already 12.6 witnesses per deed.
 It cannot be fixed before the density question above is settled, or the fix will be judged against a baseline that
 is itself an artefact.
+
+## Resolved in part, 2026-10-25-10: option 2 shipped
+
+`capacity` is now a **price**. `Tuning::crowding_penalty` (**0.6**) charges a place with no free seat
+`1 - penalty` of its score, so a full place is expensive rather than deleted; `capacity: 0` stays a prohibition.
+
+| people | rival density, veto → price | `work` share |
+|---|---|---|
+| 24 | 7.83% → **2.90%** | 10.4% → 12.9% |
+| 36 | 23.08% → **6.10%** | 5.8% → 11.3% |
+| 48 | 20.11% → **3.94%** | 3.7% → 9.6% |
+
+**Options 1 and 3 remain open.** Option 1 (scale the harness's places with `--people`) is still the right correction
+to an instrument that has now produced two false results, and it is item 2 in the log. Option 3 (leave capacity to the
+host) is what a host *can* now do — the crate no longer deletes the option, so pricing a crowd is expressible in a
+definitions file — but the crate supplies a default price, which is a different position from "no opinion".
+
+Three designs were measured; two were rejected. The **proportional** price (`1 - penalty · fill`) is the more faithful
+reading of a congestion map and it cost `work` 10.3% → 6.6% at 48 people, because it diverts people from a place that
+is merely 9/10 full; and **removing the veto with no price** empties the hostile graph (0.92% at 36) and raises
+interrupted arrivals 34% at 24. Details: `docs/loop/runs/2026-10-25-10/eval.md`.
