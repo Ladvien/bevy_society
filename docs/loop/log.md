@@ -4211,3 +4211,64 @@ change and the documented command is `--all-features`.)
 4. **The refusal rate is `accept.base` 0.50** — still the most host-visible unmeasured number.
 5. **`produce_and_consume` scans `PersonIndex` per ending** (`O(n·endings)`), and `last_exchange_day` on `Tie` still
    wants the save-version bump.
+
+## 2026-10-25-09 — A village with no room (nothing shipped)
+
+**Pick.** Last iteration's top remaining item was the price model. The evidence sent the iteration elsewhere: its
+own nine-seed run found **rivalries exploding with population**, 18 rival pairs at 24 people against 183 at 36. A
+price that rests at its floor is a cosmetic number; a village where a fifth of all pairs hate each other is behaviour
+a host cannot ship.
+
+**What I built, and why it was reverted.** `src/reputation.rs` divides **trust** by
+`witnesses ^ Tuning::witness_dilution` (0.5) and applies **affinity**, **respect** and the memory's **importance** at
+full magnitude to every witness — three of a deed's four consequences still grow linearly with the crowd, and
+affinity is what a tie label calls a rivalry. **Latané 1981** (*American Psychologist* 36(4): 343-356, DOI
+`10.1037/0003-066X.36.4.343`, verified against Crossref) is the law it should follow: *"impact should take the form
+of a power function, with the marginal effect of the Nth other person being less than that of the (N−1)th."*
+
+I diluted all four. The mechanism tests passed (`tests/witness_dilution.rs`, 3 tests: every effect falls per witness,
+the total still rises, the total is sublinear) and the village density flattened — **and the graph emptied**: at 24
+people, rival pairs 21.6 → 1.0, `became_rival` 218 → 11. The plan had already named that a regression. Every positive
+exponent does it, because the 24-person village's crowd is **already 12.6 witnesses per deed** (21.5 at 36, 30.0 at
+48). Reverted: `src/reputation.rs`, `src/core.rs`, `tests/witness_dilution.rs` are byte-identical to `8532a2f`.
+
+**The control that overturned the diagnosis.** The harness builds the **same four places for every `--people`**, and
+they seat 30. So "36 people" and "48 people" were an overfilled village, not a bigger one — the crate says so at
+startup (`'well' is home to 16 people, but an arrival disc of radius 1.5 seats about 4`). Scale the places' capacity
+with the population and change nothing else:
+
+| people | rival % (over capacity) | rival % (seated) | `work` share |
+|---|---|---|---|
+| 24 | 7.83% | — | 10.3% |
+| 36 | 23.08% | **0.00%** | 5.5% → 10.3% |
+| 48 | 20.11% | **0.02%** | 3.6% → 7.9% |
+
+`work` collapses because the workshop is full, social contact replaces it, and the same number of hostile events lands
+on a far denser contact graph. **`snub` barely moves** (1.2% → 1.3%). The crowd multiplier was never the cause.
+
+**Why nothing ships.** Zero hostility is as wrong as 20%, so the fix is neither "dilute the crowd" nor "add seats" but
+"a full place should cost something, not vanish" — `Place(tag)` filters `used < capacity` **before scoring**, so a full
+workshop has no candidate at all, while `Home` bypasses the gate entirely. That re-shuffles every village's day and
+needs its own nine-seed measurement, so it is `docs/loop/needs-decision/a-village-with-no-room.md` with three options
+and a stated target (density flat at about 7-8% from 24 to 48 people, `work` holding at about 10%).
+
+**What shipped.** `examples/evidence.rs --witness-dilution`, the flag the exponent sweep needed, and a
+`village-grows` scenario recording the measurement and that it does not hold. **Dead-code delta: zero.**
+**Perf:** no model change; no benchmark run, because a before-and-after of identical code measures the machine.
+**Tests:** unchanged crate, so the suite is unchanged; `fmt`, `clippy --all-targets --all-features` and `doc` clean.
+
+**Verdicts.** Pass 1 **FAIL** for the change (reverted) and GREAT for the diagnosis. Pass 2 GREAT — the left panel of
+`evidence/plots/capacity.png` is the plot that killed the hypothesis, because density *falls* from 36 to 48 while the
+crowd per deed rises. Pass 3 GREAT.
+
+**Commit** `ecaca1d`.
+
+**Top 5 remaining.**
+
+1. **A full place is a prohibition, not a price.** `used < capacity` removes the candidate; `Home` ignores capacity
+   altogether. This is the real believability defect, now measured at three populations.
+2. **The price model follows net stock and counts units, not heads** (carried twice now). Needs unmet demand.
+3. **The `--people` flag scales people and not the village**, and it produced a false scaling law that reached a log.
+   Either scale the places or refuse.
+4. **A deed's hostility still grows linearly with the crowd** — real, measured, and unfixable until 1 is settled.
+5. **The refusal rate is `accept.base` 0.50**, still the most host-visible unmeasured number.
