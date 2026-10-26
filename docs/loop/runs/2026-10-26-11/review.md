@@ -100,12 +100,23 @@ how full your village's stores are, per person — an empty store is worth doubl
 the nominal unit. The same six loaves are dearer for thirty villagers than for three. It is a function of the
 world rather than an accumulator, so it cannot drift, and your scripts can read it with `ctx.price("bread")`."*
 
+**The seated fresh run passes the shape test, and shows a famine the old price hid.**
+`evidence/plots/price-fresh24.png`: correlation **−0.9976**, range **0.79 – 2.00**, standard deviation 0.342,
+and the 16 719 ticks at exactly 2.0 are again **all** ticks whose `bread_mean` is exactly 0.0. The price falls
+whenever the store fills and rises whenever it empties, with no clipping at the full-store end.
+
+The panel also makes visible something no earlier plot could, because the old price was not a reading of
+anything: **the village holds zero bread for 23.9% of its ticks**, in runs as long as **3.39 game-days**
+(days ~8.6–13.8). The price reports that state exactly right — it is the one number in the crate that now
+does. But a village where a quarter of all ticks are a famine is a **behaviour** fact, not a pricing one, and
+nothing reads the price to react to it. Recorded as the top remaining item.
+
 **Also verified here, and it is the check that this is one change:** the whole society is bit-identical apart
 from `price`. `summary.json` matches field for field except `price` (0.500 → 1.583) and the two `narrative.txt`
 files are **byte-identical**. No decision reads a price, so nothing else may have moved — and nothing did.
 
 **Verdict: GREAT** for the change, with the pass's `s19_p36` panel marked as an overfilled village rather than
-used as evidence.
+used as evidence, and the seated `fresh24/s23_p24` run carrying Pass 3.
 
 ## What this review corrects
 
