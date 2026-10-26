@@ -662,6 +662,7 @@ fn arrive_and_satisfy(
     transforms: Query<&GlobalTransform>,
     mut commands: Commands,
     mut people: Query<(&mut Doing, &mut Needs)>,
+    stocks: Query<&crate::Stock>,
     mut arrivals: Option<ResMut<ArrivalQueue>>,
 ) {
     let now = clock.now_days;
@@ -737,10 +738,40 @@ fn arrive_and_satisfy(
         }
 
         if doing.arrived_day.is_some() {
+            // **A meal feeds only as much as the shelf had.** `satisfies` is the crate's *satiation*
+            // term and satiation follows the amount eaten, not the time spent at the table: Zandstra 2000
+            // (DOI `10.18174/197257`) separates satiation, which "influences the size of meals", from
+            // satiety, which "influences the frequency of meals". This used to pay in full from an empty
+            // store, so the economy said "no bread changed hands" and the needs model said "fed". Measured
+            // on the price pass's village: 4.80 loaves baked a game-day against 21.06 completed meals, so
+            // ~77% of meals were conjured, and the village held zero bread for 24.0% of its ticks.
+            //
+            // **The factor is the authored fraction, not a penalty rate.** `taken / asked` is already in
+            // the definitions file; a `Tuning` coefficient would invent a curve where the data gives one.
+            // It is stable across a meal's ticks because `Stock` is debited at *completion* (the same rule
+            // an interrupted task follows), so every tick of one meal reads the same store.
+            //
+            // **An activity that consumes nothing is untouched**: `factor` is `1.0` and `Stock` is never
+            // read, which is every activity in the starter pack except `eat`.
+            let factor = match stocks.get(person).ok() {
+                Some(stock) if !spec.consumes.is_empty() => spec
+                    .consumes
+                    .iter()
+                    .map(|&(good, asked)| {
+                        if asked <= 0.0 {
+                            1.0
+                        } else {
+                            (stock.get(good) / asked).min(1.0)
+                        }
+                    })
+                    .fold(f32::INFINITY, f32::min),
+                _ => 1.0,
+            };
             // `satisfies` is a per-game-hour delta, so a tick is `dt_days · 24` hours of it.
             for &(need, delta) in &spec.satisfies {
                 if let Some(level) = needs.0.get_mut(usize::from(need.0)) {
-                    *level = (*level + f64::from(delta) as f32 * dt_hours as f32).clamp(0.0, 1.0);
+                    let gain = f64::from(delta) as f32 * dt_hours as f32 * factor;
+                    *level = (*level + gain).clamp(0.0, 1.0);
                 }
             }
         }

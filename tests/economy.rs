@@ -281,3 +281,191 @@ fn a_store_survives_a_round_trip_and_an_old_save_is_refused() {
         other => panic!("a version-1 save must be refused, got {other:?}"),
     }
 }
+
+// -------------------------------------------------------------------------------------------------
+// A meal is what was on the shelf
+// -------------------------------------------------------------------------------------------------
+
+/// A village whose `eat` actually pays a need, so the payout is what is being measured. `bake` produces
+/// `bread_per_bake`; the eater asks for a whole loaf.
+///
+/// `food` does not decay here, so any change in it is the meal's own payout and nothing else.
+fn fed_defs(bread_per_bake: f32) -> SocietyDefs {
+    SocietyDefs::from_ron(&format!(
+        r#"(
+            goods: [(id: "bread")],
+            needs: [(id: "food", decay_per_day: 0.0)],
+            activities: [
+                (id: "bake", target: Place("oven"), duration_hours: 0.5,
+                 produces: [("bread", {bread_per_bake})],
+                 considerations: [(input: Need("food"), curve: Step(0.0))],
+                 satisfies: [], interaction: None, barks: []),
+                (id: "eat", target: Place("oven"), duration_hours: 0.5,
+                 consumes: [("bread", 1.0)],
+                 considerations: [(input: Need("food"), curve: Step(0.0))],
+                 satisfies: [("food", 1.0)], interaction: None, barks: []),
+            ],
+        )"#
+    ))
+    .expect("the definitions parse")
+}
+
+/// One eater at an oven, holding `held` loaves and nothing else in the village. No baker, so the store can
+/// only fall: whatever the eater pays came from what it walked in with.
+fn lone_eater(held: f32) -> (App, Entity) {
+    let mut app = common::headless(fed_defs(0.0), common::settings());
+    let oven = app
+        .world_mut()
+        .spawn((
+            Name::new("oven"),
+            Place { capacity: 8 },
+            PlaceTags(vec!["oven".to_owned()]),
+            Transform::default(),
+        ))
+        .id();
+    let eater = common::spawn_person(&mut app, "Eater", Vec2::ZERO);
+    app.world_mut()
+        .entity_mut(eater)
+        .insert((Autonomous, Home(oven)));
+    // The first update sizes `Needs` and `Stock` from the definitions, so seed after it. A need starts at
+    // its `initial` (1.0 by default), so it is zeroed too — otherwise the payout is measured against a
+    // ceiling it is already at.
+    common::run(&mut app, 2);
+    if let Some(mut stock) = app.world_mut().get_mut::<Stock>(eater) {
+        stock.0[0] = held;
+    }
+    if let Some(mut needs) = app.world_mut().get_mut::<bevy_society::Needs>(eater) {
+        needs.0[0] = 0.0;
+    }
+    (app, eater)
+}
+
+/// `food` for one person, or `None` before `Needs` exists.
+fn food(app: &App, person: Entity) -> Option<f32> {
+    app.world()
+        .get::<bevy_society::Needs>(person)
+        .and_then(|needs| needs.0.first().copied())
+}
+
+/// **A meal from an empty shelf feeds nobody.**
+///
+/// This is the defect the price pass measured and could not fix: the village baked 4.80 loaves a game-day
+/// against 21.06 completed meals, so ~77% of its meals were conjugated out of nothing, and it held zero
+/// bread for 24.0% of ticks. `satisfies` paid in full regardless of what `Stock::take` found.
+///
+/// The villager still *eats* — the activity is chosen, the walk happens, the meal takes its ticks. It simply
+/// is not fed, which is the difference between this and gating, which was measured to wreck the village.
+#[test]
+fn a_meal_from_an_empty_shelf_feeds_nobody() {
+    let (mut app, eater) = lone_eater(0.0);
+    common::run(&mut app, 600);
+    let level = food(&app, eater).expect("Needs is sized after the first update");
+    assert!(
+        level < 1e-3,
+        "a meal with no bread must not feed anybody, but food reached {level}"
+    );
+    // And nobody was blocked: the activity was still chosen, so the store was still debited to nothing.
+    let held = app
+        .world()
+        .get::<Stock>(eater)
+        .map(|s| s.get(bevy_society::GoodId(0)))
+        .unwrap_or(-1.0);
+    assert!(
+        held.abs() < 1e-6,
+        "the eater must still hold nothing after eating from an empty store, not {held}"
+    );
+}
+
+/// **A meal with the bread pays exactly what it always did.**
+///
+/// The guard on the change: a fed village is bit-identical. One whole loaf is an `eat` at `1.0` a game-hour
+/// for half an hour, so the payout is `0.5` and the factor must be exactly `1.0`.
+#[test]
+fn a_fed_meal_pays_in_full() {
+    let (mut app, eater) = lone_eater(1.0);
+    common::run(&mut app, 1_200);
+    let level = food(&app, eater).expect("Needs is sized after the first update");
+    assert!(
+        level > 0.0,
+        "a meal with a loaf must feed its eater, but food stayed at {level}"
+    );
+    // The store was debited, which is the other half of the same event.
+    let held = app
+        .world()
+        .get::<Stock>(eater)
+        .map(|s| s.get(bevy_society::GoodId(0)))
+        .unwrap_or(-1.0);
+    assert!(
+        held < 1e-6,
+        "the loaf must have been eaten, but {held} is left"
+    );
+}
+
+/// **Half a loaf feeds half as much.** Linear in what was there, with no threshold: the crate has no source
+/// for a "a meal needs a whole loaf or it does not count" rule, and inventing one would make a partial store
+/// worth exactly nothing.
+#[test]
+fn half_a_loaf_feeds_half() {
+    let full = {
+        let (mut app, eater) = lone_eater(1.0);
+        common::run(&mut app, 1_200);
+        food(&app, eater).expect("sized")
+    };
+    let half = {
+        let (mut app, eater) = lone_eater(0.5);
+        common::run(&mut app, 1_200);
+        food(&app, eater).expect("sized")
+    };
+    assert!(
+        full > 0.1 && half > 1e-3,
+        "both meals must feed something for this to measure anything: {full} and {half}"
+    );
+    let ratio = half / full;
+    assert!(
+        (ratio - 0.5).abs() < 0.06,
+        "half a loaf must feed about half as much, not {ratio:.3} ({half} against {full})"
+    );
+}
+
+/// **An activity that consumes nothing is untouched.** `satisfies` scales by the store only where the
+/// activity declared a `consumes`; every other activity pays exactly what it paid before, so this change
+/// stays inside one activity's arithmetic.
+#[test]
+fn an_activity_that_consumes_nothing_is_unaffected() {
+    let defs = SocietyDefs::from_ron(
+        r#"(
+            goods: [(id: "bread")],
+            needs: [(id: "food", decay_per_day: 0.0)],
+            activities: [
+                (id: "rest", target: Place("oven"), duration_hours: 0.5,
+                 considerations: [(input: Need("food"), curve: Step(0.0))],
+                 satisfies: [("food", 1.0)], interaction: None, barks: []),
+            ],
+        )"#,
+    )
+    .expect("the definitions parse");
+    let mut app = common::headless(defs, common::settings());
+    let oven = app
+        .world_mut()
+        .spawn((
+            Name::new("oven"),
+            Place { capacity: 8 },
+            PlaceTags(vec!["oven".to_owned()]),
+            Transform::default(),
+        ))
+        .id();
+    let person = common::spawn_person(&mut app, "Resting", Vec2::ZERO);
+    app.world_mut()
+        .entity_mut(person)
+        .insert((Autonomous, Home(oven)));
+    common::run(&mut app, 2);
+    if let Some(mut needs) = app.world_mut().get_mut::<bevy_society::Needs>(person) {
+        needs.0[0] = 0.0;
+    }
+    common::run(&mut app, 1_200);
+    let level = food(&app, person).expect("sized");
+    assert!(
+        level > 0.1,
+        "an activity with no `consumes` must pay in full from an empty store, but food is {level}"
+    );
+}
