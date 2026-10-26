@@ -6,12 +6,18 @@
 //! an auctioneer**". Twenty-four villagers do not clear a market; they produce, they eat what they produced,
 //! and the price is an *observation* of how that went.
 //!
-//! **The acceptance test is the literature's own.** The production/consumption model in *Games and AI*
-//! (corpus doc `eth-cgl-ar_games-Zun16a`) states it: "if the parameters are chosen such that the inflow of
-//! resources into the system equals the outflow, then the economy is **stable and prices fluctuate around a
-//! constant value**... by upsetting this balance we can simulate a variety of interesting real market
-//! phenomenon, such as shortages and oversupply." [`update_prices`] is built so that claim is a test rather
-//! than a hope: equal inflow and outflow give a zero delta and the price does not move.
+//! **The price is read off how full the stores are, not integrated from the flow.** The production/consumption
+//! model in *Games and AI* (corpus doc `eth-cgl-ar_games-Zun16a`) states its acceptance test — "if the
+//! parameters are chosen such that the inflow of resources into the system equals the outflow, then the
+//! economy is **stable and prices fluctuate around a constant value** ... **shortages and oversupply**" move
+//! it — and its own Model A satisfies it by pricing from the **storage ratio** rather than from a flow:
+//! `p = w · v(r)` with `r = S_cur / S_max`, and *"the price modifier term `v(r)` doubles the price if the
+//! storage is empty and halves the price if the storage is full"* (§3.1.1). [`update_prices`] applies
+//! exactly that `v`, over village-wide stores and **per head**. The earlier `Δprice ∝ (produced − consumed)`
+//! is gone: it integrated net stock, so a village that baked more than it ate saw its price *rise*, and it
+//! counted units, so the same six loaves made a glut of one village and a famine of thirty. Both defects are
+//! in `docs/research/economics.md` "Open contradictions" and both are repaired by
+//! [`storage_price`](crate::model::price::storage_price).
 //!
 //! **Goods are not fungible.** Henrich et al. 2005 (DOI `10.1017/S0140525X05000142`, in the corpus): "meat
 //! and honey are meticulously shared among the Ache, but goods purchased by money are not". There is no
@@ -24,7 +30,7 @@
 use bevy::prelude::*;
 
 use crate::core::require_core;
-use crate::core::{SocietyClock, SocietySettings, SocietySystems};
+use crate::core::{SocietySettings, SocietySystems};
 use crate::defs::GoodId;
 
 /// Per-person holdings, one level per good in definition order, each in `[0, Tuning::stock_ceiling]`.
@@ -68,28 +74,6 @@ impl Stock {
     }
 }
 
-/// What flowed through one good this tick: how much was produced and how much was consumed.
-///
-/// Accumulated by `produce_and_consume` between society ticks and consumed by `update_prices`, so the price
-/// is a measurement of what the village did rather than a second simulation beside it.
-#[derive(Resource, Debug, Clone, Default, PartialEq)]
-pub struct Flow {
-    /// Units produced this tick, by good.
-    pub produced: Vec<f32>,
-    /// Units consumed this tick, by good.
-    pub consumed: Vec<f32>,
-}
-
-impl Flow {
-    /// Makes room for `goods` goods and clears every counter.
-    fn reset(&mut self, goods: usize) {
-        self.produced.clear();
-        self.produced.resize(goods, 0.0);
-        self.consumed.clear();
-        self.consumed.resize(goods, 0.0);
-    }
-}
-
 /// The price of each good, in definition order.
 ///
 /// One number per good, starting at 1.0 and clamped to `[Tuning::price_floor, Tuning::price_ceiling]` so a
@@ -127,23 +111,14 @@ pub fn value_of(held: f32) -> f32 {
 /// Iterates [`PersonIndex::sorted`](crate::PersonIndex) so the order is fixed, and draws nothing.
 pub(crate) fn produce_and_consume(
     mut ended: MessageReader<crate::ActivityEnded>,
-    mut flow: ResMut<Flow>,
     settings: Res<SocietySettings>,
     defs: Res<crate::SocietyDefs>,
     index: Res<crate::PersonIndex>,
     mut stocks: Query<&mut Stock>,
 ) {
-    let goods = defs.goods.len();
-    if goods == 0 {
+    if defs.goods.is_empty() {
         for _ in ended.read() {}
         return;
-    }
-    // **Do not reset every tick.** An activity ends only every few dozen ticks, so a per-tick reset would
-    // hand `update_prices` one tick of flow followed by thirty ticks of zero and the price would never
-    // move. `update_prices` consumes and clears instead, which makes the price an integral of what the
-    // village did since the last price update.
-    if flow.produced.len() != goods {
-        flow.reset(goods);
     }
     // **Only a completed activity pays.** An interrupted one did not happen, which is the same rule
     // `satisfies` follows and the reason an interruption is a cost rather than a pause.
@@ -167,59 +142,64 @@ pub(crate) fn produce_and_consume(
             continue;
         };
         for &(good, amount) in &spec.consumes {
-            let taken = stock.take(good, amount);
-            flow.consumed[usize::from(good.0)] += taken;
+            stock.take(good, amount);
         }
         for &(good, amount) in &spec.produces {
-            let added = stock.add(good, amount, ceiling);
-            flow.produced[usize::from(good.0)] += added;
+            stock.add(good, amount, ceiling);
         }
     }
 }
 
-/// Moves each price toward the side the village is short on, and leaves it alone when it is not short.
+/// Sets each good's price from how full the village's stores are, **per head**.
 ///
-/// `Δprice = price_speed_per_day · (produced − consumed)` — **per interval, not per tick**.
+/// `price = storage_price(total_held, people, price_full_store, 1.0)`, clamped to
+/// `[Tuning::price_floor, Tuning::price_ceiling]`. The function is the corpus's own `v(r)` — the storage
+/// ratio, worth `2.0` at an empty store, `1.0` at half and `0.5` at a full one — and it is in
+/// [`crate::model::price`] with its quotes and its test against the paper's three named points.
 ///
-/// Not per tick: an activity ends only every few dozen ticks, so a per-tick `dt` would weight one tick's
-/// imbalance by `1/320` of a day and the price would never visibly move. The counters accumulate between
-/// price updates and are cleared here, so the delta is the change for the interval that just elapsed, and
-/// `price_speed_per_day` reads as "how far the price moves per unit of imbalance per pricing step".
+/// **Per head is the whole point.** The ratio is over the **mean** held per person against
+/// `Tuning::price_full_store` — a day's supply a head — so the same six loaves price differently in a village
+/// of three and a village of thirty. A unit count cannot make that distinction and the previous
+/// `Δprice ∝ (produced − consumed)` counted units.
 ///
-/// This is the whole economy's dynamics and it is deliberately one line: the acceptance test in the module
-/// header — equal inflow and outflow means a price that does not move — is satisfied by construction, and
-/// anything richer would need rates no paper in the corpus supplies.
+/// **Nothing to integrate, so nothing to get wrong.** The old price accumulated a flow counter between
+/// updates, which is how it came to price *net stock*: a village that baked more than it ate watched its
+/// price rise, and an eater with an empty shelf — who takes nothing, so consumes nothing — made a real
+/// shortage invisible. Here the price is a function of the world, so a village whose inflow equals its
+/// outflow holds a constant store and therefore a constant price, which is the acceptance test in the
+/// module header satisfied by construction rather than by a rate.
 ///
-/// **Design defaults**: `price_speed_per_day` and the clamp band. `stock_ceiling` is in [`Tuning`](crate::Tuning)
-/// too. The paper's own figures (`w = 6.0`, 500 units) are for its gnomes and are not transferable.
+/// Iterates [`PersonIndex::sorted`](crate::PersonIndex), so the sum is over a fixed order, and draws
+/// nothing.
 pub(crate) fn update_prices(
-    clock: Res<SocietyClock>,
     settings: Res<SocietySettings>,
-    mut flow: ResMut<Flow>,
+    defs: Res<crate::SocietyDefs>,
+    index: Res<crate::PersonIndex>,
+    stocks: Query<&Stock>,
     mut prices: ResMut<Prices>,
 ) {
-    if flow.produced.is_empty() {
+    let goods = defs.goods.len();
+    if goods == 0 {
         return;
     }
-    let tuning = &settings.tuning;
-    if prices.0.len() < flow.produced.len() {
-        prices.0.resize(flow.produced.len(), 1.0);
+    if prices.0.len() < goods {
+        prices.0.resize(goods, 1.0);
     }
-    let _ = clock;
-    for i in 0..flow.produced.len() {
-        // **Scarcity is `produced − consumed`.** A village that ate more than it baked is short, and a
-        // short good gets dearer. The first version had this inverted, so an undersupplied village showed
-        // its price *falling*: with a shared store, the eaters who cannot find bread stop eating, so
-        // consumption falls faster than production and the raw difference is negative.
-        let scarcity = flow.produced[i] - flow.consumed[i];
-        let next = prices.0[i] + tuning.price_speed_per_day * scarcity;
-        prices.0[i] = next.clamp(tuning.price_floor, tuning.price_ceiling);
+    let mut held = vec![0.0_f32; goods];
+    for &(_, person) in &index.sorted {
+        let Ok(stock) = stocks.get(person) else {
+            continue;
+        };
+        for (good, total) in held.iter_mut().enumerate() {
+            *total += stock.get(GoodId(good as u16));
+        }
     }
-    // **Consume the flow once it has been priced.** The counters accumulate between society ticks;
-    // clearing them here rather than in the producer is what makes the price an integral of what happened
-    // rather than of the last tick alone.
-    flow.consumed.fill(0.0);
-    flow.produced.fill(0.0);
+    let people = index.sorted.len();
+    let full_store = settings.tuning.price_full_store;
+    for (good, total) in held.into_iter().enumerate() {
+        let raw = crate::model::price::storage_price(total, people, full_store, 1.0);
+        prices.0[good] = raw.clamp(settings.tuning.price_floor, settings.tuning.price_ceiling);
+    }
 }
 
 /// Goods, stock and prices.
@@ -231,7 +211,6 @@ pub struct EconomyPlugin;
 impl Plugin for EconomyPlugin {
     fn build(&self, app: &mut App) {
         app.register_type::<Stock>()
-            .init_resource::<Flow>()
             .init_resource::<Prices>()
             .add_systems(
                 FixedUpdate,
@@ -254,7 +233,7 @@ mod tests {
     fn stock_clamps_and_reports_what_it_actually_moved() {
         let mut stock = Stock::default();
         assert_eq!(stock.add(GoodId(0), 0.4, 1.0), 0.4);
-        // A producer already at the ceiling adds nothing, which is what keeps the flow honest.
+        // A producer already at the ceiling adds nothing.
         assert_eq!(stock.add(GoodId(0), 0.9, 1.0), 0.6);
         assert_eq!(stock.get(GoodId(0)), 1.0);
         // Taking more than is there takes what is there.
@@ -263,23 +242,5 @@ mod tests {
         // An unknown good holds nothing rather than panicking.
         assert_eq!(stock.get(GoodId(9)), 0.0);
         assert_eq!(stock.take(GoodId(9), 1.0), 0.0);
-    }
-
-    #[test]
-    fn a_balanced_flow_leaves_the_price_where_it_was() {
-        // The acceptance test, as arithmetic: `consumed - produced == 0` gives a zero delta whatever the
-        // speed and whatever the tick length.
-        let imbalance = 2.0_f32 - 2.0;
-        let delta = 4.0_f32 * 0.01 * imbalance;
-        assert_eq!(delta, 0.0);
-    }
-
-    #[test]
-    fn an_undersupplied_good_gets_dearer_and_an_oversupplied_one_cheaper() {
-        let (speed, dt) = (2.0_f32, 0.25_f32);
-        let dearer = speed * dt * (3.0 - 1.0);
-        let cheaper = speed * dt * (1.0 - 3.0);
-        assert!(dearer > 0.0, "short supply must raise the price");
-        assert!(cheaper < 0.0, "oversupply must lower it");
     }
 }

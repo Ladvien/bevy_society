@@ -168,7 +168,7 @@ pub use defs::{
 };
 #[cfg(feature = "dialogue")]
 pub use dialogue::{DialoguePlugin, TalkTo};
-pub use economy::{EconomyPlugin, Flow, Prices, Stock, value_of};
+pub use economy::{EconomyPlugin, Prices, Stock, value_of};
 #[cfg(feature = "fields")]
 pub use fields::{Commotion, SocialFieldPlugin, SocialFieldSettings, SocialFields};
 // The two value types the fields are configured with, re-exported so a host names one crate. Both are

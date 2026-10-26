@@ -175,8 +175,15 @@ Any other `{...}` is rejected at compile time rather than printed literally.
 `goods: [(id: "bread")]` declares a **quantity**, not a currency. Every person carries a `Stock` with one level
 per good, in `[0, Tuning::stock_ceiling]`. An activity can `produces: [("bread", 3.0)]` and `consumes:
 [("bread", 1.0)]`, applied once, when it **completes** (an interrupted one pays nothing, like `satisfies`). Each
-good has a price in `Prices`, moved by `price_speed_per_day · (produced − consumed)` per interval: it rests when
-the village is fed and rises when it is short. **Nothing gates**: an empty store never stops anyone eating.
+good has a price in `Prices`, read off **how full the village's stores are, per head**:
+`price = 2 · (1 − r)` below half full and `1.5 − r` above it, where `r` is
+`total held / ( villagers · Tuning::price_full_store )`. An empty store is worth **double** the nominal unit, a
+full one **half**, and half full is nominal — the shape and the numbers from the corpus's own game-economy
+Model A (`eth-cgl-ar_games-Zun16a` §3.1.1: "the price modifier term v(r) doubles the price if the storage is
+empty and halves the price if the storage is full"). It is clamped to
+`[Tuning::price_floor, Tuning::price_ceiling]`. The same six loaves therefore price differently in a village
+of three and one of thirty, which a count of units could not say. **Nothing gates**: an empty store never
+stops anyone eating.
 
 A good changes hands on an accepted interaction:
 

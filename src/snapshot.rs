@@ -8,6 +8,7 @@
 use std::sync::{Arc, Mutex};
 
 use bevy::ecs::query::QueryData;
+use bevy::ecs::system::SystemParam;
 use bevy::prelude::*;
 use bevy_emerge_rng::{DetRng, seeded};
 use rand_chacha::ChaCha8Rng;
@@ -35,6 +36,8 @@ pub(crate) struct Names {
     pub(crate) factions: Vec<String>,
     /// Activity names, indexed by [`ActivityId`].
     pub(crate) activities: Vec<String>,
+    /// Good names, indexed by [`GoodId`](crate::GoodId).
+    pub(crate) goods: Vec<String>,
 }
 
 impl Names {
@@ -46,6 +49,7 @@ impl Names {
             topics: defs.topics.iter().map(|s| s.name.clone()).collect(),
             factions: defs.factions.iter().map(|s| s.name.clone()).collect(),
             activities: defs.activities.iter().map(|s| s.name.clone()).collect(),
+            goods: defs.goods.clone(),
         }
     }
 
@@ -67,6 +71,14 @@ impl Names {
     /// The faction called `name`.
     pub(crate) fn faction(&self, name: &str) -> Result<FactionId, String> {
         position(&self.factions, "faction", name).map(|i| FactionId(i as u16))
+    }
+
+    /// The good called `name`.
+    ///
+    /// A pack that declares no goods at all cannot resolve one, and the error says which name was asked
+    /// for rather than blaming the economy.
+    pub(crate) fn good(&self, name: &str) -> Result<crate::GoodId, String> {
+        position(&self.goods, "good", name).map(|i| crate::GoodId(i as u16))
     }
 
     /// The name of an activity, `""` for the idle activity or an unknown id.
@@ -138,6 +150,8 @@ pub(crate) struct PersonView {
     pub(crate) activity: Option<ActivityId>,
     /// Memories, used for grudges.
     pub(crate) memories: Memories,
+    /// What the person holds of each good, in definition order.
+    pub(crate) stock: crate::Stock,
 }
 
 impl PersonView {
@@ -156,6 +170,8 @@ pub(crate) struct SocietySnapshot {
     hour: f32,
     day: i64,
     names: Names,
+    /// Prices by good, in definition order, as of the tick start.
+    prices: Vec<f32>,
     /// Persons in ascending id order.
     persons: Vec<PersonView>,
     /// Per-tick generator for `ctx.rand()`, seeded from [`SocietyRng`].
@@ -253,6 +269,22 @@ impl SocietySnapshot {
             .get(usize::from(id.0))
             .copied()
             .unwrap_or(0.0))
+    }
+
+    /// `ctx.stock(a, good)`: how much of a good the person held at the tick start. An unknown good name
+    /// is an error naming it; a good the person holds none of is `0.0`.
+    pub(crate) fn stock(&self, a: i64, good: &str) -> Result<f32, String> {
+        let id = self.names.good(good)?;
+        Ok(self.person(a)?.stock.get(id))
+    }
+
+    /// `ctx.price(good)`: the good's price as of the tick start, clamped to
+    /// `[Tuning::price_floor, Tuning::price_ceiling]`. It is the **tick-start** value because that is what a
+    /// script sees: `update_prices` runs in `SocietySystems::Interact`, after `Perceive` froze the snapshot,
+    /// so a rule reads yesterday's price and acts today — the same one-tick lag every other `ctx` read has.
+    pub(crate) fn price(&self, good: &str) -> Result<f32, String> {
+        let id = self.names.good(good)?;
+        Ok(self.prices.get(usize::from(id.0)).copied().unwrap_or(1.0))
     }
 
     /// `ctx.signal(a, id)`: a host-written signal value. An unknown name is an error naming it; a
@@ -368,6 +400,19 @@ impl SocietySnapshot {
     }
 }
 
+/// The two crate-level resources the snapshot reads that a host might not have installed.
+///
+/// Grouped so [`build_snapshot`] stays inside clippy's argument budget, and because they are the same kind of
+/// thing: a pack's compiled definitions and the prices its goods carry, both optional so a host without
+/// `EconomyPlugin` still gets a snapshot (prices then read the nominal unit, as `Prices::get` documents).
+#[derive(SystemParam)]
+pub(crate) struct SnapshotSources<'w> {
+    /// The compiled definitions, absent before a host inserts them.
+    pub(crate) defs: Option<Res<'w, SocietyDefs>>,
+    /// The goods' prices, absent without `EconomyPlugin`.
+    pub(crate) prices: Option<Res<'w, crate::Prices>>,
+}
+
 /// The components the snapshot copies out of each person.
 #[derive(QueryData)]
 #[query_data(mutable)]
@@ -385,6 +430,7 @@ pub(crate) struct SnapshotSource<'w> {
     memories: &'w Memories,
     doing: Option<&'w Doing>,
     name: Option<&'w Name>,
+    stock: Option<&'w crate::Stock>,
 }
 
 /// The current snapshot, rebuilt every tick by [`build_snapshot`]. `None` before the first tick.
@@ -395,13 +441,14 @@ pub(crate) struct SnapshotCell(pub(crate) Option<Arc<SocietySnapshot>>);
 pub(crate) fn build_snapshot(
     settings: Res<SocietySettings>,
     clock: Res<SocietyClock>,
-    defs: Option<Res<SocietyDefs>>,
+    sources: SnapshotSources,
     index: Res<PersonIndex>,
     mut rng: ResMut<SocietyRng>,
     mut cell: ResMut<SnapshotCell>,
     people: Query<SnapshotSource>,
 ) {
-    let names = defs
+    let names = sources
+        .defs
         .as_deref()
         .map_or_else(Names::default, Names::from_defs);
     let tuning = &settings.tuning;
@@ -434,6 +481,7 @@ pub(crate) fn build_snapshot(
             memories,
             doing,
             name,
+            stock,
         ) = (
             view.personality,
             view.mood,
@@ -448,6 +496,7 @@ pub(crate) fn build_snapshot(
             view.memories,
             view.doing,
             view.name,
+            view.stock,
         );
         let mut views: Vec<TieView> = ties
             .0
@@ -478,6 +527,7 @@ pub(crate) fn build_snapshot(
             standing: status.standing,
             activity: doing.map(|d| d.activity),
             memories: memories.clone(),
+            stock: stock.cloned().unwrap_or_default(),
         });
     }
 
@@ -487,6 +537,13 @@ pub(crate) fn build_snapshot(
         hour: clock.hour(),
         day: i64::from(clock.day()),
         names,
+        // `Prices` is the economy plugin's; a host without `EconomyPlugin` gets the nominal unit for every
+        // good, which is what `Prices::get` documents for one nobody has traded.
+        prices: sources
+            .prices
+            .as_deref()
+            .map(|p| p.0.clone())
+            .unwrap_or_default(),
         persons,
         rng: Mutex::new(seeded(seed)),
     }));

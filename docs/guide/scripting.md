@@ -39,6 +39,8 @@ that names it.
 | `ctx.emotion(a, kind)` | summed intensity of one emotion, `[0, 1]` |
 | `ctx.need(a, id)` | a need's level, `[0, 1]` |
 | `ctx.signal(a, id)` | a host-written signal value; `0.0` when the host never wrote it |
+| `ctx.stock(a, good)` | how much of a good `a` holds at the tick start |
+| `ctx.price(good)` | the good's price, read from how full the village's stores are (one tick behind, like every `ctx` read) |
 | `ctx.opinion(a, topic)` | an opinion, `[-1, 1]` |
 | `ctx.trait(a, name)` | a personality trait, `[0, 1]` |
 | `ctx.knows(a, rumor)` | whether `a` knows that rumor |

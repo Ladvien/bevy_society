@@ -25,6 +25,21 @@ docs/loop/
 ```
 Paper notes stay in `docs/research/`, one per model, as they are now.
 
+## Your work is committed even if you are killed — read this before you start
+
+**The driver commits and pushes whatever you leave uncommitted when your pass ends**, marked
+`WIP(pass N): work the pass did not get to commit`. That is not permission to leave the tree dirty:
+a `WIP` commit has **not been through your gate**, so the next pass must verify it before building on
+it. Two consequences:
+
+1. **Commit as you go, not once at the end.** Your commit step is last, behind implement, gate and
+   benchmark, so a pass killed at the ceiling never reaches it. Commit the research note alone before
+   writing code, as your sections already say; then commit the implementation, then the docs and the
+   log. Each commit that lands is work a killed pass cannot lose.
+2. **Start every pass by looking for a `WIP(pass N)` commit** from a previous pass on your branch
+   (`git log --oneline -5`). If one is there, its work was never gated: run your gate on it first, then
+   either finish it or `git revert` it before you start your own item. Never silently build on it.
+
 ## 1. Orient
 Read `docs/loop/log.md`, `docs/research/`, `git log`, open issues, and
 the dead-code inventory (it should equal exactly what in-flight systems

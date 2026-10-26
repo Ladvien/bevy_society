@@ -170,18 +170,26 @@ pub struct Tuning {
     /// which is a number for a different simulation. This one is sized so a completed task is a visible
     /// fraction of a full store rather than a rounding error.
     pub stock_ceiling: f32,
-    /// How fast a good's price responds to an imbalance between what the village consumed and produced,
-    /// in price units per unit of imbalance per game-day.
+    /// How much of a good **per person** counts as a full store, for the price the village's stores imply.
     ///
-    /// **Design default, chosen by measurement.** The *shape* is the literature's: "if the inflow of
-    /// resources into the system equals the outflow, then the economy is stable and prices fluctuate around a
-    /// constant value ... shortages and oversupply" move it (`eth-cgl-ar_games-Zun16a`). The paper supplies
-    /// no rate.
-    pub price_speed_per_day: f32,
+    /// **A design default, and the one number in the price model that is not the paper's.** The corpus's
+    /// model reads `r = S_cur / S_max` where `S_max` is "the storage size" of a producer that spends a whole
+    /// run filling it (`eth-cgl-ar_games-Zun16a` §3.1.1), so `r` spans the unit interval there. A village's
+    /// stores do not: `Tuning::stock_ceiling` is a hard clamp at six units a person and the village holds a
+    /// quarter of one each. Measured at seed 7 over 17 game-days, pricing against the clamp put `r` below
+    /// **0.12** always and pinned the price in **1.76 – 2.00** — a scarcity index that reads the same in a
+    /// glut and a drought, which is precisely the defect the storage-ratio model replaced. At **1.0** a loaf
+    /// a head is half price, and that same measure spans **1.0 – 2.0**.
+    ///
+    /// One unit is a meal, so a loaf a head is a village with a day in hand: the reading is "how many days
+    /// does the village have?", which is the question a price is supposed to answer.
+    pub price_full_store: f32,
     /// The lowest a price may fall.
     ///
     /// **Design default.** A clamp, not a model: without it a permanently oversupplied good would run to
-    /// zero and stop carrying information.
+    /// zero and stop carrying information. The corpus's own model clamps at its `v(r)` extremes, which are
+    /// half and double the nominal unit (`eth-cgl-ar_games-Zun16a` §3.1.1), so the band is wider than the
+    /// shape needs — a host can tighten it without touching the model.
     pub price_floor: f32,
     /// The highest a price may rise. **Design default**, for the same reason as [`Self::price_floor`].
     pub price_ceiling: f32,
@@ -482,7 +490,8 @@ impl Default for Tuning {
             dyad_balance_per_day: 0.5,
             // **Design defaults, chosen by measurement** — `docs/loop/runs/2026-10-25-07/eval.md`.
             stock_ceiling: 6.0,
-            price_speed_per_day: 0.5,
+            // **Design default, chosen by measurement** — `docs/loop/runs/2026-10-26-11/eval.md`.
+            price_full_store: 1.0,
             price_floor: 0.25,
             price_ceiling: 4.0,
             // **Design defaults, chosen by measurement** — `docs/loop/runs/2026-10-25-08/eval.md`.

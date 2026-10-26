@@ -545,6 +545,21 @@ fn register_ctx(engine: &mut Engine) {
             ctx.0.signal(a, signal).map_err(boxed)
         },
     );
+    // The goods half of the same interface: what somebody holds and what it is worth. A rule that wants to
+    // react to a shortage reads `ctx.price("bread")`; a rule that wants to react to one villager's hunger
+    // reads `ctx.stock(actor, "bread")`.
+    engine.register_fn(
+        "stock",
+        |ctx: &mut Ctx, a: i64, good: &str| -> Result<f32, Box<EvalAltResult>> {
+            ctx.0.stock(a, good).map_err(boxed)
+        },
+    );
+    engine.register_fn(
+        "price",
+        |ctx: &mut Ctx, good: &str| -> Result<f32, Box<EvalAltResult>> {
+            ctx.0.price(good).map_err(boxed)
+        },
+    );
     engine.register_fn(
         "opinion",
         |ctx: &mut Ctx, a: i64, topic: &str| -> Result<f32, Box<EvalAltResult>> {

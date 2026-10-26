@@ -104,12 +104,17 @@ fn production_and_consumption_move_the_store() {
     );
 }
 
-/// **Balanced inflow leaves the price alone; a shortage raises it.** The literature's own test, run as two
+/// **A balanced economy rests and a short one is dearer.** The literature's own test, run as two
 /// configurations of one village.
+///
+/// This used to assert that a starved village's price *rose* from its starting value, which only made sense
+/// for a price that integrated a flow from a nominal `1.0`. A price read off the stores is already at the
+/// empty-store extreme at tick 0 — the village starts holding nothing — so the comparison has to be between
+/// villages, not before and after one. `balanced` is the paper's "inflow equals outflow": its store holds
+/// still, so its price does. `starved` bakes a tenth of a loaf per bake, so its store never fills and its
+/// price sits near double.
 #[test]
-fn a_balanced_economy_rests_and_a_shortage_does_not() {
-    // Balanced: the baker makes more per bake than the eater uses per meal, and the ceiling stops either
-    // running away, so the two flows sit level.
+fn a_balanced_economy_rests_and_a_shortage_is_dearer() {
     let (mut balanced, _) = village(2.0, 0.5, 4);
     common::run(&mut balanced, 2_400);
     let settled = price(&balanced);
@@ -120,15 +125,18 @@ fn a_balanced_economy_rests_and_a_shortage_does_not() {
         "a balanced village's price must stay put: {settled:.3} -> {after:.3}"
     );
 
-    // Shortage: the baker makes a tenth of a loaf per bake and the eater still eats one, so consumption
-    // exceeds production every tick the two both run.
     let (mut starved, _) = village(0.1, 0.5, 4);
-    let before = price(&starved);
     common::run(&mut starved, 2_400);
-    let later = price(&starved);
+    let short = price(&starved);
     assert!(
-        later > before,
-        "an undersupplied good must get dearer: {before:.3} -> {later:.3}"
+        short > settled,
+        "an undersupplied good must be dearer than a fed one: {short:.3} against {settled:.3}"
+    );
+    // The shape's own bound: an empty store is worth double the nominal unit, and the band does not clip
+    // that (floor 0.25, ceiling 4.0).
+    assert!(
+        short > 1.5,
+        "a village that never fills its store must price near double, not {short:.3}"
     );
 }
 

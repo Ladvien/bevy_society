@@ -87,18 +87,51 @@ when it does not, in `tests/economy.rs`.
   `PersonSave` and `SocietySave::VERSION` is **2**.
 - **`produces` / `consumes` on an activity**, per **completed** use. An interrupted task produces nothing,
   the same rule `satisfies` follows.
-- **`Prices`**, one per good, moved by
-  `Δprice = price_speed_per_day · (produced − consumed)` **per interval**, clamped to
-  `[price_floor, price_ceiling]`.
+- **`Prices`**, one per good, read off **how full the village's stores are, per head**:
+  `price = nominal · v(total_held / (people · price_full_store))`, clamped to
+  `[price_floor, price_ceiling]`. `v` is the paper's own storage-ratio term, and `price_full_store` is a
+  **design default** of one unit a head — a day's supply — with the measurement that chose it below.
 
-**Why the delta is per interval and not per tick.** The first version multiplied by `dt_days`, and an activity
-ends only every few dozen ticks — so the price integrated one tick of imbalance against thirty of zero and
-moved by `0.0016` in a 1 200-tick run. The counters accumulate between price updates and are cleared by the
-update, which makes the price an integral of what the village did rather than of the last tick.
+**Why the price is a function of the stores and not an integral of the flow.** It used to be
+`Δprice = price_speed_per_day · (produced − consumed)` **per interval**, and two defects were measured
+against it. `consumed` is what `Stock::take` actually *removed*, so the difference was **net stock**: a
+village that baked more than it ate saw its price rise, and a real shortage was invisible because an eater
+with an empty shelf takes nothing and adds nothing. It also counted **units, not heads**, so the same six
+loaves were a glut in a village of three and a famine in one of thirty — and with a three-loaf `bake` the
+price spent **28% of its ticks on the floor**.
 
-**Why scarcity is `produced − consumed` and not the reverse.** The first version had it inverted and an
-undersupplied village showed its price *falling*: with a shared store the eaters who cannot find bread stop
-eating, so consumption drops faster than production and the raw difference turns negative.
+**The corpus's Model A prices from the storage ratio instead, and the paper says what it means**
+(*Gnome Trader*, `eth-cgl-ar_games-Zun16a` §3.1.1). Each agent's price is
+
+$$p = w \cdot v(r) + k, \qquad r = \frac{S_{\text{cur}}}{S_{\text{max}}}, \qquad
+v(r) = \begin{cases} -2(r - 1), & r < 0.5 \\ 1.5 - r, & \text{otherwise} \end{cases}$$
+
+and its own gloss: *"The price modifier term `v(r)` **doubles the price if the storage is empty and halves
+the price if the storage is full**."* A full store is half price, an empty one double, half full the nominal
+unit — and because `r` is a fraction of capacity rather than a count of units, that is a scarcity signal
+**per head** by construction.
+
+**What does not transfer, and what the crate drops.** `w` is the paper's real-world market index (a 60-day
+moving average of the SMI), which needs an outside data feed the crate must not have; `k` is a ±10%
+randomisation, which determinism forbids. Both are dropped, and the nominal unit is `1.0` — already the
+documented value for a good nobody has traded. The village-wide `r` is
+`total_held / (people · price_full_store)`: the denominator is a supply per head, so the same six loaves are
+dearer in a village of thirty than in one of three. `v` itself is implemented unchanged in
+`src/model/price.rs`, tested against the paper's three named points (empty → 2.0, half → 1.0, full → 0.5).
+
+**`S_max` is the one number that does not transfer, and the obvious reading of it is wrong.** The paper's
+`S_max` is "the storage size" of a producer that spends a whole run filling it, so its `r` spans the unit
+interval. A village's `Tuning::stock_ceiling` (six units a head) is a *clamp*, and the village holds a
+quarter of a loaf a person: measured over 17 game-days at seed 7 the mean never exceeds **0.71**, so
+`r ≤ 0.12` always and `v` never leaves **1.76 – 2.00** (price standard deviation **0.05**). That pins the
+price at the famine end whatever the village does — a scarcity index that reads the same in a glut and a
+drought, the defect this change repairs, one level down. `price_full_store = 1.0` a head spans
+**0.79 – 2.00** on the same stores, which is why it is the shipped default. Both numbers are measured in
+`docs/loop/runs/2026-10-26-11/eval.md`.
+
+**The acceptance test still holds, by construction rather than by a rate.** A village whose inflow equals its
+outflow holds a constant store, and a constant store has a constant price. `tests/economy.rs` runs the same
+village balanced and starved and asserts the first rests and the second prices near double.
 
 ### Trade between villagers
 
@@ -133,12 +166,14 @@ the engine already does that (`target_gives`; `a_barter_moves_a_good_each_way_an
 village has no second good because nothing would consume it, and an unconsumed good is a store that only
 fills.
 
-**The emergent claim, measured and corrected.** Parunak's claim reads like "trade moves the price". It does
-not here, and the plan that said it would was wrong: a transfer neither produces nor consumes, so
-`Δprice = speed · (produced − consumed)` is untouched by it. What a transfer changes is the **spread of
-stores**: `trade_narrows_the_spread_of_stores` (one holder of four loaves, three with none) ends with a standard
-deviation under 60% of the control's, and `docs/loop/runs/2026-10-25-08/eval.md` measures the same in the
-village.
+**Trade moves the price, now, and only slightly — which is the model working.** Parunak's claim reads like
+"repeated trade balances supply and demand". A transfer moves no store total — one person's loss is another's
+gain — so a price read off the **village-wide** store is barely touched by it: what a transfer changes is the
+**spread** of stores, `trade_narrows_the_spread_of_stores` (one holder of four loaves, three with none) ending
+with a standard deviation under 60% of the control's. The price moves only while a share is in flight — a
+loaf taken by the giver and not yet added to the receiver briefly leaves the total — which is a rounding-level
+effect and is not a mechanism to rely on. Recorded rather than dressed up: the price is a village-level
+observation and trade is a redistribution inside the village.
 
 **The split of the surplus is not a number.** Hall & Milgrom's resolution is that the parties alternate offers
 and the threat is delay, which needs a patience parameter the crate does not have. With a one-way share there
@@ -156,10 +191,11 @@ only bargaining there is. Recorded rather than invented.
 
 ### Design defaults, all of them
 
-`stock_ceiling` (6.0), `price_speed_per_day` (0.5), `price_floor` (0.25), `price_ceiling` (4.0),
-`trade_reserve` (1.0) and `trade_margin` (0.1) have **no source**. The paper's own `w = 6.0` and "500 units" are
-for its gnomes. They are chosen by measurement — see `docs/loop/runs/2026-10-25-07/eval.md` and
-`docs/loop/runs/2026-10-25-08/eval.md`.
+`stock_ceiling` (6.0), `price_floor` (0.25), `price_ceiling` (4.0), `trade_reserve` (1.0) and
+`trade_margin` (0.1) have **no source**. The paper's own `w = 6.0` and "500 units" are for its gnomes. They
+are chosen by measurement — see `docs/loop/runs/2026-10-25-07/eval.md`, `docs/loop/runs/2026-10-25-08/eval.md`
+and `docs/loop/runs/2026-10-26-11/eval.md`. The price *shape* is not a default: it is the paper's `v`, and
+`src/model/price.rs` tests it against the three points the paper names.
 
 ## What the model leaves out
 
@@ -175,17 +211,6 @@ for its gnomes. They are chosen by measurement — see `docs/loop/runs/2026-10-2
 
 ## Open contradictions and departures
 
-- **The price follows net stock, which is the wrong way round, and it counts units, not heads.** `consumed` is
-  what `Stock::take` actually removed, so `produced − consumed` is the net change in what villagers hold: a
-  village that bakes more than it eats sees its price **rise**, and a real shortage is invisible, because an
-  eater with an empty shelf takes nothing and adds nothing. The sign was flipped in the economy iteration to make
-  the shortage case of `tests/economy.rs` pass, and the reason recorded there ("eaters who cannot find bread stop
-  eating") describes this artefact rather than explaining it. Found on `2026-10-25-08`: with a three-loaf `bake`
-  the village's price spends **28% of its ticks on the floor** (1% at one loaf), because `Δprice = 0.5 × produced`
-  moves it 1.5 in one step against a 3.75 band, and sharing does not change that. The repair is to count **unmet
-  demand** (what an eater asked for and could not take) as the scarcity signal and to scale by population; that
-  needs its own counter, its own research (price adjustment from excess demand) and its own measurement, and it
-  is the first remaining item in `docs/loop/log.md`.
 - **The trait-to-trade mapping is a design default.** No paper in the corpus assigns Big Five traits to
   occupations. It is three lines in `SkillGroup::trait_of` so a host can see and disagree with it in one
   place.
