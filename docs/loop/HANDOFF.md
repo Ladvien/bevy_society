@@ -5,13 +5,13 @@ only what is **in flight, verified and unfinished**, so the next iteration can s
 
 ## Where the repo is
 
-`main` at `6c35f15` (iteration `2026-10-25-09`, "a village with no room"). Working tree has iteration
-**`2026-10-25-10`** uncommitted — see below.
+`main` at **`9c7b373`** (`87f357d` is the change, `9c7b373` its log), working tree clean. The last three iterations
+are complete and pushed; the crate has **no model changes in flight**. `git status` is the source of truth.
 
-The crate has **no model changes in flight**: every experiment from the last two iterations was either shipped or
-reverted byte-for-byte. `git status` is the source of truth.
+Iteration `2026-10-25-08` shipped trade and sharing; `2026-10-25-09` shipped a diagnosis and nothing else;
+`2026-10-25-10` shipped the capacity price below.
 
-## Iteration 2026-10-25-10, uncommitted: a full place costs something
+## Iteration 2026-10-25-10, shipped: a full place costs something
 
 **The change.** `Tuning::crowding_penalty` (**default 0.6**) plus one multiply in `src/behavior.rs`'s per-target
 scoring loop: a `Place(tag)` / `Bound` target whose place has **no free seat** keeps `1 - penalty` of its score.
@@ -36,12 +36,12 @@ Evidence: `runs/2026-10-25-10/evidence/{before,after}/*/summary.json` and
 **Two designs were rejected by measurement before this one shipped** (the proportional price, and removing the veto
 with no price). Both are in the eval with their numbers — do not re-try either without reading it.
 
-### What is left before this iteration can be committed
+### Verification, done
 
-1. **The suite has not been seen green on the final tree.** `tests/crowded_place.rs` (4 tests) and the `crowding_tests`
-   unit tests in `src/behavior.rs` (4 tests) were run individually and pass; `tests/bound_places.rs` (7) and
-   `tests/label_hysteresis.rs` (8) pass after their fixes. The **whole** suite was running when this handoff was
-   written. Run:
+**77 of 77 test binaries pass in both feature sets**, and `clippy --all-targets --all-features -D warnings`,
+`fmt --check` and `doc -D warnings` all exit 0. `tests/crowded_place.rs` is new (4), the `crowding_tests` unit tests
+in `src/behavior.rs` are new (4), `tests/bound_places.rs` (7) and `tests/label_hysteresis.rs` (8) pass after their
+fixes. To re-run:
 
    ```
    ./tools/big-cargo.sh test --release --no-fail-fast --all-features
@@ -51,18 +51,17 @@ with no price). Both are in the eval with their numbers — do not re-try either
    RUSTDOCFLAGS="-D warnings" cargo doc --no-deps --all-features
    ```
 
-2. **`docs/loop/log.md` has the entry but `Commit COMMIT`** still needs the real hash.
+### What is left from this iteration
 
-3. **`docs/guide/authoring.md` is not updated.** It has no `capacity` section at all; the honest place for the new
-   rule is a short paragraph beside `Activities` → `target`. `getting-started.md` *is* updated.
-
-4. **The GIFs were not re-recorded and do not need to be** — none of the seven clips fills a place. But that claim was
-   not checked frame by frame this iteration; it was inferred from the capture's 24 people in 30 seats. Worth one
-   look at `docs/media/goods.gif` frame 239 before committing if you want it verified rather than reasoned.
-
-5. **`docs/loop/needs-decision/a-village-with-no-room.md` is now partly resolved** and says nothing about it. Its
-   option 2 ("`capacity` as a soft limit with a cost") is what shipped; options 1 and 3 are still open. Add a
-   "Resolved in part" section, as `over-subscribed-evening.md` does.
+1. **The GIFs were not re-recorded, and that was reasoned rather than checked.** None of the seven clips fills a
+   place (the capture is 24 people in 30 seats), so they should be unaffected — but no frame was inspected this
+   iteration. Worth one look at `docs/media/goods.gif` frame 239, and at whether the capture's `craft`/`work`
+   competition shifted the village's day.
+2. **`--people` above the seat count measures an overfilled village**, not a bigger one. Item 2 below.
+3. **24 people still change**: rival density 7.83% → 2.90%, `work` 10.4% → 12.9%. Every nine-seed baseline recorded
+   before this iteration is under the old ranking. `craft` shares the workshop with `work`, so the workshop is
+   already full part of the day — the price is being paid at 24 people too. If that is unwanted, the lever is the
+   pack (give `craft` its own place), not the crate.
 
 ## The top five remaining items (from the log, unchanged)
 
