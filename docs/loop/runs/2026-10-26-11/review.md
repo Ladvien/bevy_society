@@ -107,7 +107,7 @@ whenever the store fills and rises whenever it empties, with no clipping at the 
 
 The panel also makes visible something no earlier plot could, because the old price was not a reading of
 anything: **the village holds zero bread for 23.9% of its ticks**, in runs as long as **3.39 game-days**
-(days ~8.6–13.8). The price reports that state exactly right — it is the one number in the crate that now
+(days 10.30–13.69). The price reports that state exactly right — it is the one number in the crate that now
 does. But a village where a quarter of all ticks are a famine is a **behaviour** fact, not a pricing one, and
 nothing reads the price to react to it. Recorded as the top remaining item.
 
