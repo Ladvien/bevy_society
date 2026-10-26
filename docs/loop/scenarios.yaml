@@ -176,8 +176,9 @@ scenarios:
       nine seeds, 17 game-days (`runs/2026-10-25-08/eval.md`): **37.1 loaves shared**, and the spread of bread
       across villagers is **0.529** against **0.854** for the same pack without `share`. Run it with
       `cargo run --release --example evidence -- --scenario village-evening --seed 7 --out <dir>`; `shares.txt`
-      lists each loaf, giver, receiver and both stores afterwards. The price does NOT rest here (28% of ticks
-      on the floor), which is a defect of the price model, not of sharing.
+      lists each loaf, giver, receiver and both stores afterwards. The price used to walk the band here (28% of
+      ticks on the floor) — a defect of the price model, not of sharing — and since 2026-10-26-11 it is read off
+      the store: 0 clipped ticks, range 0.79–2.00, correlating −0.997 with bread per head.
 
   - name: village-grows
     kind: village

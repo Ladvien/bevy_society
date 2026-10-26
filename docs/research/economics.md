@@ -191,7 +191,8 @@ only bargaining there is. Recorded rather than invented.
 
 ### Design defaults, all of them
 
-`stock_ceiling` (6.0), `price_floor` (0.25), `price_ceiling` (4.0), `trade_reserve` (1.0) and
+`stock_ceiling` (6.0), **`price_full_store` (1.0)**, `price_floor` (0.25), `price_ceiling` (4.0),
+`trade_reserve` (1.0) and
 `trade_margin` (0.1) have **no source**. The paper's own `w = 6.0` and "500 units" are for its gnomes. They
 are chosen by measurement — see `docs/loop/runs/2026-10-25-07/eval.md`, `docs/loop/runs/2026-10-25-08/eval.md`
 and `docs/loop/runs/2026-10-26-11/eval.md`. The price *shape* is not a default: it is the paper's `v`, and
@@ -211,6 +212,16 @@ and `docs/loop/runs/2026-10-26-11/eval.md`. The price *shape* is not a default: 
 
 ## Open contradictions and departures
 
+- **`price_full_store = 1.0` reads the project's own village as permanently short.** A day's supply a head is
+  the default's reading of "full", and the village holds a **quarter** of a loaf a head, so its median price is
+  **1.50** and it never once reaches the half-price glut end. Recomputed directly from the store series in
+  `docs/loop/runs/2026-10-26-11/evidence/after/s7_p24/series.csv` at four defaults, the store's median of 0.25 a
+  head sits on the nominal unit at `0.5` (median price 1.00) and at half price at `0.25` (0.50). The default is
+  honest — "how many days does the village have?" has the answer *a quarter* — but it is the number a host will
+  most want to tune, and moving it moves every price, so it has not been re-tuned on the evidence of one pack.
+- **The price does not drive behaviour.** No decision reads a price. That is deliberate in this change (it is
+  what makes the bit-identical village a usable check) and it is the natural next step: an `Input::Surplus`-like
+  term that makes a good dearer to skip in a shortage.
 - **The trait-to-trade mapping is a design default.** No paper in the corpus assigns Big Five traits to
   occupations. It is three lines in `SkillGroup::trait_of` so a host can see and disagree with it in one
   place.

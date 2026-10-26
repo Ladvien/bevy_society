@@ -8,8 +8,9 @@
 //! > balance we can simulate a variety of interesting real market phenomenon, such as **shortages and
 //! > oversupply**."
 //!
-//! So the test is run twice on the same village: once with production matching consumption, once with the
-//! producer starved, and the price is expected to sit in the first and climb in the second.
+//! So the test is run on two configurations of the same village: once with production matching consumption,
+//! once with the producer starved. The price is **read off the store**, so the fed village's price sits where
+//! its store does and the starved one's is dearer — a comparison between villages, not a climb within one.
 mod common;
 
 use bevy::prelude::*;
