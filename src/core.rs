@@ -201,6 +201,31 @@ pub struct Tuning {
     /// **Design default.** Hall & Milgrom's condition is that the parties must have found a *joint surplus*
     /// before bargaining; this is how large it has to be for a village to bother. No paper gives a number.
     pub trade_margin: f32,
+    /// How fast a place's desirability falls once it is over its declared `capacity`.
+    ///
+    /// **A full place is a price, not a prohibition.** [`Place::capacity`](crate::Place) used to *filter*
+    /// candidates before scoring, so a full workshop had no candidate at all and `work` could not be
+    /// chosen; measured on `village-evening` with its fixed 30 seats, `work` fell **10.3% → 3.6%** of
+    /// person-ticks as the population went 24 → 48. This multiplier replaces the filter:
+    /// `exp(-penalty · max(0, (used + 1) / capacity - 1))`, exactly `1.0` while there is room and
+    /// falling past it.
+    ///
+    /// **Design default, citing the shape and not the number.** Talamali, Bose, Haire, Xu, Marshall &
+    /// Reina 2020, *Swarm Intelligence* 14(1):25-56, DOI `10.1007/s11721-019-00176-9`, model congestion on a
+    /// foraged path as an exponential in the number of users over the number the path fits,
+    /// `T_C = T_0 (exp[κ · n / N_crit] − 1)`, and measure collection as linear below `N_crit` and
+    /// nonlinearly decaying above it — a crowded source is *still used*, and the optimum allocates an
+    /// interior split. `capacity` is `N_crit`. The paper's κ (2.321) is fitted to Kilobot collisions,
+    /// which this crate does not simulate, so the rate here is a design default chosen by measurement.
+    ///
+    /// At 1.0 the price is `exp(-over/1)` where `over` is the *fraction* by which the place is
+    /// overfilled, so the step past capacity is `1/capacity` in that argument: 0.85 for the seventh body
+    /// at a six-seat workshop, 0.61 at ten, 0.31 at twelve. That is steep enough to send the next arrival
+    /// to the emptier of two places — anything below 1.0 does — and shallow enough that a crowded place
+    /// keeps being used, which is the paper's "nonlinear decay" rather than a cliff. `0.0` makes occupancy
+    /// free rather than a prohibition — a host that wants a full place to be *impossible* rather than
+    /// expensive declares `capacity: 0` on it.
+    pub place_crowding_penalty: f32,
     /// Familiarity added to two people by a mutual close friend's introduction. Design default (no
     /// source paper gives this number); mechanism: triadic closure, Kossinets & Watts 2006,
     /// DOI 10.1126/science.1116869.
@@ -462,6 +487,9 @@ impl Default for Tuning {
             // **Design defaults, chosen by measurement** — `docs/loop/runs/2026-10-25-08/eval.md`.
             trade_reserve: 1.0,
             trade_margin: 0.1,
+            // **Design default, chosen by measurement** — `docs/loop/runs/2026-12-29-01/eval.md`.
+            // Shape from Talamali et al. 2020, DOI 10.1007/s11721-019-00176-9, Eq. (12).
+            place_crowding_penalty: 1.0,
             introduction_familiarity: 0.1,
             confidence_base: 0.2,
             confidence_openness: 0.6,

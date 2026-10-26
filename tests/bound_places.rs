@@ -301,13 +301,15 @@ fn bind_replaces_and_get_reads() {
     assert_eq!(bound.0.len(), 1, "and leaves one entry");
 }
 
-/// A bound place gets no candidate when it is at capacity, exactly as `Place(tag)` does.
+/// A bound place that declares it seats nobody gets no candidate, exactly as `Place(tag)` does.
 ///
-/// Asserted on the decision rather than on positions: two people may be *sent* to a capacity-1 place in
-/// the same tick, because `Place(tag)` behaves the same way — a place's `used` count is recomputed each
-/// tick from who is already there, and it cannot see a choice made in the same tick.
+/// **This used to be the "a full bound place gives no candidate" test**, because occupancy was a hard
+/// gate for `Place(tag)` and `Bound` alike. Occupancy is now a price
+/// ([`Tuning::place_crowding_penalty`]), so a full place stays a candidate at a lower score and the only
+/// remaining prohibition is `capacity: 0` — which is what this asserts, on `Bound`, so that the two
+/// targets cannot drift apart.
 #[test]
-fn a_full_bound_place_gives_no_candidate() {
+fn a_capacity_zero_bound_place_admits_nobody() {
     let mut app = headless(defs(), settings());
     let tight = app
         .world_mut()

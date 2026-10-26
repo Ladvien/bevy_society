@@ -14,6 +14,7 @@ use crate::core::{Perception, PersonIndex, SocietyClock, SocietySettings};
 use crate::defs::{ActivityId, ActivityTarget, Signal, SocietyDefs, Term};
 use crate::groups::Memberships;
 use crate::mind::{Emotions, Mood, Needs, Personality};
+use crate::model::crowding::crowding_factor;
 use crate::relationships::Ties;
 use crate::rumor::RumorBook;
 
@@ -1208,7 +1209,7 @@ fn in_perception(
 // Deciding
 // -------------------------------------------------------------------------------------------------
 
-/// One place as a decision sees it (plan D7): its tag set, how full it is, and **where it is**.
+/// One place as a decision sees it (plan D7): its tag set, **where it is**, and what its occupancy costs.
 ///
 /// The position is what makes [`Signal::Distance`] meaningful for a `Place`. Without it the signal reported
 /// `1.0` — the maximum, "as far as it can see" — for every place, so a definition that asked for `Distance`
@@ -1218,9 +1219,13 @@ fn in_perception(
 struct PlaceView {
     entity: Entity,
     tags: Vec<String>,
-    capacity: u32,
-    used: u32,
     position: Vec2,
+    /// The desirability multiplier occupancy puts on this place: exactly `1.0` while there is room, and
+    /// falling past it. See [`Tuning::place_crowding_penalty`](crate::Tuning::place_crowding_penalty).
+    ///
+    /// `capacity` and `used` are not kept here: they exist only to compute this, and keeping them would be
+    /// a second way to ask "is this place full" that could disagree with the score.
+    crowding: f32,
 }
 
 /// Everything scoring one candidate needs, copied out of the world once per decision (plan D7).
@@ -1390,17 +1395,20 @@ fn decide_activities(
             }
         }
     }
+    let penalty = tuning.place_crowding_penalty;
     let mut place_views: Vec<PlaceView> = places
         .iter()
-        .map(|(entity, place, tags, transform)| PlaceView {
-            entity,
-            tags: tags.0.clone(),
-            capacity: place.capacity,
-            used: used
+        .map(|(entity, place, tags, transform)| {
+            let used = used
                 .iter()
                 .find(|(p, _)| *p == entity)
-                .map_or(0, |(_, n)| *n),
-            position: settings.plane.project(transform.translation),
+                .map_or(0, |(_, n)| *n);
+            PlaceView {
+                entity,
+                tags: tags.0.clone(),
+                position: settings.plane.project(transform.translation),
+                crowding: crowding_factor(used, place.capacity, penalty),
+            }
         })
         .collect();
     place_views.sort_by_key(|p| p.entity.to_bits());
@@ -1603,6 +1611,17 @@ fn decide_activities(
             // picked from the ties afterwards. Before this, `gossip` with eight neighbours held
             // 8/9 of the selection mass and `relax` starved: measured, a Person activity went from
             // 0.00 of all starts at one neighbour to 0.97 at twelve.
+            // **Only where occupancy already gated the option.** `Place(tag)` and `Bound(name)` were
+            // the two targets that filtered on `used < capacity`; `Home` never did, and it still does
+            // not. That asymmetry is a real defect — a home with six declared seats takes sixteen
+            // residents and the crate warns about it — but it is a different question
+            // (`docs/loop/needs-decision/a-village-with-no-room.md`), and pricing `Home` here would
+            // silently suppress `sleep` in exactly the over-full homes the startup warning names.
+            // One change at a time.
+            let priced = matches!(
+                spec.target,
+                ActivityTarget::Place(_) | ActivityTarget::Bound(_)
+            );
             let mut best_for_activity: Option<(f32, Vec<DoingTarget>)> = None;
             for target in targets {
                 // `near` is built from `perception.near`, whose indices are positions in
@@ -1634,6 +1653,15 @@ fn decide_activities(
                     fields.as_deref(),
                     &defs.skills,
                 );
+                // **A place's occupancy is a price on the option**
+                // (see [`crowding_factor`](crate::model::crowding::crowding_factor)). Applied here
+                // rather than inside `score_option` because it belongs to the *target*, not to any one
+                // consideration: a full workshop is worth less to everyone, whatever they are doing there.
+                let score = if priced {
+                    score * target_crowding(&target, &place_views)
+                } else {
+                    score
+                };
                 if score <= 0.0 {
                     continue;
                 }
@@ -1875,7 +1903,8 @@ impl ScriptContext<'_> {
     }
 }
 
-/// The targets an activity offers this decision (plan D7), with full places excluded.
+/// The targets an activity offers this decision (plan D7), with every tagged place included — a full
+/// place is priced in the score, not withheld here.
 ///
 /// `Wander` draws its point here, from the two `unit()` draws the SPEC names: radius · √u₁ at angle
 /// 2πu₂, which is uniform over the disc rather than bunched at its centre.
@@ -1902,20 +1931,22 @@ fn targets_for(
                 position + Vec2::new(r * angle.cos(), r * angle.sin()),
             )]
         }
+        // **Every tagged place is a candidate, full or not.** A full place used to be filtered out here,
+        // before scoring, which made the activity unselectable rather than costly; the occupancy now
+        // enters the score as
+        // [`crowding_factor`](crate::model::crowding::crowding_factor). A place with `capacity == 0`
+        // scores exactly 0 there, which is the one case that really is a prohibition.
         ActivityTarget::Place(tag) => places
             .iter()
-            .filter(|place| place.used < place.capacity && place.tags.iter().any(|t| t == tag))
+            .filter(|place| place.tags.iter().any(|t| t == tag))
             .map(|place| DoingTarget::Place(place.entity))
             .collect(),
-        // The place this person bound under the name, when they have one and it is a place with
-        // room. No binding means no candidate at all: the activity simply does not apply to them.
+        // The place this person bound under the name, when they have one. No binding means no candidate
+        // at all: the activity simply does not apply to them. A binding to a place that is full is a
+        // price like any other place's, not a lost binding.
         ActivityTarget::Bound(name) => bound
             .and_then(|bindings| bindings.get(name))
-            .filter(|entity| {
-                places
-                    .iter()
-                    .any(|place| place.entity == *entity && place.used < place.capacity)
-            })
+            .filter(|entity| places.iter().any(|place| place.entity == *entity))
             .map_or_else(Vec::new, |entity| vec![DoingTarget::Place(entity)]),
         ActivityTarget::Person => near.iter().map(|(e, _)| DoingTarget::Person(*e)).collect(),
         // A gradient target walks toward the slope of the named field. Without the `fields` feature, or
@@ -2021,6 +2052,19 @@ fn score_option(
         product *= compensated;
     }
     product
+}
+
+/// The occupancy multiplier for one candidate target: a place's
+/// [`crowding_factor`](crate::model::crowding::crowding_factor), `1.0` for everything else. Split out so
+/// the "every other target is unaffected" claim is one readable expression rather than a comment on an `if`.
+fn target_crowding(target: &DoingTarget, places: &[PlaceView]) -> f32 {
+    match target {
+        DoingTarget::Place(place) => places
+            .iter()
+            .find(|view| view.entity == *place)
+            .map_or(1.0, |view| view.crowding),
+        DoingTarget::Point(_) | DoingTarget::Person(_) | DoingTarget::Itself => 1.0,
+    }
 }
 
 /// One consideration's normalised `[0, 1]` input (plan D7).

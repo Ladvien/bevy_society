@@ -57,6 +57,39 @@ Vansteenkiste & Ryan 2013 (DOI 10.1037/a0032359) is why this is worth naming rat
 plot: self-determination theory distinguishes **need satisfaction** from **need frustration**, and
 frustration is not merely a low value but a different state with its own behavioural consequences.
 
+## Decision: a place at capacity is a price, not a prohibition
+
+An activity may target `Place("tag")` or a person's own `Bound(name)`. Both used to drop a place from the
+candidate list **before scoring** (`used < capacity`), so a full place gave the activity *no candidate at
+all*: not chosen less often, but unavailable. Measured on `village-evening`, whose four places seat 30:
+`work` fell **10.3% → 3.6%** of person-ticks as the population went 24 → 48, because the workshop
+(6 seats) was permanently full.
+
+The score now carries a **crowding multiplier** (`src/model/crowding.rs`, engine-free):
+
+$$s_{\text{crowd}} = \exp\left[-\kappa \cdot \max\left(0, \frac{u + 1}{c} - 1\right)\right]$$
+
+with $u$ people already targeting the place, $c$ its declared `capacity`, and $\kappa$
+`Tuning::place_crowding_penalty` (default 1.0). It is **exactly 1.0** up to and including the last free
+seat, so a village with room is unchanged, and it falls past capacity without reaching zero. $u + 1$
+because the person deciding is asking for a seat it does not yet hold. `capacity: 0` is an exact `0.0` —
+the one case that really is a prohibition.
+
+**The shape is Talamali et al. (2020)**, *Swarm Intelligence* 14(1):25-56, DOI
+`10.1007/s11721-019-00176-9`. Eq. (12) models congestion on a foraged path as
+$T_C = T_{0}(\exp[\kappa \rho S / N_{\text{crit}}] - 1)$, "negligible if $\kappa \rho S \ll N_{\text{crit}}$"
+and growing exponentially past it; Eq. (13) makes $N_{\text{crit}}$ "how many bodies fit"; and the paper
+measures (Fig. 3 caption) "a linear growth for small-to-medium numbers of robots on a path, and a
+**nonlinear decay for medium-to-large numbers**", with an **interior split** as the optimum when sources
+are close (§5.2.2). The crate takes the form and the structural reading — `capacity` *is* $N_{\text{crit}}$
+— and not the fitted $\kappa = 2.321$, which is calibrated to Kilobot collisions this crate does not
+simulate; the rate is therefore a **design default**, chosen by measurement, and its doc says so.
+
+`ActivityTarget::Home` is deliberately **not** priced. A home is where its residents sleep, it was never
+gated, and a home that cannot seat them is a layout problem `warn_unreachable_places` already names at
+startup. Pricing it would suppress `sleep` in exactly the over-full homes the warning is about, which is a
+different change (`docs/loop/needs-decision/a-village-with-no-room.md`).
+
 ## What the model leaves out
 
 - Dual-utility selection and an activity-level weight beyond the compensation step.
@@ -77,3 +110,11 @@ frustration is not merely a low value but a different state with its own behavio
 - Game AI Pro 2, ch. 3, Dual Utility Reasoning · `gameaipro2-ch03-dual-utility-reasoning` (converted)
 - Game AI Pro, ch. 9, Introduction to Utility Theory · `gameaipro1-ch09-introduction-utility-theory` (converted)
 - Mark, D. (2013). Infinite Axis Utility System. Cited in Game AI Pro 3 ch. 13. Not converted.
+- Talamali, M. S., Bose, T., Haire, M., Xu, X., Marshall, J. A. R. & Reina, A. (2020). *Sophisticated
+  collective foraging with minimalist agents: a swarm robotics test.* *Swarm Intelligence* 14(1):25-56.
+  https://doi.org/10.1007/s11721-019-00176-9 — Eq. (12) congestion term, Eq. (13) critical number, Eq. (14)
+  congestion-inflated distance, §5.2.2 the interior split, Fig. 3 caption the growth-then-decay collection
+  curve, Table 2 the fitted κ = 2.321 / T₀ = 0.029 s. **Not in the corpus** (checked against
+  `docs/research/corpus/*.tsv`); read from the SHURA open copy at
+  https://shura.shu.ac.uk/25216/8/Talamali2019_Article_SophisticatedCollectiveForagin.pdf, equations and
+  quoted phrases verified in the full text.

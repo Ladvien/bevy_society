@@ -82,8 +82,18 @@ person is simply not living their daily life, and removing the marker lets them 
 `EndActivity { person }` cancels one running activity without any of that, for a place that closed or a
 shift that ended.
 
-`Place` and `PlaceTags` are how activities find somewhere to go. A `Place`'s `capacity` limits how
-many people may use it at once, so a crowded tavern pushes the next villager to the market.
+`Place` and `PlaceTags` are how activities find somewhere to go. A `Place`'s `capacity` is how many
+people it seats at once, and it is a **price, not a prohibition**: a place that is full scores its
+activity lower rather than disappearing from the candidate list, by
+`exp(-place_crowding_penalty · max(0, (used + 1) / capacity - 1))`. So a crowded tavern pushes the next
+villager toward the market, and still lets them in when the workshop is the only work in town. The
+multiplier is **exactly `1.0` up to the last free seat**, so a place with room behaves as if the term did
+not exist. `capacity: 0` is the one case that really is a prohibition: a place that seats nobody seat
+nobody. `Tuning::place_crowding_penalty` sets the rate (default 1.0; `0.0` makes occupancy free).
+`ActivityTarget::Home` is deliberately **not** priced — a home is where its residents sleep, and a home
+that cannot seat them is a layout problem the crate warns about at startup rather than a reason to sleep
+less. The measurement and the shape's source (Talamali et al. 2019, congestion on a used path) are in
+[`docs/research/needs-and-utility.md`](../research/needs-and-utility.md).
 
 ### Solid buildings: `Obstacle`
 

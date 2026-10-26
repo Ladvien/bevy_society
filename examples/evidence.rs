@@ -64,6 +64,9 @@ fn main() {
     if let Some(exponent) = args.witness_dilution {
         settings.tuning.witness_dilution = exponent;
     }
+    if let Some(crowding) = args.place_crowding {
+        settings.tuning.place_crowding_penalty = crowding;
+    }
     if let Some(seed) = args.seed {
         settings.seed = seed;
     }
@@ -1310,6 +1313,9 @@ struct Args {
     dyad_balance: Option<f32>,
     /// `Tuning::witness_dilution`, so the exponent can be swept without editing the crate.
     witness_dilution: Option<f32>,
+    /// `Tuning::place_crowding_penalty`, so a run can be read with occupancy as a price (`1.0`, the
+    /// default), as free (`0.0`), or as a steeper cost.
+    place_crowding: Option<f32>,
     /// Overrides `Tuning::positivity_offset`, so the same scenario can be re-read with a different
     /// resting mood.
     positivity_offset: Option<f32>,
@@ -1336,6 +1342,7 @@ impl Args {
             friend_band: None,
             dyad_balance: None,
             witness_dilution: None,
+            place_crowding: None,
             days: None,
         };
         let mut argv = std::env::args().skip(1);
@@ -1358,6 +1365,9 @@ impl Args {
                 "--dyad-balance" => args.dyad_balance = argv.next().and_then(|v| v.parse().ok()),
                 "--witness-dilution" => {
                     args.witness_dilution = argv.next().and_then(|v| v.parse().ok())
+                }
+                "--place-crowding" => {
+                    args.place_crowding = argv.next().and_then(|v| v.parse().ok())
                 }
                 "--friend-affinity" => {
                     args.friend_affinity = argv.next().and_then(|v| v.parse().ok())
