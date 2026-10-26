@@ -178,3 +178,21 @@ scenarios:
       `cargo run --release --example evidence -- --scenario village-evening --seed 7 --out <dir>`; `shares.txt`
       lists each loaf, giver, receiver and both stores afterwards. The price does NOT rest here (28% of ticks
       on the floor), which is a defect of the price model, not of sharing.
+
+  - name: village-grows
+    kind: village
+    seed: 1
+    population: 24
+    settings: { seconds_per_day: 64.0, start_hour: 15.0, travel_timeout_hours: 4.0 }
+    ticks: 4200
+    status: measured
+    observable: >
+      Rival density holds roughly flat as the population grows, and `work` keeps its share of a life. Measured
+      2026-10-25-09 and NOT held: the harness builds the same four places for every `--people`, and those places
+      seat 30, so 36 and 48 people run a village that is over capacity. Rival pairs go 21.6 / 145.4 / 226.8 at
+      24 / 36 / 48 (7.8% / 23.1% / 20.1% of directed pairs) while `work` falls 10.3% / 5.5% / 3.6% of person-ticks.
+      Scaling the places' capacity with the population instead gives 0.00% / 0.02% hostile and `work` back at
+      10.3% / 7.9% -- which is the *other* failure, so the target is about 7-8% at every size, not zero. The
+      comparison is `runs/2026-10-25-09/evidence/{before,seated}/` and the decision is
+      `needs-decision/a-village-with-no-room.md`. Reproduce with `cargo run --release --example evidence --
+      --scenario village-evening --seed S --people N --out <dir>` for N in 24 36 48.

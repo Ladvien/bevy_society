@@ -61,6 +61,9 @@ fn main() {
     if let Some(rate) = args.dyad_balance {
         settings.tuning.dyad_balance_per_day = rate;
     }
+    if let Some(exponent) = args.witness_dilution {
+        settings.tuning.witness_dilution = exponent;
+    }
     if let Some(seed) = args.seed {
         settings.seed = seed;
     }
@@ -1305,6 +1308,8 @@ struct Args {
     friend_band: Option<f32>,
     /// Overrides `Tuning::dyad_balance_per_day`, so a run can be read with ties pulled toward reciprocity.
     dyad_balance: Option<f32>,
+    /// `Tuning::witness_dilution`, so the exponent can be swept without editing the crate.
+    witness_dilution: Option<f32>,
     /// Overrides `Tuning::positivity_offset`, so the same scenario can be re-read with a different
     /// resting mood.
     positivity_offset: Option<f32>,
@@ -1330,6 +1335,7 @@ impl Args {
             label_hysteresis: None,
             friend_band: None,
             dyad_balance: None,
+            witness_dilution: None,
             days: None,
         };
         let mut argv = std::env::args().skip(1);
@@ -1350,6 +1356,9 @@ impl Args {
                 }
                 "--friend-band" => args.friend_band = argv.next().and_then(|v| v.parse().ok()),
                 "--dyad-balance" => args.dyad_balance = argv.next().and_then(|v| v.parse().ok()),
+                "--witness-dilution" => {
+                    args.witness_dilution = argv.next().and_then(|v| v.parse().ok())
+                }
                 "--friend-affinity" => {
                     args.friend_affinity = argv.next().and_then(|v| v.parse().ok())
                 }

@@ -93,6 +93,24 @@ ground plane's depth: measured, the ties clip showed two short segments where th
 edges. Halos and ties therefore draw at chest or head height. Opinion bars are the exception and are
 drawn on the ground, because a bar needs its *length* in the camera's plane.
 
+## Building on big
+
+Compilation for this crate happens on **big** (`ssh big`, Linux x86_64, 24 cores), not on the laptop:
+
+```
+./tools/big-cargo.sh test --release --all-features
+./tools/big-cargo.sh --no-sync clippy --all-targets --all-features -- -D warnings
+```
+
+The wrapper rsyncs the working tree (minus `.git`, `target`, the GIFs and `frames/`) to `~/bs-build` on big, then
+runs cargo there with `RUSTUP_TOOLCHAIN=1.98.1` and `CARGO_TARGET_DIR=~/bs-target`, under `nice -n 5` because the
+machine is shared. `--no-sync` reuses the last copy, which is what a second command wants. Override with
+`BS_REMOTE_DIR`, `BS_REMOTE_TARGET` or `BS_TOOLCHAIN`.
+
+**Capture, `gif.py` and the evidence plots stay on the laptop**: big has no GPU renderer for a Bevy window and no
+`ffmpeg`, and a PNG rendered there is not comparable with one rendered here (different GPU). Compilation and tests
+move; pixels do not.
+
 ## Capture
 
 `examples/capture` builds the same village as `examples/village` (one scene, in
