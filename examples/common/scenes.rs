@@ -5,7 +5,9 @@
 //! same rule `docs/DEMOS.md` states for the capture — a demo must not change the thing it demonstrates.
 
 use bevy::prelude::*;
-use bevy_society::{Autonomous, Mood, Needs, Opinions, Person, PersonIndex};
+use bevy_society::{
+    Autonomous, GoodId, InteractionResolved, Mood, Needs, Opinions, Person, PersonIndex, Stock,
+};
 
 /// Draws one ring per villager whose level on need `slot` is low, sized by how low.
 ///
@@ -305,4 +307,97 @@ pub fn ties_camera(fraction: f32) -> Transform {
         centre.z + 5.8 * angle.cos(),
     )
     .looking_at(centre, Vec3::Y)
+}
+
+/// How many frames a share line stays on screen. A share is one tick, so without a flash the clip would
+/// show it for a twentieth of a second and nobody would see goods change hands.
+const SHARE_FLASH_FRAMES: u32 = 24;
+
+/// Every accepted `share` so far, and the ones still being drawn.
+///
+/// Present only in the goods scene: its HUD line reads it, and the other clips have no use for it.
+#[derive(Resource, Default)]
+pub struct Shares {
+    /// Accepted barters since the recording began.
+    pub total: u32,
+    /// `(giver, receiver, frames left)`.
+    live: Vec<(Entity, Entity, u32)>,
+}
+
+/// Counts each accepted `share` and queues a line for it. A view: it reads the message and never
+/// writes to the society.
+pub fn track_shares(mut resolved: MessageReader<InteractionResolved>, mut shares: ResMut<Shares>) {
+    for message in resolved.read() {
+        if message.interaction == "share" && message.accepted {
+            shares.total += 1;
+            shares
+                .live
+                .push((message.actor, message.target, SHARE_FLASH_FRAMES));
+        }
+    }
+}
+
+/// Draws one ring per villager whose radius is how much of the first good they hold.
+///
+/// An empty store is a small dark ring and a full one is a large gold one, so a viewer watches the loaves
+/// spread from the people who have them to the people who do not. The ring's scale is the store's own
+/// scale (`stock_ceiling` is 8), capped where the picture stops getting more informative.
+pub fn draw_store_rings(
+    index: Res<PersonIndex>,
+    stocks: Query<&Stock>,
+    transforms: Query<&GlobalTransform>,
+    mut gizmos: Gizmos,
+) {
+    for &(_, entity) in &index.sorted {
+        let (Ok(stock), Ok(transform)) = (stocks.get(entity), transforms.get(entity)) else {
+            continue;
+        };
+        let held = stock.get(GoodId(0));
+        let pos = transform.translation();
+        let (radius, color) = if held < 0.05 {
+            (0.3, Color::srgb(0.12, 0.12, 0.22))
+        } else {
+            (0.3 + 0.15 * held.min(4.0), Color::srgb(1.0, 0.78, 0.12))
+        };
+        // The same two concentric rings the needs clip uses: one thin circle disappears against grass.
+        for scale in [1.0, 0.62] {
+            gizmos.circle(
+                Isometry3d::new(
+                    Vec3::new(pos.x, pos.y + 0.95, pos.z),
+                    Quat::from_rotation_x(std::f32::consts::FRAC_PI_2),
+                ),
+                radius * scale,
+                color,
+            );
+        }
+    }
+}
+
+/// Draws a bright line from the giver to the receiver of each recent share, with a ring on the receiver.
+pub fn draw_shares(
+    mut shares: ResMut<Shares>,
+    transforms: Query<&GlobalTransform>,
+    mut gizmos: Gizmos,
+) {
+    for (from, to, frames) in shares.live.iter_mut() {
+        *frames = frames.saturating_sub(1);
+        let (Ok(a), Ok(b)) = (transforms.get(*from), transforms.get(*to)) else {
+            continue;
+        };
+        let (a, b) = (a.translation(), b.translation());
+        let lift = Vec3::Y * 1.25;
+        let fade = *frames as f32 / SHARE_FLASH_FRAMES as f32;
+        let color = Color::srgb(1.0, 0.95 - 0.2 * (1.0 - fade), 0.55 + 0.45 * fade);
+        // Three parallel lines: a single gizmo line is one pixel wide and vanishes in a 640 px GIF.
+        let side = Vec3::new(b.z - a.z, 0.0, a.x - b.x).normalize_or_zero() * 0.06;
+        for offset in [-side, Vec3::ZERO, side] {
+            gizmos.line(a + lift + offset, b + lift + offset, color);
+        }
+        gizmos.circle(
+            Isometry3d::new(b + lift, Quat::from_rotation_x(std::f32::consts::FRAC_PI_2)),
+            0.55,
+            color,
+        );
+    }
+    shares.live.retain(|(_, _, frames)| *frames > 0);
 }

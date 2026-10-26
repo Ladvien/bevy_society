@@ -166,6 +166,46 @@ introduce the pair to each other's close ties, and add intergroup contact.
 Bark templates may use `{self}`, `{target}`, `{place}` and `{subject}` (rumor subject, gossip only).
 Any other `{...}` is rejected at compile time rather than printed literally.
 
+## Goods, stores and trade
+
+`goods: [(id: "bread")]` declares a **quantity**, not a currency. Every person carries a `Stock` with one level
+per good, in `[0, Tuning::stock_ceiling]`. An activity can `produces: [("bread", 3.0)]` and `consumes:
+[("bread", 1.0)]`, applied once, when it **completes** (an interrupted one pays nothing, like `satisfies`). Each
+good has a price in `Prices`, moved by `price_speed_per_day · (produced − consumed)` per interval: it rests when
+the village is fed and rises when it is short. **Nothing gates**: an empty store never stops anyone eating.
+
+A good changes hands on an accepted interaction:
+
+```ron
+(
+    id: "share",
+    on_accept: (
+        actor_gives: [("bread", 1.0)],     // `target_gives: [...]` too, and both is a swap
+        actor_to_target: (trust: 0.05),    // the giver is paid in goodwill
+        target_to_actor: (trust: 0.05),
+    ),
+)
+```
+
+Each side gives what it has, up to the amount, so the pair cannot create a good. An activity that offers such
+an exchange is scored by the **joint surplus** of it:
+
+```ron
+(
+    id: "share",
+    target: Person,
+    duration_hours: 0.2,
+    considerations: [(input: Surplus("bread"), curve: Linear(2.0, 0.0))],
+    interaction: Some("share"),
+)
+```
+
+`Surplus(good)` is `value(target's store) − value(own store)` with `value(held) = 1 / (1 + held)`, in `[0, 1]`:
+zero between equal stores, 0.5 for a loaf to someone with none, and zero unless the giver holds **more than**
+`Tuning::trade_reserve` (so a giver of a whole loaf is left with at least one) and the gap is at least `Tuning::trade_margin`. It needs a `Person` target. The
+neighbours' stores are copied for scoring only when some activity uses `Surplus`, so a pack without one pays
+nothing.
+
 ## Triggers
 
 ```ron

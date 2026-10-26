@@ -1255,6 +1255,15 @@ struct Decision {
     close_doing: Vec<(Entity, u16)>,
     hour: f32,
     perception_radius: f32,
+    /// The actor's own goods, so `Surplus` can ask what a unit is worth to it.
+    stock: crate::Stock,
+    /// Every neighbour's goods, so `Surplus` can ask the same of the other side of a trade. Keyed by entity
+    /// and only for the people in `near`, which is the same set a `Person`-targeted activity can choose.
+    near_stock: Vec<(Entity, crate::Stock)>,
+    /// [`Tuning::trade_reserve`](crate::Tuning), copied so `signal_value` needs no settings handle.
+    trade_reserve: f32,
+    /// [`Tuning::trade_margin`](crate::Tuning), copied for the same reason.
+    trade_margin: f32,
 }
 
 /// The components a decision reads for one person.
@@ -1343,6 +1352,7 @@ fn decide_activities(
     // Bindings already warned about, by `(PersonId, name)`. A `Local` rather than a resource because
     // it is this system's own bookkeeping, and a `BTreeSet` so its iteration can never matter.
     mut warned_bindings: Local<std::collections::BTreeSet<(u32, String)>>,
+    stocks: Query<&crate::Stock>,
 ) {
     let DecisionQueries {
         people,
@@ -1358,6 +1368,15 @@ fn decide_activities(
 
     let now = clock.now_days;
     let tuning = &settings.tuning;
+    // **Neighbours' stores are copied only when some activity reads them.** `near_stock` is a `Vec` of
+    // `Stock`s per person per tick, which is cost a host with no `Surplus` consideration would pay for
+    // nothing: the benchmark has none and runs at 5 000 people.
+    let reads_stores = defs.activities.iter().any(|activity| {
+        activity
+            .considerations
+            .iter()
+            .any(|term| matches!(term.signal, Signal::Surplus(_)))
+    });
     let tier_cutoff = tuning.tier_cutoff;
     let hour = clock.hour();
 
@@ -1501,6 +1520,20 @@ fn decide_activities(
                 .collect(),
             hour,
             perception_radius: settings.perception_radius,
+            trade_reserve: tuning.trade_reserve,
+            trade_margin: tuning.trade_margin,
+            // Goods, for `Surplus`. Only the neighbours in `near`, which is the same set a
+            // `Person`-targeted activity can actually choose from.
+            stock: stocks.get(person).cloned().unwrap_or_default(),
+            near_stock: if reads_stores {
+                near.iter()
+                    .filter_map(|(entity, _)| {
+                        stocks.get(*entity).ok().cloned().map(|s| (*entity, s))
+                    })
+                    .collect()
+            } else {
+                Vec::new()
+            },
         };
 
         // The actor is fixed for this person; the target changes with every option, so it is bound
@@ -2062,6 +2095,31 @@ fn signal_value(
                 (decision.position.distance(p) / decision.perception_radius).min(1.0)
             })
         }
+        // **The joint surplus of a trade**, from the two stores. Not a rate: `value_of` is `1 / (1 + held)`,
+        // so the gap is near zero when two people hold the same amount and largest when one has nothing.
+        // Hall & Milgrom's precondition for a bargain to have anything in it. It is zero unless the actor
+        // holds **more than** it keeps back (`Tuning::trade_reserve`, so a giver is never left with less
+        // than the reserve when it gives a unit) and the gap is worth the walk (`Tuning::trade_margin`); a target who is not in the neighbour list, or who holds no goods at all,
+        // is not a counterparty.
+        Signal::Surplus(id) => {
+            let actor_holds = decision.stock.get(id);
+            let target_holds = match target {
+                DoingTarget::Person(other) => decision
+                    .near_stock
+                    .iter()
+                    .find(|(e, _)| *e == other)
+                    .map(|(_, stock)| stock.get(id)),
+                _ => None,
+            };
+            target_holds.map_or(0.0, |theirs| {
+                let gap = crate::economy::value_of(theirs) - crate::economy::value_of(actor_holds);
+                if actor_holds <= decision.trade_reserve || gap < decision.trade_margin {
+                    0.0
+                } else {
+                    gap.min(1.0)
+                }
+            })
+        }
         // **A skill is read, not stored.** The level is the trait its group names, so the same personality
         // is the same competence everywhere and nothing has to be saved. An undefined skill cannot reach
         // here: `compile_term` resolves the name against the defs and refuses a package that names one.
@@ -2369,6 +2427,30 @@ fn apply_effects(
     _interaction: &str,
     _now: f64,
 ) {
+    // **Goods change hands, and only what is there.** A giver who has less than the amount gives what it
+    // has; the transfer is a barter, so both sides move in the same call and a shortfall on one side is not
+    // a debt. `Stock::take` reports what actually moved and `Stock::add` what actually landed, so the pair
+    // cannot create goods.
+    if !effects.actor_gives.is_empty() || !effects.target_gives.is_empty() {
+        let ceiling = world
+            .get_resource::<crate::SocietySettings>()
+            .map_or_else(Default::default, |settings| settings.tuning.stock_ceiling);
+        for (from, to, list) in [
+            (actor, target, &effects.actor_gives),
+            (target, actor, &effects.target_gives),
+        ] {
+            for &(good, amount) in list {
+                let taken = world
+                    .get_mut::<crate::Stock>(from)
+                    .map_or(0.0, |mut stock| stock.take(good, amount));
+                if taken > 0.0
+                    && let Some(mut theirs) = world.get_mut::<crate::Stock>(to)
+                {
+                    theirs.add(good, taken, ceiling);
+                }
+            }
+        }
+    }
     // Read once: the affinity clamp is `Tuning::affinity_ceiling`, so every writer needs it.
     let tuning = world
         .get_resource::<SocietySettings>()

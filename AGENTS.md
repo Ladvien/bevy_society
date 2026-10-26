@@ -53,12 +53,15 @@ Pinned to **Bevy 0.20.0**. Read the vendored source (`~/.cargo/registry/src/inde
 - `src/model/opinion.rs` — Deffuant influence, anchor pull, similarity, conformity.
 - `src/model/rumor_dk.rs` — Daley–Kendall stifling, telling weight, belief after hearing.
 - `src/model/balance.rs` — triadic balance step and relaxation toward zero.
+- `src/economy.rs` — goods, `Stock` per person, `produces`/`consumes` per completed activity, `Prices`, and `value_of` (`EconomyPlugin`). A transfer between two people is not here: it is `actor_gives` / `target_gives` applied by `apply_effects` in `src/behavior.rs`, and `Input::Surplus` scores it.
 - `src/relationships.rs` — `Ties` (directed weighted edges), familiarity and exposure, affinity relaxation, structural balance, `Dunbar` capacity trim, and tie labels (`RelationshipsPlugin`, set `Relate`).
 - `src/groups.rs` — `Memberships`, `Status` (conferred standing), contests, intergroup contact, and `FactionStats` (`GroupsPlugin`, set `Relate`).
 - `src/fields.rs` — social fields (feature `fields`): crowd presence/commotion and per-faction presence grids on `bevy_stigmergy`, `FieldInput` scoring and gradient targets.
 - `assets/starter.society.ron` — the starter pack, parsed by `DefsFile::starter()`.
 - `tests/defs.rs` — definition parsing, merging, id interning and error messages.
 - `tests/fields.rs` — millers' presence field points toward their cluster (feature `fields`).
+- `tests/economy.rs` — a balanced economy's price rests and a shortage moves it; `Stock` survives a save.
+- `tests/trade.rs` — a good changes hands only on a surplus above `trade_reserve` and `trade_margin`, a two-good swap conserves both, and trade narrows the spread of stores.
 - `tests/leaf.rs` — the crate boundary: dependency list, forbidden names, engine-free `src/model/`, lookup-only hash collections.
 - `tests/mind.rs` — emotion half-life, mood lift toward Joy and return to baseline, needs decay at `decay_per_day`.
 - `tests/dialogue.rs` — conversation choice and `if` conditions, node effects, barks, speaker lifetime and the missing-plugin panic (feature `dialogue`).

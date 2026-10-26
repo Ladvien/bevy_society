@@ -161,3 +161,20 @@ scenarios:
       12%. The term that scales is scoring every `Person`-targeted activity against every neighbour:
       182 neighbours at that density, so ~3.6M consideration evaluations a tick. See
       `runs/2026-11-26-01/perf.md`.)
+
+  - name: village-sharing
+    kind: village
+    seed: 7
+    population: 24
+    settings: { seconds_per_day: 64.0, start_hour: 15.0 }
+    ticks: 67200
+    status: measured
+    test: tests/trade.rs
+    observable: >
+      Goods change hands on a surplus and the stores level. `trade_narrows_the_spread_of_stores` asserts it in
+      miniature (one holder of four loaves, three with none: sd under 60% of the control's). In the village,
+      nine seeds, 17 game-days (`runs/2026-10-25-08/eval.md`): **37.1 loaves shared**, and the spread of bread
+      across villagers is **0.529** against **0.854** for the same pack without `share`. Run it with
+      `cargo run --release --example evidence -- --scenario village-evening --seed 7 --out <dir>`; `shares.txt`
+      lists each loaf, giver, receiver and both stores afterwards. The price does NOT rest here (28% of ticks
+      on the floor), which is a defect of the price model, not of sharing.

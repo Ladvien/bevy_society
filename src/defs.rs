@@ -320,6 +320,18 @@ pub enum Input {
     SocialProof,
     /// A named skill's level, in `[0, 1]`. See [`SkillDef`].
     Skill(String),
+    /// The **joint surplus** a trade in this good would produce, in `[0, 1]`.
+    ///
+    /// `value(target's store) − value(actor's store)` for the good named, where `value(held) = 1/(1+held)`.
+    /// This is Hall & Milgrom's precondition as a consideration: "once ... they have met and found that they
+    /// would enjoy a **joint surplus**, the threats to disclaim the match are hollow" (Hall 2005, DOI
+    /// `10.3386/w11678`). Near zero when both stores are the same, and largest when one is empty.
+    ///
+    /// Zero unless the actor holds **more than** [`Tuning::trade_reserve`](crate::Tuning) of the good (it has
+    /// something to spare) **and** the gap is at least [`Tuning::trade_margin`](crate::Tuning) (it is worth
+    /// the walk). The input itself is a measurement of two stores, not a rate. It needs a `Person` target,
+    /// and a target holding no goods at all is not a counterparty.
+    Surplus(String),
     /// A social field value at the target cell. Needs the `fields` feature.
     Field(FieldInput),
     /// A Rhai float expression, clamped to [0, 1].
@@ -436,6 +448,18 @@ pub struct EffectsDef {
     pub actor_needs: Vec<(String, f32)>,
     /// Need changes for the target.
     pub target_needs: Vec<(String, f32)>,
+    /// **A good the actor hands over on accept**, with the amount: a trade.
+    ///
+    /// Pairwise barter, not a market: "a less-studied alternative to auction systems is the pattern of
+    /// Edgeworth barter, in which buyers and sellers interact directly with each other in repeated pairwise
+    /// transactions, without the benefit of an auctioneer" (corpus doc `10.1007_11678809_10`). The transfer
+    /// is *declarative* — the activity says what changes hands — so no new system decides who trades with
+    /// whom; `Perceive` already does, and the acceptance draw decides whether it happens.
+    #[serde(default)]
+    pub actor_gives: Vec<(String, f32)>,
+    /// A good the target hands over on accept, with the amount.
+    #[serde(default)]
+    pub target_gives: Vec<(String, f32)>,
     /// How memorable the outcome is, in [0, 1].
     pub importance: f32,
     /// Rhai statements run with actor and target bound.
@@ -445,6 +469,8 @@ pub struct EffectsDef {
 impl Default for EffectsDef {
     fn default() -> Self {
         Self {
+            actor_gives: Vec::new(),
+            target_gives: Vec::new(),
             actor_to_target: TieDelta::default(),
             target_to_actor: TieDelta::default(),
             actor_emotion: None,
@@ -1241,6 +1267,8 @@ impl SocietyDefs {
     ) -> Result<EffectsSpec, DefsError> {
         let actor_needs = self.need_deltas(owner, &def.actor_needs)?;
         let target_needs = self.need_deltas(owner, &def.target_needs)?;
+        let actor_gives = self.good_list(owner, &def.actor_gives)?;
+        let target_gives = self.good_list(owner, &def.target_gives)?;
         let script = match def.script.as_deref() {
             Some(source) => Some(scripts.statements(owner, source)?),
             None => None,
@@ -1252,6 +1280,8 @@ impl SocietyDefs {
             target_emotion: def.target_emotion,
             actor_needs,
             target_needs,
+            actor_gives,
+            target_gives,
             importance: def.importance,
             script,
         })
@@ -1382,6 +1412,9 @@ impl SocietyDefs {
             Input::SocialProof => Signal::SocialProof,
             Input::Skill(name) => {
                 Signal::Skill(require(self.skill_id(name), "skill", name, owner)?)
+            }
+            Input::Surplus(name) => {
+                Signal::Surplus(require(self.good_id(name), "good", name, owner)?)
             }
             Input::Field(field) => Signal::Field(*field),
             Input::Script(source) => Signal::Script(scripts.expression(owner, source)?),
@@ -1671,6 +1704,8 @@ pub enum Signal {
     SocialProof,
     /// A skill's level, read from the actor's personality.
     Skill(SkillId),
+    /// The joint surplus a trade in this good would produce.
+    Surplus(GoodId),
     /// A social field value.
     Field(FieldInput),
     /// A compiled Rhai expression.
@@ -1686,6 +1721,8 @@ pub(crate) struct EffectsSpec {
     pub(crate) target_emotion: Option<(EmotionKind, f32)>,
     pub(crate) actor_needs: Vec<(NeedId, f32)>,
     pub(crate) target_needs: Vec<(NeedId, f32)>,
+    pub(crate) actor_gives: Vec<(GoodId, f32)>,
+    pub(crate) target_gives: Vec<(GoodId, f32)>,
     pub(crate) importance: f32,
     pub(crate) script: Option<ScriptId>,
 }
@@ -1843,7 +1880,12 @@ fn check_target(owner: &str, target: &ActivityTarget) -> Result<(), DefsError> {
 fn check_input(owner: &str, input: &Input, target: &ActivityTarget) -> Result<(), DefsError> {
     let person_only = matches!(
         input,
-        Input::Affinity | Input::Trust | Input::Respect | Input::Familiarity | Input::SocialProof
+        Input::Affinity
+            | Input::Trust
+            | Input::Respect
+            | Input::Familiarity
+            | Input::SocialProof
+            | Input::Surplus(_)
     );
     if person_only && !matches!(target, ActivityTarget::Person) {
         return Err(invalid(owner, format!("{input:?} needs a Person target")));

@@ -204,6 +204,8 @@ pub fn spawn_hud(commands: &mut Commands, font: Handle<Font>) -> Entity {
 /// Updates the HUD: the day and time, the rumor's reach, and how many friendships and rivalries exist.
 ///
 /// Each friendship is two directed ties, so the counts are halved; a rivalry likewise.
+// A Bevy system's parameters are its dependencies; the goods line adds two to a HUD that already read five.
+#[allow(clippy::too_many_arguments)]
 pub fn update_hud(
     clock: Res<SocietyClock>,
     books: Res<RumorBook>,
@@ -211,6 +213,9 @@ pub fn update_hud(
     index: Res<PersonIndex>,
     ties: Query<&Ties>,
     villagers: Query<(), (With<Autonomous>, With<Person>)>,
+    // The goods line, shown only in the clip that is about goods: every other HUD stays exactly as it was.
+    shares: Option<Res<super::scenes::Shares>>,
+    stocks: Query<&bevy_society::Stock>,
     mut hud: Query<&mut Text, With<Hud>>,
 ) {
     let Ok(mut text) = hud.single_mut() else {
@@ -248,8 +253,35 @@ pub fn update_hud(
                 rumor.known_by, villagers
             )
         });
+    // **Who holds bread, not the price.** The price is one number per good that moves only when a bake or a
+    // meal finishes, so over a six-hour clip it sat at 1.00 and told a viewer nothing. Sharing moves bread
+    // from the people who have it to the people who do not, and that count is the thing it changes.
+    let goods = match shares {
+        Some(shares) => {
+            // The villagers, not `PersonIndex::sorted`: that includes the player, and "25 people" in a
+            // village of 24 reads as an off-by-one (the rumor line below has the same note).
+            let holding = index
+                .sorted
+                .iter()
+                .filter(|(_, e)| {
+                    villagers.contains(*e)
+                        && stocks
+                            .get(*e)
+                            .is_ok_and(|s| s.get(bevy_society::GoodId(0)) >= 0.5)
+                })
+                .count();
+            format!(
+                "\n{} {} shared · {} hold bread, {} do not",
+                shares.total,
+                if shares.total == 1 { "loaf" } else { "loaves" },
+                holding,
+                villagers.iter().count().saturating_sub(holding)
+            )
+        }
+        None => String::new(),
+    };
     **text = format!(
-        "Day {} · {:02}:{:02}   Friendships {} · Rivalries {}{reach}",
+        "Day {} · {:02}:{:02}   Friendships {} · Rivalries {}{reach}{goods}",
         clock.day(),
         hour as u32,
         minutes,

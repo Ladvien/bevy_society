@@ -5,10 +5,11 @@
 //! cargo run --example evidence -- --scenario village-evening --out docs/loop/runs/<run>/evidence
 //! ```
 //!
-//! Three artefacts per run:
+//! Four artefacts per run:
 //!
 //! - `narrative.txt` — one person's day in readable lines: when they chose what, whom they talked to,
 //!   what it did to their mood and needs. Read it as a stranger would.
+//! - `shares.txt` — one line per accepted `share`: when, who gave to whom, and both stores before and after that tick.
 //! - `series.csv` — one row per tick: the aggregates a plot needs (mean need levels, mood, opinion
 //!   variance, rumor reach, friendship and rivalry counts). `tools/plots.py` turns it into PNGs.
 //! - `summary.json` — the end state, for a test or a log entry to assert against.
@@ -24,9 +25,9 @@ use bevy::ecs::world::World as EcsWorld;
 use bevy::prelude::{Entity, MinimalPlugins, Transform, TransformPlugin, Vec2};
 use bevy::time::TimeUpdateStrategy;
 use bevy_society::{
-    ActivityEnded, ActivityStarted, Autonomous, Doing, Home, InteractionResolved, Knowledge, Mood,
-    Needs, Opinions, Person, Place, PlaceTags, PlantRumor, RumorBook, SocietyClock, SocietyDefs,
-    SocietyPlugins, SocietySettings, TieLabel, TieLabelChanged, Ties,
+    ActivityEnded, ActivityStarted, Autonomous, Doing, GoodId, Home, InteractionResolved,
+    Knowledge, Mood, Needs, Opinions, Person, Place, PlaceTags, PlantRumor, RumorBook,
+    SocietyClock, SocietyDefs, SocietyPlugins, SocietySettings, TieLabel, TieLabelChanged, Ties,
 };
 use std::collections::BTreeMap;
 use std::fmt::Write as _;
@@ -121,6 +122,11 @@ fn main() {
     // so counting the ones that *leave* `Rival` is the direct measurement of recovery, and nothing was
     // recording it. Measured on `village-evening`: rivals 0 -> 42 over 17 game-days while friends stayed 13-18.
     let mut accepted_compliments = 0usize;
+    // **Sharing, counted where it resolves.** An accepted `share` is one unit changing hands; the number is
+    // what a plot of the store spread needs next to it, because a flat spread with no shares is a village
+    // that never traded and a flat spread with many is one that is already level.
+    let mut shares = 0usize;
+    let mut share_log: Vec<String> = Vec::new();
     let mut became_rival = 0usize;
     // **Every** label transition, not only the rival ones. A host that shows "you are now friends"
     // or unlocks a conversation on `TieLabelChanged` cares about how many arrive and whether they mean
@@ -142,10 +148,25 @@ fn main() {
     // key the harness does not read.
     let plant_tick = plant_at(&args.scenario);
     for tick in 0..ticks {
+        // Each villager's first-good store **before** this update, so a share can be logged as
+        // `before -> after` for both sides. After alone read as a bug: "Dena holds 0.0, Hilda holds 0.0" is
+        // a loaf that arrived and was eaten in the same tick, and cannot be told from a transfer that failed.
+        let held_before: Vec<(Entity, f32)> = world
+            .villagers
+            .iter()
+            .map(|&e| {
+                let held = app
+                    .world()
+                    .get::<bevy_society::Stock>(e)
+                    .map_or(0.0, |stock| stock.get(GoodId(0)));
+                (e, held)
+            })
+            .collect();
         app.update();
         if tick == plant_tick {
             planted = plant(&mut app, &world, &gossipers);
         }
+        let mut shared_now: Vec<(Entity, Entity)> = Vec::new();
         {
             let mut exchanges = app
                 .world_mut()
@@ -157,6 +178,10 @@ fn main() {
                 // earlier iteration's "bad outweighs good 4.8:1" was arithmetic on the wrong variable.
                 if resolved.interaction == "compliment" && resolved.accepted {
                     accepted_compliments += 1;
+                }
+                if resolved.interaction == "share" && resolved.accepted {
+                    shares += 1;
+                    shared_now.push((resolved.actor, resolved.target));
                 }
                 // Every approach, accepted or refused. A reciprocity step should move this ratio without
                 // touching the acceptance model, because the model already reads the *target's* tie.
@@ -176,6 +201,39 @@ fn main() {
                     None => gossipers.push((resolved.actor, 1)),
                 }
             }
+        }
+        // **One line per loaf shared**, with both stores *after* the move, so a reader can see the loaf go
+        // from the shelf that had it to the shelf that did not. The counter says how many; this says who.
+        for (giver, receiver) in shared_now {
+            let world_ref = app.world();
+            let name = |e: Entity| {
+                world_ref
+                    .get::<Name>(e)
+                    .map_or_else(|| "someone".to_owned(), |n| n.as_str().to_owned())
+            };
+            let held = |e: Entity| {
+                world_ref
+                    .get::<bevy_society::Stock>(e)
+                    .map_or(0.0, |stock| stock.get(GoodId(0)))
+            };
+            let was = |e: Entity| {
+                held_before
+                    .iter()
+                    .find(|(other, _)| *other == e)
+                    .map_or(0.0, |(_, held)| *held)
+            };
+            share_log.push(format!(
+                "{}  {} -> {}  ({} {:.1} -> {:.1}, {} {:.1} -> {:.1}, over this tick)",
+                clock_label(world_ref.resource::<SocietyClock>()),
+                name(giver),
+                name(receiver),
+                name(giver),
+                was(giver),
+                held(giver),
+                name(receiver),
+                was(receiver),
+                held(receiver),
+            ));
         }
         // **Tick 0 is not a sample of the society; it is before one exists.** `size_person_state` fills
         // `Needs` and `Opinions` on the first tick, so a row taken before the first update reads
@@ -217,7 +275,8 @@ fn main() {
                 }
             }
         }
-        let row = snapshot_row(&app, tick as f64, &world, planted);
+        let mut row = snapshot_row(&app, tick as f64, &world, planted);
+        row.shares = shares;
         // The first row is the pre-society state: `size_person_state` has not run, so `Needs` is empty
         // and every need reads 0.000. Recording it made "all four needs cross below 0.35" true of the
         // mean on the strength of one row at tick 0, while no individual ever came close.
@@ -235,6 +294,12 @@ fn main() {
         std::process::exit(1);
     }
     write_narrative(&mut app, tracked, &lines, &out);
+    if !share_log.is_empty() {
+        let path = out.join("shares.txt");
+        if let Err(err) = std::fs::write(&path, share_log.join("\n") + "\n") {
+            eprintln!("evidence: cannot write {}: {err}", path.display());
+        }
+    }
     write_why(&mut app, tracked, &out);
     series(&rows, &out);
     summary(
@@ -249,6 +314,7 @@ fn main() {
             failed_by_activity: &failed_by_activity,
             rival_transitions: (became_rival, left_rival),
             accepted_compliments,
+            shares,
             label_changes,
             reciprocity: reciprocity_of(app.world(), &world),
             approaches: (accepted_approaches, refused_approaches),
@@ -290,6 +356,13 @@ struct Row {
     friends: u32,
     rivals: u32,
     doing: BTreeMap<String, u32>,
+    /// The first good's store across the village: `(min, mean, max, standard deviation)`. Zeros when the
+    /// definitions declare no goods.
+    store: (f32, f32, f32, f32),
+    /// The first good's price.
+    price: f32,
+    /// Accepted `share`s so far, cumulative.
+    shares: usize,
 }
 
 /// The starter pack, plus whatever the village scenario adds.
@@ -867,7 +940,33 @@ fn snapshot_row(
         friends: friends / 2,
         rivals: rivals / 2,
         doing,
+        store: store_spread(world_ref, &world.villagers),
+        price: world_ref
+            .get_resource::<bevy_society::Prices>()
+            .map_or(0.0, |prices| prices.get(GoodId(0))),
+        shares: 0,
     }
+}
+
+/// `(min, mean, max, standard deviation)` of the first good's store over the villagers.
+///
+/// The standard deviation is the one number that says whether stores are level: a village that shares
+/// should end with a smaller spread than one that does not, and the mean is what stays put.
+fn store_spread(ecs: &EcsWorld, villagers: &[Entity]) -> (f32, f32, f32, f32) {
+    let held: Vec<f32> = villagers
+        .iter()
+        .filter_map(|&e| ecs.get::<bevy_society::Stock>(e))
+        .map(|stock| stock.get(GoodId(0)))
+        .collect();
+    if held.is_empty() {
+        return (0.0, 0.0, 0.0, 0.0);
+    }
+    let n = held.len() as f32;
+    let mean = held.iter().sum::<f32>() / n;
+    let sd = (held.iter().map(|h| (h - mean).powi(2)).sum::<f32>() / n).sqrt();
+    let min = held.iter().copied().fold(f32::MAX, f32::min);
+    let max = held.iter().copied().fold(f32::MIN, f32::max);
+    (min, mean, max, sd)
 }
 
 /// Reads the messages a tracked person produced this tick into `lines`.
@@ -1036,7 +1135,7 @@ fn clock_label(clock: &SocietyClock) -> String {
 /// Writes `series.csv`, one row per tick.
 fn series(rows: &[Row], out: &Path) {
     let mut csv = String::from(
-        "tick,need0,need1,need2,need3,pleasure,arousal,dominance,opinion_variance,rumor_reach,friends,rivals,doing\n",
+        "tick,need0,need1,need2,need3,pleasure,arousal,dominance,opinion_variance,rumor_reach,friends,rivals,bread_min,bread_mean,bread_max,bread_sd,price,shares,doing\n",
     );
     for row in rows {
         let needs: Vec<String> = (0..4)
@@ -1049,7 +1148,7 @@ fn series(rows: &[Row], out: &Path) {
             .collect();
         let _ = writeln!(
             csv,
-            "{},{},{:.4},{:.4},{:.4},{:.5},{},{},{},\"{}\"",
+            "{},{},{:.4},{:.4},{:.4},{:.5},{},{},{},{:.3},{:.3},{:.3},{:.3},{:.3},{},\"{}\"",
             row.tick,
             needs.join(","),
             row.pleasure,
@@ -1059,6 +1158,12 @@ fn series(rows: &[Row], out: &Path) {
             row.reach,
             row.friends,
             row.rivals,
+            row.store.0,
+            row.store.1,
+            row.store.2,
+            row.store.3,
+            row.price,
+            row.shares,
             doing.join(" "),
         );
     }
@@ -1076,6 +1181,8 @@ struct Endings<'a> {
     rival_transitions: (usize, usize),
     /// Accepted `compliment`s — the only affinity-raising interaction the starter pack has.
     accepted_compliments: usize,
+    /// Accepted `share`s, each one unit of a good changing hands.
+    shares: usize,
     /// Every `TieLabelChanged`, in either direction.
     label_changes: usize,
     /// `(mutual friends, one-way friends, mean |aff(a->b) - aff(b->a)|)` over every pair.
@@ -1099,6 +1206,7 @@ fn summary(
         failed_by_activity,
         rival_transitions,
         accepted_compliments,
+        shares,
         label_changes,
         reciprocity,
         approaches,
@@ -1127,8 +1235,9 @@ fn summary(
         }
     }
     let clock = world_ref.resource::<SocietyClock>();
+    let spread = store_spread(world_ref, &world.villagers);
     let json = format!(
-        "{{\n  \"ticks\": {},\n  \"people\": {},\n  \"rumors\": {},\n  \"rumor_known_by\": {},\n  \"rumor_reach\": {:.3},\n  \"friends\": {},\n  \"rivals\": {},\n  \"completed_endings\": {},\n  \"interrupted_endings\": {},\n  \"became_rival\": {},\n  \"left_rival\": {},\n  \"accepted_compliments\": {},\n  \"label_changes\": {},\n  \"mutual_friends\": {},\n  \"one_way_friends\": {},\n  \"affinity_gap\": {:.3},\n  \"refusals\": {},\n  \"acceptances\": {},\n  \"game_days\": {:.2}\n}}\n",
+        "{{\n  \"ticks\": {},\n  \"people\": {},\n  \"rumors\": {},\n  \"rumor_known_by\": {},\n  \"rumor_reach\": {:.3},\n  \"friends\": {},\n  \"rivals\": {},\n  \"completed_endings\": {},\n  \"interrupted_endings\": {},\n  \"became_rival\": {},\n  \"left_rival\": {},\n  \"accepted_compliments\": {},\n  \"label_changes\": {},\n  \"mutual_friends\": {},\n  \"one_way_friends\": {},\n  \"affinity_gap\": {:.3},\n  \"refusals\": {},\n  \"acceptances\": {},\n  \"shares\": {},\n  \"bread_mean\": {:.3},\n  \"bread_sd\": {:.3},\n  \"bread_max\": {:.3},\n  \"price\": {:.3},\n  \"game_days\": {:.2}\n}}\n",
         clock.tick,
         living,
         book.rumors.len(),
@@ -1147,6 +1256,13 @@ fn summary(
         reciprocity.2,
         approaches.1,
         approaches.0,
+        shares,
+        spread.1,
+        spread.3,
+        spread.2,
+        world_ref
+            .get_resource::<bevy_society::Prices>()
+            .map_or(0.0, |prices| prices.get(GoodId(0))),
         clock.now_days,
     );
     let mut failed = String::new();

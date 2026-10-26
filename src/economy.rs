@@ -105,6 +105,20 @@ impl Prices {
     }
 }
 
+/// What one unit of a good is worth to a person holding `held` of it: `1 / (1 + held)`.
+///
+/// Diminishing marginal value, and the crate's only honest option: a store is a level, so somebody with an
+/// empty shelf wants a unit more than somebody with a full one. No curve, no utility function, no new rate —
+/// a person with none values a unit at 1.0 and a person at a full store at `1 / (1 + ceiling)`.
+///
+/// This is what makes a **joint surplus** possible between two people, which is the condition Hall & Milgrom
+/// require before a bargain begins at all: "once a qualified worker and an employer have met and found that
+/// they would enjoy a joint surplus, the threats to disclaim the match are hollow" (Hall 2005, DOI
+/// `10.3386/w11678`, in the corpus, reporting Hall & Milgrom).
+pub fn value_of(held: f32) -> f32 {
+    1.0 / (1.0 + held.max(0.0))
+}
+
 /// Applies every finished activity's production and consumption, once.
 ///
 /// Runs after the exchange set, on the tick's own [`ActivityEnded`](crate::ActivityEnded) messages, so a

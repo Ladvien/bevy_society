@@ -117,9 +117,13 @@ fn every_scenario_declares_a_seed() {
         .lines()
         .filter_map(|line| line.trim().strip_prefix("seed:"))
         .collect();
+    let scenarios = YAML
+        .lines()
+        .filter(|line| line.trim().starts_with("- name:"))
+        .count();
     assert_eq!(
         seeds.len(),
-        7,
+        scenarios,
         "every scenario declares a seed, so none silently runs at the crate default: {seeds:?}"
     );
 }

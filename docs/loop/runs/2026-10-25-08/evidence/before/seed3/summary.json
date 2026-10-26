@@ -1,0 +1,31 @@
+{
+  "ticks": 67200,
+  "people": 24,
+  "rumors": 662,
+  "rumor_known_by": 2,
+  "rumor_reach": 0.125,
+  "friends": 17,
+  "rivals": 26,
+  "completed_endings": 6527,
+  "interrupted_endings": 368,
+  "became_rival": 287,
+  "left_rival": 235,
+  "accepted_compliments": 1570,
+  "label_changes": 1460,
+  "mutual_friends": 12,
+  "one_way_friends": 10,
+  "affinity_gap": 0.054,
+  "refusals": 1880,
+  "acceptances": 3333,
+  "interrupted_by_activity": {
+    "bake": 6,
+    "compliment": 21,
+    "craft": 50,
+    "eat": 66,
+    "relax": 17,
+    "sleep": 138,
+    "snub": 4,
+    "work": 66
+  },
+  "game_days": 17.03
+}

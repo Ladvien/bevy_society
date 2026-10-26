@@ -185,6 +185,22 @@ pub struct Tuning {
     pub price_floor: f32,
     /// The highest a price may rise. **Design default**, for the same reason as [`Self::price_floor`].
     pub price_ceiling: f32,
+    /// How much of a good a person keeps back: a giver offers a good only when it holds **more than this**.
+    ///
+    /// **Design default, chosen by reading the log of who gave what.** At 0, and at a gate of "at least one",
+    /// a villager's last loaf went to a neighbour ("Vesna holds 0.0") — generous, and not what Henrich et al.
+    /// report: the meat that is shared is the surplus. With a whole-loaf gift the reserve of 1.0 means a giver
+    /// needs two loaves and is left with at least one. It also stops one unit changing hands back and forth
+    /// between two nearly equal stores.
+    ///
+    /// It is read when a share is **chosen**, not when the pair meets, so a giver who eats on the way can still
+    /// hand over its last unit (1 of 76 logged shares at 24 and 36 people).
+    pub trade_reserve: f32,
+    /// The smallest gap between two people's valuations at which a trade is worth making.
+    ///
+    /// **Design default.** Hall & Milgrom's condition is that the parties must have found a *joint surplus*
+    /// before bargaining; this is how large it has to be for a village to bother. No paper gives a number.
+    pub trade_margin: f32,
     /// Familiarity added to two people by a mutual close friend's introduction. Design default (no
     /// source paper gives this number); mechanism: triadic closure, Kossinets & Watts 2006,
     /// DOI 10.1126/science.1116869.
@@ -443,6 +459,9 @@ impl Default for Tuning {
             price_speed_per_day: 0.5,
             price_floor: 0.25,
             price_ceiling: 4.0,
+            // **Design defaults, chosen by measurement** — `docs/loop/runs/2026-10-25-08/eval.md`.
+            trade_reserve: 1.0,
+            trade_margin: 0.1,
             introduction_familiarity: 0.1,
             confidence_base: 0.2,
             confidence_openness: 0.6,

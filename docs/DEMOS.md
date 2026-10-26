@@ -13,10 +13,35 @@
 | `needs.gif` | `needs` | **hunger** halos — big green is fed, small red is hungry | `food: a full green ring is fed, a small red one is hungry` |
 | `ties.gif` | `ties` | the tie graph alone: green friendship lines | `ties: green is friendship · the village forms them faster than it falls out` |
 | `factions.gif` | `factions` | the three faction colours, no lines | `faction colour · orange millers, green weavers, violet watch` |
+| `goods.gif` | `goods` | a ring per villager sized by their bread (gold holds some, small dark holds none), a white line for each loaf shared, and a HUD line counting loaves shared and who holds bread | `bread: gold ring = loaves held, dark = none · a white line is a loaf shared` |
 
-All six are the same village, same seed and the same run: `{"frames": 240, "rumor_reach": 0.080,
-"friends": 29, "rivals": 0, "barks": 574}`, recorded 2026-10-25. Only what is drawn differs, which is the
-point — a feature clip is a different *view* of one simulation, not a different simulation.
+All seven are the same village, same seed and the same run, **except `goods`**: `{"frames": 240, "rumor_reach": 0.080,
+"friends": 24, "rivals": 0, "barks": 637}`, recorded 2026-10-25 against the pack that has `share` and a three-loaf
+`bake`. Only what is drawn differs, which is the point — a feature clip is a different *view* of one simulation,
+not a different simulation.
+
+**`goods` also opens with bread handed out** (`stock_bakers` in `examples/capture.rs`): every other villager holds
+four loaves at frame 0. The settled village's stores sit near zero — a loaf is eaten as fast as it is baked, 0.05 a
+person measured over nine seeds — so a clip taken from the settled state would show 24 dark rings and nothing to
+see. The model, its rates and every number printed above are untouched; only the recording's starting state
+differs, and the README says so. `{"frames": 240, "rumor_reach": 0.040, "friends": 23, "rivals": 0, "barks": 613}`.
+In its six game-hours **5 loaves are shared** and the people holding bread go from 12 to 17.
+
+### Which teller, and what the rumor line means
+
+`PlantRumor` is written at frame 30 with a weaver as teller. **Which weaver is chance.** A rumor moves only when its
+holder happens to choose `gossip` beside somebody, so inside six game-hours some tellers pass it on and some do
+not. Tried on 2026-10-25 against this village, seed and settle:
+
+| villager index | rumor reach after 240 frames |
+|---|---|
+| 1, 3, 8, 16, 18, 20 | **0.040** — the teller alone, nobody told |
+| 5, 10, 12, 14 | **0.080** — one person told |
+
+The first weaver (8) was the old choice and now tells nobody, because the economy changed what the settle did.
+The capture uses **10**, the next weaver along. A busier teller picked by neighbour count was tried and told
+nobody either, so it was removed. The hero's "2 of 24" is therefore **a choice among ten, four of which work**,
+and the README says so.
 
 ### The clips were rebuilt in 2026-11-28, and every one of them had been lying
 
@@ -106,19 +131,18 @@ a demo look better: the defaults are the model.
 ### Current result
 
 ```
-{"frames": 240, "rumor_reach": 0.080, "friends": 14, "rivals": 2, "barks": 1025}
-{"frames": 480, "rumor_reach": 0.120, "friends": 11, "rivals": 2, "barks": 1094}
+{"frames": 240, "rumor_reach": 0.080, "friends": 24, "rivals": 0, "barks": 637}
+{"frames": 480, "rumor_reach": 0.080, "friends": 23, "rivals": 0, "barks": 677}
 ```
 
-The first line is the six clips of 2026-10-25, the second the same village recorded twice as long. All
-three thresholds that measure the society are met. **The rumor threshold is not what it was**: the
-previous documentation claimed `rumor_reach` of 0.520 and 0.360 against a threshold of 0.5, but that
-number counted the **newest alive rumor**, which is whichever deed the village last made a story of — the
-settle steps create dozens — and not the one the clip plants. Measured against the planted rumor the
-reach is 2 of 25 at 240 frames and 3 of 25 at 480. It is slow because telling is one choice among many and
-Daley–Kendall stifles a teller whose listener already knew; a busier teller (the villager with the most
-accepted `gossip` exchanges in the settle steps) was tried in place of the first weaver and reached 2 as
-well.
+The first line is the clips of 2026-10-25, the second the same village recorded twice as long. Three of the four
+thresholds are met (`rumor_reach ≥ 0.08`, `barks ≥ 6`, `friends ≥ 3`); **`rivals ≥ 1` is not**, and has not been
+since the clips were rebuilt: a rivalry takes game-days to form and the clip is six game-hours, so no clip draws
+one and the README says so. **The rumor threshold is not what it was**: an earlier documentation claimed
+`rumor_reach` of 0.520 and 0.360 against a threshold of 0.5, but that number counted the **newest alive rumor**,
+which is whichever deed the village last made a story of — the settle steps create dozens — and not the one the
+clip plants. Measured against the planted rumor the reach is **2 of 24 at 240 frames and still 2 at 480**. It is
+slow because telling is one choice among many and Daley–Kendall stifles a teller whose listener already knew.
 
 The capture settles for 3 800 steps before recording. An earlier clip ran 900 ticks — 4.1 game-days — and
 formed no friendships: `TieLabel::classify` needs `affinity ≥ 0.4`, affinity moves at
@@ -215,17 +239,18 @@ Each frame must show:
 `capture` draws **no speech balloons** by design (the dialogue plugin is disabled, so the frames would
 never show them); balloons are the interactive `village` example's, so they are not part of this check.
 
-Last checked **2026-10-25**, all six clips, frames 0 / 120 / 239 of each, against the run
-`{"frames": 240, "rumor_reach": 0.080, "friends": 14, "rivals": 2, "barks": 1025}`:
+Last checked **2026-10-25**, all seven clips, frames 0 / 120 / 239 of each, against the run
+`{"frames": 240, "rumor_reach": 0.080, "friends": 24, "rivals": 0, "barks": 637}` (and `goods`'s own):
 
 | clip | frame 0 | frame 120 | frame 239 | verdict |
 |---|---|---|---|---|
-| `village` | 19 friendships, 2 rivalries, no rumor line, no halo | `known by 1/24`, one magenta halo | `known by 2/24`, two halos | pass: the rumor starts at frame 30 and spreads, slowly |
-| `mood` | mostly amber rings, a few orange-red or lime; sizes differ | same | same | pass, but **subtle**: most villagers are near neutral, so the clip differs by a few rings |
-| `opinions` | red and green bars, lengths from short to long | same | same | pass: both colour and length differ |
-| `needs` | every ring full and green | rings smaller and yellower-green | rings small and olive | pass, but **subtle**: six game-hours is a short time for a need to decay |
-| `ties` | 19 friendships, 2 rivalries | 17 and 2 | 14 and 2 | pass: a graph, but a sparse one; lines inside the violet and green clusters are hidden by the bodies |
+| `village` | 26 friendships, 0 rivalries, no rumor line, no halo | `known by 1/24` | `known by 2/24`, two magenta halos | pass: the rumor starts at frame 30 and spreads, slowly |
+| `mood` | mostly amber and yellow rings, a few orange-red; sizes differ | same | same | pass, but **subtle**: most villagers are near neutral, so the clip differs by a few rings |
+| `opinions` | red bars on two thirds of the villagers, green on the rest, lengths differ | same | same | pass: both colour and length differ |
+| `needs` | every ring full and green | same | same | pass, but **very subtle**: nobody is hungry in the six game-hours, so the rings do not visibly shrink |
+| `ties` | 26 friendships, 0 rivalries | 26 | 24 | pass: a graph, but a sparse one |
 | `factions` | orange, green and violet, no lines | same | same | pass |
+| `goods` | 0 shared, 12 hold bread, 12 do not; gold rings and small dark ones | 1 loaf shared, 13 hold bread, 11 do not | 5 shared, 17 hold bread, 7 do not | pass: readable, and the HUD line is what makes it legible, because a share is a half-second white line |
 
 Also seen and left alone: the fourth stall sits mostly below the bottom edge of every frame, and two or
 three orange villagers touch that edge at frame 120. Nobody is inside a stall; villagers stand against

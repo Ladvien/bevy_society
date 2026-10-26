@@ -16,19 +16,56 @@
     // `docs/loop/runs/2026-10-25-06/eval.md`.
     activities: [
         (
-            // **The village's one producer.** A task that makes a good, so the store moves and the price has
-            // something to be an observation of. Nothing consumes bread but `eat`, which the starter pack
-            // declares, so production and consumption can be balanced or not by tuning one rate.
+            // **Sharing, because the village has one good.** "A less-studied alternative to auction systems
+            // is the pattern of Edgeworth barter, in which buyers and sellers interact directly with each
+            // other in repeated pairwise transactions, without the benefit of an auctioneer" (corpus
+            // `10.1007_11678809_10`). With *two* goods that is a swap and the engine does it (`target_gives`,
+            // `tests/trade.rs`). With one it is what Henrich et al. found in the small-scale societies: the
+            // meat is **shared**, and the giver is paid in standing (`10.1017/S0140525X05000142`), which is
+            // the trust both sides gain below.
+            //
+            // The activity fires only when there is a **joint surplus** to share — Hall & Milgrom's
+            // precondition, "once ... they have found that they would enjoy a joint surplus"
+            // (`10.3386/w11678`): the giver holds a loaf to spare and the other side's shelf is emptier.
+            id: "share",
+            target: Person,
+            duration_hours: 0.2,
+            considerations: [
+                // Zero between two equal stores or when the giver has nothing to spare (it must hold *more
+                // than* `Tuning::trade_reserve`, so nobody gives away their last loaf; `trade_margin` is the
+                // smallest worthwhile gap); 1.0 for a loaf to someone with none. Slope 2, not 1, because at
+                // 1 the share scored 0.5 against a day full of other options and the village shared 65
+                // times in 17 days against 95 at slope 2, before the reserve was made strict (it is now
+                // 37, with the same levelling). Friends, rivals and interruptions are level within the
+                // seed-to-seed spread. `docs/loop/runs/2026-10-25-08/eval.md`.
+                (input: Surplus("bread"), curve: Linear(2.0, 0.0)),
+            ],
+            satisfies: [],
+            interaction: Some("share"),
+            barks: [],
+        ),
+        (
+            // **The village's producer, and the first division of labour.** A task that makes a good, so the
+            // store moves and the price has something to be an observation of. Nothing consumes bread but
+            // `eat`, which the starter pack declares.
+            //
+            // Three loaves a bake, and **the diligent are the ones who bake** (`Skill("craft")`, the same
+            // trait that decides who crafts). At one loaf for everybody a loaf was eaten as fast as it was
+            // baked and nobody ever had one to share: the stores averaged 0.05 loaves a person and the
+            // village shared 20 times in 17 days. Three loaves from a few hands leaves them a surplus: 65
+            // shares at the same slope, and 37 once a giver had to keep a loaf. Measured over nine seeds in
+            // `docs/loop/runs/2026-10-25-08/eval.md`.
             id: "bake",
             target: Place("food"),
             duration_hours: 1.0,
-            produces: [("bread", 1.0)],
+            produces: [("bread", 3.0)],
             // **A dawn errand, not a second job.** At `Hours(6, 18)` and 2 hours a bake, it out-competed
             // `work` for the whole day and the village lost its rivalries entirely (seed 7: 26 -> 1, seed
             // 42: 33 -> 0, measured). An hour at first light sits where `work`'s `Hours(8, 17)` window is
             // shut, so it adds a morning without taking the day.
             considerations: [
                 (input: Hour, curve: Hours(6.0, 7.0)),
+                (input: Skill("craft"), curve: Linear(1.0, 0.0)),
             ],
             satisfies: [],
             interaction: None,
@@ -68,6 +105,28 @@
             on: RumorReach(deed: "steal", fraction: 0.5),
             then: "fx.emit(\"village_turns\", #{})",
             once: true,
+        ),
+    ],
+    interactions: [
+        (
+            // The transfer is declared here, so no system decides who shares with whom: `Perceive` picks
+            // the pair and the acceptance draw decides whether it happens. The giver pays in goods and is
+            // paid in goodwill, both sides at once.
+            id: "share",
+            on_accept: (
+                actor_gives: [("bread", 1.0)],
+                target_gives: [],
+                actor_to_target: (trust: 0.05),
+                target_to_actor: (trust: 0.05),
+                actor_emotion: Some((Liking, 0.1)),
+                target_emotion: Some((Joy, 0.2)),
+            ),
+            on_reject: (actor_emotion: Some((Distress, 0.05))),
+            barks: (
+                actor: ["Take this."],
+                accepted: ["Thank you kindly."],
+                rejected: ["I have plenty."],
+            ),
         ),
     ],
     conversations: [

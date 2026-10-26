@@ -147,6 +147,18 @@ fn main() {
             Scene::Needs => {
                 app.add_systems(Update, scenes::draw_need_rings);
             }
+            Scene::Goods => {
+                app.init_resource::<scenes::Shares>();
+                app.add_systems(
+                    Update,
+                    (
+                        scenes::track_shares,
+                        scenes::draw_store_rings,
+                        scenes::draw_shares,
+                    )
+                        .chain(),
+                );
+            }
             Scene::Village | Scene::Ties | Scene::Factions => {}
         }
         app.insert_resource(ClearColor(Color::srgb(0.45, 0.55, 0.68)));
@@ -183,6 +195,9 @@ fn main() {
     // numbers printed above.
     feed(&mut rec, &village);
     spread_opinions(&mut rec, &village);
+    if args.scene == Scene::Goods {
+        stock_bakers(&mut rec, &village);
+    }
 
     for frame in 0..args.frames {
         if frame == PLANT_FRAME {
@@ -260,6 +275,26 @@ fn spread_opinions(rec: &mut Recorder, village: &scene::Village) {
     }
 }
 
+/// Gives every other villager a full basket of bread when recording starts, so the goods clip opens with
+/// some people holding loaves and some with nothing and a viewer watches the loaves move.
+///
+/// **This is the demo's starting state, and it is said so on the clip.** In the shipped village the stores
+/// sit near zero (measured, `bread_mean` 0.04 over 17 game-days) because a loaf is eaten about as fast as
+/// it is baked, so a clip taken from the settle state would show a village with nothing to trade. The
+/// model, the rates and the run that produced the printed numbers are untouched.
+fn stock_bakers(rec: &mut Recorder, village: &scene::Village) {
+    for (i, &entity) in village.villagers.iter().enumerate() {
+        if let Some(mut stock) = rec.world().get_mut::<bevy_society::Stock>(entity) {
+            let held = if i % 2 == 0 { 4.0 } else { 0.0 };
+            if stock.0.is_empty() {
+                stock.0.push(held);
+            } else {
+                stock.0[0] = held;
+            }
+        }
+    }
+}
+
 /// Which need the needs clip rings.
 ///
 /// **`food` is index 2, not 1.** The starter pack declares `social` (0), `rest` (1), `food` (2),
@@ -275,7 +310,7 @@ fn camera_entity(rec: &mut Recorder) -> Option<Entity> {
         .next()
 }
 
-/// Plants the rumor about Bram, told by the first weaver.
+/// Plants the rumor about Bram, told by the third weaver.
 fn plant(rec: &mut Recorder, subject: Option<Entity>) {
     let (Some(subject), Some(origin)) = (subject, weaver(rec)) else {
         return;
@@ -293,17 +328,21 @@ fn plant(rec: &mut Recorder, subject: Option<Entity>) {
     });
 }
 
-/// The first weaver: villagers spawn in `NAMES` order, eight per faction, so index 8 is the first
-/// weaver. It is deliberately not the subject, and not a miller.
+/// The third weaver: villagers spawn in `NAMES` order, eight per faction, so index 10 is a weaver. It is
+/// deliberately not the subject, and not a miller.
 ///
-/// A busier teller was tried — the villager with the most accepted `gossip` exchanges over the settle
-/// steps — and measured: the planted rumor reached **2** villagers in both cases, at 240 and at 480
-/// frames, so the extra code bought nothing and was removed.
+/// **Which weaver is chance, and the clip says so.** A rumor moves only when its holder happens to choose
+/// `gossip` beside somebody, so in six game-hours some tellers pass it on and some do not. Measured at
+/// this village, seed and settle on 2026-10-25, tellers at index 1, 3, 8, 16, 18 and 20 told nobody
+/// (`rumor_reach 0.040`, the teller alone) and 5, 10, 12 and 14 told one person (`0.080`). The first weaver
+/// (8) was the old choice and now tells nobody because the economy changed the settle; 10 is the next
+/// weaver along. Choosing the best-surrounded villager was tried and told nobody either, so the extra code
+/// was removed: a better teller is not what this clip is short of, six game-hours are.
 fn weaver(rec: &mut Recorder) -> Option<Entity> {
     rec.world()
         .resource::<PersonIndex>()
         .sorted
-        .get(8)
+        .get(10)
         .map(|&(_, entity)| entity)
 }
 
@@ -383,6 +422,8 @@ enum Scene {
     Factions,
     /// Needs: a ring per villager whose fullness is the need level.
     Needs,
+    /// Goods: a ring per villager whose size is their store of bread, and a line for every loaf shared.
+    Goods,
 }
 
 impl Scene {
@@ -394,6 +435,7 @@ impl Scene {
             "ties" => Self::Ties,
             "factions" => Self::Factions,
             "needs" => Self::Needs,
+            "goods" | "share" => Self::Goods,
             _ => return None,
         })
     }
