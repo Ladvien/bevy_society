@@ -183,7 +183,12 @@ Model A (`eth-cgl-ar_games-Zun16a` §3.1.1: "the price modifier term v(r) double
 empty and halves the price if the storage is full"). It is clamped to
 `[Tuning::price_floor, Tuning::price_ceiling]`. The same six loaves therefore price differently in a village
 of three and one of thirty, which a count of units could not say. **Nothing gates**: an empty store never
-stops anyone eating.
+stops anyone eating — but **it stops the meal feeding them**. An activity's `satisfies` is paid in
+proportion to what its `consumes` actually took, `min(1, held / asked)`, so `eat` from an empty larder still
+walks to the table, still spends the ticks, and restores no `food`. A partial store feeds partially. An
+activity with no `consumes` is unaffected; its payout is exactly what it always was. This follows
+Zandstra 2000 (DOI `10.18174/197257`), whose *satiation* — the term that "influences the size of meals" —
+is what `satisfies` is modelling.
 
 A good changes hands on an accepted interaction:
 
