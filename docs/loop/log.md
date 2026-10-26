@@ -4142,3 +4142,72 @@ clean. Perf: 0.762 ms/tick at 100 and 517.0 at 5 000, inside a ~10% spread.
    unmeasured number.
 4. **`last_exchange_day` on `Tie`** — needs the save version bump, which is now a familiar shape. One field.
 5. **A skill cannot improve**, and a price has no counterparty. Both in `docs/research/economics.md`.
+
+## 2026-10-25-08 — Goods change hands
+
+**Pick.** Item 5, trade between villagers: the last gap in the economy the request named ("basic economics"), and
+the first remaining item of the previous iteration. It beats the runner-up (the `O(n·endings)` scan in
+`produce_and_consume`) because it is host-visible and the scan is one line nobody can observe.
+
+**What shipped.** `actor_gives` / `target_gives` on an interaction's `on_accept` (both sides in one call, each
+giving what it has, so a pair cannot create a good); `Input::Surplus(good)`, the joint surplus of two stores,
+`value(target) − value(own)` with `value(held) = 1 / (1 + held)`, zero unless the giver holds **more than**
+`Tuning::trade_reserve` (1.0) and the gap is at least `Tuning::trade_margin` (0.1). Sources: Hall 2005 reporting
+Hall & Milgrom (`10.3386/w11678`, a bargain needs a joint surplus) and Parunak et al. (`10.1007_11678809_10`,
+pairwise Edgeworth barter). In the village it is **sharing**, because the village has one good — Henrich et al.
+(`10.1017/S0140525X05000142`) — and `bake` now makes three loaves and weighs `Skill("craft")`, which is the first
+division of labour in the pack. A new clip, `docs/media/goods.gif`.
+
+**The numbers are in the eval, nine seeds.** Before (`37d80e8`) → after: friends **15.6 → 18.8** (+3.2 ± 1.2), rivals
+**18.2 → 18.4**, rumor reach **0.245 → 0.153** (−0.09 ± 0.08, inside the noise), interrupted endings **320 → 319**,
+**37.1 shares** in 17 game-days, and the spread of bread across the village **0.854 → 0.529** against the same pack
+without `share` (largest store 3.17 → 1.97). Perf: inside the noise at 100 and 5 000 people (+0.2% median at 5 000);
+the neighbour-store copy costs about 1% at 5 000 with the village pack.
+
+**Three things that did not go the way the plan said.**
+
+1. **The plan's price claim was wrong.** "The price stops running to its clamp once trade is possible" does not
+   follow from a transfer, which neither produces nor consumes, and it measured the other way. What is true and
+   tested is the **spread of stores**. Reading `produce_and_consume` to find out why then found a real defect in
+   *last iteration's* model: `consumed` is what `Stock::take` removed, so `produced − consumed` is net stock, and
+   **the price rises when bread piles up** while a real shortage is invisible. The sign was flipped to pass a test.
+   With a three-loaf bake the price sits on its floor **28.5%** of ticks (1% at one loaf). Not fixed here; the
+   README and `economics.md` now call the price a known defect.
+2. **Three seeds could not test the regression.** Seeds 7 / 42 / 11 moved rivals +8 / −2 / −13 on an earlier
+   version whose nine-seed mean was level; the baseline's own seed-to-seed spread is 5.8 rivals. The comparison is
+   now a nine-seed paired mean ± standard error.
+3. **Reading the log found a bug the numbers hid.** `shares.txt` said "Vesna holds 0.0": villagers were giving away
+   their only loaf. Making the gate "more than the reserve" cut shares **94.9 → 37.1 and left the levelling
+   identical**, so the 58 extra were doing nothing. One race remains (the reserve is read at decision time; 1 of 76
+   logged shares left a giver at 0).
+
+**Also**
+
+- The clips: every one re-recorded after the pack changed. The hero's first weaver now tells nobody in six game-hours;
+  of ten tellers tried, four pass the rumor on, so the capture uses index 10 and the README says it is a choice among
+  ten. The six older clips are **bit-identical** after the final change (frames 0 / 120 / 239 md5-equal).
+- `tests/scenario_spec.rs` pinned "7 scenarios"; it now compares seeds with scenarios, so it cannot go stale.
+- Papers: downloaded Perc et al. 2017 (`10.1016/j.physrep.2017.05.004`) for the cooperation/reciprocity work;
+  Akerlof & Kranton 2000 (identity and economics, `10.1162/003355300554881`) had no open copy.
+
+**Verdicts.** Pass 1 GREAT (the price prediction is recorded as wrong, not claimed). Pass 2 GREAT on the change, with
+the price clipping recorded as pre-existing. Pass 3 GREAT (seed 99, 36 people).
+
+**Dead-code delta.** Zero. **Tests:** `tests/trade.rs` is new (7); both feature sets green; `clippy --all-features`,
+`fmt`, `doc` clean. (`clippy --no-default-features` has five dead-code errors in the dialogue types; they predate this
+change and the documented command is `--all-features`.)
+
+**Commit** `13ac880` (no `gh` on this machine, so no PR was opened; pushed to `main` as the previous iterations were).
+
+**Top 5 remaining.**
+
+1. **The price model follows net stock and counts units, not heads.** It should read **unmet demand** (what an eater
+   asked for and could not take) and scale per head. Needs an `unmet` counter, its own research (excess-demand price
+   adjustment) and its own measurement. Evidence: `2026-10-25-08/evidence/plots/spread.png`, bottom left.
+2. **Rivalries explode with population.** 18 at 24 people, **183 at 36** at the baseline (seed 99). The largest
+   believability problem this run found, and unrelated to trade.
+3. **A second good, for real barter.** The engine swaps two goods and tests it; the village needs a consumer for the
+   second good (nothing consumes cloth) and a `Want` input mirroring `Surplus` so both sides gain.
+4. **The refusal rate is `accept.base` 0.50** — still the most host-visible unmeasured number.
+5. **`produce_and_consume` scans `PersonIndex` per ending** (`O(n·endings)`), and `last_exchange_day` on `Tie` still
+   wants the save-version bump.
