@@ -43,7 +43,7 @@ The capture uses **10**, the next weaver along. A busier teller picked by neighb
 nobody either, so it was removed. The hero's "2 of 24" is therefore **a choice among ten, four of which work**,
 and the README says so.
 
-### The clips were rebuilt in 2026-11-28, and every one of them had been lying
+### The clips were rebuilt on 2026-10-24 (`f9ca267`), and every one of them had been lying
 
 A visual review of the previous set found six separate faults. They are recorded because each has a
 shape a later change could reintroduce.

@@ -4,33 +4,29 @@ Give your Bevy world a living society: villagers who remember, gossip, take side
 
 [![CI](https://github.com/Ladvien/bevy_society/actions/workflows/ci.yml/badge.svg)](https://github.com/Ladvien/bevy_society/actions/workflows/ci.yml)
 
+## The demo
+
 ![A rumor spreads through a village](https://github.com/Ladvien/bevy_society/raw/main/docs/media/village.gif)
 
-One afternoon in a village of twenty-four people: a weaver tells the rumor that Bram stole bread, and in the six game-hours the clip covers (14:00 to 20:00) it passes to a second villager — known by **2 of 24** at the end, as the counter in the corner shows. The same run recorded twice as long, twelve game-hours, is still at 2, and which weaver tells matters: of ten tellers tried, four passed it on inside six hours and six did not (`docs/DEMOS.md`), so this clip tells it from one of the four. A rumor crosses a village in game-days, not hours, because each telling is one choice among many and the Daley–Kendall rule stifles a teller whose listener already knew. Tie lines show friendships green; the magenta ring marks whoever knows the rumor. (No clip draws a rivalry — six game-hours is too short for one to form; the full 17-game-day run forms 18 at seed 7, and 16 on average over nine seeds.) Every clip below is the same village, same seed, same run — only the overlay changes, except **Goods**, which also opens with bread handed out and says so.
+One afternoon in a village of twenty-four people: a weaver tells the rumor that Bram stole bread, and in the six game-hours the clip covers (14:00 to 20:00) it passes to one more villager — the plate in the corner reads `known by 2/24` on the last frame. The same run recorded twice as long, twelve game-hours, is still at 2, and which weaver tells matters: of ten tellers tried, four passed it on inside six hours and six did not (`docs/DEMOS.md`), so this clip tells it from one of the four. A rumor crosses a village in game-days, not hours, because each telling is one choice among many and the Daley–Kendall rule stifles a teller whose listener already knew. Tie lines show friendships green; the magenta ring marks whoever knows the rumor.
+
+Every clip below is the same village, same seed, same run — only the overlay changes, except **Goods**, which also opens with bread handed out and says so. None of them draws a rivalry: the plate reads `Rivalries 0` from first frame to last, because six game-hours is not long enough for one to form. The full run does form them — 7 rival pairs of 276 at seed 7 over 17.6 game-days, with `Tuning::rival_band` at its default (`docs/loop/runs/2026-10-27-02/eval.md`).
 
 ### One clip per feature
 
 | | |
 |---|---|
-| ![Mood](https://github.com/Ladvien/bevy_society/raw/main/docs/media/mood.gif) **Mood** — a halo on every villager. Green is pleased, amber neutral, red displeased; halo size is arousal. The colour scale is normalised to the ±0.4 the model actually produces, so a small mood shift is visible. | ![Opinion](https://github.com/Ladvien/bevy_society/raw/main/docs/media/opinions.gif) **Opinions** — one bar per villager on the honesty topic, green above the midpoint and red below, length by strength. |
-| ![Needs](https://github.com/Ladvien/bevy_society/raw/main/docs/media/needs.gif) **Needs** — a full green halo is a fed villager, a small red one is hungry. | ![Ties](https://github.com/Ladvien/bevy_society/raw/main/docs/media/ties.gif) **Relationships** — the tie graph alone: green friendship, red rivalry, brightness by familiarity. |
-| ![Factions](https://github.com/Ladvien/bevy_society/raw/main/docs/media/factions.gif) **Factions** — orange millers, green weavers, violet watch, no ties, so the group structure is the only thing on screen. | ![Goods](https://github.com/Ladvien/bevy_society/raw/main/docs/media/goods.gif) **Goods** — a gold ring is a villager holding bread, sized by how much; a small dark one holds none; a white line is a loaf being shared. The recording opens with every other villager holding four loaves (the village's own stores sit near zero, so a clip from the settled state would have nothing to show) and **5 loaves are shared in the six game-hours**, moving the count of villagers holding bread from 12 to 17 — the counter in the corner says so. The hero clip above is the same run with every overlay on. |
+| ![Mood](https://github.com/Ladvien/bevy_society/raw/main/docs/media/mood.gif) **Mood** — a halo on every villager. Green is pleased, amber neutral, red displeased; halo size is arousal. The colour scale is normalised to the ±0.45 this village actually spans (`MOOD_SPAN`), so a small mood shift is a visible colour change rather than every villager the same olive. | ![Opinion](https://github.com/Ladvien/bevy_society/raw/main/docs/media/opinions.gif) **Opinions** — one bar per villager on the honesty topic, green above the midpoint and red below, length by strength, all drawn from a fixed origin so a near-neutral opinion is still legible. |
+| ![Needs](https://github.com/Ladvien/bevy_society/raw/main/docs/media/needs.gif) **Needs** — a full green halo is a fed villager, a small red one is hungry. | ![Ties](https://github.com/Ladvien/bevy_society/raw/main/docs/media/ties.gif) **Relationships** — the tie graph alone: green friendship, red rivalry, brightness by familiarity, and only for pairs already familiar. Every line in this clip is green — the village has no rivalry yet. |
+| ![Factions](https://github.com/Ladvien/bevy_society/raw/main/docs/media/factions.gif) **Factions** — orange millers, green weavers, violet watch, no ties, so the group structure is the only thing on screen. | ![Goods](https://github.com/Ladvien/bevy_society/raw/main/docs/media/goods.gif) **Goods** — a gold ring is a villager holding bread, sized by how much; a small dark one holds none; a white line is a loaf being shared. The recording opens with every other villager holding four loaves (the village's own stores sit near zero, so a clip from the settled state would have nothing to show), and the plate reads `0 loaves shared · 12 hold bread` on the first frame and `5 loaves shared · 17 hold bread` on the last. The hero clip above is the same run with every overlay on. |
 
-## Cargo features
-
-| feature | default | turns on |
-|---|---|---|
-| `dialogue` | yes | `DialoguePlugin`, `TalkTo`, barks and conversations through `bevy_speech_bubbles`. The host adds `SpeechBubblesPlugin` over its own camera. |
-| `steering` | yes | `SteeringPlugin`: `SocialMover` walking under ORCA (`bevy_orca`), and `Obstacle`. |
-| `fields` | yes | `SocialFieldPlugin`: crowd presence and commotion grids and per-faction presence grids (`bevy_stigmergy`), the `Field` consideration and the `Gradient` target. |
-| `serde` | no | `SocietySave`, `capture` and `restore`: save and load the whole society. |
-| none (`--no-default-features`) | | the core: mind, daily life, relationships, opinions, rumors, reputation, factions, scripts and `DecisionTrace`. |
+`docs/DEMOS.md` is the recipe: the scene each clip is recorded from, the camera, the encode, and what a visual review has caught in each rebuild.
 
 ## What you get
 
 - **People with a mind** — Big Five personalities, moods on a pleasure/arousal/dominance axis, an OCC emotion set, needs that decay, and memories that fade. [personality-and-mood](https://github.com/Ladvien/bevy_society/blob/main/docs/research/personality-and-mood.md), [memory](https://github.com/Ladvien/bevy_society/blob/main/docs/research/memory.md)
 - **Daily life and trades** — utility-AI decisions over tagged places and other people, with travel, arrival, durations and need satisfaction. A **task is not a skill**: an activity can declare a `profession`, and a `Skill("craft")` consideration reads the trait that capability comes from, so who does the skilled work is decided by comparative advantage rather than by assignment. Nothing is gated — an unskilled villager can still take the task, at a lower score. [needs-and-utility](https://github.com/Ladvien/bevy_society/blob/main/docs/research/needs-and-utility.md) A **full place costs** instead of vanishing: a place with no free seat keeps `1 - Tuning::crowding_penalty` of its score, so a villager with an alternative goes elsewhere and one with none still arrives, while `capacity: 0` is closed. Measured, this holds a village's rival density at 2.9-6.1% of pairs as it grows from 24 to 48 people in a 30-seat village, where the old veto took it to 23% and lost the working day. [capacity](https://github.com/Ladvien/bevy_society/blob/main/docs/loop/runs/2026-10-25-10/eval.md)
-- **Relationships** — directed ties carrying affinity, trust, respect and familiarity, with power-law forgetting, structural balance, a Dunbar-style cap and friend/rival labels. Affinity is **clamped to `±Tuning::affinity_ceiling` (0.35)** and a `Friend` needs trust as well, so a large town with daily contact keeps friendship scarce: measured, 60 people over 30 game-days reach 155 friend ties of 3 540 ordered pairs (**4.4%**) and 656 rivals. [relationships](https://github.com/Ladvien/bevy_society/blob/main/docs/research/relationships.md), [the measurement](https://github.com/Ladvien/bevy_society/blob/main/docs/loop/needs-decision/friendship-has-no-diminishing-return.md)
+- **Relationships** — directed ties carrying affinity, trust, respect and familiarity, with power-law forgetting, structural balance, a Dunbar-style cap and friend/rival labels. Affinity is **clamped to `±Tuning::affinity_ceiling` (0.35)** and a `Friend` needs trust as well, so a large town with daily contact keeps friendship scarce: measured, 60 people over 30 game-days reach 155 friend ties of 3 540 ordered pairs (**4.4%**). [relationships](https://github.com/Ladvien/bevy_society/blob/main/docs/research/relationships.md), [the measurement](https://github.com/Ladvien/bevy_society/blob/main/docs/loop/needs-decision/friendship-has-no-diminishing-return.md)
 - **Opinions** — bounded-confidence influence, stubborn anchors and conformity to a clear group majority. [opinion-dynamics](https://github.com/Ladvien/bevy_society/blob/main/docs/research/opinion-dynamics.md)
 - **Rumors and reputation** — gossip with the Daley–Kendall stifling rule, belief scaled by trust, witnesses who judge deeds and hold grudges. [rumor-and-reputation](https://github.com/Ladvien/bevy_society/blob/main/docs/research/rumor-and-reputation.md)
 - **Factions and status** — in-group affinity, standing as conferred respect, contests and intergroup contact. [groups-and-status](https://github.com/Ladvien/bevy_society/blob/main/docs/research/groups-and-status.md)
@@ -44,12 +40,16 @@ One afternoon in a village of twenty-four people: a weaver tells the rumor that 
 
 Every formula traces to a paper; every rate is a named field on `Tuning`; every default either comes from a paper or says it is a design default.
 
-## Quick start
+## Install
 
 ```toml
 [dependencies]
 bevy_society = "0.3"
 ```
+
+## Quick start
+
+This is the crate's own doctest, and `tests/readme.rs` fails if the two ever differ.
 
 ```rust,no_run
 use bevy::prelude::*;
@@ -90,8 +90,7 @@ for _ in 0..600 {
 assert!(app.world().resource::<SocietyClock>().tick > 0);
 ```
 
-Run it headlessly with `cargo run --example quickstart`, which is this code. On a real run it reports
-`237 social exchanges, 127 accepted` after nine game-days.
+Run it headlessly with `cargo run --example quickstart`. The example sets a short 16-second game-day, so 600 updates are enough for the village to start talking; on this code it reports `229 social exchanges, 112 accepted`.
 
 The full village, with balloons and the debug server:
 
@@ -100,6 +99,16 @@ cargo run --example village -- /System/Library/Fonts/Supplemental/Arial.ttf
 ```
 
 Font paths: macOS `/System/Library/Fonts/Supplemental/Arial.ttf`; Linux `/usr/share/fonts/liberation/LiberationSans-Regular.ttf`; Windows `C:\Windows\Fonts\arial.ttf`.
+
+## Cargo features
+
+| feature | default | turns on |
+|---|---|---|
+| `dialogue` | yes | `DialoguePlugin`, `TalkTo`, barks and conversations through `bevy_speech_bubbles`. The host adds `SpeechBubblesPlugin` over its own camera. |
+| `steering` | yes | `SteeringPlugin`: `SocialMover` walking under ORCA (`bevy_orca`), and `Obstacle`. |
+| `fields` | yes | `SocialFieldPlugin`: crowd presence and commotion grids and per-faction presence grids (`bevy_stigmergy`), the `Field` consideration and the `Gradient` target. |
+| `serde` | no | `SocietySave`, `capture` and `restore`: save and load the whole society. |
+| none (`--no-default-features`) | | the core: mind, daily life, relationships, opinions, rumors, reputation, factions, scripts and `DecisionTrace`. |
 
 ## A tour
 
@@ -137,7 +146,7 @@ Options are scored by compensated considerations, tiered by `rank`, and drawn by
 
 ### Relationships
 
-`Ties` holds one directed edge per person with affinity, trust, respect and familiarity. Labels are recomputed each tick and a change writes `TieLabelChanged`. **A label is a latitude, not a line**: entering a category and leaving it are different tests (`Tuning::label_hysteresis` at the low end, `Tuning::friend_band` for a friendship, `Tuning::rival_band` for a rivalry), so a value resting on a bar does not announce a relationship change every time the model nudges it. Measured, a friendship now lasts a median **1.0 game-day** instead of **0.36**, and a rivalry **2.64** instead of **0.29** — before the rival band a `Rival` was released when its affinity climbed **0.0001** above the bar, so the village made rivalries it could not keep.
+`Ties` holds one directed edge per person with affinity, trust, respect and familiarity. Labels are recomputed each tick and a change writes `TieLabelChanged`. **A label is a latitude, not a line**: entering a category and leaving it are different tests (`Tuning::label_hysteresis` at the low end, `Tuning::friend_band` for a friendship, `Tuning::rival_band` for a rivalry), so a value resting on a bar does not announce a relationship change every time the model nudges it. Measured on `village-evening` at seed 7, a friendship now lasts a median **1.01 game-days** instead of **0.36** (`CHANGELOG.md`, 0.3.0), and a rivalry **2.64** instead of **0.29** — before the rival band a `Rival` was released when its affinity climbed **0.0001** above the bar, so the village made rivalries it could not keep ([the sweep](https://github.com/Ladvien/bevy_society/blob/main/docs/loop/runs/2026-10-27-02/eval.md)).
 
 ### Opinions
 
@@ -217,7 +226,7 @@ The papers were gathered with [home-still](https://github.com/Ladvien/bevy_socie
 
 | bevy_society | Bevy |
 |---|---|
-| 0.1 | 0.20 |
+| 0.1, 0.2, 0.3 | 0.20 |
 
 ## Documentation
 

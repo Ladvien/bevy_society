@@ -8,4 +8,4 @@
 - [`guide/scripting.md`](guide/scripting.md) — the Rhai `ctx` / `fx` API, triggers and limits.
 - [`guide/dialogue.md`](guide/dialogue.md) — conversations and barks.
 - [`research/README.md`](research/README.md) — the papers behind every formula, per module.
-- [`DEMOS.md`](DEMOS.md) — how the six README clips were captured, encoded and visually checked.
+- [`DEMOS.md`](DEMOS.md) — how the seven README clips were captured, encoded and visually checked.
