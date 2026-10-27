@@ -358,6 +358,38 @@ pub struct Tuning {
     ///
     /// `0.0` is the single bar, `classify_with_trust` exactly.
     pub friend_band: f32,
+    /// How far above `-`[`Self::rival_affinity`] a rivalry's affinity may rise before the rival label
+    /// is lost, in affinity units. The mirror of [`Self::friend_band`].
+    ///
+    /// **A rivalry with no band is a label, not a grudge.** Without this clause a Rival was released the
+    /// instant its affinity rose above `-rival_affinity` — which affinity relaxation does on its own, at
+    /// `affinity_relax_per_day` 0.01 a game-day, and one accepted `compliment` does ten times over.
+    /// Measured on `village-evening`, three seeds, 2.93 game-days, pair level: rival spells lasted a
+    /// median of **0.14 / 0.29 / 0.38 game-days** and the affinity at the moment of release was
+    /// **0.0001-0.0002 above the bar** — one arithmetic step — while `became_rival` (47 / 43 / 19) ran
+    /// almost level with `left_rival` (42 / 38 / 19). The village formed rivalries it could not keep, and
+    /// no rival spell ended for want of familiarity (0 of 149 released below `familiarity_peak` 0.1).
+    ///
+    /// **The direction is the pack's own citation, and the crate had it inverted.** `snub`'s
+    /// consideration cites Baumeister, Bratslavsky, Finkenauer & Vohs 2001 (DOI
+    /// `10.1037/1089-2680.5.4.323`): "bad impressions and bad stereotypes are quicker to form and **more
+    /// resistant to disconfirmation** than good ones". Quicker to form is implemented — one insult moves
+    /// every witness — and more resistant to disconfirmation was not, because the positive side alone had
+    /// a band. The paper's other half, "good may prevail over bad by superior force of numbers", is why
+    /// this is a band and not a floor: good still wins on count, which the village already shows.
+    ///
+    /// The shape is the **latitude of acceptance** the other two bands use — a judgement about a person is
+    /// a band around an anchor, and a stimulus just past the anchor's end shifts the band rather than
+    /// reversing the judgement (Sherif & Hovland 1961, via Fagan & Browne 1994: 219-220, corpus doc
+    /// `10.1007_0-306-47586-3_8`). **The source gives the shape and no number**: this width is a **design
+    /// default chosen by measurement** — `docs/loop/runs/2026-10-27-02/eval.md`.
+    ///
+    /// A rivalry still ends: affinity must climb the whole band, so reconciliation needs a real change
+    /// rather than rounding. `0.0` is the single bar, the behaviour before this field existed. The field
+    /// is **clamped at [`Self::rival_affinity`]** inside `classify_from`, because a band as wide as the
+    /// bar would hold a rivalry at any affinity below zero and one wider than it would hold a tie at any
+    /// affinity under [`Self::affinity_ceiling`] — a grudge that no amount of good conduct releases.
+    pub rival_band: f32,
     /// Affinity lost by the person whose approach is **refused**, per refusal.
     ///
     /// Design default (no source paper gives it); it was a literal `0.05` in `resolve_interactions` until
@@ -534,6 +566,9 @@ impl Default for Tuning {
             // **Design default, chosen by measurement.** 0.05 holds a friendship through one refusal
             // without creating one: measured, rivals unchanged, friends 18 -> 22 at seed 7.
             friend_band: 0.05,
+            // **Design default, chosen by measurement** — `docs/loop/runs/2026-10-27-02/eval.md`. The
+            // release margin it replaces was 0.0001, and the sweep is below.
+            rival_band: 0.1,
             rejection_affinity_penalty: 0.05,
             contest_steepness: 4.0,
             tier_cutoff: 0.25,

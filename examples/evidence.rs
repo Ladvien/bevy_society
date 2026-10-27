@@ -58,6 +58,9 @@ fn main() {
     if let Some(band) = args.friend_band {
         settings.tuning.friend_band = band;
     }
+    if let Some(band) = args.rival_band {
+        settings.tuning.rival_band = band;
+    }
     if let Some(rate) = args.dyad_balance {
         settings.tuning.dyad_balance_per_day = rate;
     }
@@ -170,11 +173,25 @@ fn main() {
             planted = plant(&mut app, &world, &gossipers);
         }
         let mut shared_now: Vec<(Entity, Entity)> = Vec::new();
+        // **Two messages are read by two consumers, so they are drained once into a `Vec`.** The
+        // narrative needs every `InteractionResolved` and `ActivityEnded` that touches the tracked
+        // person, and the counters below need all of them for the whole village. Draining in the counters
+        // first — which is what this did — left the narrative with **no interaction line and no
+        // `finished` line at all**: a reader saw `started snub` with no target and no outcome, on the
+        // change whose whole subject is which pairs are rivals. Nothing said so; the file simply read
+        // plausibly.
+        let resolved_now: Vec<InteractionResolved> = app
+            .world_mut()
+            .resource_mut::<bevy::ecs::message::Messages<InteractionResolved>>()
+            .drain()
+            .collect();
+        let ended_now: Vec<ActivityEnded> = app
+            .world_mut()
+            .resource_mut::<bevy::ecs::message::Messages<ActivityEnded>>()
+            .drain()
+            .collect();
         {
-            let mut exchanges = app
-                .world_mut()
-                .resource_mut::<bevy::ecs::message::Messages<InteractionResolved>>();
-            for resolved in exchanges.drain() {
+            for resolved in &resolved_now {
                 // **Both sides of the affinity ledger.** `compliment` is the only activity that raises
                 // affinity between two people; a witnessed deed lowers it for every witness. Without
                 // counting both, a claim about which side outweighs the other cannot be checked — and an
@@ -251,10 +268,7 @@ fn main() {
         // counters drain every `ActivityEnded` for everybody, which is what a steering change has to
         // be judged on.
         {
-            let mut ended = app
-                .world_mut()
-                .resource_mut::<bevy::ecs::message::Messages<ActivityEnded>>();
-            for message in ended.drain() {
+            for message in &ended_now {
                 if message.completed {
                     completed_endings += 1;
                 } else {
@@ -288,7 +302,14 @@ fn main() {
             peak_known_by = peak_known_by.max(row.known_by);
             rows.push(row);
         }
-        drain_narrative(&mut app, &world, tracked, &mut lines);
+        drain_narrative(
+            &mut app,
+            &world,
+            tracked,
+            &resolved_now,
+            &ended_now,
+            &mut lines,
+        );
     }
 
     let out = PathBuf::from(&args.out);
@@ -973,7 +994,14 @@ fn store_spread(ecs: &EcsWorld, villagers: &[Entity]) -> (f32, f32, f32, f32) {
 }
 
 /// Reads the messages a tracked person produced this tick into `lines`.
-fn drain_narrative(app: &mut App, world: &World, tracked: Option<Entity>, lines: &mut Vec<String>) {
+fn drain_narrative(
+    app: &mut App,
+    world: &World,
+    tracked: Option<Entity>,
+    resolved_now: &[InteractionResolved],
+    ended_now: &[bevy_society::ActivityEnded],
+    lines: &mut Vec<String>,
+) {
     let Some(tracked) = tracked else {
         return;
     };
@@ -991,29 +1019,19 @@ fn drain_narrative(app: &mut App, world: &World, tracked: Option<Entity>, lines:
                 ));
             }
         }
-        let mut ended = app
-            .world_mut()
-            .resource_mut::<bevy::ecs::message::Messages<ActivityEnded>>();
-        for message in ended.drain().filter(|m| m.person == tracked) {
-            {
-                lines.push(format!(
-                    "{:>5}: finished {} ({})",
-                    clock_label(&clock),
-                    message.activity,
-                    if message.completed {
-                        "completed"
-                    } else {
-                        "interrupted"
-                    }
-                ));
-            }
+        for message in ended_now.iter().filter(|m| m.person == tracked) {
+            lines.push(format!(
+                "{:>5}: finished {} ({})",
+                clock_label(&clock),
+                message.activity,
+                if message.completed {
+                    "completed"
+                } else {
+                    "interrupted"
+                }
+            ));
         }
-        let resolved_messages: Vec<InteractionResolved> = app
-            .world_mut()
-            .resource_mut::<bevy::ecs::message::Messages<InteractionResolved>>()
-            .drain()
-            .collect();
-        for message in resolved_messages {
+        for message in resolved_now {
             if message.actor == tracked || message.target == tracked {
                 let other = if message.actor == tracked {
                     message.target
@@ -1306,6 +1324,9 @@ struct Args {
     label_hysteresis: Option<f32>,
     /// Overrides `Tuning::friend_band`, so a run can be read with a friendship held below its bar.
     friend_band: Option<f32>,
+    /// Overrides `Tuning::rival_band`, so the band a rivalry is held through can be swept without
+    /// editing the crate.
+    rival_band: Option<f32>,
     /// Overrides `Tuning::dyad_balance_per_day`, so a run can be read with ties pulled toward reciprocity.
     dyad_balance: Option<f32>,
     /// `Tuning::witness_dilution`, so the exponent can be swept without editing the crate.
@@ -1334,6 +1355,7 @@ impl Args {
             friend_affinity: None,
             label_hysteresis: None,
             friend_band: None,
+            rival_band: None,
             dyad_balance: None,
             witness_dilution: None,
             days: None,
@@ -1355,6 +1377,7 @@ impl Args {
                     args.label_hysteresis = argv.next().and_then(|v| v.parse().ok())
                 }
                 "--friend-band" => args.friend_band = argv.next().and_then(|v| v.parse().ok()),
+                "--rival-band" => args.rival_band = argv.next().and_then(|v| v.parse().ok()),
                 "--dyad-balance" => args.dyad_balance = argv.next().and_then(|v| v.parse().ok()),
                 "--witness-dilution" => {
                     args.witness_dilution = argv.next().and_then(|v| v.parse().ok())

@@ -4,12 +4,26 @@ All notable changes to bevy_society. The format follows [Keep a Changelog](https
 
 ## [Unreleased]
 
+### Added
+
+- **A rivalry is held through a band, as a friendship already was.** `TieLabel::classify_from` kept a `Friend` while its affinity had dipped no further than `friend_band` below its bar, and had **no matching clause for `Rival`** — so a rivalry was released the instant affinity rose above `-rival_affinity`. Measured at pair level on `village-evening` (three seeds, 2.93 game-days), the affinity at the moment of release was **0.0001–0.0002 above the bar**, one relaxation step; rival spells lasted a median of **0.14 / 0.29 / 0.38 game-days**; `became_rival` (47 / 43 / 19) ran almost level with `left_rival` (42 / 38 / 19); and **0 of 149** released spells ended for want of familiarity. The village made rivalries it could not keep.
+
+  The direction is the pack's own citation, and the crate had it inverted. `snub` cites **Baumeister, Bratslavsky, Finkenauer & Vohs 2001** (DOI `10.1037/1089-2680.5.4.323`): bad impressions are "quicker to form and **more resistant to disconfirmation** than good ones". Quicker to form was implemented — one insult moves every witness — and more resistant to disconfirmation was not, because only the positive category had a band. The paper's other half, "good may prevail over bad by superior force of numbers", is why this is a **band and not a floor**: good still wins on count.
+
+  `Tuning::rival_band` is new, default **0.10** — a design default chosen by a three-seed sweep, because Baumeister gives the direction and no number, exactly as it gives `snub`'s direction and not its slope. `0.0` restores the single bar. The field is clamped at `rival_affinity` inside `classify_from`, so a host cannot configure a grudge that no amount of good conduct releases.
+
+  **Measured, same pack and seed:** rival pairs at the end **2 → 7** (seed 7), **0 → 1** (seed 11), **2 → 8** (seed 42); rival pairs averaged over the run **1.13 → 2.98**, **0.21 → 1.04**, **0.66 → 2.57**; ticks with no rivalry at all **46% → 13%**, **79% → 21%**, **59% → 18%**. Median rival spell **0.29 → 2.64 game-days** at seed 7, and the release margin **0.0002 → 0.1002**. **Friend pairs are identical at all three seeds (25 / 21 / 19) and at every band swept**, which is the check that the clause guards one category rather than moving the network. `left_rival` stays above zero at every seed, so a rivalry still reconciles. `docs/loop/runs/2026-10-27-02/`.
+
+  **`examples/evidence` was losing every interaction line from its narrative**, found while reading the run. The counters drained `InteractionResolved` and `ActivityEnded` before `drain_narrative` read them, so the file showed `started snub` with no target and no outcome — on the change whose entire subject is which pairs are rivals. Both messages are now drained once into a `Vec` and read by both consumers.
+
 ### Fixed
 
 - **`DefsFile::merge` carries `goods` and `skills`.** It carried nine lists of eleven and dropped these two, so a pack merged in that declares a good contributed nothing: `SocietyDefs::compile` then resolved every `consumes` and `produces` naming it to "not defined", and the error pointed at the *consuming* activity rather than at the merge. Found when `bake` moved into the starter pack — the exact shape the village example uses (`starter` + `village.society.ron`). An id in both packs is now `DefsError::Duplicate { kind: "good" | "skill" }`, like every other list. `tests/defs.rs` pins the merge, the duplicate and the cross-pack `consumes` case, and all three fail against the old code.
 
 ### Breaking
 
+- **A field was added to `Tuning`, which is not `#[non_exhaustive]`.** `rival_band` (0.10); a host that constructs `Tuning` in full needs a code change, and hosts using `..Default::default()` do not. `rival_band = 0.0` restores the single-bar label exactly, so a host that wants the old behaviour can have it without pinning the version.
+- **`TieLabelChanged` fires less often for the same society**, because a `Rival` label now survives a shallow rise in affinity. Measured on `village-evening` at three seeds: `Rival` releases **42 / 19 / 38 → 13 / 8 / 11**. A host that counted on the old churn is the one that needs the note; nothing else about the message surface moved.
 - **`SocietySave::VERSION` is 2, because `Stock` is the first per-person state added since the format was written.** A version-1 save now comes back as `RestoreError::Version` and is refused rather than misread — which is what `VERSION` exists for. A host with saved societies must discard or migrate them.
 
 ### Added

@@ -88,9 +88,9 @@ measurement, and a test on the constant would only restate the source line.
 - **The village turns hostile in aggregate.** The measurement says rivals are 0–2 today; holding them could take
   that to a number a host dislikes. The sweep records friend and rival pairs together at every setting, and the
   acceptance bar is that friends do not fall by more than the seed spread.
-- **A band above `2 · rival_affinity` would make a rivalry unreleasable** — the clamp is `±affinity_ceiling`
-  (0.35) and `rival_affinity` is 0.30, so any band ≥ 0.60 pins every rival forever. The field's doc states the
-  bound and the sweep does not go near it.
+- **A band as wide as the bar would make a rivalry unreleasable** — the clamp is `±affinity_ceiling` (0.35) and
+  `rival_affinity` is 0.30, so a band of 0.30 pins every rival at any affinity below zero. `classify_from`
+  therefore clamps the field at `rival_affinity`, and the field's doc says so.
 - **`stranger_familiarity` interaction.** A band test at familiarity 0 exercises a path `classify_from` guards
   with `.max(0.0)`; the new clause requires `familiarity >= rival_familiarity` (0.2) explicitly, so it cannot
   hold a tie the tie does not have.

@@ -20,9 +20,18 @@ Each person keeps a `Ties` component: one `Tie` per person they know. A tie hold
   - otherwise Acquaintance.
   `refresh_label` returns the old and new label only when the label changes.
 - **Leaving a category is not the same as entering it** (`TieLabel::classify_from`). An `Acquaintance`
-  falls back to a `Stranger` only at `stranger_familiarity − label_hysteresis`, and a `Friend` is kept while
-  its affinity has dipped no further than `friend_band` below `friend_affinity`. See "A label is a latitude"
-  below.
+  falls back to a `Stranger` only at `stranger_familiarity − label_hysteresis`, a `Friend` is kept while
+  its affinity has dipped no further than `friend_band` below `friend_affinity`, and — since 2026-10-27-02
+  — a `Rival` is kept while its affinity has risen no further than `rival_band` above `−rival_affinity`.
+  See "A label is a latitude" below.
+- **The rival band, measured.** Without it a `Rival` was released at a margin of **0.0001–0.0002** above
+  its bar — one relaxation step — and rival spells lasted a median of **0.14 / 0.29 / 0.38 game-days** at
+  seeds 7 / 42 / 11, with `became_rival` (47 / 43 / 19) almost level with `left_rival` (42 / 38 / 19) and
+  **0 of 149** released spells ending for want of familiarity. The direction is Baumeister et al. 2001
+  (DOI `10.1037/1089-2680.5.4.323`), which the pack already cites at `snub`: bad impressions are "quicker
+  to form and **more resistant to disconfirmation** than good ones". The width is a design default chosen
+  by sweep at three seeds; friend counts are **identical (25 / 21 / 19) at every band tested**, so the
+  clause isolates the negative category rather than moving the network:
 
 - **The label thresholds are `Tuning` fields.** `friend_affinity` 0.4, `friend_familiarity` 0.3, `rival_affinity` 0.4, `rival_familiarity` 0.2, `stranger_familiarity` 0.1, and `rejection_affinity_penalty` 0.05 — all **design defaults**, none from a paper. They were literals inside `classify` until 2026-12-12. Measured, `friend_familiarity` is satisfied by 0.907 among friend-ties and 0.908 among the rest, so that term discriminates nothing; that is now visible and adjustable in one place.
 - **Trust can rise and fall.** `chat` (+0.05 to each party), `gossip` (+0.03) and `compliment` (+0.02) raise it on accept; `witness_reaction` moves it by `trust_gain * harm`, so a witnessed `steal` (`harm -0.7`) is **-0.14 per witness**. The starter pack set **no** trust delta at all until 2026-12-03, so trust could only fall: measured, targets held **0.13-0.27** toward the person approaching them against the 0.5 that `AcceptDef` treats as neutral, and 47% of interactions were refused.
