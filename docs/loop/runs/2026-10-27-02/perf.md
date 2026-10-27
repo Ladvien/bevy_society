@@ -11,12 +11,18 @@ Before build is a worktree at `cd9b10e` (the research commit, `src/` untouched b
 |---|---|---|---|---|---|---|
 | 100 | 1 | 0.951 | 0.987 | 0.893 | 0.879 | 22.2% / 24.8% |
 | 100 | 2 | 0.974 | 1.029 | 0.900 | 0.926 | 26.6% / 23.3% |
+| 100 | 3 | 0.964 | 0.973 | 0.863 | 0.821 | 25.9% / 32.6% |
 | 1 000 | 1 | 39.452 | 42.169 | 29.841 | 30.355 | 35.4% / 35.6% |
+| 1 000 | 2 | 40.758 | 41.470 | 29.655 | 32.531 | 40.3% / 34.1% |
+| 1 000 | 3 | *47.388* | *67.081* | *33.407* | *64.327* | 53.9% / 6.9% — **contaminated, discarded** |
 
-**The spread is larger than the difference between the builds at both sizes** (22–27% at 100 people, 35% at
-1 000), so neither figure distinguishes them. The `min` columns are the closest comparison available — a fast
-window is evidence the machine was momentarily quiet — and they differ by **1.6%** at 100 people and **1.7%** at
-1 000, in opposite directions across rounds.
+**The spread is larger than the difference between the builds at both sizes** (22–33% at 100 people, 34–54% at
+1 000), so the medians distinguish nothing. The `min` columns are the closest comparison available — a fast window
+is evidence the machine was momentarily quiet — and across the three 100-person rounds the after build is
+sometimes faster and sometimes slower (min 0.821–0.926 after against 0.863–0.900 before). The 1 000-person rounds
+differ by 1.7%, 9.7% and 92% in the *same* direction, and the third is not a measurement of the code: it ran
+concurrently with the full test suite and its spread collapsed to 6.9% because a second process pinned both builds
+at the same contended speed. Only the first two 1 000-person rounds ran on a quiet-ish machine.
 
 The machine was under load from other work for the whole iteration (load average 20–40 on 24 cores), which is why
 the spreads are this wide; `docs/loop/runs/2026-12-26-01/eval.md` measured **100%** spreads on the same laptop at
