@@ -67,6 +67,9 @@ fn main() {
     if let Some(exponent) = args.witness_dilution {
         settings.tuning.witness_dilution = exponent;
     }
+    if let Some(ratio) = args.negativity_ratio {
+        settings.tuning.negativity_ratio = ratio;
+    }
     if let Some(seed) = args.seed {
         settings.seed = seed;
     }
@@ -128,6 +131,10 @@ fn main() {
     // so counting the ones that *leave* `Rival` is the direct measurement of recovery, and nothing was
     // recording it. Measured on `village-evening`: rivals 0 -> 42 over 17 game-days while friends stayed 13-18.
     let mut accepted_compliments = 0usize;
+    // **The victim-side counter.** Every accepted `insult`, and how many of those left the victim's affinity
+    // for its insulter below zero. Before the patient's affinity write existed this was `0 of N` by
+    // construction — the tie was whatever mere exposure had made it, measured at `+0.034` on this scenario.
+    let (mut insult_deeds, mut disliked_insulter) = (0usize, 0usize);
     // **Sharing, counted where it resolves.** An accepted `share` is one unit changing hands; the number is
     // what a plot of the store spread needs next to it, because a flat spread with no shares is a village
     // that never traded and a flat spread with many is one that is already level.
@@ -198,6 +205,20 @@ fn main() {
                 // earlier iteration's "bad outweighs good 4.8:1" was arithmetic on the wrong variable.
                 if resolved.interaction == "compliment" && resolved.accepted {
                     accepted_compliments += 1;
+                }
+                if resolved.interaction == "insult" && resolved.accepted {
+                    insult_deeds += 1;
+                    // Read *after* the tick that resolved the exchange: `resolve_interactions` writes the
+                    // patient's tie in the same system, so by the time this message is drained the affinity
+                    // is the post-deed one.
+                    let affinity = app
+                        .world()
+                        .get::<Ties>(resolved.target)
+                        .and_then(|ties| ties.get(resolved.actor))
+                        .map_or(0.0, |tie| tie.affinity);
+                    if affinity < 0.0 {
+                        disliked_insulter += 1;
+                    }
                 }
                 if resolved.interaction == "share" && resolved.accepted {
                     shares += 1;
@@ -342,6 +363,7 @@ fn main() {
             label_changes,
             reciprocity: reciprocity_of(app.world(), &world),
             approaches: (accepted_approaches, refused_approaches),
+            victims: (insult_deeds, disliked_insulter),
         },
     );
     println!(
@@ -1210,6 +1232,13 @@ struct Endings<'a> {
     reciprocity: (usize, usize, f32),
     /// `(accepted, refused)` approaches.
     approaches: (usize, usize),
+    /// `(accepted insults, of those where the victim's affinity for its insulter is negative afterwards)`.
+    ///
+    /// **The observable this crate could not answer before 2026-10-27-03.** `patient_reaction` moved trust and
+    /// no affinity, so a victim's liking for the person who had just insulted them was whatever mere exposure
+    /// had made it: measured on this scenario at seed 7, **+0.034**, positive. A count of victims holding a
+    /// negative tie says in one number whether being hurt costs the relationship.
+    victims: (usize, usize),
 }
 
 /// Writes `summary.json`.
@@ -1231,6 +1260,7 @@ fn summary(
         label_changes,
         reciprocity,
         approaches,
+        victims,
     } = endings;
     let endings = (completed_endings_unused, interrupted_endings_unused);
     let world_ref = ecs;
@@ -1258,7 +1288,7 @@ fn summary(
     let clock = world_ref.resource::<SocietyClock>();
     let spread = store_spread(world_ref, &world.villagers);
     let json = format!(
-        "{{\n  \"ticks\": {},\n  \"people\": {},\n  \"rumors\": {},\n  \"rumor_known_by\": {},\n  \"rumor_reach\": {:.3},\n  \"friends\": {},\n  \"rivals\": {},\n  \"completed_endings\": {},\n  \"interrupted_endings\": {},\n  \"became_rival\": {},\n  \"left_rival\": {},\n  \"accepted_compliments\": {},\n  \"label_changes\": {},\n  \"mutual_friends\": {},\n  \"one_way_friends\": {},\n  \"affinity_gap\": {:.3},\n  \"refusals\": {},\n  \"acceptances\": {},\n  \"shares\": {},\n  \"bread_mean\": {:.3},\n  \"bread_sd\": {:.3},\n  \"bread_max\": {:.3},\n  \"price\": {:.3},\n  \"game_days\": {:.2}\n}}\n",
+        "{{\n  \"ticks\": {},\n  \"people\": {},\n  \"rumors\": {},\n  \"rumor_known_by\": {},\n  \"rumor_reach\": {:.3},\n  \"friends\": {},\n  \"rivals\": {},\n  \"completed_endings\": {},\n  \"interrupted_endings\": {},\n  \"became_rival\": {},\n  \"left_rival\": {},\n  \"accepted_compliments\": {},\n  \"label_changes\": {},\n  \"mutual_friends\": {},\n  \"one_way_friends\": {},\n  \"affinity_gap\": {:.3},\n  \"refusals\": {},\n  \"acceptances\": {},\n  \"shares\": {},\n  \"insults\": {},\n  \"victims_who_dislike_their_insulter\": {},\n  \"bread_mean\": {:.3},\n  \"bread_sd\": {:.3},\n  \"bread_max\": {:.3},\n  \"price\": {:.3},\n  \"game_days\": {:.2}\n}}\n",
         clock.tick,
         living,
         book.rumors.len(),
@@ -1278,6 +1308,8 @@ fn summary(
         approaches.1,
         approaches.0,
         shares,
+        victims.0,
+        victims.1,
         spread.1,
         spread.3,
         spread.2,
@@ -1331,6 +1363,9 @@ struct Args {
     dyad_balance: Option<f32>,
     /// `Tuning::witness_dilution`, so the exponent can be swept without editing the crate.
     witness_dilution: Option<f32>,
+    /// `Tuning::negativity_ratio`, so how much more an injury moves its victim than a benefit of the same
+    /// size can be swept without editing the crate. `0.0` switches the harm half off at the patient.
+    negativity_ratio: Option<f32>,
     /// Overrides `Tuning::positivity_offset`, so the same scenario can be re-read with a different
     /// resting mood.
     positivity_offset: Option<f32>,
@@ -1358,6 +1393,7 @@ impl Args {
             rival_band: None,
             dyad_balance: None,
             witness_dilution: None,
+            negativity_ratio: None,
             days: None,
         };
         let mut argv = std::env::args().skip(1);
@@ -1381,6 +1417,9 @@ impl Args {
                 "--dyad-balance" => args.dyad_balance = argv.next().and_then(|v| v.parse().ok()),
                 "--witness-dilution" => {
                     args.witness_dilution = argv.next().and_then(|v| v.parse().ok())
+                }
+                "--negativity-ratio" => {
+                    args.negativity_ratio = argv.next().and_then(|v| v.parse().ok())
                 }
                 "--friend-affinity" => {
                     args.friend_affinity = argv.next().and_then(|v| v.parse().ok())

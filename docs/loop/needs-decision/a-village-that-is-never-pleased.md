@@ -106,3 +106,12 @@ interactions — paid no emotion to either party, and `compliment` paid only its
 an insult pays `Anger 0.5` against a conversation's `Liking 0.2`, refusals are more frequent than acceptances
 in a crowd, and so distress outnumbers joy even now. That is the negativity bias the paper describes, and the
 remaining headroom is a question about the pack, not the model.
+
+
+## Update 2026-10-27-03
+
+With the victim's affinity now moved by an insult (`Tuning::negativity_ratio` 5.0, Baumeister/Gottman), the starter pack's
+insult rate matters more: accepted compliments : accepted insults is about 2.9 : 1 in `village-evening`, below the 5:1
+the same paper gives as the survival threshold, and rivals outnumber friends at seeds 7 and 42 (27 vs 16, 40 vs 19).
+Options: (a) leave the pack, hosts author their own rates; (b) lower the pack's `snub`/insult drive so the village sits
+near 5:1; (c) lower `negativity_ratio`. Recommend (b): the ratio is cited, the pack's rate is a design default.

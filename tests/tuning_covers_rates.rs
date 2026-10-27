@@ -116,3 +116,17 @@ fn the_label_thresholds_are_on_tuning_and_the_defaults_are_unchanged() {
         "`0.0` must restore the single bar for a host that wants the old behaviour"
     );
 }
+
+/// **The two reputation weights have fields as of 2026-10-27-03**, because one of them was a literal.
+///
+/// `patient_reaction` moved no affinity at all and `witness_reaction` wrote `0.15 * approval` with the `0.15`
+/// hard-coded — a rate with no name, on a model whose README says every rate is a named field. They are
+/// `Tuning::witness_affinity` and `Tuning::negativity_ratio` now, and this pins that both are read rather than
+/// merely present: a host that sets either sees the tie move differently.
+#[test]
+fn the_reputation_weight_defaults_are_the_cited_ones() {
+    let tuning = Tuning::default();
+    assert!((tuning.witness_affinity - 0.15).abs() < 1e-6);
+    // Baumeister et al. 2001 / Gottman's five to one. See the field's doc.
+    assert!((tuning.negativity_ratio - 5.0).abs() < 1e-6);
+}

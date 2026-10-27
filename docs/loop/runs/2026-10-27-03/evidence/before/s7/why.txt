@@ -1,0 +1,8 @@
+# tick 66758: someone weighed nothing
+
+ 1.000  wander
+ 0.999  compliment
+ 0.622  gossip
+ 0.533  share
+ 0.487  relax
+ 0.446  play

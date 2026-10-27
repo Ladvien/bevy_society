@@ -6,6 +6,46 @@ All notable changes to bevy_society. The format follows [Keep a Changelog](https
 
 ### Added
 
+- **A victim is moved by what was done to them, and an injury costs more than a benefit of the same size.**
+  `patient_reaction` moved trust and appraised an emotion and **no affinity at all**, so a person who had just
+  been insulted went on liking the person who insulted them. Measured on `village-evening` (seed 7, 12 000 ticks,
+  every accepted `insult` caught as it reached the victim): the victim's affinity for its insulter was
+  **+0.034** — positive, set by mere exposure, beside the insulter's +0.131. The more often the two met, the
+  more the victim liked them.
+
+  The write is `witness_affinity · severity`, with
+
+  ```text
+  severity = harm                       if harm >= 0.0
+           = harm · negativity_ratio    if harm <  0.0
+  ```
+
+  `Tuning::negativity_ratio` is **5.0**, which is **Baumeister, Bratslavsky, Finkenauer & Vohs 2001**
+  (DOI `10.1037/1089-2680.5.4.323`) reporting Gottman 1994: *"positive and good interactions must outnumber the
+  negative and bad ones by at least five to one … bad events are on average five times as powerful as good
+  ones"*. The same review gives the reciprocity half (p. 22, citing Wills et al. 1974): *"negative,
+  displeasurable behaviors were reciprocated to a significant degree, whereas the reciprocation of positive,
+  pleasurable behaviors was weaker and not significant"*. The paper is already cited by the pack's `snub` and
+  already used by `Tuning::rival_band`; this is the magnitude it supplies, which the crate had nowhere.
+
+  **A benefit is unscaled**, so the ratio is a ratio: `1.0` makes the two sides symmetric, `0.0` switches the
+  harm half off at the patient entirely — the number a host sets for a society without resentment — and both are
+  pinned by tests. The ratio applies to **the victim only**: a witness already reads the deed through its own
+  opinion, and scaling a bystander by five would multiply every insult seen by a crowd, which is the runaway
+  `witness_dilution` exists to damp.
+
+  **The patient reciprocates; a witness judges.** A witness's affinity is `witness_affinity · approval` with
+  `approval = norm · sign(harm)`, weighing the deed against its own `Opinions`; the patient's reads the deed's
+  `harm` directly. That is not a shortcut — `Opinions::value` returns 0.0 for a person whose opinions hold no
+  entry on the topic, so reading the patient's opinion would leave that victim's tie **silently untouched**, which
+  is the exact bug this change removes. Measured, a bystander with a neutral opinion writes no affinity at all.
+
+  **`Tuning::witness_affinity` (0.15) is new, and it was a literal.** `witness_reaction` wrote `0.15 * approval`
+  with the number hard-coded — a rate with no name, on a model whose README says every rate is a named field.
+  Both sides of a deed now read one field. `examples/evidence` gains `--negativity-ratio`, and `summary.json`
+  gains `insults` and `victims_who_dislike_their_insulter`, so the defect and its repair are one number apart.
+  `docs/loop/runs/2026-10-27-03/`.
+
 - **A rivalry is held through a band, as a friendship already was.** `TieLabel::classify_from` kept a `Friend` while its affinity had dipped no further than `friend_band` below its bar, and had **no matching clause for `Rival`** — so a rivalry was released the instant affinity rose above `-rival_affinity`. Measured at pair level on `village-evening` (three seeds, 2.93 game-days), the affinity at the moment of release was **0.0001–0.0002 above the bar**, one relaxation step; rival spells lasted a median of **0.14 / 0.29 / 0.38 game-days**; `became_rival` (47 / 43 / 19) ran almost level with `left_rival` (42 / 38 / 19); and **0 of 149** released spells ended for want of familiarity. The village made rivalries it could not keep.
 
   The direction is the pack's own citation, and the crate had it inverted. `snub` cites **Baumeister, Bratslavsky, Finkenauer & Vohs 2001** (DOI `10.1037/1089-2680.5.4.323`): bad impressions are "quicker to form and **more resistant to disconfirmation** than good ones". Quicker to form was implemented — one insult moves every witness — and more resistant to disconfirmation was not, because only the positive category had a band. The paper's other half, "good may prevail over bad by superior force of numbers", is why this is a **band and not a floor**: good still wins on count.
@@ -22,7 +62,15 @@ All notable changes to bevy_society. The format follows [Keep a Changelog](https
 
 ### Breaking
 
-- **A field was added to `Tuning`, which is not `#[non_exhaustive]`.** `rival_band` (0.10); a host that constructs `Tuning` in full needs a code change, and hosts using `..Default::default()` do not. `rival_band = 0.0` restores the single-bar label exactly, so a host that wants the old behaviour can have it without pinning the version.
+- **Two fields were added to `Tuning`, which is not `#[non_exhaustive]`.** `witness_affinity` (0.15) and
+  `negativity_ratio` (5.0); a host that constructs `Tuning` in full needs a code change, and hosts using
+  `..Default::default()` do not. `negativity_ratio = 1.0` restores the pre-change model at the patient (an
+  injury moves it exactly as far as a bystander's opinion moves a bystander) and `0.0` switches the harm half
+  off, so a host that wants the old behaviour can have it without pinning the version.
+- **A victim's affinity for whoever harms them now falls, where it used to rise.** This is the point of the
+  change and it is still a behaviour change a host will see: `village-evening` at three seeds, and every society
+  whose `insult` lands. `Tuning::negativity_ratio` is the one number that decides how hard.
+- **A field was added to `Tuning`, which is not `#[non_exhaustive]`.** (2026-10-27-02) `rival_band` (0.10); a host that constructs `Tuning` in full needs a code change, and hosts using `..Default::default()` do not. `rival_band = 0.0` restores the single-bar label exactly, so a host that wants the old behaviour can have it without pinning the version.
 - **`TieLabelChanged` fires less often for the same society**, because a `Rival` label now survives a shallow rise in affinity. Measured on `village-evening` at three seeds: `Rival` releases **42 / 19 / 38 → 13 / 8 / 11**. A host that counted on the old churn is the one that needs the note; nothing else about the message surface moved.
 - **`SocietySave::VERSION` is 2, because `Stock` is the first per-person state added since the format was written.** A version-1 save now comes back as `RestoreError::Version` and is refused rather than misread — which is what `VERSION` exists for. A host with saved societies must discard or migrate them.
 

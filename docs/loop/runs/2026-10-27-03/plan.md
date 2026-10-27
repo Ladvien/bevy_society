@@ -7,18 +7,29 @@ Iteration `2026-10-27-03`. Research in `research.md`; the pick and its measureme
 `src/reputation.rs`, `patient_reaction`:
 
 1. **The victim's affinity moves.** Today it moves `trust` and nothing else. It gains
-   `tie.add_affinity(witness_affinity · approval · severity, tuning)` where
-   - `approval = norm · sign(harm)`, read from the patient's `Opinions` on the deed's topic, the same judgement
-     `witness_reaction` makes;
-   - `severity = harm.abs()` scaled by `Tuning::negativity_ratio` (5.0) when `harm < 0.0`, and unscaled when
-     `harm > 0.0`. Baumeister et al. 2001 / Gottman's 5:1, already cited by `snub`.
+   `tie.add_affinity(witness_affinity · severity, tuning)` where
+
+   ```text
+   severity = harm                             if harm >= 0   (a benefit)
+            = harm · negativity_ratio          if harm <  0   (an injury)
+   ```
+
+   - **`harm`, not `norm · sign(harm)`.** A witness's reaction is a *judgement* of a norm and reads its
+     `Opinions`; the patient's is a *reciprocation* of what was done to it. The two are the two halves of
+     indirect reciprocity and the paper's claim is about reciprocity — "negative, displeasurable behaviours
+     were reciprocated to a significant degree". Reading the patient's opinion would also make the write
+     **silently zero for any person with no opinion on the topic** (`Opinions::value` returns 0.0 when
+     unsized), which is the class of bug this iteration exists to remove.
+   - `negativity_ratio` (5.0) is Baumeister et al. 2001 / Gottman's "bad events are on average five times as
+     powerful as good ones", already cited by `snub` and already used by `Tuning::rival_band`.
 
 2. **`Tuning::witness_affinity` (0.15) and `Tuning::negativity_ratio` (5.0) are new named fields.** The `0.15`
    is a literal inside `witness_reaction` today — a rate with no field, which breaks the crate's own rule. Hoisting
    it means the victim's write and the witness's write read one number.
 
-3. **The signature grows** so `patient_reaction` can read the patient's opinions, the deed's topic, the deed's
-   `harm` sign and `Tuning`. One caller (`src/behavior.rs:2948`) and it already has all four in scope.
+3. **The signature grows** so `patient_reaction` can read `Tuning`. One caller
+   (`src/behavior.rs:2948`), which already has it in scope. The patient's `Opinions` are **not** read, per
+   the reasoning above, so nothing else is threaded through.
 
 No new system, no new message, no schema change. The `MemoryKind::Suffered` half — the memory the `ReportDeed`
 path never writes — is **escalated**, not decided: it changes a public enum a host matches on.
@@ -37,7 +48,7 @@ path never writes — is **escalated**, not decided: it changes a public enum a 
 
 ## Tests
 
-`tests/reputation_patient.rs` (new):
+Unit tests in `src/reputation.rs` (`patient_tests`; `patient_reaction` is `pub(crate)`, so they live beside it):
 
 - **the victim's affinity falls for a harmful deed and rises for a helpful one** — both directions, because a
   write that only ever subtracts is a different, wrong model;
@@ -45,8 +56,8 @@ path never writes — is **escalated**, not decided: it changes a public enum a 
   against `negativity_ratio`, not against a magic number;
 - **`negativity_ratio = 0.0` makes the victim's write symmetric** with a bystander's, so the field is read;
 - **the victim's write respects `affinity_ceiling`** — a third theft does not take a tie past the clamp;
-- **a deed the victim approves of raises affinity even when its `harm` is negative** (a victim who values
-  toughness), pinning that the norm is read and not assumed.
+- **a benefit raises the victim's affinity by exactly `witness_affinity · harm`**, unscaled, so the ratio
+  applies to injuries and nothing else.
 
 `tests/tuning_covers_rates.rs` gains the two new fields to the surface check it already makes.
 

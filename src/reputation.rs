@@ -104,7 +104,10 @@ pub(crate) fn witness_reaction(
     }
 
     let tie = ties.entry(actor);
-    tie.add_affinity(0.15 * approval, &settings.tuning);
+    tie.add_affinity(
+        settings.tuning.witness_affinity * approval,
+        &settings.tuning,
+    );
     tie.respect = (tie.respect + 0.1 * approval).clamp(-1.0, 1.0);
 
     if approval > 0.0 {
@@ -131,24 +134,58 @@ pub(crate) fn witness_reaction(
     }
 }
 
-/// The patient's reaction to a deed done to them (plan D5): `Gratitude` when the deed helped,
-/// `Anger` when it hurt, both toward the actor and with intensity `|harm|`; and trust moved by
-/// `trust_gain · harm`, where the caller computes `trust_gain` from the patient's
-/// conscientiousness.
+/// The patient's reaction to a deed done to them (plan D5).
+///
+/// `Gratitude` when the deed helped, `Anger` when it hurt, both toward the actor and with intensity
+/// `|harm|`. Trust moves by `trust_gain · harm`, where the caller computes `trust_gain` from the
+/// patient's conscientiousness.
+///
+/// **Affinity moves by `witness_affinity · severity`**, and `severity` is the deed's own harm scaled by
+/// [`Tuning::negativity_ratio`] when it is negative:
+///
+/// ```text
+/// severity = harm                         if harm >= 0.0
+///          = harm · negativity_ratio      if harm <  0.0
+/// ```
+///
+/// Before 2026-10-27-03 this function moved no affinity at all, and the consequence was measurable: every
+/// accepted `insult` in `village-evening` left the victim's affinity for its insulter at **+0.034** — positive,
+/// set by mere exposure, beside the insulter's +0.131. A person who has just been insulted went on liking the
+/// person who insulted them, and the more often they met, the more they liked them.
+///
+/// The asymmetry is **Baumeister, Bratslavsky, Finkenauer & Vohs 2001** (DOI `10.1037/1089-2680.5.4.323`),
+/// reporting Gottman 1994: bad events are "on average five times as powerful as good ones", and "negative,
+/// displeasurable behaviors were reciprocated to a significant degree, whereas the reciprocation of positive,
+/// pleasurable behaviors was weaker and not significant". The paper gives the ratio; the weight is
+/// [`Tuning::witness_affinity`].
+///
+/// **The patient reciprocates; it does not judge.** `witness_reaction` writes `witness_affinity · approval`,
+/// where `approval = norm · sign(harm)` — a witness weighs the deed against its own opinion on the topic. The
+/// patient's write reads the deed's `harm` directly, because reciprocation is a response to what happened
+/// rather than an assessment of the kind of act. It is also the only reading that cannot be silently zero: an
+/// opinion is 0.0 for a person whose `Opinions` were never sized, which would leave that victim exactly as
+/// untouched as before.
 pub(crate) fn patient_reaction(
     ties: &mut Ties,
     emotions: &mut Emotions,
     harm: f32,
     gain: f32,
     actor: Entity,
+    tuning: &Tuning,
 ) {
     if harm > 0.0 {
         emotions.appraise(EmotionKind::Gratitude, harm, Some(actor));
     } else if harm < 0.0 {
         emotions.appraise(EmotionKind::Anger, -harm, Some(actor));
     }
+    let severity = if harm < 0.0 {
+        harm * tuning.negativity_ratio
+    } else {
+        harm
+    };
     let tie = ties.entry(actor);
     tie.trust = (tie.trust + gain * harm).clamp(0.0, 1.0);
+    tie.add_affinity(tuning.witness_affinity * severity, tuning);
 }
 
 /// The actor's own reaction to a deed it did (plan D5): `Pride` when its opinion on the deed's topic
@@ -219,4 +256,60 @@ pub(crate) fn spread_witnessed_rumor(
         rumor.known_by += rest.len() as u32;
     }
     Some(id)
+}
+
+#[cfg(test)]
+mod patient_tests {
+    use super::*;
+
+    fn victim_after(harm: f32, tuning: &Tuning) -> f32 {
+        let actor = Entity::from_raw_u32(7).expect("a valid entity index");
+        let mut ties = Ties::default();
+        let mut emotions = Emotions::default();
+        patient_reaction(&mut ties, &mut emotions, harm, 0.0, actor, tuning);
+        ties.get(actor).map_or(0.0, |t| t.affinity)
+    }
+
+    #[test]
+    fn an_injury_lowers_and_a_benefit_raises_the_victims_affinity() {
+        let t = Tuning::default();
+        assert!(victim_after(-0.2, &t) < 0.0);
+        assert!(victim_after(0.2, &t) > 0.0);
+    }
+
+    #[test]
+    fn a_benefit_is_unscaled_and_an_injury_is_scaled_by_the_ratio() {
+        let t = Tuning::default();
+        let benefit = victim_after(0.04, &t);
+        assert!((benefit - t.witness_affinity * 0.04).abs() < 1e-6);
+        let injury = victim_after(-0.04, &t);
+        assert!((injury / benefit + t.negativity_ratio).abs() < 1e-4);
+    }
+
+    #[test]
+    fn ratio_zero_switches_off_harm_and_one_makes_it_symmetric() {
+        let off = Tuning {
+            negativity_ratio: 0.0,
+            ..Tuning::default()
+        };
+        assert_eq!(victim_after(-0.3, &off), 0.0);
+        let sym = Tuning {
+            negativity_ratio: 1.0,
+            ..Tuning::default()
+        };
+        assert!((victim_after(-0.1, &sym) + victim_after(0.1, &sym)).abs() < 1e-6);
+    }
+
+    #[test]
+    fn the_write_respects_the_affinity_ceiling() {
+        let t = Tuning::default();
+        let actor = Entity::from_raw_u32(7).expect("a valid entity index");
+        let mut ties = Ties::default();
+        let mut emotions = Emotions::default();
+        for _ in 0..10 {
+            patient_reaction(&mut ties, &mut emotions, -0.9, 0.0, actor, &t);
+        }
+        let aff = ties.get(actor).map_or(0.0, |x| x.affinity);
+        assert!((aff + t.affinity_ceiling).abs() < 1e-6);
+    }
 }

@@ -1,0 +1,8 @@
+# tick 66823: someone weighed nothing
+
+ 1.000  wander
+ 0.998  compliment
+ 0.711  share
+ 0.639  gossip
+ 0.618  snub
+ 0.577  chat

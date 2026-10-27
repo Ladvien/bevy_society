@@ -240,6 +240,44 @@ pub struct Tuning {
     /// Trust gain per unit of deed harm from a witness. Design default (no source paper gives this
     /// number); mechanism: image scoring, Nowak & Sigmund 1998, DOI 10.1038/31225.
     pub witness_gain: f32,
+    /// Affinity moved per unit of a deed's harm, by **both** the person it was done to and everyone who saw
+    /// it. `0.15` until 2026-10-27-03, when it was a literal inside `witness_reaction` — a rate with no field,
+    /// which is the one thing this crate's README says never happens.
+    ///
+    /// The witness's write is `witness_affinity · approval`, where `approval = norm · sign(harm)`: a witness
+    /// *judges* the deed against its own opinion. The patient's write is `witness_affinity · severity`, where
+    /// `severity` is the harm itself scaled by [`Self::negativity_ratio`] when it is negative: a patient
+    /// *reciprocates* what was done to it, and reciprocation reads what happened rather than what one thinks
+    /// of that kind of act. Those are the two halves of indirect reciprocity, and a patient that judged
+    /// instead of reciprocating would be moved by nothing whenever it holds no opinion on the topic.
+    ///
+    /// **Design default** (no source paper gives the weight); mechanism: Baumeister et al. 2001,
+    /// DOI `10.1037/1089-2680.5.4.323`, and the image-scoring literature above.
+    pub witness_affinity: f32,
+    /// How much more a **harmful** deed moves the person it was done to than a helpful one of the same size.
+    ///
+    /// Baumeister, Bratslavsky, Finkenauer & Vohs 2001, *Bad Is Stronger Than Good*, DOI
+    /// `10.1037/1089-2680.5.4.323`, reporting Gottman 1994 (p. 33): *"positive and good interactions must
+    /// outnumber the negative and bad ones by at least five to one. If the ratio falls below that, the
+    /// relationship is likely to fail and breakup. … Gottman's index suggests that **bad events are on
+    /// average five times as powerful as good ones**"*. The same review reports the reciprocity half at
+    /// p. 22, citing Wills et al. 1974: *"negative, displeasurable behaviors were reciprocated to a
+    /// significant degree, whereas the reciprocation of positive, pleasurable behaviors was weaker and not
+    /// significant"*.
+    ///
+    /// The paper is already cited by the pack's `snub` and already used by [`Self::rival_band`]; this is the
+    /// magnitude it supplies, which the crate had nowhere.
+    ///
+    /// **Applies to the patient only.** A witness already reads the deed through a norm, and scaling a
+    /// bystander's reaction by five would multiply every insult seen by a crowd — the runaway
+    /// `witness_dilution` exists to damp. Applies only when `harm < 0.0`: a benefit is unscaled, which is what
+    /// makes the ratio a ratio.
+    ///
+    /// `1.0` makes harm and benefit symmetric, which recovers the pre-2026-10-27 behaviour at the patient.
+    /// `0.0` switches the harm half off — a victim takes no affinity from an injury and still takes a
+    /// benefit — and is pinned by a test, so a host that wants a society without resentment has one number
+    /// to set.
+    pub negativity_ratio: f32,
     /// How a deed's per-witness cost shrinks as the crowd watching it grows.
     ///
     /// `0.0` applies the full `witness_gain · harm` to every witness, so the deed's total cost grows
@@ -543,6 +581,9 @@ impl Default for Tuning {
             anchor_pull: 0.1,
             conformity_per_day: 0.2,
             witness_gain: 0.2,
+            witness_affinity: 0.15,
+            // Baumeister et al. 2001 (Gottman's 5:1). See the field's doc.
+            negativity_ratio: 5.0,
             witness_dilution: 0.5,
             rumor_threshold: 0.3,
             gossip_trust_gain: 0.3,

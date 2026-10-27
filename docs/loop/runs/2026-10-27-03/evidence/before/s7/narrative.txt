@@ -1,0 +1,699 @@
+# Bram's day
+
+At the end: doing Some("sleep"), needs Some([0.7692871, 0.6537743, 0.73394, 0.54290324]), mood P0.03 A0.01 D0.13
+
+d1 15h00: started compliment
+d1 15h00: compliment with Alys (accepted)
+d1 15h12: started compliment
+d1 15h12: finished compliment (completed)
+d1 15h12: compliment with Edric (refused)
+d1 15h24: started compliment
+d1 15h24: finished compliment (completed)
+d1 15h24: compliment with Garet (refused)
+d1 15h37: started compliment
+d1 15h37: finished compliment (completed)
+d1 15h37: compliment with Corin (accepted)
+d1 15h37: compliment approached by Hilda (accepted)
+d1 15h49: started work
+d1 15h49: finished compliment (completed)
+d1 20h56: insult approached by Garet (accepted)
+d1 21h30: started snub
+d1 21h30: finished work (completed)
+d1 21h30: insult with Garet (accepted)
+d1 21h33: gossip approached by Alys (accepted)
+d1 21h36: started compliment
+d1 21h36: finished snub (completed)
+d1 21h36: compliment with Hilda (refused)
+d1 21h49: started play
+d1 21h49: finished compliment (completed)
+d1 21h49: chat with Jena (refused)
+d1 21h51: insult approached by Garet (accepted)
+d1 22h19: started sleep
+d1 22h19: finished play (completed)
+d2 07h46: insult approached by Garet (refused)
+d2 07h56: started gossip
+d2 07h56: finished sleep (completed)
+d2 07h56: gossip with Hilda (accepted)
+d2 08h14: started eat
+d2 08h14: finished gossip (completed)
+d2 08h18: chat approached by Corin (accepted)
+d2 08h54: insult approached by Garet (refused)
+d2 10h47: started eat
+d2 10h47: finished eat (completed)
+d2 11h32: started eat
+d2 11h32: finished eat (completed)
+d2 12h17: started craft
+d2 12h17: finished eat (completed)
+d2 16h21: insult approached by Garet (accepted)
+d2 17h17: insult approached by Garet (refused)
+d2 18h00: started play
+d2 18h00: finished craft (completed)
+d2 18h00: chat with Ulric (refused)
+d2 18h30: started gossip
+d2 18h30: finished play (completed)
+d2 18h30: gossip with Ulric (refused)
+d2 18h49: started eat
+d2 18h49: finished gossip (completed)
+d2 19h34: started snub
+d2 19h34: finished eat (completed)
+d2 20h54: insult with Garet (refused)
+d2 21h01: started snub
+d2 21h01: finished snub (completed)
+d2 21h01: insult with Garet (accepted)
+d2 21h07: started snub
+d2 21h07: finished snub (completed)
+d2 21h07: insult with Garet (accepted)
+d2 21h13: started gossip
+d2 21h13: finished snub (completed)
+d2 21h13: gossip with Corin (refused)
+d2 21h31: started snub
+d2 21h31: finished gossip (completed)
+d2 21h31: insult with Garet (refused)
+d2 21h38: started snub
+d2 21h38: finished snub (completed)
+d2 21h38: insult with Garet (accepted)
+d2 21h44: started gossip
+d2 21h44: finished snub (completed)
+d2 21h44: gossip with Quill (refused)
+d2 22h02: started sleep
+d2 22h02: finished gossip (completed)
+d3 06h17: started snub
+d3 06h17: finished sleep (completed)
+d3 06h17: insult with Garet (accepted)
+d3 06h23: started gossip
+d3 06h23: finished snub (completed)
+d3 06h23: gossip with Garet (accepted)
+d3 06h42: started gossip
+d3 06h42: finished gossip (completed)
+d3 06h42: gossip with Garet (accepted)
+d3 07h00: started play
+d3 07h00: finished gossip (completed)
+d3 07h00: chat with Garet (refused)
+d3 07h30: started eat
+d3 07h30: finished play (completed)
+d3 09h31: insult approached by Corin (refused)
+d3 11h30: started gossip
+d3 11h30: finished eat (interrupted)
+d3 11h30: gossip with Vesna (accepted)
+d3 11h49: started craft
+d3 11h49: finished gossip (completed)
+d3 15h30: chat approached by Alys (accepted)
+d3 15h48: chat approached by Alys (accepted)
+d3 16h13: started craft
+d3 16h13: finished craft (completed)
+d3 19h01: insult approached by Garet (refused)
+d3 19h13: started eat
+d3 19h13: finished craft (completed)
+d3 19h58: started compliment
+d3 19h58: finished eat (completed)
+d3 21h06: compliment with Alys (accepted)
+d3 21h18: started compliment
+d3 21h18: finished compliment (completed)
+d3 21h18: compliment with Alys (accepted)
+d3 21h30: started relax
+d3 21h30: finished compliment (completed)
+d4 01h23: started sleep
+d4 01h23: finished relax (completed)
+d4 08h00: gossip approached by Hilda (accepted)
+d4 08h13: insult approached by Garet (accepted)
+d4 08h38: insult approached by Garet (accepted)
+d4 10h40: started compliment
+d4 10h40: finished sleep (completed)
+d4 12h11: compliment with Alys (refused)
+d4 12h24: started chat
+d4 12h24: finished compliment (completed)
+d4 12h24: chat with Alys (refused)
+d4 12h42: started gossip
+d4 12h42: finished chat (completed)
+d4 12h42: gossip with Quill (accepted)
+d4 13h00: started work
+d4 13h00: finished gossip (completed)
+d4 15h08: compliment approached by Hilda (accepted)
+d4 15h09: compliment approached by Corin (accepted)
+d4 17h16: insult approached by Garet (refused)
+d4 19h07: chat approached by Ulric (refused)
+d4 19h51: started eat
+d4 19h51: finished work (completed)
+d4 20h22: insult approached by Garet (accepted)
+d4 20h28: share approached by Garet (refused)
+d4 22h57: started sleep
+d4 22h57: finished eat (completed)
+d5 02h57: started sleep
+d5 02h57: finished sleep (interrupted)
+d5 06h57: started bake
+d5 06h57: finished sleep (interrupted)
+d5 08h40: share approached by Oswin (refused)
+d5 09h37: started work
+d5 09h37: finished bake (completed)
+d5 15h49: started chat
+d5 15h49: finished work (completed)
+d5 15h49: chat with Perrin (accepted)
+d5 16h03: compliment approached by Edric (accepted)
+d5 16h08: started share
+d5 16h08: finished chat (completed)
+d5 16h08: share with Oswin (accepted)
+d5 16h20: started eat
+d5 16h20: finished share (completed)
+d5 18h44: gossip approached by Lira (accepted)
+d5 19h00: started compliment
+d5 19h00: finished eat (completed)
+d5 19h49: compliment with Edric (refused)
+d5 19h49: compliment approached by Edric (accepted)
+d5 20h01: started play
+d5 20h01: finished compliment (completed)
+d5 20h01: chat with Ivo (accepted)
+d5 20h23: chat approached by Oswin (accepted)
+d5 20h31: started share
+d5 20h31: finished play (completed)
+d5 21h21: share with Milo (refused)
+d5 21h33: started share
+d5 21h33: finished share (completed)
+d5 21h41: compliment approached by Edric (accepted)
+d5 21h48: insult approached by Ulric (accepted)
+d5 21h54: insult approached by Ulric (accepted)
+d5 22h28: share with Garet (refused)
+d5 22h40: started sleep
+d5 22h40: finished share (completed)
+d6 06h40: started bake
+d6 06h40: finished sleep (completed)
+d6 09h33: started work
+d6 09h33: finished bake (completed)
+d6 13h33: started play
+d6 13h33: finished work (interrupted)
+d6 13h33: chat with Oswin (accepted)
+d6 14h03: started compliment
+d6 14h03: finished play (completed)
+d6 14h03: compliment with Oswin (accepted)
+d6 14h16: started compliment
+d6 14h16: finished compliment (completed)
+d6 14h16: compliment with Oswin (refused)
+d6 14h26: compliment approached by Oswin (refused)
+d6 14h28: started share
+d6 14h28: finished compliment (completed)
+d6 14h28: share with Oswin (accepted)
+d6 14h38: compliment approached by Oswin (refused)
+d6 14h40: started craft
+d6 14h40: finished share (completed)
+d6 15h35: gossip approached by Oswin (refused)
+d6 15h53: insult approached by Oswin (accepted)
+d6 18h28: insult approached by Quill (accepted)
+d6 18h34: insult approached by Quill (refused)
+d6 18h40: started share
+d6 18h40: finished craft (interrupted)
+d6 19h03: compliment approached by Dena (refused)
+d6 19h13: share with Fenna (accepted)
+d6 19h25: started share
+d6 19h25: finished share (completed)
+d6 19h40: compliment approached by Hilda (accepted)
+d6 19h48: insult approached by Ulric (accepted)
+d6 20h05: share with Quill (refused)
+d6 20h05: insult approached by Quill (refused)
+d6 20h17: started chat
+d6 20h17: finished share (completed)
+d6 20h17: chat with Lira (refused)
+d6 20h24: insult approached by Quill (refused)
+d6 20h33: insult approached by Oswin (accepted)
+d6 20h36: started play
+d6 20h36: finished chat (completed)
+d6 20h36: chat with Lira (refused)
+d6 20h37: insult approached by Ulric (accepted)
+d6 21h06: started eat
+d6 21h06: finished play (completed)
+d6 21h07: insult approached by Quill (accepted)
+d6 22h40: started sleep
+d6 22h40: finished eat (completed)
+d7 07h38: insult approached by Ulric (refused)
+d7 08h12: started craft
+d7 08h12: finished sleep (completed)
+d7 08h35: insult approached by Quill (refused)
+d7 12h36: started gossip
+d7 12h36: finished craft (completed)
+d7 12h36: gossip with Vesna (refused)
+d7 12h55: started play
+d7 12h55: finished gossip (completed)
+d7 12h55: chat with Vesna (accepted)
+d7 13h25: started snub
+d7 13h25: finished play (completed)
+d7 13h51: insult with Ulric (accepted)
+d7 13h58: started work
+d7 13h58: finished snub (completed)
+d7 17h58: started share
+d7 17h58: finished work (completed)
+d7 17h58: share with Ysolde (refused)
+d7 18h10: started gossip
+d7 18h10: finished share (completed)
+d7 18h10: gossip with Ysolde (accepted)
+d7 18h28: started snub
+d7 18h28: finished gossip (completed)
+d7 18h50: gossip approached by Ulric (refused)
+d7 19h09: gossip approached by Ulric (accepted)
+d7 20h43: insult with Quill (accepted)
+d7 20h49: started gossip
+d7 20h49: finished snub (completed)
+d7 20h49: gossip with Rhea (accepted)
+d7 21h04: insult approached by Sable (accepted)
+d7 21h07: started compliment
+d7 21h07: finished gossip (completed)
+d7 21h35: compliment with Hilda (refused)
+d7 21h45: insult approached by Quill (accepted)
+d7 21h47: started compliment
+d7 21h47: finished compliment (completed)
+d7 22h23: compliment with Edric (accepted)
+d7 22h35: started sleep
+d7 22h35: finished compliment (completed)
+d8 07h31: started compliment
+d8 07h31: finished sleep (completed)
+d8 07h31: compliment with Edric (accepted)
+d8 07h43: started chat
+d8 07h43: finished compliment (completed)
+d8 07h43: chat with Hilda (refused)
+d8 07h55: chat approached by Hilda (accepted)
+d8 08h01: started play
+d8 08h01: finished chat (completed)
+d8 08h01: chat with Hilda (refused)
+d8 08h20: compliment approached by Edric (accepted)
+d8 08h25: compliment approached by Hilda (accepted)
+d8 08h32: started eat
+d8 08h32: finished play (completed)
+d8 08h47: insult approached by Sable (refused)
+d8 08h54: insult approached by Sable (accepted)
+d8 10h43: chat approached by Quill (accepted)
+d8 11h05: started gossip
+d8 11h05: finished eat (completed)
+d8 11h05: gossip with Quill (refused)
+d8 11h24: started work
+d8 11h24: finished gossip (completed)
+d8 11h50: gossip approached by Quill (accepted)
+d8 14h35: insult approached by Corin (refused)
+d8 14h42: compliment approached by Corin (refused)
+d8 15h24: started share
+d8 15h24: finished work (completed)
+d8 16h21: gossip approached by Quill (accepted)
+d8 16h37: gossip approached by Dena (refused)
+d8 16h55: gossip approached by Dena (refused)
+d8 17h13: chat approached by Dena (refused)
+d8 17h43: compliment approached by Dena (refused)
+d8 18h39: share with Sable (refused)
+d8 18h51: started compliment
+d8 18h51: finished share (completed)
+d8 18h51: compliment with Dena (accepted)
+d8 19h03: started play
+d8 19h03: finished compliment (completed)
+d8 19h03: chat with Dena (accepted)
+d8 19h31: compliment approached by Dena (accepted)
+d8 19h33: started share
+d8 19h33: finished play (completed)
+d8 19h33: share with Ysolde (refused)
+d8 19h42: insult approached by Ulric (accepted)
+d8 19h46: started share
+d8 19h46: finished share (completed)
+d8 19h46: share with Dena (accepted)
+d8 19h50: insult approached by Ysolde (refused)
+d8 19h58: started snub
+d8 19h58: finished share (completed)
+d8 19h58: insult with Ulric (refused)
+d8 20h04: started compliment
+d8 20h04: finished snub (completed)
+d8 20h04: compliment with Dena (accepted)
+d8 20h17: started compliment
+d8 20h17: finished compliment (completed)
+d8 20h17: compliment with Dena (refused)
+d8 20h29: compliment approached by Dena (refused)
+d8 20h29: started share
+d8 20h29: finished compliment (completed)
+d8 20h29: share with Ulric (refused)
+d8 20h41: compliment approached by Dena (refused)
+d8 20h41: started compliment
+d8 20h41: finished share (completed)
+d8 20h41: compliment with Dena (accepted)
+d8 20h53: gossip approached by Dena (accepted)
+d8 20h54: started gossip
+d8 20h54: finished compliment (completed)
+d8 20h54: gossip with Dena (accepted)
+d8 21h11: insult approached by Dena (refused)
+d8 21h12: started share
+d8 21h12: finished gossip (completed)
+d8 21h12: share with Ysolde (refused)
+d8 21h18: gossip approached by Dena (accepted)
+d8 21h24: started share
+d8 21h24: finished share (completed)
+d8 21h24: share with Sable (accepted)
+d8 21h36: insult approached by Dena (accepted)
+d8 21h36: started share
+d8 21h36: finished share (completed)
+d8 21h36: share with Ulric (refused)
+d8 21h42: insult approached by Dena (accepted)
+d8 21h49: started compliment
+d8 21h49: finished share (completed)
+d8 21h49: compliment with Dena (accepted)
+d8 21h49: gossip approached by Dena (refused)
+d8 22h01: started sleep
+d8 22h01: finished compliment (completed)
+d8 22h16: insult approached by Quill (accepted)
+d9 07h22: chat approached by Dena (accepted)
+d9 08h06: started share
+d9 08h06: finished sleep (completed)
+d9 09h05: share with Lira (accepted)
+d9 09h17: started eat
+d9 09h17: finished share (completed)
+d9 10h11: insult approached by Wren (refused)
+d9 10h36: insult approached by Quill (accepted)
+d9 10h43: started gossip
+d9 10h43: finished eat (completed)
+d9 10h43: gossip with Alys (refused)
+d9 11h01: started compliment
+d9 11h01: finished gossip (completed)
+d9 11h01: compliment with Edric (accepted)
+d9 11h13: started work
+d9 11h13: finished compliment (completed)
+d9 12h48: insult approached by Ulric (accepted)
+d9 14h12: chat approached by Alys (accepted)
+d9 14h31: compliment approached by Alys (accepted)
+d9 15h14: started compliment
+d9 15h14: finished work (interrupted)
+d9 15h14: compliment with Alys (refused)
+d9 15h26: started snub
+d9 15h26: finished compliment (completed)
+d9 15h26: insult with Ulric (accepted)
+d9 15h32: started gossip
+d9 15h32: finished snub (completed)
+d9 15h32: gossip with Alys (accepted)
+d9 15h50: started play
+d9 15h50: finished gossip (completed)
+d9 15h50: chat with Alys (accepted)
+d9 16h21: started snub
+d9 16h21: finished play (completed)
+d9 16h21: insult with Ulric (refused)
+d9 16h27: started compliment
+d9 16h27: finished snub (completed)
+d9 16h27: compliment with Alys (accepted)
+d9 16h39: started compliment
+d9 16h39: finished compliment (completed)
+d9 16h39: compliment with Alys (accepted)
+d9 16h52: started snub
+d9 16h52: finished compliment (completed)
+d9 16h52: insult with Ulric (refused)
+d9 16h58: started snub
+d9 16h58: finished snub (completed)
+d9 17h19: share approached by Perrin (accepted)
+d9 17h47: insult with Ulric (accepted)
+d9 17h54: started compliment
+d9 17h54: finished snub (completed)
+d9 18h42: compliment with Alys (accepted)
+d9 18h43: chat approached by Sable (accepted)
+d9 18h54: started snub
+d9 18h54: finished compliment (completed)
+d9 19h48: insult approached by Sable (accepted)
+d9 20h16: compliment approached by Dena (refused)
+d9 20h25: insult with Ulric (refused)
+d9 20h25: insult approached by Ulric (refused)
+d9 20h31: started share
+d9 20h31: finished snub (completed)
+d9 20h31: insult approached by Ulric (refused)
+d9 21h43: share with Ysolde (refused)
+d9 21h56: started gossip
+d9 21h56: finished share (completed)
+d9 21h56: gossip with Garet (refused)
+d9 22h14: started sleep
+d9 22h14: finished gossip (completed)
+d9 23h02: compliment approached by Alys (refused)
+d10 02h14: started sleep
+d10 02h14: finished sleep (interrupted)
+d10 06h14: started share
+d10 06h14: finished sleep (interrupted)
+d10 06h43: share with Ulric (refused)
+d10 06h55: started gossip
+d10 06h55: finished share (completed)
+d10 06h55: gossip with Garet (refused)
+d10 07h13: started play
+d10 07h13: finished gossip (completed)
+d10 07h13: chat with Garet (accepted)
+d10 07h44: started share
+d10 07h44: finished play (completed)
+d10 08h13: share with Ysolde (refused)
+d10 08h26: started gossip
+d10 08h26: finished share (completed)
+d10 08h26: gossip with Ulric (accepted)
+d10 08h44: started craft
+d10 08h44: finished gossip (completed)
+d10 12h41: compliment approached by Hilda (accepted)
+d10 12h44: started gossip
+d10 12h44: finished craft (interrupted)
+d10 12h44: gossip with Perrin (accepted)
+d10 13h02: started compliment
+d10 13h02: finished gossip (completed)
+d10 13h56: compliment with Hilda (accepted)
+d10 14h08: started eat
+d10 14h08: finished compliment (completed)
+d10 15h26: started share
+d10 15h26: finished eat (completed)
+d10 15h26: share with Hilda (accepted)
+d10 15h39: started work
+d10 15h39: finished share (completed)
+d10 16h28: chat approached by Hilda (accepted)
+d10 16h47: compliment approached by Hilda (accepted)
+d10 16h59: gossip approached by Hilda (accepted)
+d10 21h55: started play
+d10 21h55: finished work (completed)
+d10 21h55: chat with Edric (refused)
+d10 22h14: compliment approached by Hilda (accepted)
+d10 22h25: started sleep
+d10 22h25: finished play (completed)
+d11 07h44: compliment approached by Alys (accepted)
+d11 07h58: chat approached by Hilda (accepted)
+d11 08h07: started play
+d11 08h07: finished sleep (completed)
+d11 08h07: chat with Hilda (accepted)
+d11 08h16: compliment approached by Hilda (accepted)
+d11 08h38: started eat
+d11 08h38: finished play (completed)
+d11 11h06: started gossip
+d11 11h06: finished eat (completed)
+d11 11h06: gossip with Alys (accepted)
+d11 11h24: started eat
+d11 11h24: finished gossip (completed)
+d11 11h35: compliment approached by Alys (accepted)
+d11 11h47: gossip approached by Alys (refused)
+d11 12h21: started snub
+d11 12h21: finished eat (completed)
+d11 12h21: insult with Alys (accepted)
+d11 12h27: started work
+d11 12h27: finished snub (completed)
+d11 12h40: compliment approached by Dena (accepted)
+d11 16h27: started play
+d11 16h27: finished work (interrupted)
+d11 16h27: chat with Quill (refused)
+d11 16h57: started craft
+d11 16h57: finished play (completed)
+d11 17h11: compliment approached by Fenna (accepted)
+d11 19h20: compliment approached by Alys (accepted)
+d11 19h32: insult approached by Alys (refused)
+d11 19h44: chat approached by Rhea (accepted)
+d11 19h54: gossip approached by Quill (refused)
+d11 20h56: gossip approached by Alys (accepted)
+d11 21h18: started compliment
+d11 21h18: finished craft (completed)
+d11 21h18: compliment with Alys (accepted)
+d11 21h27: gossip approached by Alys (refused)
+d11 21h30: started eat
+d11 21h30: finished compliment (completed)
+d11 21h34: share approached by Ivo (refused)
+d11 21h43: gossip approached by Lira (refused)
+d11 21h45: gossip approached by Alys (accepted)
+d11 22h57: started sleep
+d11 22h57: finished eat (completed)
+d12 07h44: compliment approached by Hilda (accepted)
+d12 07h57: compliment approached by Hilda (accepted)
+d12 08h09: compliment approached by Hilda (accepted)
+d12 08h38: started work
+d12 08h38: finished sleep (completed)
+d12 09h07: share approached by Tomas (refused)
+d12 10h39: share approached by Sable (refused)
+d12 12h24: chat approached by Nera (accepted)
+d12 13h32: share approached by Nera (refused)
+d12 13h36: gossip approached by Quill (refused)
+d12 16h03: started eat
+d12 16h03: finished work (completed)
+d12 16h33: share approached by Milo (accepted)
+d12 18h34: gossip approached by Wren (refused)
+d12 20h04: started compliment
+d12 20h04: finished eat (interrupted)
+d12 20h36: gossip approached by Milo (refused)
+d12 20h38: compliment with Hilda (accepted)
+d12 20h50: started play
+d12 20h50: finished compliment (completed)
+d12 20h50: chat with Milo (accepted)
+d12 20h55: insult approached by Milo (accepted)
+d12 21h21: started compliment
+d12 21h21: finished play (completed)
+d12 21h21: compliment with Hilda (accepted)
+d12 21h33: started chat
+d12 21h33: finished compliment (completed)
+d12 21h33: chat with Hilda (refused)
+d12 21h51: started eat
+d12 21h51: finished chat (completed)
+d12 22h39: started sleep
+d12 22h39: finished eat (completed)
+d13 07h32: chat approached by Hilda (accepted)
+d13 07h47: started snub
+d13 07h47: finished sleep (completed)
+d13 07h51: compliment approached by Hilda (accepted)
+d13 08h03: compliment approached by Hilda (accepted)
+d13 08h07: insult with Milo (refused)
+d13 08h14: started work
+d13 08h14: finished snub (completed)
+d13 08h22: compliment approached by Hilda (refused)
+d13 08h45: chat approached by Milo (accepted)
+d13 09h07: compliment approached by Alys (refused)
+d13 11h10: share approached by Fenna (accepted)
+d13 14h11: started craft
+d13 14h11: finished work (completed)
+d13 18h11: started share
+d13 18h11: finished craft (interrupted)
+d13 18h11: share with Corin (accepted)
+d13 18h23: started relax
+d13 18h23: finished share (completed)
+d13 20h12: compliment approached by Hilda (refused)
+d13 20h28: compliment approached by Fenna (accepted)
+d13 21h21: started eat
+d13 21h21: finished relax (completed)
+d13 23h51: started sleep
+d13 23h51: finished eat (completed)
+d14 08h54: started play
+d14 08h54: finished sleep (completed)
+d14 08h54: chat with Alys (refused)
+d14 09h24: started craft
+d14 09h24: finished play (completed)
+d14 09h25: share approached by Perrin (accepted)
+d14 12h59: chat approached by Nera (refused)
+d14 13h25: compliment approached by Dena (accepted)
+d14 13h47: gossip approached by Nera (refused)
+d14 14h06: gossip approached by Nera (refused)
+d14 14h17: started compliment
+d14 14h17: finished craft (completed)
+d14 14h17: compliment with Dena (accepted)
+d14 14h24: gossip approached by Nera (refused)
+d14 14h30: started chat
+d14 14h30: finished compliment (completed)
+d14 14h30: chat with Hilda (refused)
+d14 14h48: started chat
+d14 14h48: finished chat (completed)
+d14 14h48: chat with Hilda (accepted)
+d14 14h58: compliment approached by Hilda (accepted)
+d14 15h06: started compliment
+d14 15h06: finished chat (completed)
+d14 15h06: compliment with Dena (accepted)
+d14 15h18: started eat
+d14 15h18: finished compliment (completed)
+d14 18h49: compliment approached by Dena (accepted)
+d14 19h19: started relax
+d14 19h19: finished eat (interrupted)
+d14 20h46: compliment approached by Hilda (accepted)
+d14 20h58: compliment approached by Hilda (accepted)
+d14 21h58: started eat
+d14 21h58: finished relax (completed)
+d14 22h43: started sleep
+d14 22h43: finished eat (completed)
+d15 02h43: started sleep
+d15 02h43: finished sleep (interrupted)
+d15 06h07: chat approached by Oswin (accepted)
+d15 06h34: gossip approached by Milo (accepted)
+d15 06h43: started compliment
+d15 06h43: finished sleep (interrupted)
+d15 06h52: chat approached by Milo (refused)
+d15 09h23: compliment with Hilda (refused)
+d15 09h35: started craft
+d15 09h35: finished compliment (completed)
+d15 13h46: started craft
+d15 13h46: finished craft (completed)
+d15 15h41: compliment approached by Fenna (refused)
+d15 16h46: started gossip
+d15 16h46: finished craft (completed)
+d15 16h46: gossip with Oswin (accepted)
+d15 17h04: started compliment
+d15 17h04: finished gossip (completed)
+d15 17h04: compliment with Oswin (refused)
+d15 17h17: started compliment
+d15 17h17: finished compliment (completed)
+d15 17h17: compliment with Fenna (refused)
+d15 17h29: started eat
+d15 17h29: finished compliment (completed)
+d15 18h00: compliment approached by Oswin (refused)
+d15 19h49: started compliment
+d15 19h49: finished eat (completed)
+d15 20h19: compliment with Oswin (refused)
+d15 20h19: compliment approached by Oswin (refused)
+d15 20h31: started compliment
+d15 20h31: finished compliment (completed)
+d15 20h43: compliment with Milo (accepted)
+d15 20h55: started relax
+d15 20h55: finished compliment (completed)
+d15 22h25: share approached by Oswin (refused)
+d15 23h14: started sleep
+d15 23h14: finished relax (completed)
+d16 07h41: compliment approached by Dena (refused)
+d16 08h50: started play
+d16 08h50: finished sleep (completed)
+d16 08h50: chat with Alys (accepted)
+d16 09h20: started work
+d16 09h20: finished play (completed)
+d16 11h06: chat approached by Perrin (refused)
+d16 11h36: gossip approached by Perrin (refused)
+d16 12h43: compliment approached by Alys (accepted)
+d16 14h58: gossip approached by Milo (refused)
+d16 15h16: chat approached by Milo (accepted)
+d16 15h59: compliment approached by Milo (refused)
+d16 16h55: started gossip
+d16 16h55: finished work (completed)
+d16 16h55: gossip with Milo (accepted)
+d16 17h13: started eat
+d16 17h13: finished gossip (completed)
+d16 17h55: share approached by Garet (refused)
+d16 18h16: compliment approached by Alys (accepted)
+d16 18h28: compliment approached by Alys (accepted)
+d16 18h37: share approached by Garet (refused)
+d16 18h41: gossip approached by Alys (accepted)
+d16 18h49: share approached by Garet (accepted)
+d16 19h05: compliment approached by Alys (accepted)
+d16 19h30: compliment approached by Alys (accepted)
+d16 20h21: started wander
+d16 20h21: finished eat (completed)
+d16 20h37: compliment approached by Alys (refused)
+d16 20h51: started compliment
+d16 20h51: finished wander (completed)
+d16 22h22: compliment with Milo (accepted)
+d16 22h34: started sleep
+d16 22h34: finished compliment (completed)
+d17 07h38: started gossip
+d17 07h38: finished sleep (completed)
+d17 07h38: gossip with Alys (accepted)
+d17 07h56: started share
+d17 07h56: finished gossip (completed)
+d17 08h41: share with Corin (accepted)
+d17 08h54: started craft
+d17 08h54: finished share (completed)
+d17 12h54: started chat
+d17 12h54: finished craft (interrupted)
+d17 12h54: chat with Rhea (refused)
+d17 13h12: started play
+d17 13h12: finished chat (completed)
+d17 13h12: chat with Ysolde (refused)
+d17 13h42: started eat
+d17 13h42: finished play (completed)
+d17 13h56: compliment approached by Fenna (accepted)
+d17 14h08: chat approached by Fenna (refused)
+d17 17h39: started compliment
+d17 17h39: finished eat (completed)
+d17 18h42: compliment with Hilda (accepted)
+d17 18h54: share approached by Tomas (refused)
+d17 18h54: started gossip
+d17 18h54: finished compliment (completed)
+d17 18h54: gossip with Quill (refused)
+d17 19h13: started compliment
+d17 19h13: finished gossip (completed)
+d17 19h19: share approached by Tomas (accepted)
+d17 21h17: compliment approached by Dena (accepted)
+d17 21h57: compliment with Milo (accepted)
+d17 21h57: compliment approached by Milo (refused)
+d17 22h09: started sleep
+d17 22h09: finished compliment (completed)

@@ -4486,3 +4486,27 @@ tests across eight affected suites pass.
    cost of a society that cannot sleep. Recorded twice now, fixed by nobody.
 5. **Seed 11's village has almost no hostility at all** (0 rivals before, 1 after). The crate can produce a village with
    no hostility and nothing warns.
+
+## 2026-10-27-03 — a victim is moved by what was done to them
+
+**Change.** `patient_reaction` writes affinity: `witness_affinity · severity`, `severity = harm` for a benefit and
+`harm · negativity_ratio` (5.0, Baumeister et al. 2001 / Gottman 5:1, DOI `10.1037/1089-2680.5.4.323`) for an injury. Two
+new `Tuning` fields; `witness_affinity` (0.15) was a literal in `witness_reaction`.
+
+**Evidence** (`runs/2026-10-27-03/`, seeds 7/11/42, 17 game-days; `plots/ratio-sweep.png`). Seed 7: victims disliking
+their insulter 66 → 350 of 390 insults; friends 27 → 16, rivals 7 → 27. Seeds 11/42: rivals 1 → 35, 8 → 40. Fresh eyes
+seed 23 / 16 people: 11 → 209 victims, rivals 1 → 17. Rivals now outnumber friends at two seeds; cause is the pack's
+2.9 : 1 compliment:insult rate, below the paper's 5:1 survival threshold (ratio 1.0 already halves friends). Escalated:
+`needs-decision/a-village-that-is-never-pleased.md` (updated), `a-victim-remembers-nothing-a-host-reported.md` (new,
+`MemoryKind::Suffered` is a public-enum change).
+
+**Verdicts.** GREAT / GREAT / GREAT (pass 2 conditional on the escalation). **Dead-code delta:** zero. **Perf:** not
+measurable on a load-30 machine; one clamp per accepted deed. **Tests:** 4 new unit tests (`reputation::patient_tests`);
+a tautological assertion removed from `tuning_covers_rates`. Full gate results are in the PR.
+
+**Top 5 remaining.**
+1. The pack's insult rate vs the paper's 5:1 (above) — villages now tip into rivalry.
+2. `ReportDeed` leaves the victim no memory (`MemoryKind::Suffered`, needs-decision).
+3. Clock decision: `travel_timeout_hours` in game hours against real-time walking.
+4. `examples/benchmark` builds an unsittable home for every population.
+5. Hostility saturation in a crowd with no positive activity.

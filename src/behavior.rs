@@ -2945,7 +2945,14 @@ fn witness_deed(
     };
     if let Some(mut ties) = world.get::<Ties>(patient).cloned() {
         let mut emotions = world.get::<Emotions>(patient).cloned().unwrap_or_default();
-        crate::reputation::patient_reaction(&mut ties, &mut emotions, deed_spec.harm, gain, actor);
+        crate::reputation::patient_reaction(
+            &mut ties,
+            &mut emotions,
+            deed_spec.harm,
+            gain,
+            actor,
+            &settings.tuning,
+        );
         if let Some(mut slot) = world.get_mut::<Ties>(patient) {
             *slot = ties;
         }
