@@ -4414,3 +4414,75 @@ by nobody. (c) No reservations: two overlapping meals read the same store and bo
    should keep.
 4. **A deed's hostility still grows linearly with the crowd** — unchanged, `src/reputation.rs` dilutes trust only.
 5. **The refusal rate is `accept.base` 0.50**, still the most host-visible unmeasured number.
+
+## 2026-10-27-02 — A rivalry is released at 0.0001, a friendship is held through 0.05
+
+**Pick.** The log's #1 was "raise the rate of friendly interaction" (run `2026-12-28-01`, carried since). Measuring
+the tree first showed that premise inverted *again*: the village is already friend-dominated — **25 / 21 / 19** friend
+pairs at seeds 7 / 11 / 42 against **2 / 0 / 2** rival pairs. But `became_rival` (47 / 43 / 19) ran almost level with
+`left_rival` (42 / 38 / 19), so the question was not why the village has too few rivalries: it was why the ones it makes
+evaporate. It beats the runner-up (`patient_reaction` moving no affinity) because that one is a missing write in one
+function with no measured consequence yet, while this is a behaviour a host watches blink.
+
+**The defect.** `TieLabel::classify_from` held a `Friend` through `friend_band` and had **no clause for `Rival`**, so a
+rivalry was released the instant its affinity rose above `-rival_affinity`. Measured at pair level, three seeds, 2.93
+game-days: the affinity at release was **0.0001–0.0002** above the bar — one relaxation step — median rival spells were
+**0.14 / 0.29 / 0.38 game-days**, and **0 of 149** released spells ended for want of familiarity. The label was being made
+and unmade by arithmetic.
+
+**The direction was the pack's own citation, inverted.** `snub` cites Baumeister et al. 2001 (DOI
+`10.1037/1089-2680.5.4.323`): bad impressions are "quicker to form and **more resistant to disconfirmation** than good
+ones". Quicker to form was implemented; more resistant to disconfirmation was not, because only the positive category had
+a hold band. The paper's other half — "good may prevail by **superior force of numbers**" — is why this ships as a band
+and not a floor.
+
+**What shipped.** `Tuning::rival_band`, default **0.10** (design default, chosen by a three-seed sweep; `0.0` restores the
+single bar), and one clause in `classify_from`. The field is clamped at `rival_affinity` inside the function, so a host
+cannot configure a grudge that no good conduct releases.
+
+**Before → after, same pack and seed, 17.62 game-days:**
+
+| | seed 7 | seed 11 | seed 42 |
+|---|---|---|---|
+| friends | 25 → **25** | 21 → **21** | 19 → **19** |
+| rivals at the end | 2 → **7** | 0 → **1** | 2 → **8** |
+| rivals averaged over the run | 1.13 → **2.98** | 0.21 → **1.04** | 0.66 → **2.57** |
+| ticks with no rivalry anywhere | 46.3% → **13.3%** | 79.3% → **20.6%** | 59.1% → **18.3%** |
+| `left_rival` | 42 → 13 | 19 → 8 | 38 → 11 |
+
+**Friend pairs are identical at every band swept (0.0 / 0.05 / 0.10 / 0.15)** — the check that the clause guards one
+category rather than moving the network, since a change that moved both ends would have moved the network. Pair-level at
+seed 7: median rival spell **0.289 → 2.637 game-days**, release margin **0.0002 → 0.1002**. `left_rival` stays above zero
+everywhere, so a rivalry still reconciles. Fresh eyes at **seed 23 / 16 people**: friends 17 → 17, rivals 0 → 1, releases
+10 → 4 — the direction holds and the effect is weaker, which is recorded rather than glossed.
+
+**The instrument was broken and finding it was not optional.** The narrative showed `started snub` with no target and no
+outcome: the harness drained `InteractionResolved` and `ActivityEnded` into its counters *before* `drain_narrative` read
+them. Both are now drained once into a `Vec` and read by both consumers. Regenerating after the fix reproduces every
+number exactly, so only the narrative was wrong — and the narrative is what a host developer reads first.
+
+**Verdicts.** Pass 1 GREAT — both directions tested, release margin and spell length measured at pair level. Pass 2 GREAT
+— `evidence/plots/rival-band.png` shows the friend curves superimposed at three seeds while the rival curve stops blinking
+to zero; seed 11's much smaller effect is left in the plot rather than dropped. Pass 3 GREAT — seed 23 / 16 people holds
+the direction, and the smaller-population limit is stated.
+
+**Dead-code delta.** Zero. **Perf:** inside the noise — 22–40% spreads against differences of 2–3%; one 1 000-person round
+was contaminated by running alongside the suite and is marked discarded rather than reported. **Tests:** `tests/`
+`label_hysteresis` gains the village test and its rival-bar test is rewritten (it had been asserting the defect); 22
+tests across eight affected suites pass.
+
+**Commit** `36c4d8c`, on top of the research (`cd9b10e`) and plan (`cdfcb13`) commits.
+
+**Top 5 remaining.**
+
+1. **`patient_reaction` moves no affinity** — a victim keeps liking their insulter. Now the sharpest gap left: with
+   rivalries persisting, the reason the first one formed is still one-sided. Needs a cited rate or an explicit
+   design-default.
+2. **Hostility saturation** in a crowd with no positive activity (affinity pins at −1.0, run `2026-10-27-01`). Unchanged:
+   the band holds grudges that already exist.
+3. **The clock decision** — `travel_timeout_hours` in game hours against real-time walking. Still the largest
+   host-ergonomics tax.
+4. **`examples/benchmark` builds an unsittable home for every population**, so every perf number in the repository is the
+   cost of a society that cannot sleep. Recorded twice now, fixed by nobody.
+5. **Seed 11's village has almost no hostility at all** (0 rivals before, 1 after). The crate can produce a village with
+   no hostility and nothing warns.
