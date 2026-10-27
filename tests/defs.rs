@@ -95,3 +95,68 @@ fn affinity_input_on_a_place_activity_is_invalid() {
     let result = SocietyDefs::from_ron(text);
     assert!(matches!(result, Err(DefsError::Invalid { .. })));
 }
+
+#[test]
+fn a_merged_pack_contributes_its_goods() -> TestResult {
+    // **A merge carried eleven lists and dropped two.** `goods` and `skills` were the two, so a pack merged
+    // in with a new good contributed nothing — and because `compile` resolves every `consumes` and `produces`
+    // by name, the failure surfaced as "not defined" against the *consuming* activity rather than against
+    // the merge. The village example is exactly this shape: the starter pack plus `village.society.ron`.
+    let mut base = DefsFile::from_ron(r#"(goods: [(id: "bread")])"#)?;
+    let other =
+        DefsFile::from_ron(r#"(goods: [(id: "wool")], skills: [(id: "weave", group: Craft)])"#)?;
+    base.merge(other)?;
+    let defs = SocietyDefs::compile(base)?;
+    assert!(
+        defs.good_id("wool").is_some(),
+        "a good the merged pack defines must be compiled in; `bread` {} and `wool` {}",
+        defs.good_id("bread").is_some(),
+        defs.good_id("wool").is_some()
+    );
+    assert!(
+        defs.skill_id("weave").is_some(),
+        "a skill the merged pack defines must be compiled in"
+    );
+    Ok(())
+}
+
+#[test]
+fn a_good_defined_in_both_packs_is_a_duplicate() {
+    // The merge's contract for every other list, now extended to goods: an id in both is an error, not a
+    // silent second entry that would give the same good two `GoodId`s.
+    let mut base = DefsFile::from_ron(r#"(goods: [(id: "bread")])"#).expect("parses");
+    let other = DefsFile::from_ron(r#"(goods: [(id: "bread")])"#).expect("parses");
+    assert!(matches!(
+        base.merge(other),
+        Err(DefsError::Duplicate { kind: "good", ref id }) if id == "bread"
+    ));
+}
+
+#[test]
+fn a_good_only_the_merged_pack_consumes_resolves() -> TestResult {
+    // The shape that failed in practice: the **starter** pack names the good and the merged pack brings the
+    // activity that uses it, so before the fix the error pointed at the activity and not at the merge.
+    let mut base = DefsFile::from_ron(
+        r#"(goods: [(id: "bread")], activities: [(
+            id: "eat",
+            target: Itself,
+            duration_hours: 1.0,
+            consumes: [("bread", 0.25)],
+            satisfies: [("food", 1.0)],
+        )], needs: [(id: "food")])"#,
+    )?;
+    let other = DefsFile::from_ron(
+        r#"(goods: [(id: "flour")], activities: [(
+            id: "mill",
+            target: Itself,
+            duration_hours: 1.0,
+            produces: [("flour", 2.0)],
+            consumes: [("bread", 0.1)],
+        )])"#,
+    )?;
+    base.merge(other)?;
+    let defs = SocietyDefs::compile(base)?;
+    assert!(defs.good_id("flour").is_some());
+    assert!(defs.activity_id("mill").is_some());
+    Ok(())
+}

@@ -691,6 +691,21 @@ impl DefsFile {
             self.interactions.iter().map(|d| d.id.as_str()),
             other.interactions.iter().map(|d| d.id.as_str()),
         )?;
+        // **`goods` and `skills` were omitted here until 2026-10-26-13.** Eleven lists were carried and two
+        // were not, so a pack merged in that declares a good contributed nothing: `compile` then resolved
+        // every `consumes` and `produces` that named it to "not defined", and the merge either failed with a
+        // confusing unknown-id error or — for a good only the *other* pack used — dropped the good silently.
+        // Found when `bake` moved into the starter pack, which is exactly the merge the village example does.
+        check_disjoint(
+            "good",
+            self.goods.iter().map(|d| d.id.as_str()),
+            other.goods.iter().map(|d| d.id.as_str()),
+        )?;
+        check_disjoint(
+            "skill",
+            self.skills.iter().map(|d| d.id.as_str()),
+            other.skills.iter().map(|d| d.id.as_str()),
+        )?;
         check_disjoint(
             "trigger",
             self.triggers.iter().map(|d| d.id.as_str()),
@@ -698,6 +713,8 @@ impl DefsFile {
         )?;
         self.needs.extend(other.needs);
         self.signals.extend(other.signals);
+        self.skills.extend(other.skills);
+        self.goods.extend(other.goods);
         self.topics.extend(other.topics);
         self.deeds.extend(other.deeds);
         self.factions.extend(other.factions);
