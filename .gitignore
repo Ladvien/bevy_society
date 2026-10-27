@@ -2,3 +2,8 @@
 Cargo.lock
 /tools/corpus/cache/
 /frames/
+
+# Raw per-tick run output is read, not committed: docs/loop/runs already tracks 978 MB of CSV. Plots,
+# narratives and .md/.json summaries are committed; a .csv under a run is regenerated from the command
+# recorded in its eval.md. Files already in history stay tracked; this only stops new ones.
+/docs/loop/runs/**/*.csv

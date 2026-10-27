@@ -25,6 +25,13 @@ docs/loop/
 ```
 Paper notes stay in `docs/research/`, one per model, as they are now.
 
+**Raw output is read, not committed.** `.gitignore` ignores every `.csv` under `docs/loop/runs/`:
+that directory already tracks 978 MB of CSV (the whole repository packs to 185 MB), and whatever is
+pushed stays in history for good. Commit what a reader needs instead: the plots, the narratives, a
+summary table as `.md` or `.json` (each file under 100 KB), and the exact command that regenerates
+the series, written in `eval.md`. In `review.md` cite a committed file, never an ignored CSV: a fresh
+clone cannot open it. `git add` of an ignored file fails on purpose; do not `-f` it.
+
 ## Your work is saved even if you are killed — read this before you start
 
 **The driver saves whatever you leave uncommitted, without touching your branch.** Every ten minutes
@@ -205,7 +212,7 @@ recording of the GIF above it when it shows different objects. Before you push a
    `--test guide_blocks`.
 
 ## 8. Log
-Append to `log.md`: change, rationale, evidence links, before/after
+Append to `log.md`: change, rationale, evidence links (committed files only), before/after
 numbers, the dead-code inventory delta, verdicts, commit, and the top 5
 remaining items.
 
