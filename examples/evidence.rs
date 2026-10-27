@@ -58,6 +58,9 @@ fn main() {
     if let Some(band) = args.friend_band {
         settings.tuning.friend_band = band;
     }
+    if let Some(band) = args.rival_band {
+        settings.tuning.rival_band = band;
+    }
     if let Some(rate) = args.dyad_balance {
         settings.tuning.dyad_balance_per_day = rate;
     }
@@ -1306,6 +1309,9 @@ struct Args {
     label_hysteresis: Option<f32>,
     /// Overrides `Tuning::friend_band`, so a run can be read with a friendship held below its bar.
     friend_band: Option<f32>,
+    /// Overrides `Tuning::rival_band`, so the band a rivalry is held through can be swept without
+    /// editing the crate.
+    rival_band: Option<f32>,
     /// Overrides `Tuning::dyad_balance_per_day`, so a run can be read with ties pulled toward reciprocity.
     dyad_balance: Option<f32>,
     /// `Tuning::witness_dilution`, so the exponent can be swept without editing the crate.
@@ -1334,6 +1340,7 @@ impl Args {
             friend_affinity: None,
             label_hysteresis: None,
             friend_band: None,
+            rival_band: None,
             dyad_balance: None,
             witness_dilution: None,
             days: None,
@@ -1355,6 +1362,7 @@ impl Args {
                     args.label_hysteresis = argv.next().and_then(|v| v.parse().ok())
                 }
                 "--friend-band" => args.friend_band = argv.next().and_then(|v| v.parse().ok()),
+                "--rival-band" => args.rival_band = argv.next().and_then(|v| v.parse().ok()),
                 "--dyad-balance" => args.dyad_balance = argv.next().and_then(|v| v.parse().ok()),
                 "--witness-dilution" => {
                     args.witness_dilution = argv.next().and_then(|v| v.parse().ok())
