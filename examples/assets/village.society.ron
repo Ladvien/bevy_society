@@ -45,33 +45,6 @@
             barks: [],
         ),
         (
-            // **The village's producer, and the first division of labour.** A task that makes a good, so the
-            // store moves and the price has something to be an observation of. Nothing consumes bread but
-            // `eat`, which the starter pack declares.
-            //
-            // Three loaves a bake, and **the diligent are the ones who bake** (`Skill("craft")`, the same
-            // trait that decides who crafts). At one loaf for everybody a loaf was eaten as fast as it was
-            // baked and nobody ever had one to share: the stores averaged 0.05 loaves a person and the
-            // village shared 20 times in 17 days. Three loaves from a few hands leaves them a surplus: 65
-            // shares at the same slope, and 37 once a giver had to keep a loaf. Measured over nine seeds in
-            // `docs/loop/runs/2026-10-25-08/eval.md`.
-            id: "bake",
-            target: Place("food"),
-            duration_hours: 1.0,
-            produces: [("bread", 3.0)],
-            // **A dawn errand, not a second job.** At `Hours(6, 18)` and 2 hours a bake, it out-competed
-            // `work` for the whole day and the village lost its rivalries entirely (seed 7: 26 -> 1, seed
-            // 42: 33 -> 0, measured). An hour at first light sits where `work`'s `Hours(8, 17)` window is
-            // shut, so it adds a morning without taking the day.
-            considerations: [
-                (input: Hour, curve: Hours(6.0, 7.0)),
-                (input: Skill("craft"), curve: Linear(1.0, 0.0)),
-            ],
-            satisfies: [],
-            interaction: None,
-            barks: ["Fresh loaves."],
-        ),
-        (
             id: "craft",
             target: Place("work"),
             duration_hours: 3.0,

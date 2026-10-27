@@ -286,6 +286,7 @@ impl Plugin for BehaviorPlugin {
         warn_short_travel_reach(&settings);
         warn_walk_outlasts_activity(defs, &settings);
         warn_unbalanced_needs(defs);
+        warn_unmade_goods(defs);
         app.add_systems(Startup, warn_unreachable_places);
     }
 }
@@ -353,6 +354,65 @@ fn warn_unbalanced_needs(defs: &SocietyDefs) {
 ///
 /// `social` sits at 2.78 and is fine; a source behind a walk and an hour window at that count is not.
 const MAX_USES_PER_DAY: f32 = 4.0;
+
+/// Warns about a good some activity **consumes** and no activity in the pack **produces**.
+///
+/// A pack can name a good and use it without ever making it, and until `satisfies` started paying for
+/// what a `consumes` actually found, that was invisible: every meal was paid in full from a shelf that
+/// could never hold anything, so the village looked fed and the larder was a fiction. Now it means a
+/// need nobody can ever meet — the worst kind of silent, because the decision rule keeps choosing the
+/// activity and the host sees a store that is always empty.
+///
+/// Measured on this crate's own starter pack, which declares `bread` and has `eat` consume it with no
+/// producer in the pack: a host built from `DefsFile::starter()` alone had a village that could never
+/// hold a loaf, and nothing said so until a run was read (`docs/loop/runs/2026-10-26-12/`).
+///
+/// A warning rather than an error: a host may supply the producer in a second pack it merges in, and a
+/// good with no producer is legitimate for a pack that only *reads* one — a market whose goods arrive
+/// from elsewhere. The crate cannot tell those apart, and refusing to compile would break the second.
+fn warn_unmade_goods(defs: &SocietyDefs) {
+    let mut unmade: Vec<String> = Vec::new();
+    for (index, good) in defs.goods.iter().enumerate() {
+        let made = defs.activities.iter().any(|activity| {
+            activity
+                .produces
+                .iter()
+                .any(|&(slot, amount)| usize::from(slot.0) == index && amount > 0.0)
+        });
+        if made {
+            continue;
+        }
+        let used = defs
+            .activities
+            .iter()
+            .filter(|activity| {
+                activity
+                    .consumes
+                    .iter()
+                    .any(|&(slot, _)| usize::from(slot.0) == index)
+            })
+            .count();
+        if used > 0 {
+            unmade.push(format!(
+                "{} ({used} activit{} consume it, none produces it)",
+                good,
+                if used == 1 { "y" } else { "ies" }
+            ));
+        }
+    }
+    if unmade.is_empty() {
+        return;
+    }
+    warn!(
+        "bevy_society: {} good{} no activity produces: {}. A `consumes` that nothing makes can never \
+         be met, so the activities that pay `satisfies` for it will pay nothing and the store will stay \
+         empty for the whole run. Add a `produces:` to some activity, or merge in the pack that makes \
+         it.",
+        unmade.len(),
+        if unmade.len() == 1 { "" } else { "s" },
+        unmade.join("; ")
+    );
+}
 
 /// Warns that `travel_timeout_hours` and the day length disagree badly enough that walks will time out.
 ///

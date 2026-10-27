@@ -23,9 +23,14 @@
 //! and honey are meticulously shared among the Ache, but goods purchased by money are not". There is no
 //! money here and no exchange rate; a good is a quantity and nothing more.
 //!
-//! **Nothing gates.** Last iteration measured that putting a new condition on a *dominant* activity wrecks
-//! the village (rivals 29 → 55 at seed 42). Having bread changes what a person prefers to do; it never
-//! changes what a person is allowed to do.
+//! **Nothing gates, and a short meal is still paid for.** Last iteration measured that putting a new
+//! condition on a *dominant* activity wrecks the village (rivals 29 → 55 at seed 42), so having bread
+//! changes what a person prefers to do and never what a person is allowed to do: an empty shelf still lets
+//! a villager walk to the table and sit down. What it cannot do is feed them. An activity's `satisfies` is
+//! paid in proportion to what its `consumes` actually found in `Stock` ([`crate::behavior`]'s
+//! `arrive_and_satisfy`), so a meal from an empty larder costs the ticks and pays nothing — the failure is
+//! priced, never prevented. Before that, ~77% of this village's meals were eaten out of a store it did not
+//! have.
 
 use bevy::prelude::*;
 

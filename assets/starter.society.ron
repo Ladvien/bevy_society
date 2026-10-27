@@ -36,6 +36,50 @@
     ],
     activities: [
         (
+            // **The producer, and the first division of labour.** A task that makes a good, so the store
+            // moves and the price has something to be an observation of.
+            //
+            // It lives in the **starter** pack, not only in the village example, because `eat` here
+            // consumes `bread` and a pack that consumes a good it never makes can never feed anybody.
+            // That was invisible while an activity's `satisfies` was paid in full whatever its `consumes`
+            // found; now that a meal pays for what it took, `eat` in a village that cannot bake is a need
+            // nobody can meet. `warn_unmade_goods` says so at startup for any host that hits it.
+            //
+            // **Four loaves a bake, measured.** A meal is a quarter loaf (`eat`'s own `consumes`) and a
+            // village feeds about 3.6 meals a person a game-day once hunger is real, so it wants roughly
+            // `people / 3.6 / 4` loaves — a shade under **one a head a day**, which is also what
+            // `Tuning::price_full_store` calls a full store, so the two defaults agree.
+            //
+            // Three and six were measured at two populations and each fails differently. At **3** the
+            // supply is 8.7 loaves against 14.8 needed at 16 people: `food` 0.271 with 26.5% of ticks
+            // below 0.1. At **6** the village oversupplies — 1.67 loaves a head, the price at the
+            // *full-store* value 0.50 on 62% of ticks — and the social fabric goes with it (friends
+            // 26 -> 21, rumor reach 0.42 -> 0.25) as sharing swallows the day (29 -> 140 shares). At
+            // **4**: `food` 0.339 / 0.330 at 24 and 16 people against the old paid-in-full 0.450 / 0.416,
+            // price 0.841 / 0.895 and never at the floor, friends 26 / 20 against 26 / 16. A design
+            // default: no paper gives loaves a bake. `docs/loop/runs/2026-10-26-12/`.
+            //
+            // **The supply does not scale with the population, and that is the trap.** Bakes a game-day
+            // are 3.3 at 16 people and 3.9 at 24, because the dawn window is one hour long and the count
+            // of people who fit an errand into it is what limits it; loaves a bake 3 -> 6 barely moved
+            // bakes a day (3.28 -> 3.91). A host scaling its population must scale `produces` too.
+            id: "bake",
+            target: Place("food"),
+            duration_hours: 1.0,
+            produces: [("bread", 4.0)],
+            // **A dawn errand, not a second job.** At `Hours(6, 18)` and 2 hours a bake, it out-competed
+            // `work` for the whole day and the village lost its rivalries entirely (seed 7: 26 -> 1, seed
+            // 42: 33 -> 0, measured). An hour at first light sits where `work`'s `Hours(8, 17)` window is
+            // shut, so it adds a morning without taking the day.
+            considerations: [
+                (input: Hour, curve: Hours(6.0, 7.0)),
+                (input: Skill("craft"), curve: Linear(1.0, 0.0)),
+            ],
+            satisfies: [],
+            interaction: None,
+            barks: ["Fresh loaves."],
+        ),
+        (
             id: "sleep",
             target: Home,
             duration_hours: 8.0,
@@ -56,10 +100,22 @@
                 (input: Need("food"), curve: Logistic(-10.0, 0.35)),
             ],
             satisfies: [("food", 1.2)],
-            // **Eating uses up bread when there is any**, and never refuses when there is not: the store
-            // changes what a person prefers, never what they may do. Gating a dominant activity on a new
-            // condition was measured to wreck the village (rivals 29 -> 55 at seed 42).
-            consumes: [("bread", 1.0)],
+            // **Eating uses up bread when there is any, and a meal is a QUARTER of a loaf.**
+            //
+            // *When there is any*: the store changes what a person prefers, never what they may do —
+            // gating a dominant activity on a new condition was measured to wreck the village (rivals
+            // 29 -> 55 at seed 42). What an empty shelf costs is the `satisfies` payout, which is scaled
+            // by what `consumes` actually found, so a meal from an empty larder walks to the table and
+            // restores no `food`. The failure is priced, never prevented.
+            //
+            // *A quarter*: a bake is four loaves and a meal used to ask for a **whole** one, which the
+            // village could never supply. Measured at seed 23 (24 people, 17.62 game-days) it bakes 4
+            // loaves a game-day and takes 21 meals, so the store was empty on **23.2%** of ticks and
+            // `food` sat at 0.450 only because every one of those meals was paid in full anyway. At a
+            // quarter loaf the village holds bread on all but **3.8%** of ticks and `food` reads 0.339 —
+            // and 110 loaves change hands where 29 did. A loaf is several servings and the pack never
+            // said how many; a quarter is a design default. `docs/loop/runs/2026-10-26-12/`.
+            consumes: [("bread", 0.25)],
             interaction: None,
             barks: ["Mmm, bread."],
         ),

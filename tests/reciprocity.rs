@@ -110,10 +110,20 @@ fn the_two_directions_of_a_relationship_converge() {
 /// `affinity` the same and both labels rare. Measured: a rate of 0.5 costs some friends and rivals
 /// (seed 7: friends 22 -> 16, rivals 42 -> 24) and that is the price of mutuality, not a collapse —
 /// there are still both.
+///
+/// **The run is 12 600 ticks (about three game-days), not 4 200, and that is this iteration's change.**
+/// The village starts at 15:00 and bakes only at first light, so 4 200 ticks — a little over one
+/// game-day — now ends before the first loaf exists. It used to be enough because `satisfies` was paid
+/// in full from an empty shelf: a village that had never baked was fed anyway, and its rivalries formed
+/// over meals nobody ate. Once a meal pays for what it took (`docs/loop/runs/2026-10-26-12/`) the same
+/// window is a starving one and the hostile ties have not formed yet: measured at seed 7, rivals are
+/// **0 at 4 200 ticks**, **0 at 8 400** (one bake, food 0.455) and **8 at 12 600** (food 0.586, bread
+/// 0.906 a head). Three game-days is the shortest window in which this fixture tests what it says it
+/// does — that the dyad step leaves *both* labels standing — rather than the supply of bread.
 #[test]
 fn the_village_keeps_both_labels() {
     let mut app = village(Tuning::default().dyad_balance_per_day, 7);
-    common::run(&mut app, 4_200);
+    common::run(&mut app, 12_600);
     let (mutual, one_way, gap, friends, rivals) = shape(&app);
     assert!(
         friends > 0 && rivals > 0,

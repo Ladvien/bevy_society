@@ -203,6 +203,12 @@ pub struct Tuning {
     ///
     /// It is read when a share is **chosen**, not when the pair meets, so a giver who eats on the way can still
     /// hand over its last unit (1 of 76 logged shares at 24 and 36 people).
+    ///
+    /// **It was sized when a meal was a whole loaf, and a meal is now a quarter** (`eat`'s `consumes`), so this
+    /// keeps back **four** meals where it used to keep back one. Measured, it did not change what a village does
+    /// at 24 people — shares rose 29 → 110 with the same friend count — but a host that wants the old meaning
+    /// should set 0.25. Recorded rather than re-tuned, because the number is host-visible and moving it changes
+    /// every village that set it. `docs/loop/runs/2026-10-26-12/review.md`.
     pub trade_reserve: f32,
     /// The smallest gap between two people's valuations at which a trade is worth making.
     ///
