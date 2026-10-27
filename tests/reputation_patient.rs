@@ -171,7 +171,7 @@ fn harm_moves_its_victim_more_than_a_bystander() {
     let (victim, witness) = deed(tuning.clone(), "insult");
 
     let expected_victim = tuning.witness_affinity * -0.4 * tuning.negativity_ratio;
-    let expected_witness = tuning.witness_affinity * -1.0;
+    let expected_witness = -tuning.witness_affinity;
     assert!(
         (victim - expected_victim).abs() < 1e-4,
         "the victim's write is the harm scaled by the ratio: expected {expected_victim}, got {victim}"
