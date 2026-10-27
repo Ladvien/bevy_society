@@ -242,6 +242,15 @@ pub struct Tuning {
     pub witness_gain: f32,
     /// How a deed's per-witness cost shrinks as the crowd watching it grows.
     ///
+    /// Applied to **all three tie writes** a witness makes — trust, affinity and respect — since
+    /// 2026-10-26-13. It was applied to trust alone before that, which damped the one write
+    /// `TieLabel::classify` does not read and left the crowd multiplying the two it does: a deed's
+    /// *affinity* cost grew linearly with the number of watchers while a `compliment`'s gain reached exactly
+    /// one person. Measured on `village-evening`, the affinity ledger was **+160.4 (1 604 accepted
+    /// compliments) against −241.2 (7 920 witness reactions)**, so friendship could not accumulate — 18
+    /// friend pairs against 42 rival pairs. Baumeister et al. 2001 (DOI 10.1037/1089-2680.5.4.323) states the
+    /// outcome a society should have instead: *"good may prevail over bad by superior force of numbers"*.
+    ///
     /// `0.0` applies the full `witness_gain · harm` to every witness, so the deed's total cost grows
     /// linearly with the crowd — while a trust *gain* from an interaction reaches only the two parties. One
     /// `chat` is `+0.10` in total; one insult seen by three people is `-0.42`, and trust in a village can
