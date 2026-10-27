@@ -4,6 +4,10 @@ All notable changes to bevy_society. The format follows [Keep a Changelog](https
 
 ## [Unreleased]
 
+### Fixed
+
+- **`DefsFile::merge` carries `goods` and `skills`.** It carried nine lists of eleven and dropped these two, so a pack merged in that declares a good contributed nothing: `SocietyDefs::compile` then resolved every `consumes` and `produces` naming it to "not defined", and the error pointed at the *consuming* activity rather than at the merge. Found when `bake` moved into the starter pack — the exact shape the village example uses (`starter` + `village.society.ron`). An id in both packs is now `DefsError::Duplicate { kind: "good" | "skill" }`, like every other list. `tests/defs.rs` pins the merge, the duplicate and the cross-pack `consumes` case, and all three fail against the old code.
+
 ### Breaking
 
 - **`SocietySave::VERSION` is 2, because `Stock` is the first per-person state added since the format was written.** A version-1 save now comes back as `RestoreError::Version` and is refused rather than misread — which is what `VERSION` exists for. A host with saved societies must discard or migrate them.

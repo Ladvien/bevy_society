@@ -22,6 +22,11 @@ file.merge(DefsFile::from_ron(include_str!("village.society.ron"))?)?;
 let defs = SocietyDefs::compile(file)?;
 ```
 
+Every list is carried: needs, signals, **skills, goods**, topics, deeds, factions, activities, interactions,
+triggers, conversations and node effects. `goods` and `skills` were omitted until 2026-10-26-13, so a pack
+that added a good contributed nothing and the error surfaced later as an unknown id on whichever activity
+consumed it — a host upgrading from 0.3.0 with a split pack should re-check that its merged file compiles.
+
 `SocietyDefs::compile` interns every id in definition order and compiles every Rhai script, so a
 malformed definition or a script with a syntax error is reported **before** the app runs, with a path
 like `activity 'eat' consideration 2`.
