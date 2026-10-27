@@ -1,11 +1,30 @@
 # Good is outweighed by bad, and the paper says it should prevail by numbers
 
 > **Measured 2026-12-28. Three levers tested, all rejected. The diagnosis is the deliverable.**
+>
+> **Corrected 2026-10-26-13: the state below is STALE and it inverted.** Re-measured on `village-evening`
+> over 17.03 game-days with the shipped pack, the village is **friend-dominated at two of three seeds and has no
+> rivalry at all at the third**:
+>
+> | seed | friend pairs | rival pairs |
+> |---|---|---|
+> | 7 | **27** | **2** |
+> | 42 | **21** | **3** |
+> | 11 | **20** | **0** |
+>
+> The 18 / 42 below was measured on 2026-12-28, before the quarter-loaf meal, the shipped `bake`, the crowding
+> price and the `snub` grudge gate landed. Every number in this file — including the +160.4 / −241.2 affinity
+> ledger — predates them and must not be quoted as current. The open question is now the opposite one: **why does
+> one seed in three produce no rivalry, and is 27 friend pairs in 24 people too many?** Measured in
+> `docs/loop/runs/2026-10-26-13/eval.md`, which also measured the lever this file named and could not measure —
+> diluting the `0.15 · approval` write by the crowd — and found it **takes rivals to zero** (seed 7: 27/2 →
+> 39/0). That lever is reverted; it is not the answer.
 
 ## The state
 
 `village-evening`, 24 people, 17 game-days: **18 friend pairs against 42 rival pairs** — 6.5% of all 276 pairs
 friendly, 15% hostile. Rivalries do reconcile (a quarter end), but the village settles hostile.
+*(Stale — see the correction at the top. Measured 2026-10-26-13: 27 / 2, 21 / 3 and 20 / 0 at seeds 7, 42, 11.)*
 
 ## What the cited literature actually says
 
