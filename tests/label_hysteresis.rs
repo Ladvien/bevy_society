@@ -100,19 +100,58 @@ fn a_friendship_is_held_only_within_its_band() {
 }
 
 #[test]
-fn the_rival_bar_keeps_a_single_line() {
+fn the_rival_bar_has_a_band_and_a_zero_band_is_a_single_line() {
+    // **This test used to assert the defect.** It was named `the_rival_bar_keeps_a_single_line` and it
+    // asserted that a Rival at `-rival_affinity + label_hysteresis / 2` became an Acquaintance — i.e. that
+    // a tie resting a hair above its bar lost the label. Measured at pair level on `village-evening`
+    // (three seeds, 2.93 game-days), that release happened at a margin of **0.0001** and rival spells
+    // lasted a median of 0.14-0.38 game-days while `became_rival` ran level with `left_rival`. The
+    // assertion was written as intended behaviour and the behaviour was the finding.
     let tuning = Tuning::default();
-    let just_over = -tuning.rival_affinity + tuning.label_hysteresis / 2.0;
+    assert!(
+        tuning.rival_band > 0.0,
+        "the shipped default must hold a rivalry through a shallow rise, or every relaxation step ends one"
+    );
+    let inside = -tuning.rival_affinity + tuning.rival_band / 2.0;
     assert_eq!(
         TieLabel::classify_from(
             TieLabel::Rival,
-            just_over,
+            inside,
+            tuning.rival_familiarity + 0.5,
+            0.5,
+            &tuning
+        ),
+        TieLabel::Rival,
+        "a rise inside the band keeps the rivalry"
+    );
+    let outside = -tuning.rival_affinity + tuning.rival_band + 0.01;
+    assert_eq!(
+        TieLabel::classify_from(
+            TieLabel::Rival,
+            outside,
             tuning.rival_familiarity + 0.5,
             0.5,
             &tuning
         ),
         TieLabel::Acquaintance,
-        "and the same at the rival bar"
+        "a rise past the band ends it, so a rivalry is not permanent"
+    );
+
+    // With the band at zero it is the single line it always was.
+    let strict = Tuning {
+        rival_band: 0.0,
+        ..Tuning::default()
+    };
+    assert_eq!(
+        TieLabel::classify_from(
+            TieLabel::Rival,
+            inside,
+            strict.rival_familiarity + 0.5,
+            0.5,
+            &strict
+        ),
+        TieLabel::Acquaintance,
+        "rival_band 0.0 restores the single bar exactly"
     );
 }
 
@@ -121,6 +160,7 @@ fn a_zero_band_is_the_old_single_bar() {
     let strict = Tuning {
         label_hysteresis: 0.0,
         friend_band: 0.0,
+        rival_band: 0.0,
         ..Tuning::default()
     };
     for (affinity, familiarity) in [
@@ -128,6 +168,7 @@ fn a_zero_band_is_the_old_single_bar() {
         (0.0, strict.stranger_familiarity),
         (0.0, strict.stranger_familiarity + 0.5),
         (strict.friend_affinity, strict.friend_familiarity + 0.5),
+        (-strict.rival_affinity, strict.rival_familiarity + 0.5),
         (0.0, 0.0),
     ] {
         for current in [
@@ -374,5 +415,96 @@ fn a_friendship_is_held_through_a_shallow_dip_and_lasts_longer() {
     assert!(
         messages_with > 0,
         "friendships must still end, or the label has become permanent"
+    );
+}
+
+/// **A rivalry is held through a shallow rise, and the held duration shows it.**
+///
+/// Measured at pair level on `village-evening` (three seeds, 2.93 game-days) before this clause existed:
+/// a `Rival` was released when its affinity climbed **0.0001–0.0002** above `-rival_affinity` — one
+/// relaxation step — and rival spells lasted a median of **0.14 / 0.29 / 0.38 game-days**, while
+/// `became_rival` (47 / 43 / 19) ran almost level with `left_rival` (42 / 38 / 19). None of the 149
+/// released spells ended for want of familiarity. The rival label was being made and unmade by arithmetic.
+///
+/// The direction is the pack's own citation for `snub` — Baumeister et al. 2001, DOI
+/// `10.1037/1089-2680.5.4.323`: bad impressions are "quicker to form and **more resistant to
+/// disconfirmation** than good ones". The positive category had a hold band and the negative one did not.
+///
+/// What must not happen: the band may not make a rivalry permanent (`left_rival` must still be non-zero),
+/// and it may not move the friend count, because the village is friend-dominated and a change that moves
+/// both ends has moved the network rather than the asymmetry.
+#[test]
+fn a_rivalry_is_held_through_a_shallow_rise_and_lasts_longer() {
+    /// `(rivalries released, median held in game-days, rivals at the end, friends at the end)`.
+    fn run(band: f32) -> (usize, f32, u32, u32) {
+        let mut app = village(7, Tuning::default().label_hysteresis);
+        app.world_mut()
+            .resource_mut::<SocietySettings>()
+            .tuning
+            .rival_band = band;
+        let mut held: Vec<f32> = Vec::new();
+        let mut since: Vec<(Entity, Entity, f32)> = Vec::new();
+        let mut released = 0usize;
+        let ticks = 3_200;
+        for _ in 0..ticks {
+            app.update();
+            let clock = *app.world().resource::<SocietyClock>();
+            for message in app
+                .world_mut()
+                .resource_mut::<Messages<TieLabelChanged>>()
+                .drain()
+            {
+                if message.new == TieLabel::Rival {
+                    since.push((message.from, message.to, clock.now_days as f32));
+                } else if message.old == TieLabel::Rival {
+                    released += 1;
+                    if let Some(i) = since
+                        .iter()
+                        .position(|(f, t, _)| *f == message.from && *t == message.to)
+                    {
+                        let (_, _, start) = since.remove(i);
+                        held.push(clock.now_days as f32 - start);
+                    }
+                }
+            }
+        }
+        held.sort_by(f32::total_cmp);
+        let median = if held.is_empty() {
+            0.0
+        } else {
+            held[held.len() / 2]
+        };
+        let (friends, rivals) = counts(&app);
+        (released, median, rivals, friends)
+    }
+
+    let (released_without, median_without, rivals_without, friends_without) = run(0.0);
+    let (released_with, median_with, rivals_with, friends_with) = run(Tuning::default().rival_band);
+
+    assert!(
+        released_without > 0 && released_without < 200,
+        "the fixture must show the churn it exists to remove: {released_without} rivalries released \
+         without a band"
+    );
+    assert!(
+        released_with < released_without,
+        "a band must reduce the releases ({released_with} with, {released_without} without)"
+    );
+    assert!(
+        median_with > median_without,
+        "and the ones that remain must last longer ({median_with:.2} vs {median_without:.2} game-days)"
+    );
+    assert!(
+        released_with > 0,
+        "a band must not make a rivalry permanent: none of {released_without} was ever released"
+    );
+    // The village is friend-dominated; the band guards one category, so the other must not move.
+    assert_eq!(
+        friends_with, friends_without,
+        "the rival band must not move the friend count: {friends_with} with, {friends_without} without"
+    );
+    assert!(
+        rivals_with >= rivals_without,
+        "holding a rivalry cannot reduce the rival count: {rivals_with} with, {rivals_without} without"
     );
 }

@@ -131,6 +131,21 @@ impl TieLabel {
         {
             return Self::Friend;
         }
+        // **A rivalry is held the way a friendship is held.** The clause above guards the positive
+        // category and this one guards the negative one, for the reason the pack already cites: "bad
+        // impressions ... are quicker to form and more resistant to disconfirmation than good ones"
+        // (Baumeister et al. 2001, DOI `10.1037/1089-2680.5.4.323`). Measured before this clause
+        // existed, a Rival was released at **0.0001** above `-rival_affinity` — one relaxation step —
+        // and `became_rival` ran level with `left_rival` at three seeds. The band is clamped at
+        // `rival_affinity` so it can never exceed the bar itself, which would make a rivalry permanent.
+        let rival_band = tuning.rival_band.clamp(0.0, tuning.rival_affinity.max(0.0));
+        if promoted != Self::Rival
+            && current == Self::Rival
+            && affinity <= -(tuning.rival_affinity - rival_band)
+            && familiarity >= tuning.rival_familiarity
+        {
+            return Self::Rival;
+        }
         // **Promotion is never held.** Only leaving the low end is: a tie that climbs is an
         // Acquaintance in the same tick it always was.
         if promoted != Self::Stranger {
