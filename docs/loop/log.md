@@ -4334,3 +4334,83 @@ itself works.
 4. **Interruptions rise at 24 people** (318 → 352) and are not fixed by capacity at any size; they are a
    travel-time constant.
 5. **The refusal rate is `accept.base` 0.50**, still the most host-visible unmeasured number.
+
+## 2026-10-26-12 — A meal is what was on the shelf
+
+**Pick.** The price pass (`2026-10-26-11`) ended by measuring a fact it could not fix because fixing it was a
+different change: the village held **zero bread for 24.0% of its ticks**, in one unbroken 3.39-game-day run, and
+the price reported it correctly while **nothing in the simulation read it**. Counting meals and loaves from that
+same committed series gave the defect its size: **4.80 loaves baked a game-day against 21.06 completed meals**,
+so ~77% of meals were eaten out of an empty shelf and every one paid its full `satisfies: [("food", 1.2)]`.
+
+It beats the runner-up (the `--people` scaling trap, deferred twice) because this is behaviour a host can watch
+go wrong — a village where nobody can be hungry — rather than a measurement hazard.
+
+**What shipped.** `arrive_and_satisfy` scales an activity's `satisfies` by `min(1, held / asked)` over every good
+it declares in `consumes`; `1.0` and no `Stock` read for an activity that declares none, so every activity but
+`eat` is bit-identical. **No `Tuning` field:** the fraction is authored data, and a penalty rate would have
+invented a curve where the pack already gives one. Zandstra 2000 (DOI `10.18174/197257`, verified on disk at
+`10.18174_197257.md:207`) is the source: satiation — what `satisfies` is — "influences the size of meals", while
+satiety, which the duration already carries, "influences the frequency of meals".
+
+**The pack could not feed itself, and this change is what made that visible.** `bake` lived only in
+`examples/assets/village.society.ron`. `assets/starter.society.ron` — a host's actual starting point — declared
+`bread` and had `eat` consume it with **no producer in the pack at all**, and had since goods landed. It was
+invisible because an empty shelf paid in full. `bake` now lives in the starter pack, and
+**`warn_unmade_goods`** names any good some activity consumes and none produces at startup, so the next pack
+with this shape cannot be silent. `tests/unmade_goods.rs` pins both halves.
+
+**The numbers, two populations** (before → after, same seed and pack, 17.62 game-days): at seed 23 / 24 people
+`food` **0.450 → 0.339**, ticks with no bread anywhere **23.2% → 3.8%**, price 1.575 → 0.841, friends **26 → 26**,
+rivals 5 → 2, reach 0.42 → 0.46; fresh eyes at seed **42 / 16 people** `food` 0.416 → 0.330, no-bread ticks
+9.3% → 4.1%, friends 16 → 20. `food` **falling** is the repair, not a regression: the village was fed by
+arithmetic and is now fed by 4.0 loaves a bake, 0.25 a meal.
+
+**Three calibrations, two rejected by their own measurements.** At a whole loaf a meal the pack asks for one and
+supplies four-fifths of the demand by conjuring. At **0.25**: 3 loaves starves (8.7 loaves against 14.8 needed at
+16 people, `food` 0.271, 26.5% of ticks under 0.1); 6 loaves gluts (store 1.67 a head, price at the full-store
+0.50 on 62% of ticks, friends 26 → 21 and reach 0.42 → 0.25 as sharing swallows the day, 29 → 140 shares).
+**4 holds** — and it is what the pack's arithmetic predicts: meals a day × a quarter ≈ `people / 3.6 / 4`, a
+shade under one loaf a head, which is exactly `Tuning::price_full_store`'s full store. The two defaults agree.
+
+**A finding the plot pass produced that the plan did not anticipate.** Bakes a game-day are **3.3 at 16 people
+and 3.9 at 24** — the dawn window is one hour long, so the count of people who fit an errand into it limits the
+supply, and loaves a bake 3 → 6 barely moved it (3.28 → 3.91). The supply **does not scale with population**, so
+the loaf carries the whole calibration and the hour cannot. Written in the pack beside the number, because a host
+scaling its population must scale `produces`.
+
+**Verdicts.** Pass 1 GREAT — the mechanism tests bite in both directions (empty shelf feeds nobody; fed meal pays
+in full; half a loaf half; a consumeless activity untouched) and both populations move. Pass 2 GREAT — in the
+before run's famine band the red line is flat and high, which is the defect drawn, and the after run has no such
+band; price at 0.50 verified arithmetically to be `v(1)` the full-store value, never the 0.25 floor. Pass 3
+GREAT — seed 42 / 16 people holds the shape, and the limit (supply is flat across populations) is now stated in
+three places rather than left to be discovered.
+
+**Verified on the final tree.** **79 of 79 test binaries pass in both feature sets** (zero failures), `clippy --all-targets --all-features -D warnings`, `fmt --check` and `doc --no-deps --all-features -D warnings` all exit 0 — and the doc suite needed `TMPDIR` moved off `/tmp`, which was full from other work and failed a doctest at *link* time (`LLVM ERROR: IO failure on output stream: No space left on device`), not a code error. **Dead-code delta: zero.**
+**Perf:** inside the noise at 100 and 1 000 people (the benchmark reports its own 55% / 126% spread and the two
+builds trade places between rounds); no speedup claimed and none possible at that spread.
+
+**One test failed, and it was a fixture built on the old lie.** `tests/reciprocity.rs`'s
+`the_village_keeps_both_labels` ran 4 200 ticks — a little over one game-day, on a village that bakes only at
+first light — and passed because that window was fed by arithmetic. Measured at seed 7 now: rivals **0 at
+4 200 ticks, 0 at 8 400** (one bake, `food` 0.455), **8 at 12 600** (`food` 0.586, 0.906 loaves a head). The run
+is now three game-days with that arithmetic in its comment. **The assertion did not change**: both labels,
+mutual and one-way ties, a gap under 0.10. Distinguishing "a fixture that no longer reaches its premise" from
+"a bar lowered to pass" is the whole point of writing it down.
+
+**Recorded, not fixed.** (a) `DefsFile::merge` does not carry `goods` at all — found while moving `bake`, a
+one-line omission beside eleven that are carried, but it changes what a merged pack means. (b) `Tuning::trade_reserve`
+(1.0) was sized when a meal was a whole loaf, so it now keeps back four meals; documented at the field, re-tuned
+by nobody. (c) No reservations: two overlapping meals read the same store and both read `1.0`.
+
+**Top 5 remaining.**
+
+1. **`DefsFile::merge` silently drops `goods`.** A pack merged in with a new good has none. One line, but it is a
+   schema question (what does a merge mean for a good the other pack already names?) and not a drive-by.
+2. **`--people` scales people and not the village** — and now also not the *supply*, since bakes a day are flat.
+   Three false results recorded against this trap so far. Either scale `produces` and the seats with `people`, or
+   refuse the flag above the authored size.
+3. **`Tuning::trade_reserve` keeps four meals now.** The field's doc says it; nothing has measured what a village
+   should keep.
+4. **A deed's hostility still grows linearly with the crowd** — unchanged, `src/reputation.rs` dilutes trust only.
+5. **The refusal rate is `accept.base` 0.50**, still the most host-visible unmeasured number.

@@ -1,0 +1,8 @@
+# tick 71356: someone chose sleep (0.253), 75% below wander (1.000)
+
+ 1.000  wander
+ 0.996  compliment
+ 0.643  gossip
+ 0.537  play
+ 0.294  snub
+ 0.253  sleep   <- chosen

@@ -41,6 +41,12 @@ pack's budget:
 | food | 0.90 | `eat` | 0.90 | 1.00 |
 | fun | 0.80 | `relax` | 0.60 | 1.33 |
 
+**"per use" is a *fed* use.** An activity that declares `consumes` pays `satisfies` in proportion to what the
+store actually yielded (`min(1, held / asked)`), so `food`'s 0.90 a meal is the most it pays and never more;
+a village that cannot bake that many loaves gets less than the table promises. The table is the supply a
+host authors, not the supply a village necessarily has — measured, this one baked 4.8 loaves a game-day
+against 21 meals (`docs/loop/runs/2026-10-26-12/`).
+
 `fun` needs 1.33 uses a day and a 24-person village supplies 0.10, so it sits at zero for a third of a
 run. Raising `relax` to 0.55 per game-hour (0.825 per use, 0.97 uses a day) halves `fun`'s zero fraction
 — 33.8% → 18.8% — but **lowers** the mean of all four needs, 0.127 → 0.118, because the village is

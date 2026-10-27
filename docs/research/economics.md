@@ -187,7 +187,10 @@ only bargaining there is. Recorded rather than invented.
   rounds of haggling to pass a loaf.
 - **No market place and no auctioneer.** Pairwise encounters only.
 - **Nothing gates.** An empty store never stops a villager eating; measured, gating a dominant activity is
-  what wrecked the village in the professions iteration.
+  what wrecked the village in the professions iteration. **It does stop the meal feeding them**: `satisfies`
+  is paid in proportion to what `consumes` actually found, `min(1, held / asked)`, which is the crate's own
+  satiation term rather than a prohibition. `docs/loop/runs/2026-10-26-12/` has the measurement — the village
+  used to bake 4.8 loaves a game-day and eat 21 meals, so ~77% of meals were conjured from an empty shelf.
 
 ### Design defaults, all of them
 
