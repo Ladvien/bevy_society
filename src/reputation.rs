@@ -59,12 +59,6 @@ pub(crate) fn trust_gain(tuning: &Tuning, conscientiousness: f32) -> f32 {
 /// trust alone. Affinity moves by `0.15 · approval` and respect by `0.1 · approval`; the witness
 /// feels `Admiration` (approval above zero) or `Reproach` (below) toward the actor.
 ///
-/// **All three tie writes — trust, affinity, respect — are divided by `witnesses^witness_dilution`.**
-/// Trust was the only one diluted until 2026-10-26-13, which left the crowd multiplying the two writes
-/// that decide the friend and rival labels while damping the one that does not. Dilution is about how
-/// much news moves a third party's judgement *of the actor*, which is the whole tie; the emotion and
-/// the `NormViolated` bar are not diluted, because a witness that objects still objects.
-///
 /// Image scoring is Nowak & Sigmund 1998 (DOI 10.1038/31225); standing is Ohtsuki & Iwasa 2004
 /// (DOI 10.1016/j.jtbi.2004.06.005). The affinity and respect weights are design defaults.
 #[expect(
@@ -97,15 +91,6 @@ pub(crate) fn witness_reaction(
     // `witness_dilution` is the exponent: 0.0 is the old behaviour, 1.0 divides by the count, 0.5 is the
     // square root. The dilution applies to the deed's *magnitude*, never to its direction or to whether it
     // is right to disapprove — a witness that objects still objects.
-    //
-    // **Every tie write is diluted, not only trust.** Until 2026-10-26-13 the divide stopped at `gain`, so
-    // the crowd multiplied `affinity` and `respect` — the two fields `TieLabel::classify` reads — while
-    // damping the one field it does not. Measured, the village's affinity ledger was **+160.4 from 1 604
-    // accepted compliments against −241.2 from 7 920 witness reactions**: a compliment writes affinity to
-    // one person and an insult to everyone in perception, so good lost on numbers, which is the opposite of
-    // what Baumeister et al. 2001 (DOI 10.1037/1089-2680.5.4.323) state — *"good may prevail over bad by
-    // superior force of numbers"*. Sommerfeld et al. 2007 (DOI 10.1073/pnas.0704598104) is the source of the
-    // dampening itself: *"the more extreme a gossip was, the less impact it had on the reader"*.
     let seen = (witnesses.max(1) as f32).powf(settings.tuning.witness_dilution);
     let gain = trust_gain(&settings.tuning, personality.conscientiousness) / seen;
 
@@ -119,8 +104,8 @@ pub(crate) fn witness_reaction(
     }
 
     let tie = ties.entry(actor);
-    tie.add_affinity(0.15 * approval / seen, &settings.tuning);
-    tie.respect = (tie.respect + 0.1 * approval / seen).clamp(-1.0, 1.0);
+    tie.add_affinity(0.15 * approval, &settings.tuning);
+    tie.respect = (tie.respect + 0.1 * approval).clamp(-1.0, 1.0);
 
     if approval > 0.0 {
         emotions.appraise(EmotionKind::Admiration, approval, Some(actor));
