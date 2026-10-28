@@ -567,13 +567,18 @@ impl Memories {
     /// **6:5**, and rumor reach doubled **0.167 → 0.333**. `village-evening` held (travelling 58.9% →
     /// 59.0%, need mean 0.545 → 0.542).
     pub fn grudge(&self, other: Entity, now_days: f64) -> f32 {
+        let hl: f32 = std::env::var("GRUDGE_HL").ok().and_then(|v| v.parse().ok()).unwrap_or(0.0);
         recall::grudge(
             self.entries
                 .iter()
                 .filter(|m| m.other == Some(other))
                 .map(|m| {
                     let hours = ((now_days - m.day as f64) * 24.0).max(0.0) as f32;
-                    (m.valence, recall::recency(hours))
+                    if hl > 0.0 {
+                        (m.valence, 0.5_f32.powf(hours / hl))
+                    } else {
+                        (m.valence, recall::recency(hours))
+                    }
                 }),
         )
     }
