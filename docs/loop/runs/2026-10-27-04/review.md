@@ -1,0 +1,4 @@
+# Review
+**1 Behavior — GREAT.** The defect (allowance frozen once arrivals stand beyond the disc) is closed by test (red→green) and by the village: interrupted sleeps fall 41–59% at four seeds (`evidence/plots/interrupted.png`, `eval.md`), completed endings do not drop. The narrative for seed 7 still reads sensibly (`evidence/after/s7/narrative.txt`: "22h03 started sleep → 07h03 finished sleep (completed)").
+**2 Zoom — GREAT.** Bars move the same direction at every seed; seed 42's all-endings drop is the smallest (346→278) and is shown, not trimmed. Friends/rivals move both ways (seed 42 rivals 38→28, seed 7 26→35): they are the knock-on of more shared time at homes, not a targeted effect; recorded, not claimed.
+**3 Fresh eyes — GREAT.** Seed 23 / 16 people: interrupted 164→78, sleeps 61→20, completed 3564→4020 (`evidence/fresh_*/summary.json`). Explainable in one line: "people already standing at a place now count toward how wide its door opens."

@@ -730,6 +730,17 @@ fn arrive_and_satisfy(
     let radius = settings.interaction_radius;
     let plane = settings.plane;
 
+    // Who has already arrived at each place, as a sorted list so a count is two binary searches. A
+    // snapshot taken before anyone moves on this tick, so the answer does not depend on iteration order.
+    let mut arrived_at: Vec<Entity> = people
+        .iter()
+        .filter_map(|(doing, _)| match (doing.target, doing.arrived_day) {
+            (DoingTarget::Place(place), Some(_)) => Some(place),
+            _ => None,
+        })
+        .collect();
+    arrived_at.sort_unstable();
+
     for (slot, &(_, person)) in index.sorted.iter().enumerate() {
         let Ok((mut doing, mut needs)) = people.get_mut(person) else {
             continue;
@@ -766,12 +777,23 @@ fn arrive_and_satisfy(
             // aims at one coordinate inside `interaction_radius`; ORCA holds centres one body diameter apart,
             // so the disc packs solid and the queue behind it times out. Measured: the goal already holds a
             // median of 6 bodies when a sleep fails, and a 1.5 m disc seats about 4.6.
+            //
+            // **The crowd is whoever is at the place**: the larger of the bodies inside `interaction_radius`
+            // and the people the crate already knows arrived there. Counting only the disc sealed a crowded
+            // place (issue #25): the people admitted at `allowed > radius` stand *outside* the disc, so the
+            // count stopped growing and the next walker was refused on the ring the last one stood on.
+            // Walkers that have not arrived never count, so nobody widens the gate for themselves.
             let crowd = match doing.target {
-                DoingTarget::Place(_) => perception
-                    .pos
-                    .iter()
-                    .filter(|p| p.distance(target_pos) <= radius)
-                    .count(),
+                DoingTarget::Place(place) => {
+                    let arrived = arrived_at.partition_point(|&e| e <= place)
+                        - arrived_at.partition_point(|&e| e < place);
+                    let in_disc = perception
+                        .pos
+                        .iter()
+                        .filter(|p| p.distance(target_pos) <= radius)
+                        .count();
+                    arrived.max(in_disc)
+                }
                 _ => 0,
             };
             let allowed = radius + settings.tuning.crowded_arrival_growth * (crowd as f32).sqrt();

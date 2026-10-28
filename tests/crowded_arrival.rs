@@ -16,7 +16,9 @@
 mod common;
 
 use bevy::prelude::*;
-use bevy_society::{Doing, DoingTarget, Home, Place, PlaceTags, SocietyDefs, SocietySettings};
+use bevy_society::{
+    Doing, DoingTarget, Home, Place, PlaceTags, SocietyClock, SocietyDefs, SocietySettings,
+};
 
 /// A place at the origin, `occupants` people already standing in it, and one walker `out` metres away with a
 /// destination at the place.
@@ -120,4 +122,69 @@ fn an_empty_disc_is_unaffected() {
         !arrives(0.7, 0, 2.2),
         "an empty place must not accept a walker at 2.2 m: growth must scale with the crowd, not replace the radius"
     );
+}
+
+/// Like `scene`, but the `occupants` stand on a ring `ring` metres out — beyond `interaction_radius` — with
+/// `arrived_day` set, which is where a crowded place's admitted people actually stand (issue #25).
+fn arrived_ring(growth: f32, occupants: usize, ring: f32, out: f32) -> bool {
+    let (mut app, walker) = scene(growth, 0, out);
+    let (home, sleep) = {
+        let doing = app.world().get::<Doing>(walker).expect("walker has Doing");
+        (doing.target, doing.activity)
+    };
+    app.update(); // the clock starts moving on the first update
+    // Stamped with the clock's own day so the two-hour `sleep` is not already over.
+    let now = app.world().resource::<SocietyClock>().now_days;
+    for i in 0..occupants {
+        let a = std::f32::consts::TAU * (i as f32) / (occupants.max(1) as f32);
+        let person = common::spawn_person(
+            &mut app,
+            &format!("R{i}"),
+            Vec2::new(ring * a.cos(), ring * a.sin()),
+        );
+        // Propagation runs after the society tick, so a person spawned between two updates would be read at
+        // the origin — inside the disc — for one tick. Give it its real `GlobalTransform` now.
+        let transform = *app.world().get::<Transform>(person).expect("has Transform");
+        app.world_mut().entity_mut(person).insert((
+            GlobalTransform::from(transform),
+            Doing {
+                activity: sleep,
+                target: home,
+                started_day: now,
+                arrived_day: Some(now),
+            },
+        ));
+    }
+    for _ in 0..12 {
+        app.update();
+        eprintln!(
+            "DBG {:?} {:?}",
+            app.world().get::<Doing>(walker).map(|d| d.arrived_day),
+            app.world()
+                .get::<GlobalTransform>(walker)
+                .map(|t| t.translation())
+        );
+        if app
+            .world()
+            .get::<Doing>(walker)
+            .is_some_and(|d| d.arrived_day.is_some())
+        {
+            return true;
+        }
+    }
+    false
+}
+
+#[test]
+fn people_admitted_beyond_the_disc_keep_widening_the_allowance() {
+    // Eight arrived bodies stand 2.0 m out, outside the 1.5 m disc, so the disc count is zero. The allowance is
+    // `1.5 + 0.7 * sqrt(8) = 3.48`: a walker at 3.0 m is admitted, where counting the disc alone refused it.
+    assert!(
+        arrived_ring(0.7, 8, 2.0, 3.0),
+        "arrived bodies outside the disc must still widen the allowance"
+    );
+    // Control: with growth 0.0 the same scene refuses at 3.0 m, so the test measures the allowance.
+    assert!(!arrived_ring(0.0, 8, 2.0, 3.0));
+    // No arrivals, no widening: a lone walker at 3.0 m is refused.
+    assert!(!arrived_ring(0.7, 0, 2.0, 3.0));
 }

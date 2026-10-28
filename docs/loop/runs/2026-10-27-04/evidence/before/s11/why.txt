@@ -1,0 +1,8 @@
+# tick 69075: someone chose craft (0.625), 38% below work (1.000)
+
+ 1.000  work
+ 1.000  wander
+ 0.998  compliment
+ 0.652  snub
+ 0.644  play
+ 0.625  craft   <- chosen
