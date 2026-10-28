@@ -73,6 +73,9 @@ fn main() {
     if let Some(penalty) = args.rejection_penalty {
         settings.tuning.rejection_affinity_penalty = penalty;
     }
+    if let Some(fraction) = args.revenge_settles {
+        settings.tuning.revenge_settles = fraction;
+    }
     if let Some(hours) = args.stall_timeout {
         settings.tuning.stall_timeout_hours = Some(hours);
     }
@@ -1377,6 +1380,8 @@ struct Args {
     negativity_ratio: Option<f32>,
     /// `Tuning::rejection_affinity_penalty`, so what a refused approach costs the approacher can be swept.
     rejection_penalty: Option<f32>,
+    /// `Tuning::revenge_settles`, so how much of a grievance a delivered retaliation settles can be swept.
+    revenge_settles: Option<f32>,
     /// Overrides `Tuning::positivity_offset`, so the same scenario can be re-read with a different
     /// resting mood.
     positivity_offset: Option<f32>,
@@ -1412,6 +1417,7 @@ impl Args {
             witness_dilution: None,
             negativity_ratio: None,
             rejection_penalty: None,
+            revenge_settles: None,
             days: None,
         };
         let mut argv = std::env::args().skip(1);
@@ -1438,6 +1444,9 @@ impl Args {
                 }
                 "--negativity-ratio" => {
                     args.negativity_ratio = argv.next().and_then(|v| v.parse().ok())
+                }
+                "--revenge-settles" => {
+                    args.revenge_settles = argv.next().and_then(|v| v.parse().ok())
                 }
                 "--rejection-penalty" => {
                     args.rejection_penalty = argv.next().and_then(|v| v.parse().ok())

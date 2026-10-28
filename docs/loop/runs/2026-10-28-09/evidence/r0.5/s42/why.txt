@@ -1,0 +1,8 @@
+# tick 69569: someone chose compliment (0.999), 0% below work (1.000)
+
+ 1.000  work
+ 1.000  wander
+ 0.999  compliment   <- chosen
+ 0.867  eat
+ 0.677  snub
+ 0.637  gossip

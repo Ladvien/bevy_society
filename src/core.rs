@@ -434,6 +434,18 @@ pub struct Tuning {
     /// 2026-12-12. A refusal is not an injury, so this is small, but it is the only thing that makes a
     /// persistent pursuer reconsider.
     pub rejection_affinity_penalty: f32,
+    /// The fraction of a grievance that **a delivered retaliation settles**: when a person's `harm < 0` deed
+    /// toward someone is accepted, each of their bad memories about that same person is scaled by
+    /// `1 - revenge_settles`. `0.0` is the behaviour before this field existed (the grievance stays whole and
+    /// `snub` keeps firing until recency erodes it, however many times it was already answered).
+    ///
+    /// Mechanism: Gollwitzer, Meder & Schmitt 2011, DOI 10.1002/ejsp.782 — revenge restores a sense of
+    /// justice only when the offender **understands** it as a reply, so only an *accepted* exchange (the
+    /// offender received it) settles anything; a refused one delivers no message. Partial by design because
+    /// Carlsmith, Wilson & Gilbert 2008, DOI 10.1037/a0012165, find that punishing does not by itself end
+    /// rumination. **The sources give the mechanism and no number**: the default is a design default chosen
+    /// by measurement, `docs/loop/runs/2026-10-28-09/eval.md`.
+    pub revenge_settles: f32,
     /// Steepness of the contest logistic. Design default (no source paper gives this number);
     /// mechanism: Bonabeau et al. 1995, DOI 10.1016/0378-4371(95)00064-e.
     pub contest_steepness: f32,
@@ -651,6 +663,7 @@ impl Default for Tuning {
             // release margin it replaces was 0.0001, and the sweep is below.
             rival_band: 0.1,
             rejection_affinity_penalty: 0.05,
+            revenge_settles: 0.0,
             contest_steepness: 4.0,
             tier_cutoff: 0.25,
             rejection_distress: 0.3,
