@@ -1,0 +1,28 @@
+# cargo-nextest settings. The loop's gate runs `cargo nextest run --profile gate` (see
+# `.omp/commands/build-loop.md`). nextest does not run doctests: `cargo test --doc` follows it.
+#
+# nextest starts one process per test and schedules across every test in every binary at once, so the
+# wall time of the gate is bounded below by the slowest single test (`label_hysteresis`, `reciprocity`)
+# rather than by the sum of all of them, and no test can see another's process-global state.
+
+[profile.default]
+# Show every failure, not only the first: a gate that stops at one red test hides the second.
+fail-fast = false
+
+[profile.gate]
+fail-fast = false
+# The tests are CPU-bound, not memory-bound: eight at once held 197 MB of anonymous memory in total (about
+# 80 MB each), so this number is a CPU choice, not a memory one. The measurement is in
+# `docs/loop/test-gate.md`.
+test-threads = 8
+# Informational: a test over ten minutes is named in the output as slow. Nothing is terminated; the two
+# long village tests legitimately take most of that.
+slow-timeout = { period = "10m" }
+
+# **Run it as `RAYON_NUM_THREADS=1 cargo nextest run --profile gate`.** `bevy_stigmergy` runs a rayon pass every
+# tick, and rayon sizes its global pool from the core count (24 on big). Measured on
+# `reciprocity::a_zero_rate_is_the_old_society` with all 24 CPUs visible: 494 CPU-seconds by default, 108 with
+# two rayon threads and 104 with one, for the same test and no slower. The whole suite without it used 7 h 11 min
+# of CPU in 40 minutes of wall, about ten cores busy on average. The variable is on the command line rather than
+# in this file because the config mechanisms nextest 0.9.150 offers for it, wrapper and setup scripts, are still
+# experimental.

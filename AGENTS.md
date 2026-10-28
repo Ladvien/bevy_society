@@ -41,7 +41,7 @@ Pinned to **Bevy 0.20.0**. Read the vendored source (`~/.cargo/registry/src/inde
 - `src/rules.rs` — the trigger queue and its evaluation, `RulesPlugin`.
 - `src/behavior.rs` — daily-life decisions, arrival, need satisfaction and the social exchange, `BehaviorPlugin`.
 - `src/interact.rs` — the `Interact` request, `SocietyBark` and its `Feeling`.
-- `tests/behavior.rs` — decisions, arrival, completion, travel timeout and exchange resolution.
+- `tests/it/behavior.rs` — decisions, arrival, completion, travel timeout and exchange resolution.
 - `src/dialogue.rs` — conversations and barks through `bevy_speech_bubbles` (feature `dialogue`): `TalkTo`, `DialoguePlugin`, speaker lifetime, node effects.
 - `src/defs.rs` — authored definitions (`DefsFile`), validation, and the compiled `SocietyDefs` with id interning and spawn helpers.
 - `src/script.rs` — Rhai compilation, the sandbox limits and the `ctx` / `fx` runtime API.
@@ -58,17 +58,20 @@ Pinned to **Bevy 0.20.0**. Read the vendored source (`~/.cargo/registry/src/inde
 - `src/groups.rs` — `Memberships`, `Status` (conferred standing), contests, intergroup contact, and `FactionStats` (`GroupsPlugin`, set `Relate`).
 - `src/fields.rs` — social fields (feature `fields`): crowd presence/commotion and per-faction presence grids on `bevy_stigmergy`, `FieldInput` scoring and gradient targets.
 - `assets/starter.society.ron` — the starter pack, parsed by `DefsFile::starter()`.
-- `tests/defs.rs` — definition parsing, merging, id interning and error messages.
-- `tests/fields.rs` — millers' presence field points toward their cluster (feature `fields`).
-- `tests/economy.rs` — a balanced economy's price rests and a shortage moves it; `Stock` survives a save.
-- `tests/trade.rs` — a good changes hands only on a surplus above `trade_reserve` and `trade_margin`, a two-good swap conserves both, and trade narrows the spread of stores.
-- `tests/leaf.rs` — the crate boundary: dependency list, forbidden names, engine-free `src/model/`, lookup-only hash collections.
-- `tests/mind.rs` — emotion half-life, mood lift toward Joy and return to baseline, needs decay at `decay_per_day`.
-- `tests/dialogue.rs` — conversation choice and `if` conditions, node effects, barks, speaker lifetime and the missing-plugin panic (feature `dialogue`).
+- `tests/it/defs.rs` — definition parsing, merging, id interning and error messages.
+- `tests/it/fields.rs` — millers' presence field points toward their cluster (feature `fields`).
+- `tests/it/economy.rs` — a balanced economy's price rests and a shortage moves it; `Stock` survives a save.
+- `tests/it/trade.rs` — a good changes hands only on a surplus above `trade_reserve` and `trade_margin`, a two-good swap conserves both, and trade narrows the spread of stores.
+- `tests/it/leaf.rs` — the crate boundary: dependency list, forbidden names, engine-free `src/model/`, lookup-only hash collections.
+- `tests/it/mind.rs` — emotion half-life, mood lift toward Joy and return to baseline, needs decay at `decay_per_day`.
+- `tests/it/dialogue.rs` — conversation choice and `if` conditions, node effects, barks, speaker lifetime and the missing-plugin panic (feature `dialogue`).
+- `tests/it/main.rs` — the one integration-test binary: every file in `tests/it/` is a module of it. `tests/it/registration.rs` fails if a file has no `mod` line there.
 
 ## Build and test
 
 - `cargo test` and `cargo test --no-default-features`.
+- **Integration tests are one binary, `tests/it/`.** `cargo test` builds and links one test binary for all of them instead of one per file (each re-linked the whole Bevy umbrella). A new test is `tests/it/<name>.rs` with `use crate::common;` (not `mod common;`) plus a `mod <name>;` line in `tests/it/main.rs`; `tests/it/registration.rs` fails if the line is missing, and if a new file lands directly in `tests/`. A test that installs something process-global (a tracing subscriber, `LogPlugin`) stays its own binary in `tests/` and is named, with the reason, in `SEPARATE` in `tests/it/registration.rs`. Run one file's tests with `cargo test --test it <name>::`.
+- `RAYON_NUM_THREADS=1 cargo nextest run --profile gate` runs the same tests with one process per test, in parallel across all of them (settings in `.config/nextest.toml`). Keep the variable: `bevy_stigmergy` runs a rayon pass every tick and rayon starts one worker per core, which cost about five times the CPU on the same test (494 against 104 CPU-seconds). nextest does not run doctests, so follow it with `cargo test --doc`.
 - `cargo build` and `cargo build --no-default-features`: these take no dev-dependencies, so they compile exactly the bevy features a consumer gets; the full-umbrella dev-dependency would hide a hole in the trimmed feature list.
 - `cargo build --examples`.
 - `cargo clippy --all-targets --all-features -- -D warnings`.
@@ -81,10 +84,10 @@ Every model comes from a paper in the home-still corpus. Search it with the home
 
 ## The non-negotiables
 
-- **No game knowledge.** `tests/leaf.rs` lists forbidden names (a game's camera marker, physics crate, the games this crate serves). Persons, places, needs, activities and scripts are data the host hands in.
+- **No game knowledge.** `tests/it/leaf.rs` lists forbidden names (a game's camera marker, physics crate, the games this crate serves). Persons, places, needs, activities and scripts are data the host hands in.
 - **One path per feature.** No fallbacks, no legacy shims, no stub placeholders.
 - **No `unwrap()`, `expect()` or `panic!` outside tests,** except the documented plugin-order checks in each plugin's `finish()`. Misconfiguration gets a loud `error!`/`warn!`, never a panic.
-- **Determinism.** Iterate persons sorted by `PersonId` (`PersonIndex.sorted`), draw only from `SocietyRng`, and never iterate a `HashMap`/`HashSet` (lookup only; `tests/leaf.rs` allow-lists the files that may name them). Same seed and same inputs give the same society, bit for bit.
+- **Determinism.** Iterate persons sorted by `PersonId` (`PersonIndex.sorted`), draw only from `SocietyRng`, and never iterate a `HashMap`/`HashSet` (lookup only; `tests/it/leaf.rs` allow-lists the files that may name them). Same seed and same inputs give the same society, bit for bit.
 - **Scripts see the tick-start snapshot and act through `fx`,** never the world.
 - **Script actions apply once per tick,** in queue order, in one exclusive system after `SocietySystems::Rules`. Actions queued in `Update` (dialogue node effects) apply at the end of the next tick.
 - **Every rate is per game-day** and every dt is `SocietyClock::dt_days`.

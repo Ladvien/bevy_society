@@ -421,6 +421,6 @@ Why each piece, in the order the measurements forced them:
   the ceiling.
 
 `cargo run --release --example evidence -- --scenario village-evening --people 60 --days 30 --seed 7 --out /tmp/ev60`
-reproduces the run; `cargo test --release --test friendship_bound` is the assertion.
+reproduces the run; `cargo test --release --test it friendship_bound::` is the assertion.
 
 Implemented in the `bounded-ties` branch, `Closes #10`.
