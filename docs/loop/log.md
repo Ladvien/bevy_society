@@ -4622,3 +4622,16 @@ a tautological assertion removed from `tuning_covers_rates`. Full gate results a
 3. `ReportDeed` leaves the victim no memory (needs-decision).
 4. Clock decision: `travel_timeout_hours` in game hours vs real-time walking.
 5. Re-measure the guide's scale table with the fixed benchmark homes on a quiet host.
+
+## 2026-10-28-06 — scale table re-measure abandoned: host too loaded
+
+**Change.** None. Open issues #24, #27 are release issues, skipped. No crate, harness or doc change.
+
+**Evidence** (`runs/2026-10-28-06/eval.md`). Load average 30-45; 100 people spread 35.6%, 1 000 and 5 000 did not finish in 900 s. Nothing quotable; guide table unchanged. **Verdicts:** not applicable. **Dead-code delta:** zero.
+
+**Top 5 remaining.**
+1. Friendship brake independent of rivalry (Dunbar trim), then retry the snub rate.
+2. `ReportDeed` leaves the victim no memory (needs-decision).
+3. Clock decision: `travel_timeout_hours` in game hours vs real-time walking.
+4. Re-measure the scale table on a quiet host; make `examples/benchmark` stop warning for its own setup.
+5. Stall + failed-place memory in the village needs plots and three reviews before enabling.
