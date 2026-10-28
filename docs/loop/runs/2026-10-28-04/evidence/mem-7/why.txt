@@ -1,0 +1,8 @@
+# tick 40793: someone chose work (0.400), 60% below wander (1.000)
+
+ 1.000  wander
+ 0.999  compliment
+ 0.922  eat
+ 0.697  play
+ 0.629  gossip
+ 0.400  work   <- chosen
