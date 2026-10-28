@@ -1,0 +1,8 @@
+# tick 69615: someone chose snub (0.583), 42% below wander (1.000)
+
+ 1.000  wander
+ 0.998  compliment
+ 0.770  eat
+ 0.739  play
+ 0.598  gossip
+ 0.583  snub   <- chosen

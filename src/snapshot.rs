@@ -167,6 +167,8 @@ impl PersonView {
 /// The frozen society read by scripts during one tick.
 pub(crate) struct SocietySnapshot {
     now_days: f64,
+    /// [`Tuning::grudge_half_life_hours`], read by `ctx.grudge`.
+    grudge_half_life_hours: f32,
     hour: f32,
     day: i64,
     names: Names,
@@ -232,7 +234,9 @@ impl SocietySnapshot {
     pub(crate) fn grudge(&self, a: i64, b: i64) -> Result<f32, String> {
         let person = self.person(a)?;
         let other = self.entity(b)?;
-        Ok(person.memories.grudge(other, self.now_days))
+        Ok(person
+            .memories
+            .grudge(other, self.now_days, self.grudge_half_life_hours))
     }
 
     /// `ctx.label(a, b)`: the tie's label as a lowercase name, `"stranger"` when there is no tie.
@@ -534,6 +538,7 @@ pub(crate) fn build_snapshot(
     let seed = rng.0.raw_u64();
     cell.0 = Some(Arc::new(SocietySnapshot {
         now_days: now,
+        grudge_half_life_hours: tuning.grudge_half_life_hours,
         hour: clock.hour(),
         day: i64::from(clock.day()),
         names,
