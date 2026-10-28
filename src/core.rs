@@ -434,6 +434,18 @@ pub struct Tuning {
     /// 2026-12-12. A refusal is not an injury, so this is small, but it is the only thing that makes a
     /// persistent pursuer reconsider.
     pub rejection_affinity_penalty: f32,
+    /// Half-life, in game-hours, of a bad memory's weight in [`crate::Memories::grudge`] (and so in
+    /// `ctx.grudge`, which `snub` scores on).
+    ///
+    /// Mechanism: revenge and avoidance motivation fall with time after a transgression, McCullough,
+    /// Fincham & Tsang 2003 (DOI 10.1037/0022-3514.84.3.540; "trend forgiveness"), and fall faster in people
+    /// who ruminate less, McCullough, Bono & Root 2007 (DOI 10.1037/0022-3514.92.3.490). Neither paper gives a
+    /// half-life in a game's hours, so **the number is a design default chosen by measurement**,
+    /// `docs/loop/runs/2026-10-28-11/eval.md`. The grudge used to share the 138-hour half-life of
+    /// retrieval recency (Park et al. 2023, DOI 10.48550/arXiv.2304.03442), which kept a received insult
+    /// alive for about a week and let it re-feed every contact. Memory retrieval is unchanged; only the
+    /// grudge decays on this clock.
+    pub grudge_half_life_hours: f32,
     /// Steepness of the contest logistic. Design default (no source paper gives this number);
     /// mechanism: Bonabeau et al. 1995, DOI 10.1016/0378-4371(95)00064-e.
     pub contest_steepness: f32,
@@ -651,6 +663,7 @@ impl Default for Tuning {
             // release margin it replaces was 0.0001, and the sweep is below.
             rival_band: 0.1,
             rejection_affinity_penalty: 0.05,
+            grudge_half_life_hours: 12.0,
             contest_steepness: 4.0,
             tier_cutoff: 0.25,
             rejection_distress: 0.3,
