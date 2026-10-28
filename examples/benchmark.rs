@@ -160,9 +160,10 @@ fn spawn_places(app: &mut bevy::app::App, people: usize) -> Vec<Entity> {
     places
 }
 
-/// `people` persons in a disc, all autonomous, each with a home.
+/// `people` persons in a disc, all autonomous, each with a home. Homes are dealt round-robin over `places`,
+/// so each place holds the `people / places` its capacity allows; one shared home would leave all but a
+/// capacity's worth of the crowd without a bed.
 fn spawn_people(app: &mut bevy::app::App, people: usize, places: &[Entity]) {
-    let home = places.first().copied();
     for i in 0..people {
         // A golden-angle spiral: even spread, no grid artefacts, and cheap to compute.
         let fraction = i as f32 / people.max(1) as f32;
@@ -174,8 +175,8 @@ fn spawn_people(app: &mut bevy::app::App, people: usize, places: &[Entity]) {
             Name::new(format!("P{i}")),
             Transform::from_xyz(radius * angle.cos(), 0.0, radius * angle.sin()),
         ));
-        if let Some(home) = home {
-            entity.insert(Home(home));
+        if !places.is_empty() {
+            entity.insert(Home(places[i % places.len()]));
         }
         #[cfg(feature = "steering")]
         entity.insert(bevy_society::SocialMover::default());

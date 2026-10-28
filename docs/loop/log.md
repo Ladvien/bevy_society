@@ -4583,3 +4583,16 @@ a tautological assertion removed from `tuning_covers_rates`. Full gate results a
 3. Clock decision: `travel_timeout_hours` in game hours vs real-time walking.
 4. `examples/benchmark` builds an unsittable home for every population.
 5. Enable `failed_place_memory_hours` in the village and measure interrupted sleeps.
+
+## 2026-10-28-03 — the benchmark gives each person a home of their own share
+
+**Change.** `examples/benchmark` set every person's `Home` to the first place (capacity `people / places`), so most of the crowd had no bed. Homes are now dealt round-robin. Harness only; no crate code. Open issues #24, #27 are release issues, skipped.
+
+**Evidence.** `runs/2026-10-28-03/eval.md`: minima at 100/1000/5000 persons 1.22→1.25 / 37.95→38.66 / 600.3→599.3 ms, inside noise on a load-23+ host. No speed claim. **Verdicts:** not applicable (no crate behaviour changed). **Dead-code delta:** zero.
+
+**Top 5 remaining.**
+1. Friendship brake independent of rivalry, then retry the snub rate.
+2. `ReportDeed` leaves the victim no memory (needs-decision).
+3. Clock decision: `travel_timeout_hours` in game hours vs real-time walking.
+4. Enable `failed_place_memory_hours` in the village and measure interrupted sleeps.
+5. Re-measure the guide's scale table with the fixed benchmark homes on a quiet host.
