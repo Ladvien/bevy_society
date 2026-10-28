@@ -11,6 +11,15 @@ pub fn recency(hours_since: f32) -> f32 {
     0.995_f32.powf(hours_since.max(0.0))
 }
 
+/// Exponential decay with an explicit half-life: `0.5^(hours / half_life)`. A non-positive half-life
+/// decays instantly (0 for any age above zero, 1 at age zero).
+pub fn halving(hours_since: f32, half_life_hours: f32) -> f32 {
+    if half_life_hours <= 0.0 {
+        return if hours_since <= 0.0 { 1.0 } else { 0.0 };
+    }
+    0.5_f32.powf(hours_since.max(0.0) / half_life_hours)
+}
+
 /// Familiarity after power-law forgetting: `peak · (1 + elapsed/τ)^(−d)`, with `elapsed` in game-days
 /// since the last contact. Power-law forgetting: Anderson & Schooler 1991 (DOI 10.1111/j.1467-9280.1991.tb00174.x);
 /// Murre & Dros 2015 (DOI 10.1371/journal.pone.0120644) fit this form to recall data. The exponent 0.5
@@ -44,6 +53,16 @@ pub fn grudge(memories: impl IntoIterator<Item = (f32, f32)>) -> f32 {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn halving_halves_at_the_half_life_and_never_grows() {
+        assert!((halving(0.0, 24.0) - 1.0).abs() < 1e-6);
+        assert!((halving(24.0, 24.0) - 0.5).abs() < 1e-6);
+        assert!((halving(72.0, 24.0) - 0.125).abs() < 1e-6);
+        assert_eq!(halving(-5.0, 24.0), 1.0);
+        assert_eq!(halving(1.0, 0.0), 0.0);
+        assert_eq!(halving(0.0, 0.0), 1.0);
+    }
 
     #[test]
     fn recency_halves_in_about_138_hours() {
