@@ -57,9 +57,10 @@ use crate::rumor::{Rumor, RumorBook, RumorId};
 
 /// Version of the [`SocietySave`] format this build writes and reads.
 ///
-/// [`restore`] refuses any other version rather than guessing at an older or newer layout, so a
-/// host that ships a save and later upgrades the crate gets a `Version` error it can act on instead
-/// of a silently wrong society.
+/// [`restore`] reads this version and the older ones [`SocietySave::upgrade`] knows a lossless step
+/// for (currently 1). It refuses any other version rather than guessing at a layout, so a host that
+/// ships a save and later upgrades the crate gets a `Version` error it can act on instead of a
+/// silently wrong society.
 pub const VERSION: u32 = 2;
 
 // -------------------------------------------------------------------------------------------------
@@ -349,6 +350,38 @@ pub struct SocietySave {
     pub fields: Option<FieldsSave>,
 }
 
+impl SocietySave {
+    /// Brings an older save up to [`VERSION`], so a host can migrate a file once and re-save it.
+    ///
+    /// [`restore`] calls this itself before it validates anything.
+    ///
+    /// - **Version 1 to 2.** The only difference is [`PersonSave::stock`], which a version-1 file
+    ///   does not have and which deserializes as empty. An empty `stock` restores as *holding
+    ///   nothing* of every good the defs declare (`Stock::get` is `0.0` for a good past the end of
+    ///   the list), the same as a person who never produced anything, and a defs file that gained
+    ///   goods since the save needs no entry for them. People who are `Dormant` or `Deceased` upgrade
+    ///   exactly as the living do.
+    ///
+    /// A save already at [`VERSION`] is returned unchanged.
+    ///
+    /// # Errors
+    ///
+    /// [`RestoreError::Version`] for a version newer than [`VERSION`], and for an older one this
+    /// build has no step for (0).
+    pub fn upgrade(mut self) -> Result<Self, RestoreError> {
+        if self.version == 1 {
+            self.version = 2;
+        }
+        if self.version != VERSION {
+            return Err(RestoreError::Version {
+                found: self.version,
+                expected: VERSION,
+            });
+        }
+        Ok(self)
+    }
+}
+
 // -------------------------------------------------------------------------------------------------
 // Errors and the report
 // -------------------------------------------------------------------------------------------------
@@ -405,6 +438,9 @@ pub struct RestoreReport {
     /// Activities that could not be restored, because their place or person key did not resolve, or
     /// their activity id is not in the defs.
     pub dropped_activities: usize,
+    /// The version the save was written at, when [`SocietySave::upgrade`] had to bring it up to
+    /// [`VERSION`] first; `None` for a save that was already current.
+    pub upgraded_from: Option<u32>,
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -745,7 +781,10 @@ fn capture_fields(world: &World) -> Option<FieldsSave> {
 /// Applies a [`SocietySave`] to a world the host has already spawned its persons and keyed places
 /// into.
 ///
-/// **Nothing is written until everything is validated**, so a save from another version, or one
+/// A save from an older version is first brought up with [`SocietySave::upgrade`] and the report says
+/// so in `upgraded_from`.
+///
+/// **Nothing is written until everything is validated**, so a save from an unknown version, or one
 /// written against a defs file that has since been edited, leaves the world exactly as it was.
 ///
 /// What comes back:
@@ -765,12 +804,8 @@ fn capture_fields(world: &World) -> Option<FieldsSave> {
 /// See [`RestoreError`]. Each is returned before anything is written.
 pub fn restore(world: &mut World, save: SocietySave) -> Result<RestoreReport, RestoreError> {
     // --- validate -------------------------------------------------------------------------------
-    if save.version != VERSION {
-        return Err(RestoreError::Version {
-            found: save.version,
-            expected: VERSION,
-        });
-    }
+    let written_at = save.version;
+    let save = save.upgrade()?;
     let Some(defs) = world.get_resource::<SocietyDefs>().cloned() else {
         return Err(RestoreError::NotReady);
     };
@@ -814,7 +849,10 @@ pub fn restore(world: &mut World, save: SocietySave) -> Result<RestoreReport, Re
         map
     };
 
-    let mut report = RestoreReport::default();
+    let mut report = RestoreReport {
+        upgraded_from: (written_at != VERSION).then_some(written_at),
+        ..RestoreReport::default()
+    };
     let mut unknown: BTreeSet<u64> = BTreeSet::new();
     for person in &save.persons {
         if !person_by_key.contains_key(&person.key) {
