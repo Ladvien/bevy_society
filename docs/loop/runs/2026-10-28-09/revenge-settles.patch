@@ -1,0 +1,115 @@
+diff --git a/examples/evidence.rs b/examples/evidence.rs
+index e9675d7..eb52c6b 100644
+--- a/examples/evidence.rs
++++ b/examples/evidence.rs
+@@ -73,6 +73,9 @@ fn main() {
+     if let Some(penalty) = args.rejection_penalty {
+         settings.tuning.rejection_affinity_penalty = penalty;
+     }
++    if let Some(fraction) = args.revenge_settles {
++        settings.tuning.revenge_settles = fraction;
++    }
+     if let Some(hours) = args.stall_timeout {
+         settings.tuning.stall_timeout_hours = Some(hours);
+     }
+@@ -1377,6 +1380,8 @@ struct Args {
+     negativity_ratio: Option<f32>,
+     /// `Tuning::rejection_affinity_penalty`, so what a refused approach costs the approacher can be swept.
+     rejection_penalty: Option<f32>,
++    /// `Tuning::revenge_settles`, so how much of a grievance a delivered retaliation settles can be swept.
++    revenge_settles: Option<f32>,
+     /// Overrides `Tuning::positivity_offset`, so the same scenario can be re-read with a different
+     /// resting mood.
+     positivity_offset: Option<f32>,
+@@ -1412,6 +1417,7 @@ impl Args {
+             witness_dilution: None,
+             negativity_ratio: None,
+             rejection_penalty: None,
++            revenge_settles: None,
+             days: None,
+         };
+         let mut argv = std::env::args().skip(1);
+@@ -1439,6 +1445,9 @@ impl Args {
+                 "--negativity-ratio" => {
+                     args.negativity_ratio = argv.next().and_then(|v| v.parse().ok())
+                 }
++                "--revenge-settles" => {
++                    args.revenge_settles = argv.next().and_then(|v| v.parse().ok())
++                }
+                 "--rejection-penalty" => {
+                     args.rejection_penalty = argv.next().and_then(|v| v.parse().ok())
+                 }
+diff --git a/src/behavior.rs b/src/behavior.rs
+index 82efa8d..0b02dd1 100644
+--- a/src/behavior.rs
++++ b/src/behavior.rs
+@@ -2647,6 +2647,16 @@ fn exchange(
+         now,
+     );
+ 
++    // A retaliation that was **delivered** (accepted) answers the actor's grievance against the target.
++    // Gollwitzer, Meder & Schmitt 2011, DOI 10.1002/ejsp.782: revenge restores justice when the offender
++    // understands it as a reply. A refused harm delivered nothing, so `harm` is 0 here and nothing settles.
++    if harm < 0.0
++        && settings.tuning.revenge_settles > 0.0
++        && let Some(mut memories) = world.get_mut::<crate::mind::Memories>(actor)
++    {
++        memories.settle(target, settings.tuning.revenge_settles);
++    }
++
+     // (7) Exposure for the pair, both ways.
+     expose(world, actor, target, settings, now);
+     expose(world, target, actor, settings, now);
+diff --git a/src/core.rs b/src/core.rs
+index 342a90f..ac5c3fa 100644
+--- a/src/core.rs
++++ b/src/core.rs
+@@ -434,6 +434,18 @@ pub struct Tuning {
+     /// 2026-12-12. A refusal is not an injury, so this is small, but it is the only thing that makes a
+     /// persistent pursuer reconsider.
+     pub rejection_affinity_penalty: f32,
++    /// The fraction of a grievance that **a delivered retaliation settles**: when a person's `harm < 0` deed
++    /// toward someone is accepted, each of their bad memories about that same person is scaled by
++    /// `1 - revenge_settles`. `0.0` is the behaviour before this field existed (the grievance stays whole and
++    /// `snub` keeps firing until recency erodes it, however many times it was already answered).
++    ///
++    /// Mechanism: Gollwitzer, Meder & Schmitt 2011, DOI 10.1002/ejsp.782 — revenge restores a sense of
++    /// justice only when the offender **understands** it as a reply, so only an *accepted* exchange (the
++    /// offender received it) settles anything; a refused one delivers no message. Partial by design because
++    /// Carlsmith, Wilson & Gilbert 2008, DOI 10.1037/a0012165, find that punishing does not by itself end
++    /// rumination. **The sources give the mechanism and no number**: the default is a design default chosen
++    /// by measurement, `docs/loop/runs/2026-10-28-09/eval.md`.
++    pub revenge_settles: f32,
+     /// Steepness of the contest logistic. Design default (no source paper gives this number);
+     /// mechanism: Bonabeau et al. 1995, DOI 10.1016/0378-4371(95)00064-e.
+     pub contest_steepness: f32,
+@@ -651,6 +663,7 @@ impl Default for Tuning {
+             // release margin it replaces was 0.0001, and the sweep is below.
+             rival_band: 0.1,
+             rejection_affinity_penalty: 0.05,
++            revenge_settles: 0.0,
+             contest_steepness: 4.0,
+             tier_cutoff: 0.25,
+             rejection_distress: 0.3,
+diff --git a/src/mind.rs b/src/mind.rs
+index 4c89f8d..49419e7 100644
+--- a/src/mind.rs
++++ b/src/mind.rs
+@@ -577,6 +577,17 @@ impl Memories {
+                 }),
+         )
+     }
++
++    /// Scales every **bad** memory about `other` by `1 - fraction`: a grievance that has been answered.
++    /// Good memories are untouched. `fraction` is clamped to `[0, 1]`. See `Tuning::revenge_settles`.
++    pub fn settle(&mut self, other: Entity, fraction: f32) {
++        let keep = 1.0 - fraction.clamp(0.0, 1.0);
++        for memory in &mut self.entries {
++            if memory.other == Some(other) && memory.valence < 0.0 {
++                memory.valence *= keep;
++            }
++        }
++    }
+ }
+ 
+ /// Asks for an emotion to be felt by `person`: the game, a deed, an interaction or a rumor writes
