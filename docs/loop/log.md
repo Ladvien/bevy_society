@@ -4555,3 +4555,18 @@ a tautological assertion removed from `tuning_covers_rates`. Full gate results a
 3. `ReportDeed` leaves the victim no memory (needs-decision).
 4. Clock decision: `travel_timeout_hours` in game hours vs real-time walking.
 5. `examples/benchmark` builds an unsittable home for every population.
+
+## 2026-10-27-07 — the starter pack's insult rate meets the paper's 5:1
+
+**Change.** No open bug or enhancement issue (only release issues #24, #27, seen and skipped). Picked the pack's insult rate (top remaining item 2, `needs-decision/a-village-that-is-never-pleased.md` option (b)): `snub`'s grudge curve `Linear(1.0, 0.0)` → `Power(1.15)`. Design default, cited for the target ratio (Baumeister et al. 2001, DOI 10.1037/1089-2680.5.4.323). Pack data only.
+
+**Evidence** (`runs/2026-10-27-07/eval.md`, `evidence/plots/friends_rivals.png`). Compliments : insults 2.9 / 3.0 / 2.6 → 7.0 / 5.0 / 6.8 at seeds 7 / 42 / 11, 4.2 at seed 23 / 16 people; friends 21 / 22 / 20 → 50 / 45 / 52, rivals 35 / 28 / 36 → 8 / 12 / 11. Response to the exponent is a cliff (1.1 no change, 1.3 no rivalry).
+
+**Verdicts.** GREAT / GREAT / GREAT (see `review.md`). **Dead-code delta:** zero. **Perf:** no code changed.
+
+**Top 5 remaining.**
+1. A person re-chooses the same unreachable place every stall window.
+2. `ReportDeed` leaves the victim no memory (needs-decision).
+3. Clock decision: `travel_timeout_hours` in game hours vs real-time walking.
+4. `examples/benchmark` builds an unsittable home for every population.
+5. Small villages (16) still run below 5:1; the snub exponent is a cliff, a smoother gate (a Tuning-level scale) would tune better.
