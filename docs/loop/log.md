@@ -4596,3 +4596,16 @@ a tautological assertion removed from `tuning_covers_rates`. Full gate results a
 3. Clock decision: `travel_timeout_hours` in game hours vs real-time walking.
 4. Enable `failed_place_memory_hours` in the village and measure interrupted sleeps.
 5. Re-measure the guide's scale table with the fixed benchmark homes on a quiet host.
+
+## 2026-10-28-04 — measuring `failed_place_memory_hours` in the village (no default changed)
+
+**Change.** Harness only: `examples/evidence` gains `--stall-timeout` and `--failed-place-memory`. Open issues #24, #27 are release issues, skipped. No crate code or default changed.
+
+**Evidence** (`runs/2026-10-28-04/eval.md`, three seeds, 10 days). Memory 3 h on top of stall 1 h cuts interrupted endings 311→236, 332→246, 325→290. But stall detection alone doubles interruptions over the default (172→311 at seed 42) and moves rivals 24→40 at seed 7, so the village stays `None`/`None`. **Verdicts:** not run (no default changed). **Dead-code delta:** zero.
+
+**Top 5 remaining.**
+1. Why stall detection swings friends/rivals by seed (24→40 rivals at seed 7); then decide whether the village enables stall + memory.
+2. Friendship brake independent of rivalry, then retry the snub rate.
+3. `ReportDeed` leaves the victim no memory (needs-decision).
+4. Clock decision: `travel_timeout_hours` in game hours vs real-time walking.
+5. Re-measure the guide's scale table with the fixed benchmark homes on a quiet host.
