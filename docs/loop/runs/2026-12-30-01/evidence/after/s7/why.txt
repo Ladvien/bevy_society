@@ -1,0 +1,8 @@
+# tick 69319: someone weighed nothing
+
+ 1.000  work
+ 1.000  wander
+ 0.998  compliment
+ 0.971  eat
+ 0.698  play
+ 0.644  gossip

@@ -348,8 +348,10 @@ fn finish_conversations(
             );
         }
         // No faction bias here: the conversation rule already picked the pair.
-        expose_toward(&mut npc_ties, talk.player, None, day, dt, &settings.tuning);
-        expose_toward(&mut player_ties, talk.npc, None, day, dt, &settings.tuning);
+        let (npc_friends, player_friends) = (npc_ties.friend_count(), player_ties.friend_count());
+        let tuning = &settings.tuning;
+        expose_toward(&mut npc_ties, talk.player, None, day, dt, npc_friends, tuning);
+        expose_toward(&mut player_ties, talk.npc, None, day, dt, player_friends, tuning);
     }
 }
 
