@@ -1,0 +1,5 @@
+# Research: no-progress (stall) detection for goal-directed walkers
+
+Source of the request: issue #26 (Sanctuary measured 30 of 60 people walking in place at some point in one sped-up day). Not a social-psychology model: the mechanism is progress-monitoring of a steered agent, standard in agent navigation as a "stuck" watchdog (best-distance-so-far and the time of its last improvement). No paper in the home-still corpus gives a stall limit; `stall_timeout_hours` and `stall_epsilon` are declared **design defaults** in `Tuning`. Not searched further: the quantity is a host's judgement of how long a queue may last, not an empirical constant, and inventing a citation would break the crate's honest-numbers rule.
+
+Algorithm: while travelling, keep `best` (distance at last improvement) and `improved_day`; if `distance < best - epsilon` set both; end the activity interrupted when `now - improved_day > stall_timeout_hours`. Using accumulated improvement against the last-improved distance (not the previous tick) means any steady walker, however slow, resets within epsilon / speed.

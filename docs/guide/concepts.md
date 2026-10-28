@@ -188,6 +188,8 @@ is "within `interaction_radius` of the place", and a place everyone shares is a 
 keeps its stalls at a 0.6 m half-width with a 1.3 m gather ring, so a person is outside the stall and within
 reach at the same time.
 
+**A host that owns the path wants a stall timeout, not a travel timeout.** Under `Locomotion::Host` leave `travel_timeout_hours` as `None`: a walk across a town takes game-hours and a total limit would cut walks still being made. The cost is that a destination nobody can reach (a point inside a building's collision boxes, a ring of standing people the solver treats as a wall) never ends, and the person aims at it for the rest of the run. `Tuning::stall_timeout_hours: Some(h)` bounds the *absence of progress* instead: the crate tracks the closest the person has been to its target and when that last improved by more than `stall_epsilon` (0.25 m), and ends the activity interrupted, as a travel timeout does, once `h` game-hours pass with no improvement. A slow walker improves every few ticks and is never cut; a person queued behind a crowd is, after `h`, so pick `h` for how long a queue may be. It defaults to `None`. A save does not carry the tracker, so a restored walker gets a fresh window. `TravelFailed` is unaffected.
+
 ## Ids
 
 Needs, signals, topics, deeds, factions, activities and interactions are interned at compile time
