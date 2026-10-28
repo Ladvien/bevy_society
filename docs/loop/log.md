@@ -4672,3 +4672,16 @@ a tautological assertion removed from `tuning_covers_rates`. Full gate results a
 3. `ReportDeed` leaves the victim no memory (needs-decision).
 4. Clock decision: `travel_timeout_hours` in game hours vs real-time walking.
 5. Re-measure the scale table on a quiet host (load average still ~25).
+
+## 2026-10-28-09 — a delivered retaliation settling the grievance does not calm the town (measured, not shipped)
+
+**Change.** None to crate or pack (tree reverted; trial kept as `runs/2026-10-28-09/revenge-settles.patch`). Open issues #24, #27 are release issues, skipped. Took the last pass's top item, the retaliation loop: after an accepted harmful deed the actor's bad memories about the target were scaled by `1 - f`, citing Gollwitzer, Meder & Schmitt 2011 (DOI 10.1002/ejsp.782).
+
+**Evidence** (`runs/2026-10-28-09/eval.md`). f = 0 reproduces HEAD. Insults do not fall (390 → 369 → 389 at seed 7; 1 875 → 1 808 at 60 people); rivals rise at f = 1.0 (mean 33.0 → 44.7) and friends fall (21.0 → 14.3). The loop is standing dislike re-fed by every contact, not insult-for-insult retaliation. **Verdicts:** not run. **Dead-code delta:** zero.
+
+**Top 5 remaining.**
+1. Tally what writes the grudge behind each snub at decision time, by memory kind (insult received / refusal / witnessed deed / rumor), at 24 and 60 people.
+2. Reconcile the evidence harness's rival count with `friendship_bound`'s at 60 people.
+3. `ReportDeed` leaves the victim no memory (needs-decision).
+4. Clock decision: `travel_timeout_hours` in game hours vs real-time walking.
+5. Re-measure the scale table on a quiet host.
