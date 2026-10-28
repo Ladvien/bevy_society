@@ -4540,3 +4540,18 @@ a tautological assertion removed from `tuning_covers_rates`. Full gate results a
 3. The pack's insult rate vs the paper's 5:1.
 4. `ReportDeed` leaves the victim no memory (needs-decision).
 5. Clock decision: `travel_timeout_hours` in game hours vs real-time walking.
+
+## 2026-10-27-06 — a version-1 save restores under version 2 (`SocietySave::upgrade`)
+
+**Change.** Issue #28 (the only open non-release issue): `restore` calls the new public `SocietySave::upgrade` before validating; v1 → v2 sets `version` and leaves `stock` empty (holds nothing of every good). `RestoreReport::upgraded_from: Option<u32>`. Version 0 and > 2 still `RestoreError::Version`, world untouched. Fixes #28. Release issues #24 and #27 seen, skipped.
+
+**Evidence.** No simulation behaviour changed, so no plots or narrative apply; the proof is `tests/save_upgrade.rs` (3 tests, fixture `tests/fixtures/save-v1.json`: v2 capture with `version` 1 and every `stock` key removed — the 0.3.0 layout, not a file written by a 0.3.0 binary). Ties, memories, memberships, rumours equal after restore; a v1 person holds 0.0 of every good; v0 and v3 refused with the world untouched. `tests/economy.rs` old "v1 is refused" assertion now asserts the upgrade. Release tests for `save`, `economy`, `save_upgrade`, clippy `-D`, doc `-D`, no-default build green; full-suite gate and perf not rerun (no model code touched).
+
+**Dead-code delta:** zero. **Verdicts:** not applicable (no visible behaviour); recorded honestly rather than claimed GREAT.
+
+**Top 5 remaining.**
+1. A person re-chooses the same unreachable place every stall window.
+2. The pack's insult rate vs the paper's 5:1.
+3. `ReportDeed` leaves the victim no memory (needs-decision).
+4. Clock decision: `travel_timeout_hours` in game hours vs real-time walking.
+5. `examples/benchmark` builds an unsittable home for every population.

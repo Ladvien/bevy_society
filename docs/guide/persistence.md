@@ -29,7 +29,7 @@ A person without a `PersonKey` is **left out of the save**, with one `warn!` per
 
 | field | holds |
 |---|---|
-| `version` | The format version, `bevy_society::VERSION` (currently `1`). |
+| `version` | The format version, `bevy_society::VERSION` (currently `2`). |
 | `names` | The names of every definition list (needs, topics, deeds, factions, activities), in definition order. Ids are indices into these lists, so this is how a restore notices the defs have moved. |
 | `clock` | The tick count, game time in days, `dt_days`, and the fixed-step accumulator. |
 | `rng` | The one random stream's seed, stream number and word position, so the draws after a reload are the draws that would have followed. |
@@ -74,7 +74,7 @@ fn load(world: &mut World, json: &str) {
 
 | `RestoreError` | Means | What to do |
 |---|---|---|
-| `Version { found, expected }` | The save was written by a different format version. The crate refuses rather than guess at an older or newer layout. | Migrate the file, or discard it. |
+| `Version { found, expected }` | The save's version is newer than this build, or older with no upgrade step (today only version 1 has one, to 2). The crate refuses rather than guess at a layout. | Load with the crate version that wrote it, or discard the file. |
 | `DefsMismatch { kind }` | The save's list of `"needs"`, `"topics"`, `"deeds"`, `"factions"` or `"activities"` is not what the defs now declare. Ids are indices, so a defs file that gained, lost or reordered a definition would write person 3's needs into person 3's opinions. | Load with the defs the save was written against, or version your defs and your saves together. |
 | `NotReady` | The world has no `SocietyDefs` or no `SocietyClock` yet. | Run the restore after the core plugin's startup. |
 
@@ -86,6 +86,7 @@ fn load(world: &mut World, json: &str) {
 |---|---|
 | `unknown_keys` | Keys in the save with no person in the world. Each is also warned about; the save's state for them is dropped. |
 | `fresh` | Persons in the world with no entry in the save. They keep the state you spawned them with and get new ids after the highest restored one, in their current id order. |
+| `upgraded_from` | `Some(v)` when the save was written at an older version and `SocietySave::upgrade` brought it up first; `None` for a current save. |
 | `dropped_activities` | Activities that could not come back, because their place or person key did not resolve or their activity id is not in the defs. |
 
 A rumor about a person who is no longer keyed keeps `Entity::PLACEHOLDER` and stops circulating, because nothing can spread a rumor about somebody the world does not have.
@@ -130,3 +131,7 @@ assert_eq!(
 
 - [`concepts.md`](concepts.md): ticks, game-days and why determinism makes a save exact.
 - [`decisions.md`](decisions.md): reading why a person did what they did.
+
+## Older saves
+
+`restore` upgrades a version-1 save itself and says so in `RestoreReport::upgraded_from`. The two versions differ by `PersonSave::stock`; a version-1 person comes back holding nothing of every good the defs declare. To migrate a file once and re-save it, call `SocietySave::upgrade`, which returns `RestoreError::Version` for a version it has no step for. `DefsMismatch` still applies after an upgrade.

@@ -203,11 +203,10 @@ fn a_price_stays_inside_its_band() {
     let _ = Person;
 }
 
-/// **A store survives a reload, and an old save is refused rather than misread.**
+/// **A store survives a reload, and an old save is upgraded rather than misread.**
 ///
 /// `Stock` is the first per-person state added since the save format was written, so
-/// `SocietySave::VERSION` moved 1 → 2. A version-1 file must come back as `RestoreError::Version` — that
-/// is what `VERSION` exists for, and `restore` already refuses what it does not understand.
+/// `SocietySave::VERSION` moved 1 → 2; `restore` upgrades a version-1 file (`tests/save_upgrade.rs`).
 #[test]
 #[cfg(feature = "serde")]
 fn a_store_survives_a_round_trip_and_an_old_save_is_refused() {
@@ -271,15 +270,11 @@ fn a_store_survives_a_round_trip_and_an_old_save_is_refused() {
         "bread must come back exactly: {restored} against {saved}"
     );
 
-    // And a version-1 save is refused with the version error, not read as if it were current.
+    // A version-1 save is upgraded, not refused: it has no stores, so everyone comes back holding nothing.
     let mut old = capture(fresh.world_mut());
     old.version = 1;
-    match restore(fresh.world_mut(), old) {
-        Err(bevy_society::RestoreError::Version { found, expected }) => {
-            assert_eq!((found, expected), (1, VERSION));
-        }
-        other => panic!("a version-1 save must be refused, got {other:?}"),
-    }
+    let report = restore(fresh.world_mut(), old).expect("a version-1 save is upgraded");
+    assert_eq!(report.upgraded_from, Some(1));
 }
 
 // -------------------------------------------------------------------------------------------------
