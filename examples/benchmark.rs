@@ -123,7 +123,13 @@ fn bevy_app() -> bevy::app::App {
     app.add_plugins((
         MinimalPlugins,
         TransformPlugin,
-        bevy::log::LogPlugin::default(),
+        // The validators in `bevy_society::behavior` warn about this setup on purpose: a 4 s game-day with
+        // 20 people per bed is a load generator, not a village. Those warnings buried the JSON line (250
+        // lines at 5 000 people), so only errors from that module are shown.
+        bevy::log::LogPlugin {
+            filter: "warn,bevy_society::behavior=error".into(),
+            ..bevy::log::LogPlugin::default()
+        },
     ))
     // A headless app has no frame clock: without this `Time<Fixed>` never advances.
     .insert_resource(TimeUpdateStrategy::ManualDuration(

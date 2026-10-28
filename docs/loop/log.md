@@ -4635,3 +4635,14 @@ a tautological assertion removed from `tuning_covers_rates`. Full gate results a
 3. Clock decision: `travel_timeout_hours` in game hours vs real-time walking.
 4. Re-measure the scale table on a quiet host; make `examples/benchmark` stop warning for its own setup.
 5. Stall + failed-place memory in the village needs plots and three reviews before enabling.
+
+## 2026-10-28-07 — benchmark prints only its JSON line
+
+**Change.** `examples/benchmark` filters the `bevy_society::behavior` validator warnings its deliberately compressed setup trips (9 lines at 100 people, 250 at 5 000). Workload unchanged. Open issues #24, #27 are release issues, skipped. Evidence: `runs/2026-10-28-07/eval.md`. **Verdicts:** not applicable (example only). **Dead-code delta:** zero.
+
+**Top 5 remaining.**
+1. Friendship brake independent of rivalry (Dunbar trim), then retry the snub rate.
+2. `ReportDeed` leaves the victim no memory (needs-decision).
+3. Clock decision: `travel_timeout_hours` in game hours vs real-time walking.
+4. Re-measure the scale table on a quiet host (load average still 9-16).
+5. Stall + failed-place memory in the village needs plots and three reviews before enabling.
