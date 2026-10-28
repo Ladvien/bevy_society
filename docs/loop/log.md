@@ -4555,3 +4555,16 @@ a tautological assertion removed from `tuning_covers_rates`. Full gate results a
 3. `ReportDeed` leaves the victim no memory (needs-decision).
 4. Clock decision: `travel_timeout_hours` in game hours vs real-time walking.
 5. `examples/benchmark` builds an unsittable home for every population.
+
+## 2026-10-27-07 — blocked: lowering the snub rate breaks the 60-person friendship bar
+
+**Change.** None shipped. Candidate: pack `snub` grudge curve `Linear` → `Power(k)`. Sweep (compliments:insults at seeds 7/42/11/23-16p): k=1.2 → 1489:73, 1867:0, 1543:41, 1090:3; k=1.4 → 1516:51, 1992:0, 1679:34, 893:48; k=2 and 3 ≈ no insults. At k=1.2 and 1.4, `tests/friendship_bound.rs` fails (60 people, 30 days: 90.8 % friend ties at k=1.4, rivals 0). Reverted. Escalated: `needs-decision/snub-rate-vs-scarce-friendship.md`. Evidence: `runs/2026-10-27-07/eval.md`, `summary.json` files.
+
+**Verdicts.** Not run (blocked). Dead-code delta zero.
+
+**Top 5 remaining.**
+1. Friendship brake independent of rivalry (Dunbar trim), then retry the snub rate (above).
+2. `ReportDeed` leaves the victim no memory (needs-decision).
+3. A person re-chooses the same unreachable place every stall window.
+4. Clock decision: `travel_timeout_hours` in game hours vs real-time walking.
+5. `examples/benchmark` builds an unsittable home for every population.
