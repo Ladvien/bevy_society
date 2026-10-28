@@ -566,14 +566,14 @@ impl Memories {
     /// of activity starts with sums and **26.0%** with the maximum, the friends:rivals balance went 4:9 →
     /// **6:5**, and rumor reach doubled **0.167 → 0.333**. `village-evening` held (travelling 58.9% →
     /// 59.0%, need mean 0.545 → 0.542).
-    pub fn grudge(&self, other: Entity, now_days: f64) -> f32 {
+    pub fn grudge(&self, other: Entity, now_days: f64, half_life_hours: f32) -> f32 {
         recall::grudge(
             self.entries
                 .iter()
                 .filter(|m| m.other == Some(other))
                 .map(|m| {
                     let hours = ((now_days - m.day as f64) * 24.0).max(0.0) as f32;
-                    (m.valence, recall::recency(hours))
+                    (m.valence, recall::halving(hours, half_life_hours))
                 }),
         )
     }
@@ -857,15 +857,25 @@ mod tests {
         m.record(mem(0.0, Some(a), -0.6, 0.5), 0.0, 8);
         // Four trivial slights do not equal one betrayal. While this summed, the value depended on
         // `memory_capacity`: keeping four small entries instead of two turned 0.6 into a saturated 1.0.
-        assert!((m.grudge(a, 0.0) - 0.6).abs() < 1e-6);
-        assert_eq!(m.grudge(ent(21), 0.0), 0.0);
+        assert!((m.grudge(a, 0.0, 138.0) - 0.6).abs() < 1e-6);
+        assert_eq!(m.grudge(ent(21), 0.0, 138.0), 0.0);
         let mut positive = Memories::default();
         positive.record(mem(0.0, Some(a), 0.8, 0.5), 0.0, 8);
-        assert_eq!(positive.grudge(a, 0.0), 0.0);
+        assert_eq!(positive.grudge(a, 0.0, 138.0), 0.0);
         // A deeper offence still dominates, and recency still discounts it.
         let mut mixed = Memories::default();
         mixed.record(mem(0.0, Some(a), -0.9, 0.5), 0.0, 8);
         mixed.record(mem(0.0, Some(a), -0.2, 0.5), 0.0, 8);
-        assert!((mixed.grudge(a, 0.0) - 0.9).abs() < 1e-6);
+        assert!((mixed.grudge(a, 0.0, 138.0) - 0.9).abs() < 1e-6);
+    }
+
+    #[test]
+    fn a_grudge_cools_on_its_own_half_life() {
+        let mut m = Memories::default();
+        let a = ent(20);
+        m.record(mem(0.0, Some(a), -0.8, 0.5), 0.0, 8);
+        // One game-day later (24 h): a 24-hour half-life halves it; a 138-hour one barely moves it.
+        assert!((m.grudge(a, 1.0, 24.0) - 0.4).abs() < 1e-5);
+        assert!((m.grudge(a, 1.0, 138.0) - 0.8 * 0.5_f32.powf(24.0 / 138.0)).abs() < 1e-5);
     }
 }
