@@ -86,6 +86,20 @@ impl Doing {
 #[reflect(Component)]
 pub struct Destination(pub Vec2);
 
+/// How close a travelling person has come to its target, and when it last got meaningfully closer
+/// (`Tuning::stall_timeout_hours`, issue #26).
+///
+/// Written by `arrive_and_satisfy` while a person travels and only when a stall timeout is set; read by
+/// `end_activities`. Removed on arrival, on every ending and whenever a new `Doing` is decided, so it
+/// never outlives the walk it measures. It is not saved: a restored walker gets a fresh window.
+#[derive(Component, Debug, Clone, Copy, PartialEq)]
+pub(crate) struct TravelProgress {
+    /// The smallest distance to the target at the last improvement, in plane units.
+    best: f32,
+    /// Game day of the last improvement by more than `Tuning::stall_epsilon`.
+    improved_day: f64,
+}
+
 // -------------------------------------------------------------------------------------------------
 // Messages
 // -------------------------------------------------------------------------------------------------
@@ -724,6 +738,7 @@ fn arrive_and_satisfy(
     mut people: Query<(&mut Doing, &mut Needs)>,
     stocks: Query<&crate::Stock>,
     mut arrivals: Option<ResMut<ArrivalQueue>>,
+    mut progress: Query<&mut TravelProgress>,
 ) {
     let now = clock.now_days;
     let dt_hours = f64::from(clock.dt_days) * 24.0;
@@ -773,6 +788,23 @@ fn arrive_and_satisfy(
             if let DoingTarget::Person(_) = doing.target {
                 commands.entity(person).insert(Destination(target_pos));
             }
+            if settings.tuning.stall_timeout_hours.is_some() {
+                let distance = here.distance(target_pos);
+                match progress.get_mut(person) {
+                    Ok(mut seen) => {
+                        if distance < seen.best - settings.tuning.stall_epsilon {
+                            seen.best = distance;
+                            seen.improved_day = now;
+                        }
+                    }
+                    Err(_) => {
+                        commands.entity(person).insert(TravelProgress {
+                            best: distance,
+                            improved_day: now,
+                        });
+                    }
+                }
+            }
             // **A crowded place is still an arrival.** Everyone sleeps at the same hour, so every resident
             // aims at one coordinate inside `interaction_radius`; ORCA holds centres one body diameter apart,
             // so the disc packs solid and the queue behind it times out. Measured: the goal already holds a
@@ -801,7 +833,9 @@ fn arrive_and_satisfy(
                 continue;
             }
             doing.arrived_day = Some(now);
-            commands.entity(person).remove::<Destination>();
+            commands
+                .entity(person)
+                .remove::<(Destination, TravelProgress)>();
             // No `ActivityStarted` here: the decision already wrote it, paired with the
             // `ActivityEnded` that closes it. Arrival begins the *duration* and the `satisfies`
             // payout, which is what `arrived_day` is for.
@@ -1177,6 +1211,7 @@ fn queue_end_requests(
 #[derive(bevy::ecs::system::SystemParam)]
 struct ActivityQueries<'w, 's> {
     doing: Query<'w, 's, &'static Doing>,
+    progress: Query<'w, 's, &'static TravelProgress>,
     dormant: Query<'w, 's, (), With<crate::Dormant>>,
 }
 
@@ -1194,12 +1229,14 @@ fn end_activities(
 ) {
     let ActivityQueries {
         doing: people,
+        progress,
         dormant,
     } = queries;
     let now = clock.now_days;
     // `None` means a walk never times out: only the host may declare it impossible, through
     // `TravelFailed`, because only the host can see whether a path exists.
     let timeout_hours = settings.tuning.travel_timeout_hours.map(f64::from);
+    let stall_hours = settings.tuning.stall_timeout_hours.map(f64::from);
     let mut endings: Vec<(Entity, String, bool)> = Vec::new();
 
     // **Host end-requests come first**, so a `TravelFailed` written this tick ends its activity in
@@ -1255,8 +1292,13 @@ fn end_activities(
         }
         let (finished, completed) = match doing.arrived_day {
             None => {
-                let timed_out =
-                    timeout_hours.is_some_and(|hours| (now - doing.started_day) * 24.0 > hours);
+                let timed_out = timeout_hours
+                    .is_some_and(|hours| (now - doing.started_day) * 24.0 > hours)
+                    || stall_hours.is_some_and(|hours| {
+                        progress
+                            .get(person)
+                            .is_ok_and(|seen| (now - seen.improved_day) * 24.0 > hours)
+                    });
                 // A `Person` target that no longer exists can never be reached, so the activity ends
                 // now rather than at a timeout that may not exist at all.
                 // **`contains`, not `binary_search`.** `Perception::persons` is filled in
@@ -1294,7 +1336,9 @@ fn end_activities(
             activity,
             completed,
         });
-        commands.entity(person).remove::<(Doing, Destination)>();
+        commands
+            .entity(person)
+            .remove::<(Doing, Destination, TravelProgress)>();
     }
 }
 
@@ -1922,6 +1966,7 @@ fn decide_activities(
             started_day: now,
             arrived_day: in_place.then_some(now),
         });
+        entity.remove::<TravelProgress>();
         // Every target that is somewhere other than where the person stands needs a destination:
         // a `Point` is that point, a `Place` is its transform, and a `Person` is that person's
         // position offset toward the actor. Setting one only for `Point` meant a village whose
