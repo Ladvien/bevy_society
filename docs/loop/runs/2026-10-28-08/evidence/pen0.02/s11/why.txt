@@ -1,0 +1,8 @@
+# tick 69632: someone chose gossip (0.609), 39% below wander (1.000)
+
+ 1.000  wander
+ 0.999  compliment
+ 0.609  gossip   <- chosen
+ 0.400  work
+ 0.300  snub
+ 0.250  craft

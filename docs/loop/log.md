@@ -4659,3 +4659,16 @@ a tautological assertion removed from `tuning_covers_rates`. Full gate results a
 3. Clock decision: `travel_timeout_hours` in game hours vs real-time walking.
 4. Re-measure the scale table on a quiet host (the table is from an M1 Max; this host differs).
 5. Stall + failed-place memory in the village needs plots and three reviews before enabling.
+
+## 2026-10-28-08 — refusal penalty is not what makes the town rival-heavy (measurement only)
+
+**Change.** Harness only: `examples/evidence --rejection-penalty`. Open issues #24, #27 are release issues, skipped. No crate or default change.
+
+**Evidence** (`runs/2026-10-28-08/eval.md`, three seeds, 24 people, 17 days). Penalty 0.05 → 0 moves mean rivals 33.0 → 27.3 and friends not at all; insults rise ~20%. At 60 people, 85% of insults (1 588 of 1 875) come from someone the victim already dislikes: the rivalry engine is retaliation through `snub`'s grudge-only consideration. The harness's 170 rival ties at 60 people disagree with `friendship_bound`'s 1157; not reconciled. **Verdicts:** not run. **Dead-code delta:** zero.
+
+**Top 5 remaining.**
+1. Retaliation loop: bound a victim's snub rate per insult received (Bondü & Richter 2016), measure, then retry the snub exponent.
+2. Reconcile the evidence harness's rival count with `friendship_bound`'s at 60 people.
+3. `ReportDeed` leaves the victim no memory (needs-decision).
+4. Clock decision: `travel_timeout_hours` in game hours vs real-time walking.
+5. Re-measure the scale table on a quiet host (load average still ~25).
