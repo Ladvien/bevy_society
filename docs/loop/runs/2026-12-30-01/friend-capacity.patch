@@ -1,0 +1,192 @@
+diff --git a/assets/starter.society.ron b/assets/starter.society.ron
+index 52b3344..26491b5 100644
+--- a/assets/starter.society.ron
++++ b/assets/starter.society.ron
+@@ -218,7 +218,7 @@
+                 // Bondü & Richter 2016 (DOI 10.3389/fpsyg.2016.00795) is the mechanism: rejection
+                 // and provocation sensitivity predict reactive aggression — a reaction to how one
+                 // has been treated, which is exactly `Memories::grudge`.
+-                (input: Script("ctx.grudge(actor, target)"), curve: Linear(1.0, 0.0)),
++                (input: Script("ctx.grudge(actor, target)"), curve: Power(1.15)),
+             ],
+             satisfies: [],
+             interaction: Some("insult"),
+diff --git a/src/behavior.rs b/src/behavior.rs
+index 82efa8d..13c3aea 100644
+--- a/src/behavior.rs
++++ b/src/behavior.rs
+@@ -2710,8 +2710,15 @@ fn apply_effects(
+         let Some(mut ties) = world.get_mut::<Ties>(owner) else {
+             continue;
+         };
++        let friends = ties.friend_count();
+         let tie = ties.entry(other);
+-        tie.add_affinity(delta.affinity, &tuning);
++        // The friend-capacity brake slows only a gain; a loss is never softened.
++        let scale = if delta.affinity > 0.0 {
++            tuning.bond_scale(friends, tie.label == crate::TieLabel::Friend)
++        } else {
++            1.0
++        };
++        tie.add_affinity(delta.affinity * scale, &tuning);
+         tie.trust = (tie.trust + delta.trust).clamp(0.0, 1.0);
+         tie.respect = (tie.respect + delta.respect).clamp(-1.0, 1.0);
+         if delta.familiarity != 0.0 {
+@@ -3321,7 +3328,16 @@ fn expose(world: &mut World, holder: Entity, other: Entity, settings: &SocietySe
+     let dt = world_dt(world);
+     let tuning = settings.tuning.clone();
+     if let Some(mut ties) = world.get_mut::<Ties>(holder) {
+-        crate::relationships::expose_toward(&mut ties, other, bias, now as f32, dt, &tuning);
++        let friends = ties.friend_count();
++        crate::relationships::expose_toward(
++            &mut ties,
++            other,
++            bias,
++            now as f32,
++            dt,
++            friends,
++            &tuning,
++        );
+     }
+ }
+ 
+diff --git a/src/core.rs b/src/core.rs
+index 342a90f..f337084 100644
+--- a/src/core.rs
++++ b/src/core.rs
+@@ -338,6 +338,22 @@ pub struct Tuning {
+     /// 0.068) while familiarity does not separate them at all (0.907 against 0.908), so trust is the
+     /// second thing a friend is. Design default.
+     pub friend_trust: f32,
++    /// How many friends one person can hold before a new bond stops forming. `0.0` turns the brake off.
++    ///
++    /// A person's closeness is a budget, not a counter. Zhou, Sornette, Hill & Dunbar 2005 (DOI
++    /// `10.1098/rspb.2004.2970`) find nested layers of social groups, each about three times the one inside
++    /// it, starting from a support clique of 3.3 people; the layer above that clique is therefore about
++    /// ten. **A tie that is not yet a friend gains positive affinity at `1 - friends / friend_capacity`
++    /// of its rate**, through interaction and mere exposure, and at nothing once the person holds
++    /// `friend_capacity` friends. A tie that already is a friend keeps its full rate, so a full circle is
++    /// stable rather than eroding.
++    ///
++    /// **Why it is here.** `affinity_ceiling` stops contact alone from making a friend, but at 60 people a
++    /// softer snub rate (the pack's `snub` curve at `Power(1.2)`, which lifts compliments to insults from
++    /// 2.9:1 to above 20:1) made 90.8% of ordered pairs friends, because nothing else limits how many
++    /// friends one person can accumulate. Ten is the layer size; the value itself is a design default
++    /// derived from the paper's scaling ratio, not a figure the paper reports.
++    pub friend_capacity: f32,
+     /// Familiarity at or above which, with [`Self::friend_affinity`], a tie is a friend.
+     pub friend_familiarity: f32,
+     /// Affinity at or below `-rival_affinity`, with [`Self::rival_familiarity`], makes a tie a rival.
+@@ -583,6 +599,15 @@ impl Tuning {
+         }
+         (affinity / self.affinity_ceiling).clamp(-1.0, 1.0)
+     }
++
++    /// The fraction of a positive affinity gain a tie receives, given how many friends its owner holds
++    /// ([`Self::friend_capacity`]). `1.0` for a tie that is already a friend, and when the brake is off.
++    pub fn bond_scale(&self, friends: usize, already_friend: bool) -> f32 {
++        if self.friend_capacity <= 0.0 || already_friend {
++            return 1.0;
++        }
++        (1.0 - friends as f32 / self.friend_capacity).clamp(0.0, 1.0)
++    }
+ }
+ 
+ impl Default for Tuning {
+@@ -632,6 +657,7 @@ impl Default for Tuning {
+             friend_affinity: 0.3,
+             affinity_ceiling: 0.35,
+             friend_trust: 0.5,
++            friend_capacity: 10.0,
+             friend_familiarity: 0.3,
+             // **Also under the clamp ceiling**, for the same reason `friend_affinity` is: `0.4` was
+             // unreachable once affinity is bounded at `±affinity_ceiling`, so a rival could never be
+diff --git a/src/dialogue.rs b/src/dialogue.rs
+index 6d75697..76e2cb3 100644
+--- a/src/dialogue.rs
++++ b/src/dialogue.rs
+@@ -348,8 +348,10 @@ fn finish_conversations(
+             );
+         }
+         // No faction bias here: the conversation rule already picked the pair.
+-        expose_toward(&mut npc_ties, talk.player, None, day, dt, &settings.tuning);
+-        expose_toward(&mut player_ties, talk.npc, None, day, dt, &settings.tuning);
++        let (npc_friends, player_friends) = (npc_ties.friend_count(), player_ties.friend_count());
++        let tuning = &settings.tuning;
++        expose_toward(&mut npc_ties, talk.player, None, day, dt, npc_friends, tuning);
++        expose_toward(&mut player_ties, talk.npc, None, day, dt, player_friends, tuning);
+     }
+ }
+ 
+diff --git a/src/relationships.rs b/src/relationships.rs
+index 9418c89..30a7c45 100644
+--- a/src/relationships.rs
++++ b/src/relationships.rs
+@@ -230,13 +230,14 @@ impl Tie {
+ 
+     /// Records one contact over `dt_days`. Familiarity is first read at `now_days`, then raised by
+     /// mere exposure; affinity is nudged toward the target (Zajonc 1968, DOI 10.1037/h0025848).
+-    pub fn expose(&mut self, now_days: f32, dt_days: f32, tuning: &Tuning) {
++    pub fn expose(&mut self, now_days: f32, dt_days: f32, bond_scale: f32, tuning: &Tuning) {
+         let f = self.familiarity(now_days, tuning);
+         self.familiarity_peak = recall::exposed_peak(f, tuning.exposure_per_day, dt_days);
+         self.last_contact_day = now_days;
+         // Exposure saturates on `(1 − |affinity|)` and now also honours the ceiling, through the one
+         // writer. Before the ceiling, this term is what carried a village to affinity 0.999.
+-        let step = tuning.mere_exposure_per_day * dt_days * (1.0 - self.affinity.abs());
++        // `bond_scale` is `Tuning::bond_scale`: the friend-capacity brake on a bond not yet formed.
++        let step = tuning.mere_exposure_per_day * dt_days * (1.0 - self.affinity.abs()) * bond_scale;
+         self.add_affinity(step, tuning);
+     }
+ 
+@@ -288,6 +289,14 @@ impl Ties {
+         self.0.binary_search_by_key(&bits, |t| t.target.to_bits())
+     }
+ 
++    /// How many of these ties are currently labelled [`TieLabel::Friend`].
++    pub fn friend_count(&self) -> usize {
++        self.0
++            .iter()
++            .filter(|tie| tie.label == TieLabel::Friend)
++            .count()
++    }
++
+     /// The tie to `target`, if any.
+     pub fn get(&self, target: Entity) -> Option<&Tie> {
+         self.search(target).ok().map(|i| &self.0[i])
+@@ -424,13 +433,15 @@ pub(crate) fn expose_toward(
+     shared_bias: Option<f32>,
+     now_days: f32,
+     dt_days: f32,
++    friends: usize,
+     tuning: &Tuning,
+ ) {
+     let tie = match shared_bias {
+         Some(bias) => ties.entry_with(target, bias),
+         None => ties.entry(target),
+     };
+-    tie.expose(now_days, dt_days, tuning);
++    let scale = tuning.bond_scale(friends, tie.label == TieLabel::Friend);
++    tie.expose(now_days, dt_days, scale, tuning);
+ }
+ 
+ /// Triadic closure for one direction (Kossinets & Watts 2006, DOI 10.1126/science.1116869): when
+@@ -460,6 +471,9 @@ fn expose_contacts(
+         let Ok(mine) = memberships.get(entity) else {
+             continue;
+         };
++        // Counted once per person per tick: the brake reads how full this person's circle is, and a
++        // contact loop must not rescan the tie list for every neighbour.
++        let friends = ties.get(entity).map_or(0, Ties::friend_count);
+         for &j in &perception.contact[i] {
+             let Some(&other) = perception.persons.get(j as usize) else {
+                 continue;
+@@ -469,7 +483,7 @@ fn expose_contacts(
+                 Err(_) => None,
+             };
+             if let Ok(mut owned) = ties.get_mut(entity) {
+-                expose_toward(&mut owned, other, bias, now, dt, tuning);
++                expose_toward(&mut owned, other, bias, now, dt, friends, tuning);
+             }
+         }
+     }

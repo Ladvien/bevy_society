@@ -4646,3 +4646,16 @@ a tautological assertion removed from `tuning_covers_rates`. Full gate results a
 3. Clock decision: `travel_timeout_hours` in game hours vs real-time walking.
 4. Re-measure the scale table on a quiet host (load average still 9-16).
 5. Stall + failed-place memory in the village needs plots and three reviews before enabling.
+
+## 2026-12-30-01 — friend-capacity brake built and measured, not shipped
+
+**Change.** None to crate or pack (tree reverted; trial kept as `runs/2026-12-30-01/friend-capacity.patch`). Open issues #24, #27 are release issues, skipped. Took the last four passes' top item: a friendship brake independent of rivalry, so the snub rate could fall.
+
+**Evidence** (`runs/2026-12-30-01/eval.md`). The brake works (`Power(1.2)`: 90.8% → 21.9% friend pairs at 60 people) but leaves 0 rivals, failing `rivals >= 1`. New fact: HEAD's 60-person town is 32.7% rival pairs and 1.8% friend pairs; rivals across snub exponents 1.0/1.1/1.15/1.2 are 1157/1267/426/0 on seed 7, no stable middle. **Verdicts:** not run (nothing shipped). **Dead-code delta:** zero.
+
+**Top 5 remaining.**
+1. Why the default 60-person town is a third rival pairs (`became_rival` vs `left_rival` over 30 days); the friendship bar guards the wrong failure.
+2. `ReportDeed` leaves the victim no memory (needs-decision).
+3. Clock decision: `travel_timeout_hours` in game hours vs real-time walking.
+4. Re-measure the scale table on a quiet host (the table is from an M1 Max; this host differs).
+5. Stall + failed-place memory in the village needs plots and three reviews before enabling.
