@@ -468,6 +468,31 @@ pub struct Tuning {
     /// destination is unreachable, and it says so with [`TravelFailed`](crate::TravelFailed). A timeout
     /// left in place would end activities the host was still walking toward.
     pub travel_timeout_hours: Option<f32>,
+    /// Game hours a travelling person may go **without getting closer** to its destination before the
+    /// activity ends interrupted, or `None` for no such limit.
+    ///
+    /// **The timeout a `Locomotion::Host` wants** (issue #26). [`travel_timeout_hours`](Self::travel_timeout_hours)
+    /// bounds the *total* walk, so a host that owns the path leaves it `None` — a walk across a town takes
+    /// game-hours and a total limit would end walks still being made — and then a destination nobody can reach
+    /// (a point inside a building's collision boxes, a ring of standing people the solver treats as a wall)
+    /// never ends: `arrived_day` is never set, the duration never starts, the person aims at the same point
+    /// for the rest of the run. This one measures the thing that distinguishes "slow" from "stuck": the crate
+    /// tracks the **closest the person has been to its target**, and the game-day that distance last improved
+    /// by more than [`stall_epsilon`](Self::stall_epsilon). A walker improves it every few ticks, however slowly;
+    /// a person standing in a queue or against a wall does not. When the last improvement is older than this,
+    /// the activity ends exactly as a travel timeout ends it (`ActivityEnded { completed: false }`, the need
+    /// left unmet).
+    ///
+    /// A **design default**, `None`: no paper gives a stall limit, it is a host's judgement of how long a
+    /// queue is allowed to be. A `Person` target moves, so progress is measured against its current point and
+    /// a chase that closes counts. A save does not carry the tracker; a restored walker gets a fresh window.
+    /// [`TravelFailed`](crate::TravelFailed) is unaffected.
+    pub stall_timeout_hours: Option<f32>,
+    /// How much closer to its destination, in the plane's units, a travelling person must get to count as
+    /// progress for [`stall_timeout_hours`](Self::stall_timeout_hours). A **design default** of 0.25 m, a
+    /// fraction of a body diameter (0.7 m): enough to ignore the solver's sideways jitter, small enough
+    /// that any real walk beats it within a few ticks.
+    pub stall_epsilon: f32,
     /// Walking speed in metres per **real** second, used by the core walker that moves a person
     /// toward its `Destination` when no `SocialMover` is steering. 1.4 m/s is an ordinary human
     /// walking speed. `SocialMover::speed` overrides it per person.
@@ -619,6 +644,8 @@ impl Default for Tuning {
             rejection_distress: 0.3,
             bereavement_familiarity: 0.3,
             travel_timeout_hours: Some(2.0),
+            stall_timeout_hours: None,
+            stall_epsilon: 0.25,
             walk_speed: 1.4,
             // **A design default, set by measurement.** Not from a paper; the *gate* is the paper. Every
             // contact-tell that finds an informed neighbour stifles the teller (Daley–Kendall), so pacing
