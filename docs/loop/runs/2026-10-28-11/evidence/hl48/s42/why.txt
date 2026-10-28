@@ -1,0 +1,8 @@
+# tick 69619: someone chose share (0.711), 29% below wander (1.000)
+
+ 1.000  wander
+ 0.998  compliment
+ 0.711  share   <- chosen
+ 0.644  gossip
+ 0.400  work
+ 0.299  snub
