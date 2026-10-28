@@ -4510,3 +4510,18 @@ a tautological assertion removed from `tuning_covers_rates`. Full gate results a
 3. Clock decision: `travel_timeout_hours` in game hours against real-time walking.
 4. `examples/benchmark` builds an unsittable home for every population.
 5. Hostility saturation in a crowd with no positive activity.
+
+## 2026-10-27-04 — a crowded place counts who has arrived (#25)
+
+**Change.** `arrive_and_satisfy` counts `crowd` as the persons whose `Doing` targets the place with `arrived_day` set, not the bodies inside `interaction_radius`. Admitted people stand at the wider `allowed`, outside the old disc, so the allowance never grew past the first arrival. **Why it beat the rest:** it is the oldest bug issue (#26 asks for a feature; #24/#27 are release requests, seen and skipped by rule).
+
+**Evidence** (`runs/2026-10-27-04/`, `village-evening` seeds 7/42/11, same seed before/after). Interrupted endings 336 → 233, 337 → 246, 367 → 220. Rivals 27 → 33, 40 → 36, 35 → 26 (no direction). No matplotlib on this host, so the comparison is `eval.md`'s table, not a PNG.
+
+**Verdicts.** GREAT / GREAT / GREAT (`review.md`). **Dead-code delta:** zero. **Perf:** not timed (loaded host); the per-walker O(persons) scan became one pass. **Tests:** `tests/crowded_arrival.rs` occupants now carry an arrived `Doing` and a new test seats 8 arrived bodies on a 2.0 m ring beyond the radius; docs fix for `crowded_arrival_growth` units.
+
+**Top 5 remaining.**
+1. #26 `stall_timeout_hours` for an unreachable `Locomotion::Host` destination (enhancement).
+2. The pack's insult rate vs the paper's 5:1.
+3. `ReportDeed` leaves the victim no memory (needs-decision).
+4. Clock decision: `travel_timeout_hours` against real-time walking.
+5. `examples/benchmark` builds an unsittable home.

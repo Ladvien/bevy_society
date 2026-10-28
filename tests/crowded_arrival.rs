@@ -27,7 +27,7 @@ fn scene(growth: f32, occupants: usize, out: f32) -> (App, Entity) {
             activities: [(
                 id: "sleep",
                 target: Home,
-                duration_hours: 2.0,
+                duration_hours: 48.0,
                 rank: 1,
                 considerations: [(input: Need("rest"), curve: Linear(-1.0, 1.0))],
                 satisfies: [("rest", 0.5)],
@@ -58,7 +58,20 @@ fn scene(growth: f32, occupants: usize, out: f32) -> (App, Entity) {
             &format!("S{i}"),
             Vec2::new(0.4 * a.cos(), 0.4 * a.sin()),
         );
-        app.world_mut().entity_mut(person).insert(Home(home));
+        let sleep = app
+            .world()
+            .resource::<SocietyDefs>()
+            .activity_id("sleep")
+            .expect("the definitions declare `sleep`");
+        app.world_mut().entity_mut(person).insert((
+            Home(home),
+            Doing {
+                activity: sleep,
+                target: DoingTarget::Place(home),
+                started_day: 0.0,
+                arrived_day: Some(0.0),
+            },
+        ));
     }
     // The walker: at `out`, already walking home. `Doing` is set directly rather than left to the decider, so
     // the test measures the arrival gate and nothing else.
@@ -119,5 +132,55 @@ fn an_empty_disc_is_unaffected() {
     assert!(
         !arrives(0.7, 0, 2.2),
         "an empty place must not accept a walker at 2.2 m: growth must scale with the crowd, not replace the radius"
+    );
+}
+
+/// Issue #25: bodies that stand on rings *beyond* `interaction_radius` — where the allowance itself admitted
+/// them — still count, so the allowance keeps growing and the next ring is admitted.
+#[test]
+fn the_allowance_grows_with_arrivals_standing_beyond_the_radius() {
+    // Radius 1.5, growth 0.7. Eight arrived bodies stand on a ring at 2.0 m, outside the 1.5 m disc the old
+    // count used, which saw none of them. A walker at 3.0 m is admitted only when they count:
+    // 1.5 + 0.7 * sqrt(8) = 3.48.
+    let (mut app, walker) = scene(0.7, 0, 3.0);
+    let home = match app.world().get::<Doing>(walker).map(|d| d.target) {
+        Some(DoingTarget::Place(home)) => home,
+        _ => panic!("the walker targets the home"),
+    };
+    let sleep = app
+        .world()
+        .resource::<SocietyDefs>()
+        .activity_id("sleep")
+        .expect("the definitions declare `sleep`");
+    for i in 0..8 {
+        let a = std::f32::consts::TAU * (i as f32) / 8.0;
+        let person = common::spawn_person(
+            &mut app,
+            &format!("R{i}"),
+            Vec2::new(2.0 * a.cos(), 2.0 * a.sin()),
+        );
+        app.world_mut().entity_mut(person).insert((
+            Home(home),
+            Doing {
+                activity: sleep,
+                target: DoingTarget::Place(home),
+                started_day: 0.0,
+                arrived_day: Some(0.0),
+            },
+        ));
+    }
+    let mut arrived = false;
+    for _ in 0..2_000 {
+        app.update();
+        if let Some(doing) = app.world().get::<Doing>(walker)
+            && doing.arrived_day.is_some()
+        {
+            arrived = true;
+            break;
+        }
+    }
+    assert!(
+        arrived,
+        "eight arrived bodies on a 2.0 m ring must widen the allowance to reach 3.0 m"
     );
 }

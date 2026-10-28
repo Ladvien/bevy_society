@@ -58,6 +58,8 @@ All notable changes to bevy_society. The format follows [Keep a Changelog](https
 
 ### Fixed
 
+- **A crowded place's arrival allowance counts who has arrived, not who stands inside `interaction_radius`** (#25). The allowance `interaction_radius + crowded_arrival_growth · sqrt(crowd)` admits a person at a distance *beyond* `interaction_radius`, where the disc it counted could not see them, so it stopped growing after the first arrival and everyone behind waited on the ring the previous arrivals stood on. `crowd` is now the persons whose `Doing` targets the place with `arrived_day` set (a lone arrival is still admitted at `interaction_radius` exactly). Measured on `village-evening`, 17 game-days, same seeds: interrupted endings 336 → 233 (seed 7), 337 → 246 (seed 42), 367 → 220 (seed 11). `Tuning::crowded_arrival_growth` is documented as a distance in the plane's own units (two body radii in the host's units), not metres.
+
 - **`DefsFile::merge` carries `goods` and `skills`.** It carried nine lists of eleven and dropped these two, so a pack merged in that declares a good contributed nothing: `SocietyDefs::compile` then resolved every `consumes` and `produces` naming it to "not defined", and the error pointed at the *consuming* activity rather than at the merge. Found when `bake` moved into the starter pack — the exact shape the village example uses (`starter` + `village.society.ron`). An id in both packs is now `DefsError::Duplicate { kind: "good" | "skill" }`, like every other list. `tests/defs.rs` pins the merge, the duplicate and the cross-pack `consumes` case, and all three fail against the old code.
 
 ### Breaking

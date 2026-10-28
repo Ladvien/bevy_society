@@ -475,11 +475,15 @@ pub struct Tuning {
     /// Game-days between two contact-gossips along one directed tie. A shared place is one
     /// conversation, not one per fixed step; the gate is the teller having news, this is only pacing.
     pub contact_gossip_cooldown_days: f32,
-    /// How far a crowded `Place`'s arrival radius grows per person already standing in it, in metres.
+    /// How far a crowded `Place`'s arrival radius grows with the people already **arrived** at it, as
+    /// `interaction_radius + this * sqrt(arrived)`. A distance in the plane's own units (`interaction_radius`,
+    /// `contact_radius` and `perception_radius` are in them too), not necessarily metres.
     ///
     /// Design default (no paper). `SocialMover::radius` is 0.35 m, so `2 * 0.35 = 0.70 m` is the distance
-    /// ORCA holds two people's centres apart — one body diameter is therefore the queue spacing, and a disc
-    /// holding `n` people legitimately reaches `interaction_radius + this * sqrt(n)` before it is full.
+    /// ORCA holds two people's centres apart — one body diameter is therefore the queue spacing. A host in
+    /// another unit sets **two body radii in its own units** (feet: a 2 ft body gets `2.0`). The count is the
+    /// persons whose `Doing` targets the place with `arrived_day` set, so the allowance keeps growing as the
+    /// ring it admits fills (it is bounded by `interaction_radius + this * sqrt(capacity)`).
     ///
     /// **Why it is needed.** Everyone goes to bed at the same hour, so every resident of a home aims at the
     /// same coordinate inside `interaction_radius`. Measured on `village-evening`: at every timed-out `sleep`

@@ -730,6 +730,23 @@ fn arrive_and_satisfy(
     let radius = settings.interaction_radius;
     let plane = settings.plane;
 
+    // **The crowd is who has arrived, not who is inside a disc.** An admitted walker stands at `allowed`,
+    // which is wider than `interaction_radius`, so a count of the bodies inside `interaction_radius` never
+    // saw the people the allowance had admitted: it stalled at the first arrival and everyone behind waited
+    // on the ring the last person stood on (issue #25). A `Doing` with `arrived_day` set at a place is a
+    // person the crate already knows is there. `capacity` bounds how many target a place, so the allowance
+    // is bounded by `radius + growth * sqrt(capacity)`. A `BTreeMap`: it is only looked up, but a sorted
+    // map keeps this file free of hash-ordered state.
+    let mut arrived_at: std::collections::BTreeMap<Entity, usize> =
+        std::collections::BTreeMap::new();
+    for (doing, _) in people.iter() {
+        if doing.arrived_day.is_some()
+            && let DoingTarget::Place(place) = doing.target
+        {
+            *arrived_at.entry(place).or_insert(0) += 1;
+        }
+    }
+
     for (slot, &(_, person)) in index.sorted.iter().enumerate() {
         let Ok((mut doing, mut needs)) = people.get_mut(person) else {
             continue;
@@ -767,11 +784,7 @@ fn arrive_and_satisfy(
             // so the disc packs solid and the queue behind it times out. Measured: the goal already holds a
             // median of 6 bodies when a sleep fails, and a 1.5 m disc seats about 4.6.
             let crowd = match doing.target {
-                DoingTarget::Place(_) => perception
-                    .pos
-                    .iter()
-                    .filter(|p| p.distance(target_pos) <= radius)
-                    .count(),
+                DoingTarget::Place(place) => arrived_at.get(&place).copied().unwrap_or(0),
                 _ => 0,
             };
             let allowed = radius + settings.tuning.crowded_arrival_growth * (crowd as f32).sqrt();
@@ -779,6 +792,9 @@ fn arrive_and_satisfy(
                 continue;
             }
             doing.arrived_day = Some(now);
+            if let DoingTarget::Place(place) = doing.target {
+                *arrived_at.entry(place).or_insert(0) += 1;
+            }
             commands.entity(person).remove::<Destination>();
             // No `ActivityStarted` here: the decision already wrote it, paired with the
             // `ActivityEnded` that closes it. Arrival begins the *duration* and the `satisfies`
