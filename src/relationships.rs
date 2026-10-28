@@ -230,13 +230,14 @@ impl Tie {
 
     /// Records one contact over `dt_days`. Familiarity is first read at `now_days`, then raised by
     /// mere exposure; affinity is nudged toward the target (Zajonc 1968, DOI 10.1037/h0025848).
-    pub fn expose(&mut self, now_days: f32, dt_days: f32, tuning: &Tuning) {
+    pub fn expose(&mut self, now_days: f32, dt_days: f32, bond_scale: f32, tuning: &Tuning) {
         let f = self.familiarity(now_days, tuning);
         self.familiarity_peak = recall::exposed_peak(f, tuning.exposure_per_day, dt_days);
         self.last_contact_day = now_days;
         // Exposure saturates on `(1 − |affinity|)` and now also honours the ceiling, through the one
         // writer. Before the ceiling, this term is what carried a village to affinity 0.999.
-        let step = tuning.mere_exposure_per_day * dt_days * (1.0 - self.affinity.abs());
+        // `bond_scale` is `Tuning::bond_scale`: the friend-capacity brake on a bond not yet formed.
+        let step = tuning.mere_exposure_per_day * dt_days * (1.0 - self.affinity.abs()) * bond_scale;
         self.add_affinity(step, tuning);
     }
 
@@ -424,13 +425,15 @@ pub(crate) fn expose_toward(
     shared_bias: Option<f32>,
     now_days: f32,
     dt_days: f32,
+    friends: usize,
     tuning: &Tuning,
 ) {
     let tie = match shared_bias {
         Some(bias) => ties.entry_with(target, bias),
         None => ties.entry(target),
     };
-    tie.expose(now_days, dt_days, tuning);
+    let scale = tuning.bond_scale(friends, tie.label == TieLabel::Friend);
+    tie.expose(now_days, dt_days, scale, tuning);
 }
 
 /// Triadic closure for one direction (Kossinets & Watts 2006, DOI 10.1126/science.1116869): when
