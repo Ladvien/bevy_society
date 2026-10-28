@@ -70,6 +70,9 @@ fn main() {
     if let Some(ratio) = args.negativity_ratio {
         settings.tuning.negativity_ratio = ratio;
     }
+    if let Some(penalty) = args.rejection_penalty {
+        settings.tuning.rejection_affinity_penalty = penalty;
+    }
     if let Some(hours) = args.stall_timeout {
         settings.tuning.stall_timeout_hours = Some(hours);
     }
@@ -1372,6 +1375,8 @@ struct Args {
     /// `Tuning::negativity_ratio`, so how much more an injury moves its victim than a benefit of the same
     /// size can be swept without editing the crate. `0.0` switches the harm half off at the patient.
     negativity_ratio: Option<f32>,
+    /// `Tuning::rejection_affinity_penalty`, so what a refused approach costs the approacher can be swept.
+    rejection_penalty: Option<f32>,
     /// Overrides `Tuning::positivity_offset`, so the same scenario can be re-read with a different
     /// resting mood.
     positivity_offset: Option<f32>,
@@ -1406,6 +1411,7 @@ impl Args {
             dyad_balance: None,
             witness_dilution: None,
             negativity_ratio: None,
+            rejection_penalty: None,
             days: None,
         };
         let mut argv = std::env::args().skip(1);
@@ -1432,6 +1438,9 @@ impl Args {
                 }
                 "--negativity-ratio" => {
                     args.negativity_ratio = argv.next().and_then(|v| v.parse().ok())
+                }
+                "--rejection-penalty" => {
+                    args.rejection_penalty = argv.next().and_then(|v| v.parse().ok())
                 }
                 "--friend-affinity" => {
                     args.friend_affinity = argv.next().and_then(|v| v.parse().ok())
