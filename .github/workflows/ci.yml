@@ -37,13 +37,13 @@ jobs:
       # The save feature's own tests: `capture`/`restore` and their derives are off by default, so
       # without this line nothing would compile them in CI.
       - run: cargo test --features serde
-      # `tests/rumor_book.rs` is release-only: it lives in a village for twenty-two game-days with 200
+      # `tests/it/rumor_book.rs` is release-only: it lives in a village for twenty-two game-days with 200
       # people, which is 4 m 26 s in a debug build and 33 s optimised. It measures a performance
       # property, so an optimised build is also the only build where the measurement means anything.
-      - run: cargo test --release --test rumor_book
+      - run: 'cargo test --release --test it rumor_book::'
       # Release-only like `rumor_book`: the friendship bound is a measurement over 60 people and 30
       # game-days, which is minutes in a debug build, and an optimised build is the only one where the
       # measurement means anything.
-      - run: cargo test --release --test friendship_bound
+      - run: 'cargo test --release --test it friendship_bound::'
       # Examples need a font at run time, so building them is the check that fits in CI.
       - run: cargo build --examples

@@ -148,7 +148,7 @@ tests. No research, no build.
 - **Input messages** (`PlantRumor`, `Interact`, `FireTrigger`, and any
   new one) are drained every fixed step, not only on society ticks.
 - **Data, not code:** persons, needs, activities and scripts are data.
-  `tests/leaf.rs` must pass; never name a game.
+  `tests/it/leaf.rs` must pass; never name a game.
 - **Honest numbers:** every rate is a named field on `Tuning`. Every
   default cites its paper (DOI in a comment beside the formula) or says
   outright that it is a design default. No magic constants.
@@ -164,8 +164,18 @@ tests. No research, no build.
 - A determinism test: same seed and spawn order, run twice, identical
   state hash; also across a save/reload if state is serialized.
 - A scenario test per behavior you touched.
-- Run `cargo test` in both feature sets, `cargo clippy -D warnings`,
-  `cargo fmt --check`, `cargo doc --no-deps`.
+- Run the tests in both feature sets with `RAYON_NUM_THREADS=1 cargo
+  nextest run --profile gate` and the same with `--no-default-features`
+  (the variable is not optional: without it every test starts 24 rayon
+  workers and burns about five times the CPU, see
+  `.config/nextest.toml`), then `cargo test --doc` (nextest does not run
+  doctests), `cargo clippy -D warnings`, `cargo fmt --check`,
+  `cargo doc --no-deps`.
+- A new test is `tests/it/<name>.rs` (`use crate::common;`, not `mod
+  common;`) plus a `mod <name>;` line in `tests/it/main.rs`;
+  `tests/it/registration.rs` fails when the line is missing. A test that
+  installs something process-global stays its own binary: see `SEPARATE`
+  there.
 - Measure tick cost at 100/1,000/5,000 persons into `perf.md`, before
   and after. A change must not slow a scenario it did not target.
 
@@ -222,9 +232,9 @@ recording of the GIF above it when it shows different objects. Before you push a
    program now, not from the log. Recipes: `docs/DEMOS.md` (`examples/capture --scene …`, then `tools/gif.py`); re-record a clip when the behaviour it shows changes.
 3. **Media you cannot regenerate here is logged, not left lying.** With no GPU or display on this machine, name
    the stale file and its path in the report and change its caption to what it still shows.
-4. **The quick-start block is the crate's doctest.** `tests/readme.rs` asserts the README block equals the
-   `src/lib.rs` doctest byte for byte; change both together, then run `cargo test --release --test readme` and
-   `--test guide_blocks`.
+4. **The quick-start block is the crate's doctest.** `tests/it/readme.rs` asserts the README block equals the
+   `src/lib.rs` doctest byte for byte; change both together, then run `cargo test --release --test it readme::` and
+   `guide_blocks::`.
 
 ## 8. Log
 Append to `log.md`: change, rationale, evidence links (committed files only), before/after
