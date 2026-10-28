@@ -4685,3 +4685,16 @@ a tautological assertion removed from `tuning_covers_rates`. Full gate results a
 3. `ReportDeed` leaves the victim no memory (needs-decision).
 4. Clock decision: `travel_timeout_hours` in game hours vs real-time walking.
 5. Re-measure the scale table on a quiet host.
+
+## 2026-10-28-10 — three quarters of snubs answer a received insult (measurement only)
+
+**Change.** Harness only: `examples/evidence` writes `grudge_sources.txt`. Open issues #24, #27 are release issues, skipped. No crate or default change.
+
+**Evidence** (`runs/2026-10-28-10/eval.md`, seeds 7/42/11 at 24 people, 60-person town). 73% of snubs (55% at 60 people) rest on an insult the snubber received and accepted; 10-19% on its own refused insult; rumors and witnessed deeds <2%. The loop is a reply-ping-pong; the previous pass cleared only the actor's side. **Verdicts:** not run. **Dead-code delta:** zero.
+
+**Top 5 remaining.**
+1. Break the ping-pong at the reply: a per-pair retaliation refractory period, or no grudge-bearing memory from a refused insult; measure insults and rivals at the same seeds.
+2. Reconcile the evidence harness's rival count with `friendship_bound`'s at 60 people.
+3. `ReportDeed` leaves the victim no memory (needs-decision).
+4. Clock decision: `travel_timeout_hours` in game hours vs real-time walking.
+5. Re-measure the scale table on a quiet host.

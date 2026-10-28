@@ -29,6 +29,7 @@ use bevy_society::{
     Knowledge, Mood, Needs, Opinions, Person, Place, PlaceTags, PlantRumor, RumorBook,
     SocietyClock, SocietyDefs, SocietyPlugins, SocietySettings, TieLabel, TieLabelChanged, Ties,
 };
+use bevy_society::{Memories, MemoryKind};
 use std::collections::BTreeMap;
 use std::fmt::Write as _;
 use std::path::{Path, PathBuf};
@@ -143,6 +144,7 @@ fn main() {
     // **The victim-side counter.** Every accepted `insult`, and how many of those left the victim's affinity
     // for its insulter below zero. Before the patient's affinity write existed this was `0 of N` by
     // construction — the tie was whatever mere exposure had made it, measured at `+0.034` on this scenario.
+    let mut grudge_sources: BTreeMap<String, usize> = BTreeMap::new();
     let (mut insult_deeds, mut disliked_insulter) = (0usize, 0usize);
     // **Sharing, counted where it resolves.** An accepted `share` is one unit changing hands; the number is
     // what a plot of the store spread needs next to it, because a flat spread with no shares is a village
@@ -332,6 +334,56 @@ fn main() {
             peak_known_by = peak_known_by.max(row.known_by);
             rows.push(row);
         }
+        // **What is behind each snub?** At the tick a `snub` starts, the memory that sets the snubber's
+        // grudge (the one with the largest `max(0, -valence) * recency`) is classified by kind. `snub`'s
+        // only consideration is that grudge, so this is the direct answer to "what is the town reacting to".
+        {
+            let now = app.world().resource::<SocietyClock>().now_days;
+            let started = app
+                .world()
+                .resource::<bevy::ecs::message::Messages<ActivityStarted>>();
+            for message in started.iter_current_update_messages() {
+                let (true, Some(target)) = (message.activity == "snub", message.target) else {
+                    continue;
+                };
+                let Some(memories) = app.world().get::<Memories>(message.person) else {
+                    continue;
+                };
+                let best = memories
+                    .entries
+                    .iter()
+                    .filter(|m| m.other == Some(target))
+                    .map(|m| {
+                        let hours = ((now - f64::from(m.day)) * 24.0).max(0.0) as f32;
+                        (
+                            (-m.valence).max(0.0) * bevy_society::model::recall::recency(hours),
+                            m,
+                        )
+                    })
+                    .filter(|(weight, _)| *weight > 0.0)
+                    .max_by(|a, b| a.0.total_cmp(&b.0));
+                let label = match best {
+                    None => "none".to_owned(),
+                    Some((_, m)) => match &m.kind {
+                        MemoryKind::Interaction {
+                            id,
+                            accepted,
+                            initiated,
+                        } => format!(
+                            "interaction {} {} {}",
+                            id.0,
+                            if *initiated { "initiated" } else { "received" },
+                            if *accepted { "accepted" } else { "refused" }
+                        ),
+                        MemoryKind::Witnessed { .. } => "witnessed".to_owned(),
+                        MemoryKind::HeardRumor(_) => "rumor".to_owned(),
+                        MemoryKind::Talked => "talked".to_owned(),
+                        MemoryKind::Custom(_) => "custom".to_owned(),
+                    },
+                };
+                *grudge_sources.entry(label).or_insert(0) += 1;
+            }
+        }
         drain_narrative(
             &mut app,
             &world,
@@ -355,6 +407,20 @@ fn main() {
         }
     }
     write_why(&mut app, tracked, &out);
+    {
+        let total: usize = grudge_sources.values().sum();
+        let mut text = format!("snubs started: {total}\n");
+        for (label, n) in &grudge_sources {
+            let _ = writeln!(
+                text,
+                "{n:>6}  {:>5.1}%  {label}",
+                100.0 * *n as f32 / total.max(1) as f32
+            );
+        }
+        if let Err(err) = std::fs::write(out.join("grudge_sources.txt"), text) {
+            eprintln!("evidence: cannot write grudge_sources.txt: {err}");
+        }
+    }
     series(&rows, &out);
     summary(
         app.world(),
