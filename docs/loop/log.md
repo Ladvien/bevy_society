@@ -4609,3 +4609,16 @@ a tautological assertion removed from `tuning_covers_rates`. Full gate results a
 3. `ReportDeed` leaves the victim no memory (needs-decision).
 4. Clock decision: `travel_timeout_hours` in game hours vs real-time walking.
 5. Re-measure the guide's scale table with the fixed benchmark homes on a quiet host.
+
+## 2026-10-28-05 — stall detection widens the friends/rivals scatter but does not bias it (measurement only)
+
+**Change.** None to crate or harness. Open issues #24, #27 are release issues, skipped. Answers top item 1 of the last pass.
+
+**Evidence** (`runs/2026-10-28-05/eval.md`, ten new seeds, 24 people, 10 days). Mean friends 19.1 → 18.4, rivals 26.1 → 27.2 with `stall_timeout_hours = 1`; sd of rivals 3.9 → 7.3; interrupted endings 135 → 365. The earlier "24 → 40 rivals" is scatter, not a shift. Village default stays `None`. **Verdicts:** not run (no behaviour changed). **Dead-code delta:** zero.
+
+**Top 5 remaining.**
+1. Why stall-cut walks (about 2.7x more interrupted endings) widen the rivals spread; with `failed_place_memory_hours` the village may still enable both, which needs plots and three reviews.
+2. Friendship brake independent of rivalry, then retry the snub rate.
+3. `ReportDeed` leaves the victim no memory (needs-decision).
+4. Clock decision: `travel_timeout_hours` in game hours vs real-time walking.
+5. Re-measure the guide's scale table with the fixed benchmark homes on a quiet host.
