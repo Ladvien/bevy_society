@@ -4525,3 +4525,18 @@ a tautological assertion removed from `tuning_covers_rates`. Full gate results a
 3. `ReportDeed` leaves the victim no memory (needs-decision).
 4. Clock decision: `travel_timeout_hours` in game hours vs real-time walking.
 5. `examples/benchmark` builds an unsittable home for every population.
+
+## 2026-10-27-05 — a walk that makes no progress can end (`stall_timeout_hours`)
+
+**Change.** Issue #26 (oldest open non-release issue; #28 is next): `Tuning::stall_timeout_hours: Option<f32>` (default `None`) and `stall_epsilon` (0.25 m), both design defaults. A crate-private `TravelProgress` tracks the closest distance to the target and the game-day it last improved by more than epsilon; `end_activities` ends the activity interrupted, as the travel timeout does, once the window passes. Fixes #26. Release issues #24 and #27 seen, skipped (owner's call).
+
+**Evidence** (`runs/2026-10-27-05/evidence/narratives/stuck-walker.md`). One motionless host-walked person: None → 0 endings in 7.0 game-hours; `Some(1.0)` → one interrupted ending per game-hour, the first 1.00 h after the start. A walker closing at 0.05 m/tick against a 0.1 h window is never cut.
+
+**Verdicts.** GREAT / GREAT / GREAT. **Dead-code delta:** zero. **Perf:** not measurable on a load-12 host; one `is_some()` per travelling person when unset. **Tests:** `tests/stall.rs` (3); `cargo test --release` green, clippy, doc, fmt, no-default build green (debug `cargo test` exceeds 50 min on this loaded host).
+
+**Top 5 remaining.**
+1. #28 let `restore` upgrade a v1 `SocietySave` to v2.
+2. A person re-chooses the same unreachable place every stall window (no memory of the failed walk).
+3. The pack's insult rate vs the paper's 5:1.
+4. `ReportDeed` leaves the victim no memory (needs-decision).
+5. Clock decision: `travel_timeout_hours` in game hours vs real-time walking.
