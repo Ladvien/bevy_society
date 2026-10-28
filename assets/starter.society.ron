@@ -218,7 +218,7 @@
                 // Bondü & Richter 2016 (DOI 10.3389/fpsyg.2016.00795) is the mechanism: rejection
                 // and provocation sensitivity predict reactive aggression — a reaction to how one
                 // has been treated, which is exactly `Memories::grudge`.
-                (input: Script("ctx.grudge(actor, target)"), curve: Linear(1.0, 0.0)),
+                (input: Script("ctx.grudge(actor, target)"), curve: Power(1.3)),
             ],
             satisfies: [],
             interaction: Some("insult"),
