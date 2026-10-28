@@ -493,6 +493,18 @@ pub struct Tuning {
     /// fraction of a body diameter (0.7 m): enough to ignore the solver's sideways jitter, small enough
     /// that any real walk beats it within a few ticks.
     pub stall_epsilon: f32,
+    /// How long, in game-hours, a person avoids a **place** whose walk just ended before arrival
+    /// (travel timeout, stall timeout or a host's [`TravelFailed`](crate::TravelFailed)). Without it a
+    /// person whose nearest tavern is unreachable re-chooses that same tavern the moment the walk ends and
+    /// spends the day walking at a wall, because a `Place` target is always the nearest tied place. With
+    /// `Some(h)` the place is dropped from that person's candidate targets for `h` game-hours, so the next
+    /// choice is the next-nearest place, or another activity if none is left.
+    ///
+    /// A **design default**, `None`: no paper gives a retry delay; it is a host's judgement of how long a
+    /// closed route stays closed (reinforcement-learning agents likewise stop re-trying an action whose last
+    /// outcome was a failure, but no corpus paper fixes the interval). Only a `Place` target is remembered;
+    /// a `Person` target moves and is chosen afresh. Not saved: a restored person forgets.
+    pub failed_place_memory_hours: Option<f32>,
     /// Walking speed in metres per **real** second, used by the core walker that moves a person
     /// toward its `Destination` when no `SocialMover` is steering. 1.4 m/s is an ordinary human
     /// walking speed. `SocialMover::speed` overrides it per person.
@@ -646,6 +658,7 @@ impl Default for Tuning {
             travel_timeout_hours: Some(2.0),
             stall_timeout_hours: None,
             stall_epsilon: 0.25,
+            failed_place_memory_hours: None,
             walk_speed: 1.4,
             // **A design default, set by measurement.** Not from a paper; the *gate* is the paper. Every
             // contact-tell that finds an informed neighbour stifles the teller (Daley–Kendall), so pacing

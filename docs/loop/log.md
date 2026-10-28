@@ -4568,3 +4568,18 @@ a tautological assertion removed from `tuning_covers_rates`. Full gate results a
 3. A person re-chooses the same unreachable place every stall window.
 4. Clock decision: `travel_timeout_hours` in game hours vs real-time walking.
 5. `examples/benchmark` builds an unsittable home for every population.
+
+## 2026-10-28-02 — a failed place is skipped for a while (`failed_place_memory_hours`)
+
+**Change.** No bug issue open (#24, #27 are release issues, skipped). `Tuning::failed_place_memory_hours: Option<f32>` (default `None`, design default): a walk to a `Place` that ends before arrival drops that place from the person's candidates for `h` game-hours (crate-private `FailedPlaces`, filtered after `targets_for` so RNG draws are unchanged). Not saved.
+
+**Evidence** (`runs/2026-10-28-02/eval.md`). Unreachable near tavern, 4.5 h: None → near ×4 every window; `Some(2.5)` → near, far, near. Default leaves every run unchanged. Test: `tests/failed_place.rs` (2).
+
+**Verdicts.** Not run (no default changed, no plots). **Dead-code delta:** zero. **Perf:** not measured.
+
+**Top 5 remaining.**
+1. Friendship brake independent of rivalry, then retry the snub rate.
+2. `ReportDeed` leaves the victim no memory (needs-decision).
+3. Clock decision: `travel_timeout_hours` in game hours vs real-time walking.
+4. `examples/benchmark` builds an unsittable home for every population.
+5. Enable `failed_place_memory_hours` in the village and measure interrupted sleeps.
