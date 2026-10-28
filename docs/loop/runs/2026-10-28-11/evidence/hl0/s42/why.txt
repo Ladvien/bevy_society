@@ -1,0 +1,8 @@
+# tick 69595: someone chose share (0.743), 26% below work (1.000)
+
+ 1.000  work
+ 1.000  wander
+ 0.998  compliment
+ 0.743  share   <- chosen
+ 0.645  chat
+ 0.644  gossip
