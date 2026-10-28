@@ -577,6 +577,17 @@ impl Memories {
                 }),
         )
     }
+
+    /// Scales every **bad** memory about `other` by `1 - fraction`: a grievance that has been answered.
+    /// Good memories are untouched. `fraction` is clamped to `[0, 1]`. See `Tuning::revenge_settles`.
+    pub fn settle(&mut self, other: Entity, fraction: f32) {
+        let keep = 1.0 - fraction.clamp(0.0, 1.0);
+        for memory in &mut self.entries {
+            if memory.other == Some(other) && memory.valence < 0.0 {
+                memory.valence *= keep;
+            }
+        }
+    }
 }
 
 /// Asks for an emotion to be felt by `person`: the game, a deed, an interaction or a rumor writes

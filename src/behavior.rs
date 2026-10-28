@@ -2647,6 +2647,16 @@ fn exchange(
         now,
     );
 
+    // A retaliation that was **delivered** (accepted) answers the actor's grievance against the target.
+    // Gollwitzer, Meder & Schmitt 2011, DOI 10.1002/ejsp.782: revenge restores justice when the offender
+    // understands it as a reply. A refused harm delivered nothing, so `harm` is 0 here and nothing settles.
+    if harm < 0.0
+        && settings.tuning.revenge_settles > 0.0
+        && let Some(mut memories) = world.get_mut::<crate::mind::Memories>(actor)
+    {
+        memories.settle(target, settings.tuning.revenge_settles);
+    }
+
     // (7) Exposure for the pair, both ways.
     expose(world, actor, target, settings, now);
     expose(world, target, actor, settings, now);
