@@ -1,0 +1,8 @@
+# tick 40805: someone chose work (1.000), the best option
+
+ 1.000  work   <- chosen
+ 1.000  wander
+ 0.999  compliment
+ 0.643  gossip
+ 0.625  craft
+ 0.602  eat
