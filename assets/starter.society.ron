@@ -218,7 +218,16 @@
                 // Bondü & Richter 2016 (DOI 10.3389/fpsyg.2016.00795) is the mechanism: rejection
                 // and provocation sensitivity predict reactive aggression — a reaction to how one
                 // has been treated, which is exactly `Memories::grudge`.
-                (input: Script("ctx.grudge(actor, target)"), curve: Linear(1.0, 0.0)),
+                //
+                // **`Power(1.15)`, not `Linear(1.0, 0.0)`.** A grudge is mostly small, so a power above 1
+                // makes a mild grudge rarely turn into an insult while a deep one still does. With the
+                // linear curve `village-evening` accepted compliments : insults was 2.9 : 1, under the 5:1
+                // Baumeister et al. 2001 (DOI 10.1037/1089-2680.5.4.323, citing Gottman 1994) give as the
+                // survival threshold, and rivals outnumbered friends (35 v 21, 28 v 22, 36 v 20 at seeds
+                // 7/42/11). At 1.15 the ratio is 7.0 / 5.0 / 6.8 and friends outnumber rivals 50 v 8,
+                // 45 v 12, 52 v 11. The exponent is a design default and the response is steep: 1.1
+                // changed nothing (397 insults), 1.3 left 56 and no rivalry at all.
+                (input: Script("ctx.grudge(actor, target)"), curve: Power(1.15)),
             ],
             satisfies: [],
             interaction: Some("insult"),

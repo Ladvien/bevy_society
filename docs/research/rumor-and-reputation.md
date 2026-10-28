@@ -29,6 +29,11 @@ A rumour is a record about one deed by one person. It has an origin, a subject, 
   1974: *"negative, displeasurable behaviors were reciprocated to a significant degree, whereas the
   reciprocation of positive, pleasurable behaviors was weaker and not significant"*.
 
+  **The pack's insult rate against that ratio (2026-10-27-07).** The starter pack's `snub` was gated on
+  `ctx.grudge` linearly, which gave accepted compliments : insults of 2.9 : 1 in `village-evening`. Its grudge
+  curve is now `Power(1.15)` (a design default; the response is steep, 1.1 changed nothing and 1.3 removed
+  rivalry), giving 7.0 / 5.0 / 6.8 at seeds 7 / 42 / 11 and 4.2 at seed 23 with 16 people.
+
   Before this existed the victim's affinity for the person who had just hurt them was set entirely by mere
   exposure: measured on `village-evening` (seed 7, 12 000 ticks), every accepted `insult` left it at **+0.034**,
   positive, beside the insulter's +0.131. A victim went on liking their insulter, and the more often the two met
