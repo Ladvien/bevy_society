@@ -100,6 +100,14 @@ pub(crate) struct TravelProgress {
     improved_day: f64,
 }
 
+/// Places a person recently failed to reach, and the game-day each is forgiven
+/// (`Tuning::failed_place_memory_hours`).
+///
+/// Written by `end_activities` when a walk to a `Place` ends before arrival; read and pruned by
+/// `decide_activities`. Kept sorted by insertion, so it never depends on hash order. Not saved.
+#[derive(Component, Debug, Clone, Default, PartialEq)]
+pub(crate) struct FailedPlaces(Vec<(Entity, f64)>);
+
 // -------------------------------------------------------------------------------------------------
 // Messages
 // -------------------------------------------------------------------------------------------------
@@ -1212,6 +1220,7 @@ fn queue_end_requests(
 struct ActivityQueries<'w, 's> {
     doing: Query<'w, 's, &'static Doing>,
     progress: Query<'w, 's, &'static TravelProgress>,
+    failed: Query<'w, 's, &'static FailedPlaces>,
     dormant: Query<'w, 's, (), With<crate::Dormant>>,
 }
 
@@ -1231,6 +1240,7 @@ fn end_activities(
         doing: people,
         progress,
         dormant,
+        failed,
     } = queries;
     let now = clock.now_days;
     // `None` means a walk never times out: only the host may declare it impossible, through
@@ -1330,7 +1340,26 @@ fn end_activities(
         }
     }
 
+    let memory_days = settings
+        .tuning
+        .failed_place_memory_hours
+        .map(|hours| f64::from(hours) / 24.0);
     for (person, activity, completed) in endings {
+        // **A walk to a place that ends before arrival is remembered** so the next decision does not
+        // pick the same place again (`Tuning::failed_place_memory_hours`). A dormant person was
+        // suspended, not defeated, and is not.
+        if let (Some(days), false, Ok(doing)) = (memory_days, completed, people.get(person))
+            && doing.arrived_day.is_none()
+            && dormant.get(person).is_err()
+            && let DoingTarget::Place(place) = doing.target
+        {
+            let mut memory = failed.get(person).cloned().unwrap_or_default();
+            memory
+                .0
+                .retain(|(avoided, until)| *avoided != place && *until > now);
+            memory.0.push((place, now + days));
+            commands.entity(person).insert(memory);
+        }
         ended.write(ActivityEnded {
             person,
             activity,
@@ -1479,6 +1508,7 @@ struct DecisionQueries<'w, 's> {
         ),
     >,
     doing: Query<'w, 's, &'static Doing>,
+    failed: Query<'w, 's, &'static FailedPlaces>,
 }
 
 /// Chooses an activity for every autonomous person that has none (plan D7).
@@ -1516,6 +1546,7 @@ fn decide_activities(
         people,
         places,
         doing,
+        failed,
     } = world;
     use bevy_emerge_rng::DetRng;
 
@@ -1743,7 +1774,7 @@ fn decide_activities(
             if i == 0 {
                 continue;
             }
-            let targets = targets_for(
+            let mut targets = targets_for(
                 &spec.target,
                 position,
                 &near,
@@ -1754,6 +1785,18 @@ fn decide_activities(
                 fields.as_deref(),
                 &mut rng.0,
             );
+            // **A place this person just failed to reach is not a candidate** until it is forgiven
+            // (`Tuning::failed_place_memory_hours`). Filtered after `targets_for` so the RNG draws it
+            // makes are the same whether or not anything is remembered.
+            if let Ok(memory) = failed.get(person) {
+                targets.retain(|target| match target {
+                    DoingTarget::Place(place) => !memory
+                        .0
+                        .iter()
+                        .any(|(avoided, until)| avoided == place && *until > now),
+                    _ => true,
+                });
+            }
             // **One candidate per activity, not per target.** Dill's weight-based draw is over
             // *options*, and an option is an action; an action with eight eligible targets is not
             // eight times as desirable as one with a single target. Scoring every target and
