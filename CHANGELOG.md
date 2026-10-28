@@ -4,6 +4,10 @@ All notable changes to bevy_society. The format follows [Keep a Changelog](https
 
 ## [Unreleased]
 
+### Changed
+
+- **The starter pack's `snub` follows a grudge on `Power(1.2)`, not `Linear(1.0, 0.0)`**, so a village keeps Baumeister et al. 2001's 5:1 positive-to-negative ratio. `village-evening`, 17 game-days, accepted compliments : insults at seeds 7 / 42 / 11 / 23 (16 people): 1116:390 / 1093:369 / 1092:415 / 760:276 → 1489:73 / 1867:0 / 1543:41 / 1090:3; rivals 35 / 28 / 36 / 23 → 7 / 0 / 5 / 0, friends 21 / 22 / 20 / 11 → 80 / 106 / 86 / 63. Hosts that load the pack get fewer insults and rivalries; a host that wants the old tempo overrides `snub` in its own file. The exponent is a design default.
+
 ### Added
 
 - **A version-1 `SocietySave` restores under version 2** (fixes #28). `restore` calls the new public `SocietySave::upgrade` before it validates; the v1 → v2 step sets `version` and leaves each `stock` empty, i.e. holding nothing of every good. `RestoreReport` gains `upgraded_from: Option<u32>` (a field on a struct hosts only read; one that builds it in full needs a code change). Version 0 and versions above 2 are refused as before, world untouched. `DefsMismatch` still applies after an upgrade.

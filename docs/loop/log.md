@@ -4555,3 +4555,18 @@ a tautological assertion removed from `tuning_covers_rates`. Full gate results a
 3. `ReportDeed` leaves the victim no memory (needs-decision).
 4. Clock decision: `travel_timeout_hours` in game hours vs real-time walking.
 5. `examples/benchmark` builds an unsittable home for every population.
+
+## 2026-10-27-07 — the pack's `snub` follows a grudge on `Power(1.2)`
+
+**Change.** `assets/starter.society.ron`: `snub` grudge curve `Linear(1.0, 0.0)` → `Power(1.2)`. Data only, no new `Tuning` field. Design-default exponent, measured against Baumeister et al. 2001's 5:1 (DOI 10.1037/1089-2680.5.4.323).
+
+**Evidence** (`runs/2026-10-27-07/eval.md`, `summary.json` files). Compliments:insults 1116:390 / 1093:369 / 1092:415 / 760:276 → 1489:73 / 1867:0 / 1543:41 / 1090:3 (seeds 7/42/11/23-16p); rivals 35/28/36/23 → 7/0/5/0; friends 21/22/20/11 → 80/106/86/63. Sweep: 1.4, 2.0, 3.0 recorded; response steep and non-monotone per seed.
+
+**Verdicts.** NOT YET / NOT YET / NOT YET against the full visual gate: no plots or narrative (no matplotlib here); target ratio met, but seed 42 has no rivalry at all. Dead-code delta zero. Perf not measured (load ~18). Tests: see PR.
+
+**Top 5 remaining.**
+1. Render plots and a narrative for this change (needs matplotlib) and check the village is not now too peaceful.
+2. `ReportDeed` leaves the victim no memory (needs-decision).
+3. A person re-chooses the same unreachable place every stall window.
+4. Clock decision: `travel_timeout_hours` in game hours vs real-time walking.
+5. `examples/benchmark` builds an unsittable home for every population.

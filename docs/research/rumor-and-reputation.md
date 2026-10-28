@@ -69,6 +69,13 @@ A rumour is a record about one deed by one person. It has an origin, a subject, 
 - **Design defaults:** `rumor_threshold`, trust coefficient, gossip gains and `witness_affinity`. Not fitted.
 - **`negativity_ratio` is a cited magnitude on a design-default weight.** Baumeister et al. 2001 supplies the
   five-to-one ratio and the direction of the asymmetry; the 0.15 it multiplies is not fitted by anything.
+- **The pack's `snub` grudge curve is a design default measured against the 5:1 ratio.** `Linear(1.0, 0.0)` gave
+  2.9 accepted compliments per accepted insult (`village-evening`, 17 game-days, seeds 7/42/11, then seed 23 with
+  16 people: 1116:390, 1093:369, 1092:415, 760:276) and rivals outnumbered friends (35/28/36/23 vs 21/22/20/11).
+  `Power(1.2)` gives 1489:73, 1867:0, 1543:41, 1090:3 with rivals 7/0/5/0 against friends 80/106/86/63. The sweep
+  (exponent 1.4: 30:1, no insults, 49:1, 18:1; 2.0: nearly none; 3.0: none) shows the response is steep and not
+  monotone per seed, so 1.2 is the least restrictive value that clears 5:1 everywhere. Seed 42 now has no
+  rivalry at all in 17 days.
 - **Wills et al. 1974 and Gottman 1994 are cited through Baumeister et al.**, not converted into the corpus.
   Recorded as such rather than presented as primary sources.
 - **No contradiction found** with converted sources.
