@@ -4510,3 +4510,18 @@ a tautological assertion removed from `tuning_covers_rates`. Full gate results a
 3. Clock decision: `travel_timeout_hours` in game hours against real-time walking.
 4. `examples/benchmark` builds an unsittable home for every population.
 5. Hostility saturation in a crowd with no positive activity.
+
+## 2026-10-27-04 — a crowded place counts whoever is at it
+
+**Change.** Issue #25 (oldest bug, ahead of #26): `crowd` in `arrive_and_satisfy` is now `max(bodies within interaction_radius, people arrived at the place)`, via a sorted pre-pass snapshot. No new `Tuning` field; `crowded_arrival_growth` docs now say plane units. Fixes #25.
+
+**Evidence** (`runs/2026-10-27-04/`, `eval.md`, `evidence/plots/interrupted.png`). Interrupted endings 348→247, 346→278, 376→242 (seeds 7/42/11); sleeps 140→82, 136→74, 150→74; fresh seed 23/16 people 164→78. Completed endings flat or up. Friends/rivals shift both ways, unclaimed.
+
+**Verdicts.** GREAT / GREAT / GREAT. **Dead-code delta:** zero. **Perf:** not separately measurable on a loaded host; one `Vec` sort per arrival pass. **Test:** `crowded_arrival::people_admitted_beyond_the_disc_keep_widening_the_allowance`, red before, green after.
+
+**Top 5 remaining.**
+1. #26 stall timeout under `Locomotion::Host` (no-progress, distinct from total travel time).
+2. The pack's insult rate vs the paper's 5:1.
+3. `ReportDeed` leaves the victim no memory (needs-decision).
+4. Clock decision: `travel_timeout_hours` in game hours vs real-time walking.
+5. `examples/benchmark` builds an unsittable home for every population.

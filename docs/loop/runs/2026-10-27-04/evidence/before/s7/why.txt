@@ -1,0 +1,8 @@
+# tick 69604: someone chose gossip (0.644), 36% below wander (1.000)
+
+ 1.000  wander
+ 0.994  compliment
+ 0.965  eat
+ 0.644  gossip   <- chosen
+ 0.606  share
+ 0.400  work

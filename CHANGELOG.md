@@ -6,6 +6,8 @@ All notable changes to bevy_society. The format follows [Keep a Changelog](https
 
 ### Added
 
+- **A crowded place counts whoever is at it, not only who stands inside `interaction_radius`** (fixes #25). The arrival allowance `interaction_radius + crowded_arrival_growth · sqrt(crowd)` admits people *beyond* the disc it counted, so after the first arrivals the count, and with it the allowance, froze and the queue behind them waited on the ring the last arrival stood on. `crowd` is now the larger of the bodies in the disc and the people whose `Doing` targets the place with `arrived_day` set (a pre-pass snapshot, so order cannot matter). `village-evening`, 17 game-days: interrupted endings 348 → 247 / 346 → 278 / 376 → 242 at seeds 7 / 42 / 11 (0.3.0: 329 / 369 / 383), interrupted `sleep`s 140 → 82 / 136 → 74 / 150 → 74; seed 23 with 16 people 164 → 78. `Tuning::crowded_arrival_growth` is documented in the plane's own units rather than metres. Run `2026-10-27-04`.
+
 - **A victim is moved by what was done to them, and an injury costs more than a benefit of the same size.**
   `patient_reaction` moved trust and appraised an emotion and **no affinity at all**, so a person who had just
   been insulted went on liking the person who insulted them. Measured on `village-evening` (seed 7, 12 000 ticks,
