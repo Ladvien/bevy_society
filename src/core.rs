@@ -475,7 +475,10 @@ pub struct Tuning {
     /// Game-days between two contact-gossips along one directed tie. A shared place is one
     /// conversation, not one per fixed step; the gate is the teller having news, this is only pacing.
     pub contact_gossip_cooldown_days: f32,
-    /// How far a crowded `Place`'s arrival radius grows per person already standing in it, in metres.
+    /// How far a crowded `Place`'s arrival radius grows per `sqrt(person)` standing at it, in the plane's
+    /// own units (the same units as `interaction_radius`; a host in feet sets two body radii in feet).
+    /// "At it" is the larger of the bodies inside `interaction_radius` and the people who have arrived
+    /// there, so those admitted beyond the disc keep widening the allowance.
     ///
     /// Design default (no paper). `SocialMover::radius` is 0.35 m, so `2 * 0.35 = 0.70 m` is the distance
     /// ORCA holds two people's centres apart — one body diameter is therefore the queue spacing, and a disc
