@@ -121,6 +121,7 @@
 
 pub mod model;
 
+mod absence;
 mod behavior;
 #[cfg(feature = "dialogue")]
 mod dialogue;
@@ -148,15 +149,16 @@ mod script_apply;
 mod snapshot;
 mod trace;
 
+pub use absence::PersonReturned;
 pub use behavior::{
     ActivityEnded, ActivityStarted, BehaviorPlugin, Destination, Doing, DoingTarget, EndActivity,
     InteractionResolved, PersonDied, ReportDeed, TravelFailed,
 };
 pub use beliefs::{BeliefsPlugin, Knowledge, Known, Opinion, Opinions, belief_after_hearing};
 pub use core::{
-    AssessmentNorm, Autonomous, BoundPlaces, ClockSource, Deceased, Dormant, Home, HostClock,
-    Locomotion, NextPersonId, Perception, Person, PersonId, PersonIndex, PersonKey, Place,
-    PlaceKey, PlaceTags, SocietyClock, SocietyCorePlugin, SocietyPlane, SocietyRng,
+    AssessmentNorm, Autonomous, Away, AwaySince, BoundPlaces, ClockSource, Deceased, Dormant, Home,
+    HostClock, Locomotion, NextPersonId, Perception, Person, PersonId, PersonIndex, PersonKey,
+    Place, PlaceKey, PlaceTags, SocietyClock, SocietyCorePlugin, SocietyPlane, SocietyRng,
     SocietySettings, SocietySystems, SocietyTick, Tuning, skill_level, society_tick_due,
 };
 pub use defs::{
