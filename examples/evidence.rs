@@ -77,6 +77,9 @@ fn main() {
     if let Some(hours) = args.stall_timeout {
         settings.tuning.stall_timeout_hours = Some(hours);
     }
+    if let Some(hours) = args.retaliation_refractory {
+        settings.tuning.retaliation_refractory_hours = Some(hours);
+    }
     if let Some(hours) = args.failed_place_memory {
         settings.tuning.failed_place_memory_hours = Some(hours);
     }
@@ -1454,6 +1457,8 @@ struct Args {
     stall_timeout: Option<f32>,
     /// Overrides `Tuning::failed_place_memory_hours`, in game hours.
     failed_place_memory: Option<f32>,
+    /// Overrides `Tuning::retaliation_refractory_hours`, in game hours.
+    retaliation_refractory: Option<f32>,
     /// Runs for this many game-days instead of the scenario's `ticks:`, so a long run is one flag rather
     /// than an arithmetic exercise. The friendship bound needs thirty days.
     days: Option<f32>,
@@ -1469,6 +1474,7 @@ impl Args {
             seconds_per_day: None,
             stall_timeout: None,
             failed_place_memory: None,
+            retaliation_refractory: None,
             positivity_offset: None,
             friend_affinity: None,
             label_hysteresis: None,
@@ -1513,6 +1519,9 @@ impl Args {
                 }
                 "--days" => args.days = argv.next().and_then(|v| v.parse().ok()),
                 "--stall-timeout" => args.stall_timeout = argv.next().and_then(|v| v.parse().ok()),
+                "--retaliation-refractory" => {
+                    args.retaliation_refractory = argv.next().and_then(|v| v.parse().ok())
+                }
                 "--failed-place-memory" => {
                     args.failed_place_memory = argv.next().and_then(|v| v.parse().ok())
                 }
