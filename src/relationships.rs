@@ -309,6 +309,11 @@ impl Ties {
     /// The tie to `target`. When absent it is inserted with [`Tie::new`] and the given affinity,
     /// in sorted position; an existing tie keeps its affinity. D7 uses this to start co-members at
     /// their faction's `ingroup_bias`.
+    ///
+    /// **The affinity set here is not clamped, but the next change to the tie is.** `Tie::add_affinity`
+    /// bounds affinity at `±Tuning::affinity_ceiling` (0.35 by default), so a host that writes `0.9`
+    /// directly reads a value inside the ceiling after the next exchange or relaxation step. Give it a
+    /// value within the ceiling.
     pub fn entry_with(&mut self, target: Entity, affinity: f32) -> &mut Tie {
         let index = match self.search(target) {
             Ok(i) => i,
