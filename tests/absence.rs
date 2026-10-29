@@ -362,3 +362,52 @@ fn a_save_mid_absence_keeps_the_marker_and_the_length() {
         returned[0].days_away
     );
 }
+
+/// **A living town.** A friend who lives an autonomous life keeps deciding while the other leaves:
+/// the one away starts no activity for the whole absence, is the one missed, and starts living again
+/// after the return.
+#[test]
+fn an_autonomous_party_member_leaves_and_comes_back_into_the_day() {
+    use bevy_society::{ActivityStarted, Autonomous};
+    let mut app = app();
+    let friend = spawn_person(&mut app, "Bram", Vec2::new(2.0, 0.0));
+    let away = spawn_person(&mut app, "Ada", Vec2::new(3.0, 0.0));
+    app.update();
+    app.update();
+    befriend(&mut app, friend, away, 0.3);
+    app.world_mut().entity_mut(friend).insert(Autonomous);
+    app.world_mut().entity_mut(away).insert(Autonomous);
+
+    app.world_mut().entity_mut(away).insert(Away);
+    app.world_mut()
+        .resource_mut::<Messages<ActivityStarted>>()
+        .clear();
+    let mut started_by = Vec::new();
+    let until = now(&app) + 1.5;
+    while now(&app) < until {
+        app.update();
+        started_by.extend(
+            app.world_mut()
+                .resource_mut::<Messages<ActivityStarted>>()
+                .drain()
+                .map(|m| m.person),
+        );
+    }
+    assert!(started_by.contains(&friend), "the town keeps living");
+    assert!(!started_by.contains(&away), "the one away decides nothing");
+    assert!(missing(&app, friend, away) > 0.05);
+
+    app.world_mut().entity_mut(away).remove::<Away>();
+    app.world_mut()
+        .resource_mut::<Messages<ActivityStarted>>()
+        .clear();
+    let (returned, _) = run_days(&mut app, 1.0);
+    assert_eq!(returned.len(), 1);
+    let started: Vec<_> = app
+        .world_mut()
+        .resource_mut::<Messages<ActivityStarted>>()
+        .drain()
+        .map(|m| m.person)
+        .collect();
+    assert!(started.contains(&away), "after the return they live again");
+}
