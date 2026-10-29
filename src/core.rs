@@ -460,6 +460,22 @@ pub struct Tuning {
     /// It exists so a **family member** grieves: they are spawned with high familiarity and no time to
     /// reach the affinity a `Friend` label needs, and losing a parent should not be a stranger's death.
     pub bereavement_familiarity: f32,
+    /// The most distress a holder feels at a close person's absence, at a closeness of 1: the ceiling of
+    /// the *missing* a [`crate::Away`] person leaves behind (issue #35). `0.0` switches absence's social
+    /// weight off entirely, reunion included, and leaves every society bit-identical to one that never
+    /// had `Away`.
+    ///
+    /// Design default (no source paper gives this number); the mechanism is separation distress as a
+    /// defining mark of an attachment bond (Hazan & Shaver 1987, DOI `10.1037/0022-3514.52.3.511`). 0.4
+    /// is a mood the mood word shows without reaching the 0.6 a close friend's death gives.
+    pub missing_cap: f32,
+    /// Days of absence after which a holder has felt `1 - 1/e` of the ceiling: the time constant of how
+    /// fast missing grows, `cap · closeness · (1 − e^(−days / this))`. Design default: a few days
+    /// away is a felt absence, which is the length an expedition runs.
+    pub missing_days: f32,
+    /// The share of what a holder was missing that comes back as `Joy` when the person returns. Design
+    /// default: a reunion is the missing turned over, so it can never exceed it.
+    pub reunion_fraction: f32,
     /// Hours a person may travel toward an activity before giving up.
     /// Game hours a person may travel toward an activity before giving up, or `None` for a walk that
     /// never times out.
@@ -655,6 +671,9 @@ impl Default for Tuning {
             tier_cutoff: 0.25,
             rejection_distress: 0.3,
             bereavement_familiarity: 0.3,
+            missing_cap: 0.4,
+            missing_days: 2.0,
+            reunion_fraction: 0.75,
             travel_timeout_hours: Some(2.0),
             stall_timeout_hours: None,
             stall_epsilon: 0.25,
@@ -935,6 +954,36 @@ pub struct Dormant;
 #[reflect(Component)]
 #[require(Dormant)]
 pub struct Deceased;
+
+/// Marker: this person is out of the town and expected back — on an expedition, a voyage, a posting.
+///
+/// It implies everything [`Dormant`] does, and adds absence's social weight (issue #35): while it
+/// lasts, every living holder who is **close** to the away person (a `Friend` tie, or a
+/// `familiarity_peak` at [`Tuning::bereavement_familiarity`], the same line grief uses) *misses* them. The
+/// crate keeps a [`Distress`](crate::EmotionKind::Distress) toward the away person at a level that
+/// grows with the days away and the closeness of the tie and is capped at [`Tuning::missing_cap`]; it is
+/// mood only, never the cause of an activity. Removing the marker writes [`crate::PersonReturned`] once
+/// and gives each holder who missed them a reunion lift. A whole party that is `Away` together does not
+/// miss each other: holders who are themselves `Away` miss nobody.
+///
+/// The crate records when the absence began in [`AwaySince`] by itself, so a host inserts this marker
+/// and nothing else. `Deceased` replaces `Away`: inserting it removes the marker and writes no
+/// `PersonReturned`.
+///
+/// Attachment theory takes proximity-seeking and **separation distress** to be what a bond is (Hazan &
+/// Shaver 1987, DOI `10.1037/0022-3514.52.3.511`): the people one is close to feel an absence in
+/// proportion to how close they are, and the feeling ends with the return.
+#[derive(Component, Reflect, Debug, Clone, Copy, Default, PartialEq, Eq)]
+#[reflect(Component)]
+#[require(Dormant)]
+pub struct Away;
+
+/// When an [`Away`] person left: the game-day, written by the crate when `Away` is inserted (unless the
+/// host or a restore already inserted it). Read it for how long someone has been gone; do not insert it
+/// without `Away`.
+#[derive(Component, Reflect, Debug, Clone, Copy, PartialEq)]
+#[reflect(Component)]
+pub struct AwaySince(pub f64);
 
 /// The home of a person, used by the `Home` activity target.
 #[derive(Component, Reflect, Debug, Clone, Copy, PartialEq, Eq)]
@@ -1353,6 +1402,8 @@ impl Plugin for SocietyCorePlugin {
             .register_type::<Autonomous>()
             .register_type::<Dormant>()
             .register_type::<Deceased>()
+            .register_type::<Away>()
+            .register_type::<AwaySince>()
             .register_type::<Home>()
             .register_type::<BoundPlaces>()
             .register_type::<Place>()
