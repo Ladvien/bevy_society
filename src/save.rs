@@ -61,7 +61,7 @@ use crate::rumor::{Rumor, RumorBook, RumorId};
 /// for (currently 1). It refuses any other version rather than guessing at a layout, so a host that
 /// ships a save and later upgrades the crate gets a `Version` error it can act on instead of a
 /// silently wrong society.
-pub const VERSION: u32 = 2;
+pub const VERSION: u32 = 3;
 
 // -------------------------------------------------------------------------------------------------
 // The saved shape: plain fields, no `Entity`
@@ -272,6 +272,11 @@ pub struct PersonSave {
     /// Goods held, one level per good in definition order. `VERSION` 2.
     #[serde(default)]
     pub stock: Vec<f32>,
+    /// The game-day an [`Away`](crate::Away) absence began, as `f64` bits, or `None` for a person who is
+    /// not away. The clock is restored with the people, so the absence keeps counting from before the
+    /// save. `VERSION` 3.
+    #[serde(default)]
+    pub away_since_bits: Option<u64>,
 }
 
 /// One rumor, with every person reference as a [`PersonKey`].
@@ -372,6 +377,11 @@ impl SocietySave {
         if self.version == 1 {
             self.version = 2;
         }
+        if self.version == 2 {
+            // `away_since_bits` is absent from a version-2 file and deserializes as `None`: nobody
+            // was away, because the marker did not exist.
+            self.version = 3;
+        }
         if self.version != VERSION {
             return Err(RestoreError::Version {
                 found: self.version,
@@ -465,6 +475,7 @@ struct PersonCapture {
     status: &'static Status,
     dormant: Has<Dormant>,
     deceased: Has<crate::Deceased>,
+    away: Option<&'static crate::AwaySince>,
     signals: &'static Signals,
     doing: Option<&'static Doing>,
     destination: Option<&'static Destination>,
@@ -643,6 +654,7 @@ pub fn capture(world: &mut World) -> SocietySave {
             status: *person.status,
             dormant: person.dormant,
             deceased: person.deceased,
+            away_since_bits: person.away.map(|since| since.0.to_bits()),
             signals: person.signals.clone(),
             doing,
             destination: person
@@ -1161,6 +1173,15 @@ fn write_person(
         em.insert(crate::Deceased);
     } else {
         em.remove::<crate::Deceased>();
+    }
+    match person.away_since_bits {
+        // `AwaySince` in the same bundle as `Away`, so the add observer finds it and keeps it.
+        Some(bits) => {
+            em.insert((crate::AwaySince(f64::from_bits(bits)), crate::Away));
+        }
+        None => {
+            em.remove::<crate::Away>();
+        }
     }
     em.insert(person.signals.clone());
     if let Some(doing) = doing {
