@@ -4706,7 +4706,7 @@ a tautological assertion removed from `tuning_covers_rates`. Full gate results a
 **Evidence** (`runs/2026-10-29-02`). `tests/absence.rs` 8 tests; `village-evening` `summary.json` and `series.csv` byte-identical before and after; the absence harness shows the closest friend's distress 0.06 → 0.19 over three days, 0 for a stranger, gone within a day of the return (`evidence/plots/absence-seed7.png`). Perf unchanged within noise (`perf.md`; 5000 people not measured under load). **Verdicts:** Behavior GREAT, Zoom GREAT, Fresh eyes GREAT with the stated limit (the harness has no RNG). **Dead-code delta:** zero. Assumed decisions in `needs-decision/an-absence-is-felt-not-caused.md`.
 
 **Top 5 remaining.**
-1. Friendship ceiling clamps a 0.95 tie to about 0.35 at the first tick (seen in the absence harness); check that it is intended for ties the host sets.
+1. A host that writes a tie above `affinity_ceiling` (0.35) sees it clamped at the next write; the absence harness showed it. Document it on `Ties::entry_with`.
 2. Population-level check of `Away` in a living town (a party leaving through `Autonomous` life).
 3. `ReportDeed` leaves the victim no memory (needs-decision).
 4. Break the insult reply ping-pong (per-pair retaliation refractory period).

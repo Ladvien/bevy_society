@@ -4,6 +4,8 @@ All notable changes to bevy_society. The format follows [Keep a Changelog](https
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-10-29
+
 ### Added
 
 - **`Away`: absence has a social weight** (fixes #35). A person marked `Away` (`#[require(Dormant)]`, so everything `Dormant` does) is *missed*: each society tick every living holder who is not themselves `Away` and whose tie to them is close (a `Friend` label, or `familiarity_peak` at `bereavement_familiarity`, the line grief uses) is held at a `Distress` toward them of `missing_cap · closeness · (1 − e^(−days / missing_days))`, closeness being `0.5 · (1 + affinity)`. It grows with the days away and the closeness, stops at the cap, and relaxes at the normal emotion half-life once the person is back. The crate records when the absence began in the new `AwaySince(day)`. Removing `Away` writes `PersonReturned { person, days_away }` once (the host removes `Dormant` too, as for any required component) and gives each holder who missed them `Joy` of `reunion_fraction` of what they were missing; a person who dies while away has `Away` replaced by `Deceased`, one `PersonDied` and no return. Three new `Tuning` fields, all design defaults (mechanism: separation distress as the mark of an attachment bond, Hazan & Shaver 1987, DOI `10.1037/0022-3514.52.3.511`): `missing_cap` 0.4 (`0.0` switches absence's weight off, reunion included, and leaves every society bit-identical), `missing_days` 2.0, `reunion_fraction` 0.75. `SocietySave` is **version 3**: `PersonSave::away_since_bits` keeps when an absence began, `upgrade` takes a version-2 file to 3, and a save in the middle of a trip restores the marker and the days already gone. New `examples/absence.rs` and `tools/plot_absence.py`; see `docs/research/relationships.md`.

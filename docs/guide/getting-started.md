@@ -7,12 +7,12 @@ the shortest path from nothing to a village that visibly does something.
 
 ```toml
 [dependencies]
-bevy_society = "0.3"
+bevy_society = "0.4"
 ```
 
 It is on crates.io, and its ladvien dependencies (`bevy_speech_bubbles`, `bevy_stigmergy`,
 `bevy_orca`, `bevy_emerge_rng`) are crates.io versions too, so a consumer needs no `[patch]`. Pin an
-exact version in a real project (`bevy_society = "=0.3.0"`), since a pre-1.0 minor bump may break.
+exact version in a real project (`bevy_society = "=0.4.0"`), since a pre-1.0 minor bump may break.
 `bevy_fairy` is only a **dev**-dependency of this repository's examples and never reaches a consumer.
 
 ## Add the plugins
