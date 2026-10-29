@@ -327,6 +327,26 @@ impl Emotions {
         }
     }
 
+    /// Raises the active emotion with this kind and target to at least `intensity` (capped at 1.0),
+    /// or pushes a new one. Unlike [`appraise`](Self::appraise) it never adds, so calling it every tick
+    /// holds a level instead of building one.
+    pub fn raise_to(&mut self, kind: EmotionKind, intensity: f32, toward: Option<Entity>) {
+        let intensity = intensity.clamp(0.0, 1.0);
+        if let Some(e) = self
+            .0
+            .iter_mut()
+            .find(|e| e.kind == kind && e.toward == toward)
+        {
+            e.intensity = e.intensity.max(intensity);
+        } else {
+            self.0.push(ActiveEmotion {
+                kind,
+                intensity,
+                toward,
+            });
+        }
+    }
+
     /// Halves every intensity per `half_life_days` and drops those below 0.05 (plan D3, half-life 0.1
     /// game-day).
     pub fn decay(&mut self, dt_days: f32, half_life_days: f32) {
@@ -613,11 +633,23 @@ impl Plugin for MindPlugin {
             .register_type::<Memories>()
             .add_message::<Appraise>()
             .add_observer(set_baseline_mood)
+            .add_systems(
+                FixedUpdate,
+                crate::absence::announce_returns
+                    .in_set(SocietySystems::Clock)
+                    .before(apply_appraisals),
+            )
             .add_systems(FixedUpdate, apply_appraisals.in_set(SocietySystems::Clock))
             .add_systems(
                 FixedUpdate,
-                (update_minds, decay_needs).in_set(SocietySystems::Mind),
+                (
+                    crate::absence::miss_the_away.after(update_minds),
+                    update_minds,
+                    decay_needs,
+                )
+                    .in_set(SocietySystems::Mind),
             );
+        crate::absence::build(app);
     }
 
     fn finish(&self, app: &mut App) {
