@@ -170,7 +170,7 @@ invent features that fit the design; justify the fit with a paper.
 2. **A model or behaviour a shipping game expects and this crate lacks**, found by research: home-still first (`distill_search`; for a paper the corpus lacks, `paper_search`, `paper_download`, `scribe_convert`, then `distill_index`), then shipped-game practice, then section 3 before any code.
 3. **Depth on the weakest existing model**: run its scenario from `scenarios.yaml`, measure it against its research note, and improve the worst gap.
 
-Record the ranked candidates and the pick in the log. A pass that ships nothing names the concrete blocker that stopped all three; "nothing new to do" is not a blocker.
+Record the ranked candidates and the pick in the log. A pass that ships nothing names the concrete blocker that stopped all three; "nothing new to do" is not a blocker. **"Not researched yet" is not a blocker either: it is this pass's work.** Take the top item, do section 3 for it now, commit `research.md` and `plan.md`, and build its first slice. "Building it would be speculation" means the research is missing, so do the research. A log-only iteration is a failed pass, not an outcome, and a pass never copies an earlier iteration's reasons for shipping nothing.
 
 ## 3. Research first
 Use the literature before any code. Search home-still for the model
