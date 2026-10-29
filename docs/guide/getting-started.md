@@ -75,12 +75,15 @@ Two markers take a person further out of the simulation, and they are different 
 | marker | effect | keeps |
 |---|---|---|
 | `Dormant` | out of daily life *for now*: no crate-chosen activity, in nobody's perception, its running activity and any activity targeting it end, no exchange with it | ties, memories, opinions, knowledge, memberships |
+| `Away` | `Dormant` plus the town feels it: the people close to them miss them while they are gone (a `Distress` toward them that grows with the days and the closeness, capped by `Tuning::missing_cap`), and removing it writes `PersonReturned` and gives each of them a reunion `Joy` | everything `Dormant` keeps, and the day the absence began (`AwaySince`) |
 | no `Person` | the person is gone: `on_person_removed` deletes every tie to and from them | nothing |
 
 `Dormant` is the one you want for a night watch, a spell indoors, an expedition or a conversation: the
 person is simply not living their daily life, and removing the marker lets them re-decide. And
 `EndActivity { person }` cancels one running activity without any of that, for a place that closed or a
 shift that ended.
+
+Use `Away` instead for an expedition or a voyage, where the town should notice who is missing: insert it and nothing else, and remove **both** `Away` and `Dormant` when they are back (removing `Away` alone leaves the person dormant, as removing any required component does). The feeling is mood only; a host that wants a line such as "Odo has not eaten since Hawise left" reads the fact from `AwaySince` and the person from `Emotions`, and `Tuning::missing_cap = 0.0` switches it off.
 
 `Place` and `PlaceTags` are how activities find somewhere to go. A `Place`'s `capacity` says how many people it is
 **sized** for, and `capacity: 0` means closed — nobody ever goes. A place that is merely **full** still takes

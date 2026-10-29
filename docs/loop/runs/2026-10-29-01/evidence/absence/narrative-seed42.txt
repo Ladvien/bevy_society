@@ -1,0 +1,11 @@
+day 0.50  Ada and Bram leave town for three days
+day 0.50  Cole misses Ada: distress 0.00, joy 0.00, pleasure 0.04
+day 1.00  Cole misses Ada: distress 0.06, joy 0.00, pleasure 0.05
+day 1.50  Cole misses Ada: distress 0.11, joy 0.00, pleasure -0.02
+day 2.00  Cole misses Ada: distress 0.14, joy 0.00, pleasure -0.09
+day 2.50  Cole misses Ada: distress 0.17, joy 0.00, pleasure -0.13
+day 3.00  Cole misses Ada: distress 0.19, joy 0.00, pleasure -0.16
+day 3.50  Ada is back after 3.00 days
+day 3.50  Bram is back after 3.00 days
+day 3.50  Cole misses Ada: distress 0.21, joy 0.15, pleasure -0.18
+day 4.00  Cole misses Ada: distress 0.00, joy 0.00, pleasure -0.06
