@@ -4711,3 +4711,5 @@ a tautological assertion removed from `tuning_covers_rates`. Full gate results a
 3. `ReportDeed` leaves the victim no memory (needs-decision).
 4. Break the insult reply ping-pong (per-pair retaliation refractory period).
 5. Re-measure the scale table on a quiet host (5000 people did not finish under load).
+
+**Release 2026-10-29-02.** `cargo semver-checks` required a major bump (3 major checks, from earlier unreleased work); published **0.4.0**, https://crates.io/crates/bevy_society/0.4.0, tag `v0.4.0`; closes #24 and #27 (0.3.1 was never cut). **Cleanup:** removed the baseline worktree `/home/ladvien/wt-absence-base` and `/home/ladvien/wt-absence-base-target` and my scratch under `/tmp` (`abs7`, `abs42`, `absfresh`, `suite.log`); `~/.venvs/society-plots` kept for the plot script. No leftover worktrees from earlier passes.
