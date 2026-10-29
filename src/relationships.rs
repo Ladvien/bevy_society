@@ -481,6 +481,7 @@ fn relax_affinity(
     settings: Res<SocietySettings>,
     index: Res<PersonIndex>,
     deceased: Query<(), With<crate::Deceased>>,
+    away: Query<(), With<crate::Away>>,
     mut ties: Query<&mut Ties>,
 ) {
     let tuning = &settings.tuning;
@@ -493,7 +494,10 @@ fn relax_affinity(
         }
         if let Ok(mut owned) = ties.get_mut(entity) {
             for tie in owned.0.iter_mut() {
-                if deceased.get(tie.target).is_ok() {
+                // A tie toward someone who is away keeps the closeness it had when they left: the
+                // absence is felt in proportion to that closeness (`absence.rs`), and a relaxation
+                // that quietly cooled the tie over the trip would make a long absence mean less.
+                if deceased.get(tie.target).is_ok() || away.get(tie.target).is_ok() {
                     continue;
                 }
                 tie.relax(clock.dt_days, tuning);
