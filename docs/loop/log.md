@@ -4715,3 +4715,18 @@ a tautological assertion removed from `tuning_covers_rates`. Full gate results a
 **Release 2026-10-29-02.** `cargo semver-checks` required a major bump (3 major checks, from earlier unreleased work); published **0.4.0**, https://crates.io/crates/bevy_society/0.4.0, tag `v0.4.0`; closes #24 and #27 (0.3.1 was never cut). **Cleanup:** removed the baseline worktree `/home/ladvien/wt-absence-base` and `/home/ladvien/wt-absence-base-target` and my scratch under `/tmp` (`abs7`, `abs42`, `absfresh`, `suite.log`); `~/.venvs/society-plots` kept for the plot script. No leftover worktrees from earlier passes.
 
 **Correction to the cleanup line.** Earlier passes left two worktrees, listed and not removed: `/home/ladvien/.cache/loop-runs/before-tree` and `/home/ladvien/.cache/price-before-src`. A person should approve their removal.
+
+## 2026-10-29-03 — `Away` in a living town; the tie-write clamp documented (small pass)
+
+**Change.** No crate behaviour change. `Ties::entry_with` now documents that the affinity it writes is not clamped but the next `add_affinity` is (last pass's top item 1). New test `an_autonomous_party_member_leaves_and_comes_back_into_the_day` (`tests/absence.rs`): with two `Autonomous` friends, the one `Away` starts no activity for 1.5 days while the other keeps living and misses them; after `(Away, Dormant)` are removed they decide again and one `PersonReturned` is announced. Open issues: none. Parked branches (`wiggum/parked-pass-20/28/36/37`) are for older items, left alone.
+
+**Evidence.** `cargo test --test absence` 8/8. First run failed only because the test removed `Away` alone, which leaves `Dormant` (documented on `Away`); the crate was right. The host was at load ~45, so the full gate (both feature sets, clippy, doc, perf) was not run; only the doc comment and a test changed. **Verdicts:** not run (no behaviour change). **Dead-code delta:** zero.
+
+**Top 5 remaining.**
+1. Break the insult reply ping-pong (per-pair retaliation refractory period).
+2. `ReportDeed` leaves the victim no memory (needs-decision).
+3. Reconcile the evidence harness's rival count with `friendship_bound`'s at 60 people.
+4. Clock decision: `travel_timeout_hours` in game hours vs real-time walking.
+5. Re-measure the scale table on a quiet host.
+
+**Cleanup.** Nothing created outside the clone. Earlier leftovers unchanged: `/home/ladvien/.cache/loop-runs/before-tree`, `/home/ladvien/.cache/price-before-src` (listed, not removed).
