@@ -1,0 +1,7 @@
+# Eval
+
+Regenerate the series: `cargo run --release --example absence -- --seed 7 --out <dir>` then `tools/plot_absence.py <dir>/series.csv <dir>/absence.png` (matplotlib in `~/.venvs/society-plots`). Baseline for the bit-identical check: a detached worktree at `169f806`, `evidence --scenario village-evening` (its CSV is not committed; `summary.json` before and after are in `evidence/before` and `evidence/after`).
+
+**Criterion 4, bit-identical at no absence.** `evidence --scenario village-evening` (its CSV is not committed; `summary.json` before and after are in `evidence/before` and `evidence/after`) (67 200 ticks, 24 people, default seed): before and after `summary.json` and `series.csv` are byte-identical (`diff`, `cmp`). Tests: `tests/absence.rs` 8 passed; the whole suite passes with default features and with `--no-default-features`; `--features serde` for `save`, `save_upgrade`, `readme`, `guide_blocks`, `leaf`, `deceased`. Clippy `-D warnings` (all targets, all features), `fmt --check`, `doc -D warnings` clean.
+
+**Absence harness** (`evidence/absence/summary.json`): two away three days; peak distress toward Ada: Cole (closest friend) 0.206, Edda 0.197, Finn (no tie) 0.000; `days_away` reported 3.0000. The harness has no random draw, so seed 42 reproduces seed 7 exactly (`summary-seed42.json`); the second configuration changes the Tuning (`--cap 0.6 --days 4.0`, `summary-cap0.6-days4.json`).

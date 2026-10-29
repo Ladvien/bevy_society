@@ -222,3 +222,17 @@ Each person keeps a `Ties` component: one `Tie` per person they know. A tie hold
   rivalries (42 -> 82): persisting grudges persist while friendship keeps fading at the same rate, so the
   counterweight is unchanged. What the paper actually prescribes is more friendly *events*, not stickier ones.
   See `docs/loop/needs-decision/good-is-outweighed-by-bad.md`.
+
+## Absence: missing someone and the return (issue #35)
+
+`Away` is `Dormant` that the town notices. **Mechanism, not rate:** separation distress is one of the defining marks of an attachment bond (Hazan & Shaver 1987, DOI `10.1037/0022-3514.52.3.511`, verified by DOI resolution; the home-still corpus was unavailable to search on 2026-10-29, so the paper is not yet in it): the people one is close to feel an absence in proportion to how close they are, and the feeling ends with the reunion. The crate's own line for "close" is the one grief already uses (`Friend`, or `familiarity_peak >= bereavement_familiarity`; closeness `0.5 · (1 + affinity)`, Prigerson et al. 2009, DOI `10.1371/journal.pmed.1000121`).
+
+```text
+level(holder → away) = missing_cap · closeness · (1 − e^(−days_away / missing_days))
+Distress toward the away person is raised TO level every society tick (never added to it)
+reunion Joy = reunion_fraction · level_at_return
+```
+
+All three numbers are **design defaults**: `missing_cap` 0.4 (a mood word shows it; it stays under the 0.6 a close friend's death gives), `missing_days` 2.0 (an expedition's length), `reunion_fraction` 0.75 (a reunion is the missing turned over, so it never exceeds it). The level is raised *to*, not by, so it holds at the cap however long the trip and decays at the normal emotion half-life (0.1 day) after the return: measured, the friend's distress is gone within a day.
+
+**Measured behaviour** (`docs/loop/runs/2026-10-29-02/evidence/after`, seed 7, two away for three days): the closest friend's distress climbs 0.06 → 0.19 over the trip and her pleasure falls from +0.05 to -0.16; at the return she feels 0.15 of joy and both are back to baseline within half a day. Holders with no tie feel nothing; a party away together does not miss each other. The tie itself drifts during a trip (relaxation, balance), so closeness is read live, not frozen at departure.

@@ -4698,3 +4698,16 @@ a tautological assertion removed from `tuning_covers_rates`. Full gate results a
 3. `ReportDeed` leaves the victim no memory (needs-decision).
 4. Clock decision: `travel_timeout_hours` in game hours vs real-time walking.
 5. Re-measure the scale table on a quiet host.
+
+## 2026-10-29-02 — `Away`: the town misses the people who left, and a return is an event (fixes #35)
+
+**Change.** `Away` (`#[require(Dormant)]`) and `AwaySince`; close holders (a `Friend` tie, or `familiarity_peak` at `bereavement_familiarity`) hold a `Distress` toward the away person at `missing_cap · closeness · (1 − e^(−days/missing_days))`; removing `Away` writes `PersonReturned { person, days_away }` once and gives each holder `Joy` of `reunion_fraction` of what they were missing; `Deceased` replaces `Away` with no return; `SocietySave` version 3 keeps the start of an absence. Three design-default `Tuning` fields (`missing_cap` 0.4, `missing_days` 2.0, `reunion_fraction` 0.75); source for the mechanism Hazan & Shaver 1987 (DOI `10.1037/0022-3514.52.3.511`). Open issues: #35 worked; #24 and #27 are release issues, closed by this pass's release. Parked branches (`wiggum/parked-pass-20/28/36/37`) are for older items, not adopted.
+
+**Evidence** (`runs/2026-10-29-02`). `tests/absence.rs` 8 tests; `village-evening` `summary.json` and `series.csv` byte-identical before and after; the absence harness shows the closest friend's distress 0.06 → 0.19 over three days, 0 for a stranger, gone within a day of the return (`evidence/plots/absence-seed7.png`). Perf unchanged within noise (`perf.md`; 5000 people not measured under load). **Verdicts:** Behavior GREAT, Zoom GREAT, Fresh eyes GREAT with the stated limit (the harness has no RNG). **Dead-code delta:** zero. Assumed decisions in `needs-decision/an-absence-is-felt-not-caused.md`.
+
+**Top 5 remaining.**
+1. Friendship ceiling clamps a 0.95 tie to about 0.35 at the first tick (seen in the absence harness); check that it is intended for ties the host sets.
+2. Population-level check of `Away` in a living town (a party leaving through `Autonomous` life).
+3. `ReportDeed` leaves the victim no memory (needs-decision).
+4. Break the insult reply ping-pong (per-pair retaliation refractory period).
+5. Re-measure the scale table on a quiet host (5000 people did not finish under load).

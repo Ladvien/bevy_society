@@ -43,6 +43,10 @@ name = "benchmark"
 path = "examples/benchmark.rs"
 
 [[example]]
+name = "absence"
+path = "examples/absence.rs"
+
+[[example]]
 name = "evidence"
 path = "examples/evidence.rs"
 
