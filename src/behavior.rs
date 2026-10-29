@@ -1142,12 +1142,9 @@ fn announce_deaths(
             let Some(tie) = their_ties.get(person) else {
                 continue;
             };
-            let close = tie.label == crate::TieLabel::Friend
-                || tie.familiarity_peak >= settings.tuning.bereavement_familiarity;
-            if !close {
+            let Some(intensity) = crate::absence::closeness(tie, &settings.tuning) else {
                 continue;
-            }
-            let intensity = (0.5 * (1.0 + tie.affinity)).clamp(0.0, 1.0);
+            };
             appraisals.write(crate::Appraise {
                 person: other,
                 kind: crate::EmotionKind::Distress,
