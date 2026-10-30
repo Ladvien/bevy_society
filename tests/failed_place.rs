@@ -151,3 +151,36 @@ fn a_restore_keeps_the_failed_places() {
         "the restored person avoids the same place until the same day"
     );
 }
+
+/// **A reload keeps the stall window of a walker.** `TravelProgress` decides when a stalled walk times
+/// out, so a restore that gave a fresh window would let the walk run on past the day the uninterrupted run
+/// ended it.
+#[cfg(feature = "serde")]
+#[test]
+fn a_restore_keeps_the_stall_window_of_a_walker() {
+    use bevy_society::{PersonKey, PlaceKey, SocietySave, capture, restore};
+
+    fn keyed() -> (App, Entity) {
+        let (mut app, person, near, far) = app(Some(2.5));
+        app.world_mut().entity_mut(person).insert(PersonKey(0));
+        app.world_mut().entity_mut(near).insert(PlaceKey(1));
+        app.world_mut().entity_mut(far).insert(PlaceKey(2));
+        (app, person)
+    }
+
+    let (mut before, person) = keyed();
+    // The first walk stalls from the start and times out at ~1 h: capture mid-walk at 0.5 h.
+    let _ = walked_places(&mut before, person, 0.5);
+    let save: SocietySave = capture(before.world_mut());
+    let window = save.persons[0].travel_progress;
+    assert!(window.is_some(), "a walker's stall window is saved");
+
+    let (mut after, _) = keyed();
+    after.update();
+    restore(after.world_mut(), save.clone()).expect("the save applies");
+    assert_eq!(
+        capture(after.world_mut()).persons[0].travel_progress,
+        window,
+        "the restored walker keeps the same window"
+    );
+}
