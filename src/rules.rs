@@ -721,3 +721,155 @@ impl EventKey {
         }
     }
 }
+
+/// What [`test_trigger`] found: whether one trigger would run for the given people, and what its
+/// `then` would write.
+#[derive(Debug, Clone, PartialEq)]
+pub struct TriggerTest {
+    /// The actor passes the trigger's `factions` / `persons` filter (true when it lists none).
+    pub selected: bool,
+    /// The actor stands inside the trigger's `area` (true when it has none).
+    pub in_area: bool,
+    /// Whether the `if` script held; `None` when the trigger has no `if`, or an earlier check
+    /// already refused it so the `if` did not run.
+    pub condition: Option<bool>,
+    /// The trigger would fire: selected, in its area, its `if` held and its `then` ran cleanly.
+    /// The `once` and cooldown bookkeeping is not consulted: this asks about the script, not the
+    /// history.
+    pub would_fire: bool,
+    /// Each write the `then` queued, in order, as the `Debug` text of the action (for example
+    /// `Adjust { person: 0, other: 1, field: "trust", delta: 0.2 }`). Empty unless `would_fire`.
+    pub effects: Vec<String>,
+}
+
+/// Why [`test_trigger`] could not answer.
+#[derive(Debug, Clone, PartialEq)]
+pub enum TriggerTestError {
+    /// The world has no compiled definitions or script engine: the society plugins are not added.
+    NoSociety,
+    /// No society tick has run, so there is no snapshot for the script to read.
+    NoSnapshot,
+    /// No trigger has this authored `id`.
+    UnknownTrigger(String),
+    /// A script failed at run time (a missing person, a wrong type, a sandbox limit).
+    Script {
+        /// The authored path of the script that failed.
+        owner: String,
+        /// The engine's message.
+        message: String,
+    },
+}
+
+impl std::fmt::Display for TriggerTestError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::NoSociety => write!(f, "no SocietyDefs or ScriptEngine: add SocietyPlugins"),
+            Self::NoSnapshot => write!(
+                f,
+                "no snapshot yet: run a society tick (or fast_forward) before testing a trigger"
+            ),
+            Self::UnknownTrigger(id) => write!(f, "no trigger with id {id:?}"),
+            Self::Script { owner, message } => write!(f, "script {owner} failed: {message}"),
+        }
+    }
+}
+
+impl std::error::Error for TriggerTestError {}
+
+/// Dry-runs the trigger authored as `trigger` against the society as the last tick froze it, as if
+/// its event had just happened to `actor` and `target`, and reports what it would write without
+/// writing it.
+///
+/// Nothing changes: the trigger's `once` and cooldown state, the pending actions, the messages
+/// and the world are all untouched, and the event the trigger listens for is not required to have
+/// happened. Call it between updates, after a [`fast_forward`](crate::fast_forward), to see how an
+/// edited script would behave on the society it will run in.
+///
+/// # Errors
+/// [`TriggerTestError`] when the society is not installed, no tick has run, `trigger` is not an
+/// authored id, or a script fails.
+pub fn test_trigger(
+    world: &mut World,
+    trigger: &str,
+    actor: Option<PersonId>,
+    target: Option<PersonId>,
+) -> Result<TriggerTest, TriggerTestError> {
+    let (Some(defs), Some(engine)) = (
+        world.get_resource::<SocietyDefs>(),
+        world.get_resource::<ScriptEngine>(),
+    ) else {
+        return Err(TriggerTestError::NoSociety);
+    };
+    let snapshot = world
+        .get_resource::<SnapshotCell>()
+        .and_then(|cell| cell.0.clone())
+        .ok_or(TriggerTestError::NoSnapshot)?;
+    let spec = defs
+        .triggers
+        .iter()
+        .find(|t| t.id == trigger)
+        .ok_or_else(|| TriggerTestError::UnknownTrigger(trigger.to_owned()))?;
+    let bindings = Bindings {
+        actor: actor.map_or(-1, |p| i64::from(p.0)),
+        target: target.map_or(-1, |p| i64::from(p.0)),
+        ..Bindings::default()
+    };
+    let failed = |script, message| TriggerTestError::Script {
+        owner: ScriptEngine::owner(&defs.scripts, script).to_owned(),
+        message,
+    };
+
+    let entity_of = |who: Option<PersonId>| {
+        let id = who?;
+        world
+            .get_resource::<PersonIndex>()?
+            .sorted
+            .iter()
+            .find(|(p, _)| *p == id)
+            .map(|(_, e)| *e)
+    };
+    let actor_entity = entity_of(actor);
+    let selected = (spec.factions.is_empty() && spec.persons.is_empty())
+        || actor_entity.is_some_and(|e| {
+            actor.is_some_and(|p| spec.persons.contains(&p.0))
+                || world
+                    .get::<crate::groups::Memberships>(e)
+                    .is_some_and(|m| spec.factions.iter().any(|f| m.contains(*f)))
+        });
+    let in_area = spec.area.is_none_or(|area| {
+        let (Some(e), Some(settings)) = (actor_entity, world.get_resource::<SocietySettings>())
+        else {
+            return false;
+        };
+        world.get::<Transform>(e).is_some_and(|t| {
+            let p = settings.plane.project(t.translation);
+            area.contains([p.x, p.y])
+        })
+    });
+
+    let mut result = TriggerTest {
+        selected,
+        in_area,
+        condition: None,
+        would_fire: false,
+        effects: Vec::new(),
+    };
+    if !selected || !in_area {
+        return Ok(result);
+    }
+    if let Some(condition) = spec.condition {
+        let holds = engine
+            .eval_bool(&defs.scripts, condition, &snapshot, bindings)
+            .map_err(|e| failed(condition, e))?;
+        result.condition = Some(holds);
+        if !holds {
+            return Ok(result);
+        }
+    }
+    let actions = engine
+        .run(&defs.scripts, spec.then, &snapshot, bindings)
+        .map_err(|e| failed(spec.then, e))?;
+    result.would_fire = true;
+    result.effects = actions.iter().map(|a| format!("{a:?}")).collect();
+    Ok(result)
+}

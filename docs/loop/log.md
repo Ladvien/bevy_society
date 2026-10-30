@@ -4839,3 +4839,10 @@ a tautological assertion removed from `tuning_covers_rates`. Full gate results a
 **Evidence.** `tests/fast_forward.rs` 3/3 (2 days = 512 ticks, whole-society hash equals a live app's after the same ticks and differs from the start; 1+1 days equals 2; error cases), `tests/leaf.rs`, clippy `-D warnings`, doc, `--no-default-features` build (5 pre-existing warnings). API only: no behaviour change, no plots/three-review gate. **Dead-code delta:** zero.
 **Top 5 remaining.** 1. Release 0.6.0 (after 6 h from v0.5.0). 2. Re-measure scale table. 3. Insult ping-pong residue (41%). 4. Friendship capacity brake (#10). 5. Reconcile rival counts.
 **Cleanup.** Created nothing outside the clone; `/tmp/ed.py` removed.
+
+## 2026-10-30-14 — `test_trigger`: dry-run a trigger on the frozen society (bevy_emerge #105)
+
+**Change.** No open issues; parked branches older, ignored. Release skipped: `v0.5.0` is under 6 h old. Pick (editor need, #105 "test it against a snapshot of the fast-forwarded society"): `test_trigger(world, id, actor, target) -> TriggerTest { selected, in_area, condition, would_fire, effects }`; effects are the `Debug` text of each queued write (design default: `ScriptAction` stays crate-private). Ignores `once`/cooldown and whether the event happened; changes nothing. Errors: no snapshot yet, unknown id, script failure naming its authored path. Runner-ups: scale-table re-measure (host load 24), friendship brake (#10, needs a source).
+**Evidence.** `tests/test_trigger.rs` 2/2 (each check reported, repeat call identical, nothing emitted; unknown id and failing script are errors), `tests/leaf.rs`, `guide_blocks`, clippy `-D warnings`, fmt, `--no-default-features` build (5 pre-existing warnings). API only: no behaviour scenario, no plots/three-review gate. **Dead-code delta:** zero.
+**Top 5 remaining.** 1. Release 0.6.0 (after 6 h from v0.5.0). 2. Re-measure scale table. 3. Insult ping-pong residue (41%). 4. Friendship capacity brake (#10). 5. Reconcile rival counts.
+**Cleanup.** Created nothing outside the clone.
