@@ -1741,16 +1741,19 @@ fn decide_activities(
                 Vec::new()
             },
         };
-
         // The actor is fixed for this person; the target changes with every option, so it is bound
         // per candidate in `score_option` rather than here.
-        let actor_id = index
-            .sorted
+        // `slot` indexes `PersonIndex.sorted`, so the id is read, not searched for (the search was
+        // O(people) per person).
+        let actor_id = index.sorted.get(slot).map_or(-1, |(id, _)| i64::from(id.0));
+        // A neighbour's id by entity, as a sorted lookup: `near.iter().position` per target was
+        // O(neighbours) per target, so O(neighbours squared) per activity per person.
+        let mut near_lookup: Vec<(u64, u32)> = near
             .iter()
-            .find(|(_, e)| *e == person)
-            // `-1`, not `0`, when the person is missing from the index: `0` is a real person id and a
-            // script would read that person's state instead of finding nobody.
-            .map_or(-1, |(id, _)| i64::from(id.0));
+            .zip(&near_ids)
+            .map(|((entity, _), id)| (entity.to_bits(), *id))
+            .collect();
+        near_lookup.sort_by_key(|(bits, _)| *bits);
         // The scripts read the tick-start snapshot and the compiled definitions; both are the same
         // for every option, so they are borrowed once and only the target is rebound per candidate.
         let script_ready = match (&engine, &snapshot) {
@@ -1838,17 +1841,11 @@ fn decide_activities(
             // 0.00 of all starts at one neighbour to 0.97 at twelve.
             let mut best_for_activity: Option<(f32, Vec<DoingTarget>)> = None;
             for target in targets {
-                // `near` is built from `perception.near`, whose indices are positions in
-                // `PersonIndex.sorted`, so the id is a lookup rather than a scan. The scan this
-                // replaces was a measurable part of the decision cost at a thousand people.
+                // `near_lookup` answers by binary search what a scan of `near` answered before.
                 let target_id = match target {
-                    DoingTarget::Person(other) => near_ids
-                        .get(
-                            near.iter()
-                                .position(|(e, _)| *e == other)
-                                .unwrap_or(usize::MAX),
-                        )
-                        .map_or(-1, |id| i64::from(*id)),
+                    DoingTarget::Person(other) => near_lookup
+                        .binary_search_by_key(&other.to_bits(), |(bits, _)| *bits)
+                        .map_or(-1, |at| i64::from(near_lookup[at].1)),
                     _ => -1,
                 };
                 let script_ref = script_ready.map(|(snapshot, engine)| ScriptContext {
@@ -2285,12 +2282,42 @@ fn score_option(
     if n == 0 {
         return 1.0;
     }
+    // **Read once per option, not once per consideration.** The target's tie and its position are
+    // linear searches over the tie list and the neighbour list; every term of an option shares them.
+    let tie = match target {
+        DoingTarget::Person(other) => decision.ties.iter().find(|t| t.target == other).copied(),
+        _ => None,
+    };
+    let there = if considerations
+        .iter()
+        .any(|term| matches!(term.signal, Signal::Distance))
+    {
+        match target {
+            DoingTarget::Person(other) => decision
+                .near
+                .iter()
+                .find(|(e, _)| *e == other)
+                .map(|(_, p)| *p),
+            DoingTarget::Place(place) => decision
+                .place_positions
+                .iter()
+                .find(|(e, _)| *e == place)
+                .map(|(_, p)| *p),
+            // A `Point` is chosen by `Wander` and has no entry in the place list; `Itself` is the
+            // actor's own position, which is not what a distance consideration is asking about.
+            DoingTarget::Point(_) | DoingTarget::Itself => None,
+        }
+    } else {
+        None
+    };
     let mut product = 1.0_f32;
     for term in considerations {
         let s = term.curve.eval(signal_value(
             term.signal,
             decision,
             target,
+            tie,
+            there,
             activity,
             scripts,
             fields,
@@ -2313,19 +2340,18 @@ fn score_option(
 /// Every arm returns a real value computed from the decision's copied state. `Field` and `Script`
 /// read the social-field grids and the Rhai snapshot, which a decision does not hold; they score 0
 /// and a host that wants them should say so through a definition the decision can score instead.
+#[allow(clippy::too_many_arguments)]
 fn signal_value(
     signal: Signal,
     decision: &Decision,
     target: DoingTarget,
+    tie: Option<crate::relationships::Tie>,
+    there: Option<Vec2>,
     activity: u16,
     scripts: Option<&ScriptContext<'_>>,
     fields: Option<&FieldGrids>,
     skills: &[crate::defs::SkillGroup],
 ) -> f32 {
-    let tie = match target {
-        DoingTarget::Person(other) => decision.ties.iter().find(|t| t.target == other).copied(),
-        _ => None,
-    };
     let value = match signal {
         Signal::Need(id) => decision
             .needs
@@ -2347,33 +2373,12 @@ fn signal_value(
         Signal::Trust => tie.map_or(0.5, |t| t.trust),
         Signal::Respect => (tie.map_or(0.0, |t| t.respect) + 1.0) / 2.0,
         Signal::Familiarity => match target {
-            DoingTarget::Person(other) => decision
-                .ties
-                .iter()
-                .find(|t| t.target == other)
-                .map_or(0.0, |t| t.familiarity_peak),
+            DoingTarget::Person(_) => tie.map_or(0.0, |t| t.familiarity_peak),
             _ => 0.0,
         },
-        Signal::Distance => {
-            let there = match target {
-                DoingTarget::Person(other) => decision
-                    .near
-                    .iter()
-                    .find(|(e, _)| *e == other)
-                    .map(|(_, p)| *p),
-                DoingTarget::Place(place) => decision
-                    .place_positions
-                    .iter()
-                    .find(|(e, _)| *e == place)
-                    .map(|(_, p)| *p),
-                // A `Point` is chosen by `Wander` and has no entry in the place list; `Itself` is the
-                // actor's own position, which is not what a distance consideration is asking about.
-                DoingTarget::Point(_) | DoingTarget::Itself => None,
-            };
-            there.map_or(1.0, |p| {
-                (decision.position.distance(p) / decision.perception_radius).min(1.0)
-            })
-        }
+        Signal::Distance => there.map_or(1.0, |p| {
+            (decision.position.distance(p) / decision.perception_radius).min(1.0)
+        }),
         // **The joint surplus of a trade**, from the two stores. Not a rate: `value_of` is `1 / (1 + held)`,
         // so the gap is near zero when two people hold the same amount and largest when one has nothing.
         // Hall & Milgrom's precondition for a bargain to have anything in it. It is zero unless the actor
