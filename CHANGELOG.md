@@ -4,6 +4,10 @@ All notable changes to bevy_society. The format follows [Keep a Changelog](https
 
 ## [Unreleased]
 
+### Changed
+
+- **A reported deed leaves its victim a memory** (the `a-victim-remembers-nothing-a-host-reported` decision, option 2, assumed). A `ReportDeed` with a `patient` and a harmful deed now records `MemoryKind::Suffered { deed, actor }` at the patient, valence `-(0.3 + |harm|)`, so `Memories::grudge` toward the actor is no longer 0. **Breaking:** `MemoryKind` and `MemoryKindSave` gain a variant, and `SocietySave::VERSION` is 4; `upgrade` steps a version-3 file with no rewrite.
+
 ## [0.4.0] - 2026-10-29
 
 ### Added

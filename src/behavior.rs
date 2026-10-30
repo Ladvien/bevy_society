@@ -3199,6 +3199,30 @@ fn resolve_reported_deeds(world: &mut World) {
             now,
             &witnesses,
         );
+        // The victim keeps what the exchange path gives them: a memory sized `0.3 + |harm|` about
+        // the actor. Without it `Memories::grudge` stays 0 and `snub` is unreachable for them.
+        if let Some(patient) = report.patient
+            && let Some(spec) = defs.deeds.get(usize::from(deed.0))
+            && spec.harm < 0.0
+            && let Some(mut memories) = world.get_mut::<crate::mind::Memories>(patient)
+        {
+            let magnitude = 0.3 + spec.harm.abs();
+            memories.record(
+                crate::mind::Memory {
+                    day: now as f32,
+                    kind: crate::mind::MemoryKind::Suffered {
+                        deed,
+                        actor: report.actor,
+                    },
+                    other: Some(report.actor),
+                    valence: -magnitude.min(1.0),
+                    // Design default: as heavy as the memory is bad.
+                    importance: magnitude.min(1.0),
+                },
+                now,
+                settings.memory_capacity,
+            );
+        }
     }
 }
 

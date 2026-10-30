@@ -70,3 +70,7 @@ migration note, and a `tests/report_deed.rs` assertion that the patient holds a 
 
 **Not a defect this iteration introduces:** the missing memory predates it and the affinity half is fixed
 separately. `docs/loop/runs/2026-10-27-03/research.md`.
+
+## Assumed decision (2026-10-29)
+
+Assumed decision: option 2, built. `MemoryKind::Suffered { deed, actor }` is written at the patient by `resolve_reported_deeds` (valence `-(0.3 + |harm|)`, the exchange path's size); `SocietySave::VERSION` 4 with a no-op 3 → 4 upgrade. Test: `a_reported_victim_remembers_and_resents_the_actor`. The owner may override here.
