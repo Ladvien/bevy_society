@@ -658,6 +658,17 @@ fn register_ctx(engine: &mut Engine) {
             ctx.0.doing(a).map_err(boxed)
         },
     );
+    engine.register_fn(
+        "position",
+        |ctx: &mut Ctx, a: i64| -> Result<rhai::Map, Box<EvalAltResult>> {
+            let [x, y] = ctx.0.position(a).map_err(boxed)?;
+            let mut map = rhai::Map::new();
+            map.insert("x".into(), Dynamic::from(x));
+            map.insert("y".into(), Dynamic::from(y));
+            Ok(map)
+        },
+    );
+    ctx_pair!(engine, "distance", distance);
     // `Array`, not `Vec<i64>`: Rhai's indexer is registered for its own array type, so a plain
     // `Vec<i64>` would arrive in the script without being indexable (`ctx.persons()[0]` would fail).
     engine.register_fn("persons", |ctx: &mut Ctx| -> rhai::Array {
