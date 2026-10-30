@@ -360,6 +360,7 @@ fn evaluate_triggers(
     needs: Query<&Needs>,
     settings: Res<SocietySettings>,
     places: Query<&Transform>,
+    memberships: Query<&crate::groups::Memberships>,
     mut errors: MessageWriter<ScriptError>,
     mut fired: MessageWriter<TriggerFired>,
 ) {
@@ -557,6 +558,11 @@ fn evaluate_triggers(
             if !event.matches(&spec.on) || !state.may_fire(which, bindings.actor, spec, now) {
                 continue;
             }
+            if (!spec.factions.is_empty() || !spec.persons.is_empty())
+                && !actor_selected(&index, &memberships, bindings.actor, spec)
+            {
+                continue;
+            }
             if let Some(area) = spec.area
                 && !actor_in_area(&index, &places, &settings, bindings.actor, area)
             {
@@ -586,6 +592,23 @@ fn evaluate_triggers(
 /// The [`PersonId`] a binding carries, `None` for the `-1` of "no person".
 fn person_id(bound: i64) -> Option<PersonId> {
     u32::try_from(bound).ok().map(PersonId)
+}
+
+/// Whether the actor is one of the trigger's `persons` or belongs to one of its `factions`; a
+/// trigger that lists both takes either. No such person is not selected.
+fn actor_selected(
+    index: &PersonIndex,
+    memberships: &Query<&crate::groups::Memberships>,
+    actor: i64,
+    spec: &crate::defs::TriggerSpec,
+) -> bool {
+    let Some(&(id, entity)) = index.sorted.iter().find(|(id, _)| i64::from(id.0) == actor) else {
+        return false;
+    };
+    spec.persons.contains(&id.0)
+        || memberships
+            .get(entity)
+            .is_ok_and(|m| spec.factions.iter().any(|f| m.contains(*f)))
 }
 
 /// Whether the person with id `actor` stands inside `area` now. No such person is outside.

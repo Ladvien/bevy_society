@@ -183,3 +183,80 @@ fn an_edited_trigger_takes_effect_in_the_running_society() {
     assert!(err.to_string().contains("needs"), "{err}");
     assert_eq!(emitted(&mut app, bram), ["x"], "still the last good defs");
 }
+
+const BOUND: &str = r#"(
+    factions: [(id: "millers"), (id: "smiths")],
+    triggers: [
+        (id: "by_faction", on: Custom("poke"), then: "fx.emit(\"faction\", #{})", factions: ["millers"]),
+        (id: "by_person", on: Custom("poke"), then: "fx.emit(\"person\", #{})", persons: [1]),
+    ],
+)"#;
+
+fn poke_names(app: &mut App, who: Entity) -> Vec<String> {
+    app.world_mut().write_message(FireTrigger {
+        name: "poke".to_owned(),
+        actor: Some(who),
+        target: None,
+    });
+    let mut seen = Vec::new();
+    for _ in 0..2 {
+        app.update();
+        seen.extend(
+            app.world_mut()
+                .resource_mut::<Messages<ScriptEvent>>()
+                .drain()
+                .map(|e| e.name),
+        );
+    }
+    seen
+}
+
+#[test]
+fn a_trigger_bound_to_factions_or_persons_fires_only_for_them() {
+    use bevy_society::Memberships;
+    let defs = SocietyDefs::from_ron(BOUND).expect("parses");
+    let miller = defs.faction_id("millers").expect("defined");
+    let smith = defs.faction_id("smiths").expect("defined");
+    let mut app = headless(defs, settings());
+    let a = spawn_person(&mut app, "A", Vec2::ZERO);
+    let b = spawn_person(&mut app, "B", Vec2::ZERO);
+    let c = spawn_person(&mut app, "C", Vec2::ZERO);
+    app.world_mut()
+        .entity_mut(a)
+        .insert(Memberships(vec![miller]));
+    app.world_mut()
+        .entity_mut(b)
+        .insert(Memberships(vec![smith]));
+    for _ in 0..2 {
+        app.update();
+    }
+
+    assert_eq!(
+        poke_names(&mut app, a),
+        ["faction"],
+        "A is a miller; PersonId 0 is not listed"
+    );
+    assert_eq!(
+        poke_names(&mut app, b),
+        ["person"],
+        "B is a smith, listed by id 1"
+    );
+    assert!(poke_names(&mut app, c).is_empty(), "C is neither");
+}
+
+#[test]
+fn factions_must_exist_and_need_an_actor() {
+    let err = SocietyDefs::from_ron(
+        r#"(triggers: [(id: "t", on: Custom("x"), then: "", factions: ["ghosts"])])"#,
+    )
+    .err()
+    .expect("unknown faction");
+    assert!(err.to_string().contains("ghosts"), "{err}");
+
+    let err = SocietyDefs::from_ron(
+        r#"(factions: [(id: "f")], triggers: [(id: "t", on: Tick, then: "", factions: ["f"])])"#,
+    )
+    .err()
+    .expect("Tick binds no actor");
+    assert!(err.to_string().contains("trigger 't'"), "{err}");
+}
