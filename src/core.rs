@@ -689,7 +689,7 @@ impl Default for Tuning {
             stall_timeout_hours: None,
             stall_epsilon: 0.25,
             failed_place_memory_hours: None,
-            retaliation_refractory_hours: None,
+            retaliation_refractory_hours: Some(6.0),
             walk_speed: 1.4,
             // **A design default, set by measurement.** Not from a paper; the *gate* is the paper. Every
             // contact-tell that finds an informed neighbour stifles the teller (Daley–Kendall), so pacing
