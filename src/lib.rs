@@ -132,6 +132,7 @@ mod beliefs;
 mod core;
 mod defs;
 mod economy;
+mod fast_forward;
 #[cfg(feature = "fields")]
 mod fields;
 mod groups;
@@ -180,6 +181,7 @@ pub use fields::{Commotion, SocialFieldPlugin, SocialFieldSettings, SocialFields
 // mapping this crate and Sanctuary both used to carry their own copy of.
 #[cfg(feature = "fields")]
 pub use bevy_stigmergy::{CellFrame, ChannelDef};
+pub use fast_forward::{FastForward, FastForwardError, fast_forward};
 pub use groups::{
     FactionStat, FactionStats, GroupsPlugin, Memberships, STANDING_FAMILIARITY, Status,
     contest_win_chance, standing_from,

@@ -4832,3 +4832,10 @@ a tautological assertion removed from `tuning_covers_rates`. Full gate results a
 **Evidence.** `tests/trigger_area.rs` 6/6 (new: faction member and listed id fire, a stranger does not; bad lists refused), full `cargo test --release` green, clippy `-D warnings`, fmt, `--no-default-features` build. Data path only: no behaviour scenario, no plots/three-review gate. **Dead-code delta:** zero.
 **Top 5 remaining.** 1. Release 0.6.0 (after 6 h from v0.5.0). 2. Re-measure scale table. 3. Insult ping-pong residue (41%). 4. Friendship capacity brake (#10). 5. Reconcile rival counts.
 **Cleanup.** Created nothing outside the clone.
+
+## 2026-10-30-13 — `fast_forward`: run a live society N days in one call (bevy_emerge #104)
+
+**Change.** No open issues; parked branches older, ignored. Release skipped: `v0.5.0` is 2 h old. Pick (editor need, #104 acceptance "a fast-forward of a fixture village is deterministic: same seed, same day"): no crate-side way to advance a society without frames. `fast_forward(&mut World, days) -> Result<FastForward, FastForwardError>` runs `FixedMain` one fixed step at a time with message buffers rotated; `ceil(days * seconds_per_day / tick_secs)` ticks. Refuses non-finite or negative days, an app that never ran `Startup` (no RNG yet), and `ClockSource::Host` (the host owns that clock). Runner-ups: scale-table re-measure, friendship brake (#10, needs a source).
+**Evidence.** `tests/fast_forward.rs` 3/3 (2 days = 512 ticks, whole-society hash equals a live app's after the same ticks and differs from the start; 1+1 days equals 2; error cases), `tests/leaf.rs`, clippy `-D warnings`, doc, `--no-default-features` build (5 pre-existing warnings). API only: no behaviour change, no plots/three-review gate. **Dead-code delta:** zero.
+**Top 5 remaining.** 1. Release 0.6.0 (after 6 h from v0.5.0). 2. Re-measure scale table. 3. Insult ping-pong residue (41%). 4. Friendship capacity brake (#10). 5. Reconcile rival counts.
+**Cleanup.** Created nothing outside the clone; `/tmp/ed.py` removed.
