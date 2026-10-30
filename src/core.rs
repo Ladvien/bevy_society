@@ -557,6 +557,23 @@ pub struct Tuning {
     /// off. Only the choice of a harmful activity is held back; a host's `Interact` is never refused by
     /// it. Saved.
     pub retaliation_refractory_hours: Option<f32>,
+    /// How much faster a **grievance fades toward someone its holder still trusts**: `ctx.grudge(a, b)` reads
+    /// each of `a`'s bad memories about `b` at its age times `1 + forgiveness · trust(a → b)`
+    /// ([`crate::model::recall::forgiving_pace`]). Without it every grudge fades on the one 138-hour recency
+    /// curve, whoever it is held against, so a slight from a trusted neighbour drives `snub` as long as one
+    /// from a stranger who keeps offending, and the reply re-arms the first insulter's grudge in turn.
+    ///
+    /// Forgiveness follows relationship value and low exploitation risk (McCullough et al. 2010, DOI
+    /// 10.1037/a0019349; Burnette et al. 2012, DOI 10.1177/0146167211424582), carried by post-transgression
+    /// trust (Strelan, Karremans & Krieg 2017, DOI 10.1111/bjso.12173). The papers give the direction and the
+    /// mediator, not a rate: `12.0` is a **design default, chosen by measurement**. At trust 0.5 a grievance's
+    /// half-life is 20 game-hours instead of 138; toward a serial offender (trust 0.1) it is 63. Measured
+    /// against `0.0` over 17 game-days at 24 people (four seeds) rival pairs fell 54-66 → 18-36 and friend
+    /// pairs rose 30-46 → 47-65; over 30 days at 60 people, 277 → 111 and 229 → 155 rivals, 49 → 101 and
+    /// 52 → 86 friends (`docs/research/memory.md`). `16.0` measured warmer but shrinks the rumor book below
+    /// what `tests/rumor_book.rs` pins. `0.0` turns it off and is exactly the unforgiving curve.
+    /// `Memories::grudge`, which reads no tie, is unaffected.
+    pub forgiveness: f32,
     /// Walking speed in metres per **real** second, used by the core walker that moves a person
     /// toward its `Destination` when no `SocialMover` is steering. 1.4 m/s is an ordinary human
     /// walking speed. `SocialMover::speed` overrides it per person.
@@ -725,6 +742,9 @@ impl Default for Tuning {
             stall_epsilon: 0.25,
             failed_place_memory_hours: None,
             retaliation_refractory_hours: Some(6.0),
+            // Design default by measurement; mechanism McCullough et al. 2010 (DOI 10.1037/a0019349) and
+            // Strelan, Karremans & Krieg 2017 (DOI 10.1111/bjso.12173). See the field's doc.
+            forgiveness: 12.0,
             walk_speed: 1.4,
             // **A design default, set by measurement.** Not from a paper; the *gate* is the paper. Every
             // contact-tell that finds an informed neighbour stifles the teller (Daley–Kendall), so pacing
