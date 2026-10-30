@@ -1,0 +1,2 @@
+# Plan
+Adopt `runs/2026-10-30-16/friend-capacity-1.15.patch`. The block then was `label_hysteresis` rival-count equality; fix without touching the pinned test: the brake reads `Tie::is_close` (affinity, trust), not the hysteretic label. New: `Tuning::friend_capacity`, `Tuning::bond_scale`, `Ties::friend_count(&Tuning)`, `Tie::is_close`, `evidence --friend-capacity`. Test: `tests/friend_capacity.rs`. Pack `snub` `Power(1.15)` was planned, but fails pinned `rumor_book`, so the brake ships opt-in (default 0.0, bit-identical to HEAD) and the pack change stays a patch.
