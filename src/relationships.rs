@@ -191,6 +191,15 @@ pub struct Tie {
 }
 
 impl Tie {
+    /// Whether this tie holds a friend's affinity and trust *now*, read off the raw numbers and not off
+    /// [`TieLabel`]. The friend-capacity brake counts and spares by this, so that the label's holding
+    /// bands (`friend_band`, `label_hysteresis`), which exist to quiet a message, never steer a
+    /// trajectory: the label stays a report, the brake reads the state. Familiarity is left out: a tie
+    /// at friend affinity and trust has been met often enough, and it decays on a slower clock.
+    pub fn is_close(&self, tuning: &Tuning) -> bool {
+        self.affinity >= tuning.friend_affinity && self.trust >= tuning.friend_trust
+    }
+
     /// A fresh tie with the plan's defaults: neutral affinity and respect, trust 0.5, no familiarity.
     pub fn new(target: Entity) -> Self {
         Self {
@@ -229,13 +238,15 @@ impl Tie {
 
     /// Records one contact over `dt_days`. Familiarity is first read at `now_days`, then raised by
     /// mere exposure; affinity is nudged toward the target (Zajonc 1968, DOI 10.1037/h0025848).
-    pub fn expose(&mut self, now_days: f32, dt_days: f32, tuning: &Tuning) {
+    pub fn expose(&mut self, now_days: f32, dt_days: f32, bond_scale: f32, tuning: &Tuning) {
         let f = self.familiarity(now_days, tuning);
         self.familiarity_peak = recall::exposed_peak(f, tuning.exposure_per_day, dt_days);
         self.last_contact_day = now_days;
         // Exposure saturates on `(1 − |affinity|)` and now also honours the ceiling, through the one
         // writer. Before the ceiling, this term is what carried a village to affinity 0.999.
-        let step = tuning.mere_exposure_per_day * dt_days * (1.0 - self.affinity.abs());
+        // `bond_scale` is `Tuning::bond_scale`: the friend-capacity brake on a bond not yet formed.
+        let step =
+            tuning.mere_exposure_per_day * dt_days * (1.0 - self.affinity.abs()) * bond_scale;
         self.add_affinity(step, tuning);
     }
 
@@ -285,6 +296,11 @@ impl Ties {
     fn search(&self, target: Entity) -> Result<usize, usize> {
         let bits = target.to_bits();
         self.0.binary_search_by_key(&bits, |t| t.target.to_bits())
+    }
+
+    /// How many of these ties are close ([`Tie::is_close`]): the circle [`Tuning::friend_capacity`] bounds.
+    pub fn friend_count(&self, tuning: &Tuning) -> usize {
+        self.0.iter().filter(|tie| tie.is_close(tuning)).count()
     }
 
     /// The tie to `target`, if any.
@@ -428,13 +444,15 @@ pub(crate) fn expose_toward(
     shared_bias: Option<f32>,
     now_days: f32,
     dt_days: f32,
+    friends: usize,
     tuning: &Tuning,
 ) {
     let tie = match shared_bias {
         Some(bias) => ties.entry_with(target, bias),
         None => ties.entry(target),
     };
-    tie.expose(now_days, dt_days, tuning);
+    let scale = tuning.bond_scale(friends, tie.is_close(tuning));
+    tie.expose(now_days, dt_days, scale, tuning);
 }
 
 /// Triadic closure for one direction (Kossinets & Watts 2006, DOI 10.1126/science.1116869): when
@@ -464,6 +482,9 @@ fn expose_contacts(
         let Ok(mine) = memberships.get(entity) else {
             continue;
         };
+        // Counted once per person per tick: the brake reads how full this person's circle is, and a
+        // contact loop must not rescan the tie list for every neighbour.
+        let friends = ties.get(entity).map_or(0, |t| t.friend_count(tuning));
         for &j in &perception.contact[i] {
             let Some(&other) = perception.persons.get(j as usize) else {
                 continue;
@@ -473,7 +494,7 @@ fn expose_contacts(
                 Err(_) => None,
             };
             if let Ok(mut owned) = ties.get_mut(entity) {
-                expose_toward(&mut owned, other, bias, now, dt, tuning);
+                expose_toward(&mut owned, other, bias, now, dt, friends, tuning);
             }
         }
     }
