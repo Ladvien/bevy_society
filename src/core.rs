@@ -557,6 +557,18 @@ pub struct Tuning {
     /// off. Only the choice of a harmful activity is held back; a host's `Interact` is never refused by
     /// it. Saved.
     pub retaliation_refractory_hours: Option<f32>,
+    /// How much faster a **grievance fades toward someone its holder still trusts**: `ctx.grudge(a, b)` reads
+    /// each of `a`'s bad memories about `b` at its age times `1 + forgiveness · trust(a → b)`
+    /// ([`crate::model::recall::forgiving_pace`]). Without it every grudge fades on the one 138-hour recency
+    /// curve, whoever it is held against, so a slight from a trusted neighbour drives `snub` as long as one
+    /// from a stranger who keeps offending, and the reply re-arms the first insulter's grudge in turn.
+    ///
+    /// Forgiveness follows relationship value and low exploitation risk (McCullough et al. 2010, DOI
+    /// 10.1037/a0019349; Burnette et al. 2012, DOI 10.1177/0146167211424582), carried by post-transgression
+    /// trust (Strelan, Karremans & Krieg 2017, DOI 10.1111/bjso.12173). The papers give the direction and the
+    /// mediator, not a rate: the value is a **design default**. `0.0` turns it off and is exactly the
+    /// unforgiving curve. `Memories::grudge`, which reads no tie, is unaffected.
+    pub forgiveness: f32,
     /// Walking speed in metres per **real** second, used by the core walker that moves a person
     /// toward its `Destination` when no `SocialMover` is steering. 1.4 m/s is an ordinary human
     /// walking speed. `SocialMover::speed` overrides it per person.
@@ -725,6 +737,7 @@ impl Default for Tuning {
             stall_epsilon: 0.25,
             failed_place_memory_hours: None,
             retaliation_refractory_hours: Some(6.0),
+            forgiveness: 12.0,
             walk_speed: 1.4,
             // **A design default, set by measurement.** Not from a paper; the *gate* is the paper. Every
             // contact-tell that finds an informed neighbour stifles the teller (Daley–Kendall), so pacing

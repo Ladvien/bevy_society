@@ -83,6 +83,9 @@ fn main() {
     if let Some(hours) = args.retaliation_refractory {
         settings.tuning.retaliation_refractory_hours = Some(hours);
     }
+    if let Some(gain) = args.forgiveness {
+        settings.tuning.forgiveness = gain;
+    }
     if let Some(hours) = args.failed_place_memory {
         settings.tuning.failed_place_memory_hours = Some(hours);
     }
@@ -1495,6 +1498,8 @@ struct Args {
     friend_capacity: Option<f32>,
     /// Overrides `Tuning::retaliation_refractory_hours`, in game hours.
     retaliation_refractory: Option<f32>,
+    /// Overrides `Tuning::forgiveness`.
+    forgiveness: Option<f32>,
     /// Runs for this many game-days instead of the scenario's `ticks:`, so a long run is one flag rather
     /// than an arithmetic exercise. The friendship bound needs thirty days.
     days: Option<f32>,
@@ -1512,6 +1517,7 @@ impl Args {
             failed_place_memory: None,
             friend_capacity: None,
             retaliation_refractory: None,
+            forgiveness: None,
             positivity_offset: None,
             friend_affinity: None,
             label_hysteresis: None,
@@ -1562,6 +1568,7 @@ impl Args {
                 "--retaliation-refractory" => {
                     args.retaliation_refractory = argv.next().and_then(|v| v.parse().ok())
                 }
+                "--forgiveness" => args.forgiveness = argv.next().and_then(|v| v.parse().ok()),
                 "--failed-place-memory" => {
                     args.failed_place_memory = argv.next().and_then(|v| v.parse().ok())
                 }
