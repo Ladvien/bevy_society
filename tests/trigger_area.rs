@@ -111,3 +111,75 @@ fn a_fired_trigger_is_reported_with_its_id_and_actor() {
     assert_eq!(fired[0].actor, Some(PersonId(0)));
     assert_eq!(fired[0].target, None);
 }
+
+const LIVE: &str = r#"(
+    needs: [(id: "rest", decay_per_day: 0.1, initial: 0.5)],
+    triggers: [(id: "poke", on: Custom("poke"), then: "fx.emit(\"v1\", #{})", once: true)],
+)"#;
+
+fn emitted(app: &mut App, who: Entity) -> Vec<String> {
+    app.world_mut().write_message(FireTrigger {
+        name: "poke".to_owned(),
+        actor: Some(who),
+        target: None,
+    });
+    let mut names = Vec::new();
+    for _ in 0..2 {
+        app.update();
+        names.extend(
+            app.world_mut()
+                .resource_mut::<Messages<ScriptEvent>>()
+                .drain()
+                .map(|e| e.name),
+        );
+    }
+    names
+}
+
+#[test]
+fn an_edited_trigger_takes_effect_in_the_running_society() {
+    use bevy_society::{DefsFile, reload_defs};
+    let mut app = headless(SocietyDefs::from_ron(LIVE).expect("parses"), settings());
+    let ada = spawn_person(&mut app, "Ada", Vec2::ZERO);
+    let bram = spawn_person(&mut app, "Bram", Vec2::ZERO);
+    for _ in 0..2 {
+        app.update();
+    }
+    assert_eq!(emitted(&mut app, ada), ["v1"]);
+    assert!(emitted(&mut app, ada).is_empty(), "once, so it is spent");
+
+    // Edit the script and add a second trigger; `poke` keeps its id, so it stays spent.
+    let edited = LIVE.replace("v1", "v2").replace(
+        "once: true)],",
+        "once: true), (id: \"extra\", on: Custom(\"poke\"), then: \"fx.emit(\\\"x\\\", #{})\")],",
+    );
+    reload_defs(
+        app.world_mut(),
+        DefsFile::from_ron(&edited).expect("parses"),
+    )
+    .expect("reloads");
+    assert_eq!(
+        emitted(&mut app, ada),
+        ["x"],
+        "poke stays spent, extra is new"
+    );
+    assert_eq!(
+        emitted(&mut app, bram),
+        ["v2", "x"],
+        "a new actor runs the edited script"
+    );
+
+    // A broken edit and an edit that moves an id table are both refused, changing nothing.
+    let broken = LIVE.replace("fx.emit(", "fx.emit(((");
+    let err = reload_defs(
+        app.world_mut(),
+        DefsFile::from_ron(&broken).expect("parses"),
+    )
+    .expect_err("does not compile");
+    assert!(err.to_string().contains("poke"), "{err}");
+    let moved = LIVE.replace("\"rest\"", "\"sleep\"");
+    let err = reload_defs(app.world_mut(), DefsFile::from_ron(&moved).expect("parses"))
+        .expect_err("a need was renamed");
+    assert!(err.to_string().contains("needs"), "{err}");
+    assert_eq!(emitted(&mut app, bram), ["x"], "still the last good defs");
+}

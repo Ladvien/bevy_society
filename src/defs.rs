@@ -908,6 +908,61 @@ impl SocietyDefs {
         Self::compile(DefsFile::from_ron(text)?)
     }
 
+    /// Swaps in an edited definitions file while the society runs: the live path for an editor
+    /// that changes a trigger's script, an activity's score or an interaction's effects without a
+    /// restart. Every id in the world is an index into the id tables (needs, signals, skills,
+    /// goods, topics, deeds, factions, activities, interactions), so the edit must leave those
+    /// tables name-for-name unchanged; anything else (triggers, conversations, node effects,
+    /// considerations, effects, tunings of a definition) may change. A file that does not compile,
+    /// or that changes an id table, is refused and `self` is left as it was.
+    ///
+    /// Prefer [`reload_defs`](crate::reload_defs), which also keeps `once` and cooldown state for
+    /// the triggers that survive the edit.
+    pub fn reload(&mut self, file: DefsFile) -> Result<(), DefsError> {
+        let next = Self::compile(file)?;
+        let changed = |table: &str| {
+            Err(DefsError::Invalid {
+                owner: "reload".to_owned(),
+                message: format!(
+                    "the {table} list changed; ids already in the world index it, so a live edit \
+                     may not add, remove or reorder {table}"
+                ),
+            })
+        };
+        fn names<T>(items: &[T], name: impl Fn(&T) -> &str) -> Vec<&str> {
+            items.iter().map(name).collect()
+        }
+        if names(&self.needs, |s| &s.name) != names(&next.needs, |s| &s.name) {
+            return changed("needs");
+        }
+        if self.signals != next.signals {
+            return changed("signals");
+        }
+        if self.skill_ids != next.skill_ids || self.skills != next.skills {
+            return changed("skills");
+        }
+        if self.goods != next.goods {
+            return changed("goods");
+        }
+        if names(&self.topics, |s| &s.name) != names(&next.topics, |s| &s.name) {
+            return changed("topics");
+        }
+        if names(&self.deeds, |s| &s.name) != names(&next.deeds, |s| &s.name) {
+            return changed("deeds");
+        }
+        if names(&self.factions, |s| &s.name) != names(&next.factions, |s| &s.name) {
+            return changed("factions");
+        }
+        if names(&self.activities, |s| &s.name) != names(&next.activities, |s| &s.name) {
+            return changed("activities");
+        }
+        if names(&self.interactions, |s| &s.name) != names(&next.interactions, |s| &s.name) {
+            return changed("interactions");
+        }
+        *self = next;
+        Ok(())
+    }
+
     /// The compiled starter pack.
     pub fn starter() -> Result<Self, DefsError> {
         Self::compile(DefsFile::starter()?)

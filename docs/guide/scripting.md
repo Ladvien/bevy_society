@@ -102,6 +102,10 @@ Each trigger that runs to completion writes `TriggerFired { trigger, actor, targ
 people the event bound), in the order the triggers ran. A trigger whose `then` errors writes `ScriptError`
 instead.
 
+### Editing a running society
+
+`reload_defs(world, file)` swaps an edited `DefsFile` into a running society, so a trigger script, an activity's considerations or an interaction's effects change without a restart. Ids already in the world index the needs, signals, skills, goods, topics, deeds, factions, activities and interactions lists, so those must stay name-for-name the same; a file that adds, drops or reorders one, or does not compile, is refused with an error and the society keeps its last good defs. A trigger that keeps its `id` keeps its `once` and cooldown state; a renamed or new one starts clean. Call it between updates, not from a system.
+
 ## Errors and limits
 
 Every evaluation runs sandboxed: 10 000 operations, 16 call levels, 1 KiB strings, 256-element arrays

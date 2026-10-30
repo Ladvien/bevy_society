@@ -17,6 +17,7 @@ use bevy::ecs::message::{Message, MessageReader, MessageWriter};
 use bevy::ecs::resource::Resource;
 use bevy::ecs::schedule::IntoScheduleConfigs;
 use bevy::ecs::system::{Query, Res, ResMut, SystemParam};
+use bevy::ecs::world::World;
 use bevy::log::error;
 use bevy::transform::components::Transform;
 
@@ -24,7 +25,9 @@ use crate::core::{
     PendingActions, PersonId, PersonIndex, SocietyClock, SocietySettings, SocietySystems,
     require_core,
 };
-use crate::defs::{ActivityId, InteractionId, SocietyDefs, TriggerKind, TriggerSpec};
+use crate::defs::{
+    ActivityId, DefsError, DefsFile, InteractionId, SocietyDefs, TriggerKind, TriggerSpec,
+};
 use crate::mind::Needs;
 use crate::relationships::{TieLabel, TieLabelChanged};
 use crate::reputation::NormViolated;
@@ -205,6 +208,47 @@ pub(crate) struct NeedArmed(pub(crate) Vec<Vec<bool>>);
 /// The (deed, rumor) pairs whose `RumorReach` trigger has already fired (plan D8).
 #[derive(Resource, Debug, Clone, Default)]
 pub(crate) struct RumorReported(pub(crate) BTreeSet<(u16, u32)>);
+
+/// Applies an edited definitions file to a running society (see [`SocietyDefs::reload`] for what
+/// may change) and keeps the `once` and cooldown bookkeeping of every trigger that survives the
+/// edit, matched by its authored `id`. A trigger that was renamed or removed forgets its state; a
+/// new one starts clean. A refused file leaves the world untouched.
+///
+/// Takes `&mut World`, so call it between updates (an editor's apply step), not from a system.
+pub fn reload_defs(world: &mut World, file: DefsFile) -> Result<(), DefsError> {
+    let Some(mut defs) = world.get_resource::<SocietyDefs>().cloned() else {
+        return Err(DefsError::Invalid {
+            owner: "reload".to_owned(),
+            message: "no SocietyDefs resource to reload".to_owned(),
+        });
+    };
+    let old_ids: Vec<String> = defs.triggers.iter().map(|t| t.id.clone()).collect();
+    defs.reload(file)?;
+    let new_index: BTreeMap<&str, usize> = defs
+        .triggers
+        .iter()
+        .enumerate()
+        .map(|(i, t)| (t.id.as_str(), i))
+        .collect();
+    let remap = |old: usize| {
+        old_ids
+            .get(old)
+            .and_then(|id| new_index.get(id.as_str()))
+            .copied()
+    };
+    if let Some(mut state) = world.get_resource_mut::<TriggerState>() {
+        state.fired = std::mem::take(&mut state.fired)
+            .into_iter()
+            .filter_map(|(i, actor)| remap(i).map(|n| (n, actor)))
+            .collect();
+        state.cooling = std::mem::take(&mut state.cooling)
+            .into_iter()
+            .filter_map(|((i, actor), day)| remap(i).map(|n| ((n, actor), day)))
+            .collect();
+    }
+    world.insert_resource(defs);
+    Ok(())
+}
 
 /// Runs triggers (plan D8). Every other plugin that observes an event pushes a trigger event onto
 /// the trigger queue, and the game fires custom events with [`FireTrigger`]. Requires
