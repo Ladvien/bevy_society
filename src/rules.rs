@@ -197,17 +197,44 @@ impl TriggerState {
 #[derive(Resource, Debug, Clone, Copy, Default)]
 pub(crate) struct LastDays(pub(crate) Option<f64>);
 
-/// Which need thresholds are currently armed (plan D8): a `NeedBelow` trigger fires on crossing
-/// below and re-arms once the need is back above `below + 0.05`, so a level hovering at the
-/// threshold does not fire every tick.
+/// Which people have fired a `NeedBelow` threshold and not yet recovered (plan D8): a `NeedBelow`
+/// trigger fires for a person on crossing below, and that person re-arms once their need is back above
+/// `below + 0.05`, so a level hovering at the threshold does not fire every tick.
 ///
-/// Indexed by need, then by `NeedBelow` trigger definition order.
+/// One entry per `(need index, threshold as f32 bits, person id)`. Absent means armed, so a new person,
+/// a new threshold and an edited defs file need no bookkeeping. The key holds no trigger index, so
+/// inserting or reordering triggers does not move it.
 #[derive(Resource, Debug, Clone, Default)]
-pub(crate) struct NeedArmed(pub(crate) Vec<Vec<bool>>);
+pub(crate) struct NeedDisarmed(pub(crate) BTreeSet<(u16, u32, u32)>);
 
 /// The (deed, rumor) pairs whose `RumorReach` trigger has already fired (plan D8).
 #[derive(Resource, Debug, Clone, Default)]
 pub(crate) struct RumorReported(pub(crate) BTreeSet<(u16, u32)>);
+
+/// Where each trigger of an earlier defs list sits in the current one, matched by authored `id`
+/// (ids are unique), because the position of a trigger changes when one is inserted, removed or
+/// moved and its `once` and cooldown bookkeeping must follow the trigger, not the slot.
+///
+/// Used when an edited file is applied ([`reload_defs`]) and when a save is restored.
+pub(crate) struct TriggerRemap(Vec<Option<usize>>);
+
+impl TriggerRemap {
+    /// `old_ids[i]` is the id the trigger at index `i` had; `new_ids` are the ids now.
+    pub(crate) fn new(old_ids: &[String], new_ids: &[String]) -> Self {
+        Self(
+            old_ids
+                .iter()
+                .map(|id| new_ids.iter().position(|n| n == id))
+                .collect(),
+        )
+    }
+
+    /// The current index of the trigger that was at `old`, or `None` when it is gone (renamed or
+    /// removed) or `old` was never an index.
+    pub(crate) fn get(&self, old: usize) -> Option<usize> {
+        self.0.get(old).copied().flatten()
+    }
+}
 
 /// Applies an edited definitions file to a running society (see [`SocietyDefs::reload`] for what
 /// may change) and keeps the `once` and cooldown bookkeeping of every trigger that survives the
@@ -224,26 +251,16 @@ pub fn reload_defs(world: &mut World, file: DefsFile) -> Result<(), DefsError> {
     };
     let old_ids: Vec<String> = defs.triggers.iter().map(|t| t.id.clone()).collect();
     defs.reload(file)?;
-    let new_index: BTreeMap<&str, usize> = defs
-        .triggers
-        .iter()
-        .enumerate()
-        .map(|(i, t)| (t.id.as_str(), i))
-        .collect();
-    let remap = |old: usize| {
-        old_ids
-            .get(old)
-            .and_then(|id| new_index.get(id.as_str()))
-            .copied()
-    };
+    let new_ids: Vec<String> = defs.triggers.iter().map(|t| t.id.clone()).collect();
+    let remap = TriggerRemap::new(&old_ids, &new_ids);
     if let Some(mut state) = world.get_resource_mut::<TriggerState>() {
         state.fired = std::mem::take(&mut state.fired)
             .into_iter()
-            .filter_map(|(i, actor)| remap(i).map(|n| (n, actor)))
+            .filter_map(|(i, actor)| remap.get(i).map(|n| (n, actor)))
             .collect();
         state.cooling = std::mem::take(&mut state.cooling)
             .into_iter()
-            .filter_map(|((i, actor), day)| remap(i).map(|n| ((n, actor), day)))
+            .filter_map(|((i, actor), day)| remap.get(i).map(|n| ((n, actor), day)))
             .collect();
     }
     world.insert_resource(defs);
@@ -260,7 +277,7 @@ impl Plugin for RulesPlugin {
         app.init_resource::<TriggerQueue>()
             .init_resource::<TriggerState>()
             .init_resource::<LastDays>()
-            .init_resource::<NeedArmed>()
+            .init_resource::<NeedDisarmed>()
             .init_resource::<RumorReported>()
             .add_message::<FireTrigger>()
             .add_message::<TriggerFired>()
@@ -308,15 +325,21 @@ pub(crate) fn id_of(index: &PersonIndex, entity: Option<Entity>) -> i64 {
         .map_or(-1, |(id, _)| i64::from(id.0))
 }
 
-/// Every threshold a `NeedBelow` trigger names for need `n`, in definition order.
+/// Every distinct threshold a `NeedBelow` trigger names for need `n`, in first-definition order.
+///
+/// Distinct, because a crossing is one event that every trigger with that need and threshold matches:
+/// two triggers on one line must not each raise their own.
 fn thresholds(defs: &SocietyDefs, need: u16) -> Vec<f32> {
-    defs.triggers
-        .iter()
-        .filter_map(|def| match def.on {
-            TriggerKind::NeedBelow { need: id, below } if id.0 == need => Some(below),
-            _ => None,
-        })
-        .collect()
+    let mut lines: Vec<f32> = Vec::new();
+    for def in &defs.triggers {
+        if let TriggerKind::NeedBelow { need: id, below } = def.on
+            && id.0 == need
+            && !lines.iter().any(|t| t.to_bits() == below.to_bits())
+        {
+            lines.push(below);
+        }
+    }
+    lines
 }
 
 /// The trigger bookkeeping one tick reads and writes (plan D8).
@@ -328,7 +351,7 @@ struct TriggerBookkeeping<'w> {
     queue: Option<ResMut<'w, TriggerQueue>>,
     state: Option<ResMut<'w, TriggerState>>,
     last_days: Option<ResMut<'w, LastDays>>,
-    armed: Option<ResMut<'w, NeedArmed>>,
+    disarmed: Option<ResMut<'w, NeedDisarmed>>,
     reported: Option<ResMut<'w, RumorReported>>,
     pending: Option<ResMut<'w, PendingActions>>,
 }
@@ -341,7 +364,7 @@ struct TriggerBookkeeping<'w> {
 /// 3. queued events, in push order;
 /// 4. `TieLabelChanged` in message order, matched when the new label is the trigger's;
 /// 5. `NormViolated` in message order, actor = actor, target = witness;
-/// 6. `NeedBelow` for persons in sorted order and needs in id order;
+/// 6. `NeedBelow` for needs in id order and persons in sorted order, once per person per crossing;
 /// 7. `RumorReach` for rumors in id order, the first time a living rumor of that deed reaches its
 ///    fraction.
 ///
@@ -483,40 +506,44 @@ fn evaluate_triggers(
         ));
     }
 
-    // Needs crossing below, in sorted person order and need order.
-    let need_count = defs.needs.len();
-    for n in 0..need_count {
-        let below = thresholds(&defs, n as u16);
-        if below.is_empty() {
-            continue;
-        }
-        let Some(armed) = book.armed.as_mut() else {
-            break;
-        };
-        if armed.0.len() < need_count {
-            armed.0.resize(need_count, Vec::new());
-        }
-        if armed.0[n].len() != below.len() {
-            armed.0[n] = vec![true; below.len()];
-        }
-        for &(_, entity) in &index.sorted {
-            let Ok(levels) = needs.get(entity) else {
-                continue;
-            };
-            let level = levels.level(n);
-            for (slot, &threshold) in below.iter().enumerate() {
-                let is_armed = armed.0[n][slot];
-                if level < threshold && is_armed {
-                    armed.0[n][slot] = false;
-                    events.push((
-                        EventKey::Need(n as u16, threshold),
-                        Bindings {
-                            actor: id_of(&index, Some(entity)),
-                            ..Bindings::default()
-                        },
-                    ));
-                } else if level > threshold + 0.05 {
-                    armed.0[n][slot] = true;
+    // Needs crossing below, in need order and sorted person order. Each person is armed and disarmed
+    // on their own: one person's level never arms the line for anyone else.
+    let lines: Vec<(usize, Vec<f32>)> = (0..defs.needs.len())
+        .map(|n| (n, thresholds(&defs, n as u16)))
+        .filter(|(_, below)| !below.is_empty())
+        .collect();
+    if let Some(disarmed) = book.disarmed.as_mut() {
+        // Forget people who are gone and lines the defs no longer draw (an edit removed the trigger).
+        disarmed.0.retain(|&(need, bits, person)| {
+            index
+                .sorted
+                .binary_search_by_key(&person, |(id, _)| id.0)
+                .is_ok()
+                && lines.iter().any(|(n, below)| {
+                    *n == usize::from(need) && below.iter().any(|t| t.to_bits() == bits)
+                })
+        });
+        for (n, below) in &lines {
+            for &(id, entity) in &index.sorted {
+                let Ok(levels) = needs.get(entity) else {
+                    continue;
+                };
+                let level = levels.level(*n);
+                for &threshold in below {
+                    let key = (*n as u16, threshold.to_bits(), id.0);
+                    if level < threshold {
+                        if disarmed.0.insert(key) {
+                            events.push((
+                                EventKey::Need(*n as u16, threshold),
+                                Bindings {
+                                    actor: i64::from(id.0),
+                                    ..Bindings::default()
+                                },
+                            ));
+                        }
+                    } else if level > threshold + 0.05 {
+                        disarmed.0.remove(&key);
+                    }
                 }
             }
         }
@@ -714,7 +741,7 @@ impl EventKey {
                 },
             ) => conversation == want_conversation && node == want_node,
             (Self::Need(n, threshold), TriggerKind::NeedBelow { need, below }) => {
-                *n == need.0 && (threshold - below).abs() < 1e-6
+                *n == need.0 && threshold.to_bits() == below.to_bits()
             }
             (Self::RumorReach(deed), TriggerKind::RumorReach { deed: want, .. }) => *deed == want.0,
             _ => false,
