@@ -4882,3 +4882,4 @@ a tautological assertion removed from `tuning_covers_rates`. Full gate results a
 **Dead-code delta:** zero.
 **Top 5 remaining.** 1. Re-measure scale table on a quiet host. 2. Attribute the other ~50% of `decide_activities`. 3. Friendship capacity brake (#10, owner relaxes `label_hysteresis` equality). 4. Reconcile rival counts. 5. Insult ping-pong residue (41%).
 **Cleanup.** Created nothing outside the clone.
+**Release.** v0.6.0 published, https://crates.io/crates/bevy_society/0.6.0 (semver-checks: breaking, new pub fields on TriggerDef and PersonSave).
