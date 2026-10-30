@@ -4783,3 +4783,10 @@ a tautological assertion removed from `tuning_covers_rates`. Full gate results a
 **Evidence.** `tests/check_script.rs` 2/2, `tests/leaf.rs`, clippy `-D warnings`, doc green. Library-only API: no behaviour scenario, no plots/three-review gate. **Dead-code delta:** zero.
 **Top 5 remaining.** 1. Re-measure scale table. 2. Insult ping-pong residue (41%). 3. Friendship capacity brake (#10). 4. Reconcile rival counts. 5. Release (0.6.0 pending semver check, after 6 h from v0.5.0).
 **Cleanup.** Created nothing outside the clone.
+
+## 2026-10-30-06 — `place_dependents` and `persons_in_rect` (bevy_emerge #104/#105 acceptance)
+
+**Change.** No open issues; parked branches older, ignored. Release skipped: `v0.5.0` is 1 h old. Pick (editor need): bevy_emerge #104 "removing a building that is someone's home is refused, naming the person" and #105 "a trigger bound to an area fires only for people inside it" need crate-side queries: `place_dependents(world, place)` (home or bound role, `PersonId` order) and `persons_in_rect(world, min, max)` on the society plane. Runner-ups: friendship capacity brake (#10, escalated), scale table (host load 32).
+**Evidence.** `tests/placement.rs` 5/5 (new test: cottage lists Ada and Bram as home, mill lists Ada as work, rects select the right person), `tests/leaf.rs`, clippy `-D warnings`, `--no-default-features` build green. Library-only queries: no behaviour change, no plots/three-review gate. **Dead-code delta:** zero.
+**Top 5 remaining.** 1. Release 0.6.0 (after 6 h from v0.5.0). 2. Re-measure scale table. 3. Insult ping-pong residue (41%). 4. Friendship capacity brake (#10). 5. Reconcile rival counts.
+**Cleanup.** Created nothing outside the clone.

@@ -121,3 +121,36 @@ fn day_one(seed: u64) -> Vec<Vec3> {
 fn the_same_seed_gives_the_same_day_one_positions() {
     assert_eq!(day_one(7), day_one(7));
 }
+
+#[test]
+fn a_place_names_who_lives_or_works_there_and_a_rect_selects_who_stands_in_it() {
+    let mut app = headless(defs(), settings());
+    let placed = PlacementFile::from_ron(PLACEMENT)
+        .unwrap()
+        .spawn(app.world_mut())
+        .expect("spawns");
+    run(&mut app, 1);
+    let world = app.world();
+    let cottage = bevy_society::place_dependents(world, placed.place("cottage").unwrap());
+    let who: Vec<_> = cottage
+        .iter()
+        .map(|d| (d.name.as_deref().unwrap(), d.role.as_str()))
+        .collect();
+    assert_eq!(who, [("Ada", "home"), ("Bram", "home")]);
+    let mill = bevy_society::place_dependents(world, placed.place("mill").unwrap());
+    assert_eq!(mill.len(), 1);
+    assert_eq!(
+        (mill[0].name.as_deref(), mill[0].role.as_str()),
+        (Some("Ada"), "work")
+    );
+
+    let (ada, bram) = (
+        placed.person("Ada").unwrap(),
+        placed.person("Bram").unwrap(),
+    );
+    let near_origin =
+        bevy_society::persons_in_rect(world, Vec2::new(0.0, 0.0), Vec2::new(3.0, 3.0));
+    assert_eq!(near_origin, [bram]);
+    let west = bevy_society::persons_in_rect(world, Vec2::new(-5.0, 0.0), Vec2::new(-3.0, 3.0));
+    assert_eq!(west, [ada]);
+}
