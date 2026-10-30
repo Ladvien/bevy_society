@@ -4,6 +4,8 @@ All notable changes to bevy_society. The format follows [Keep a Changelog](https
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-10-30
+
 ### Added
 
 - **`ctx.position(a)` and `ctx.distance(a, b)`** in scripts: where a person stood at the tick start (`#{x, y}` on the society plane, the axes a trigger's `area` uses) and the plane distance between two. A person without a `Transform` is a script error naming them. Lets a trigger's `if` ask who is near whom or inside a rectangle it computes, not only the fixed `area` (bevy_emerge #105 noted `ctx` had no position reader). `tests/script_position.rs`.
