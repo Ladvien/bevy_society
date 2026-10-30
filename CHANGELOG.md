@@ -23,6 +23,7 @@ All notable changes to bevy_society. The format follows [Keep a Changelog](https
 ### Changed
 
 - **`Tuning::retaliation_refractory_hours` now defaults to `Some(6.0)`** (was `None`). Every society now answers a grievance with one blow per 6 game-hours per ordered pair; set `None` for the old behaviour. Measured at the same seeds (`docs/loop/runs/2026-10-29-04/eval.md`): 60-person town reply share of snubs 55.5% → 41.2%, rivals 170 → 138. Full `cargo test --release` green, including `friendship_bound`.
+- **A decision no longer searches lists per target and per term** (`decide_activities`, `score_option`). The actor's id is read from its slot in `PersonIndex.sorted` instead of found by scanning the population; a neighbour's id is a binary search over a sorted copy of `near` instead of a scan per target (O(neighbours²) per activity per person); and a target's tie and position are read once per option rather than once per consideration. Output is unchanged (same neighbours, same order, same draws). On a loaded host, two of three paired runs at 3 000 people were 5-9% faster and one was level: a small gain, not a measured figure.
 
 ### Fixed
 
