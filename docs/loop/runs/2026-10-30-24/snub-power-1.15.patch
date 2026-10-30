@@ -1,0 +1,5 @@
+--- a/assets/starter.society.ron
++++ b/assets/starter.society.ron
+@@ -218,7 +218,7 @@
+-                (input: Script("ctx.grudge(actor, target)"), curve: Linear(1.0, 0.0)),
++                (input: Script("ctx.grudge(actor, target)"), curve: Power(1.15)),

@@ -236,3 +236,19 @@ reunion Joy = reunion_fraction · level_at_return
 All three numbers are **design defaults**: `missing_cap` 0.4 (a mood word shows it; it stays under the 0.6 a close friend's death gives), `missing_days` 2.0 (an expedition's length), `reunion_fraction` 0.75 (a reunion is the missing turned over, so it never exceeds it). The level is raised *to*, not by, so it holds at the cap however long the trip and decays at the normal emotion half-life (0.1 day) after the return: measured, the friend's distress is gone within a day.
 
 **Measured behaviour** (`docs/loop/runs/2026-10-29-02/evidence/after`, seed 7, two away for three days): the closest friend's distress climbs 0.06 → 0.19 over the trip and her pleasure falls from +0.05 to -0.16; at the return she feels 0.15 of joy and both are back to baseline within half a day. Holders with no tie feel nothing; a party away together does not miss each other. The tie itself drifts during a trip (relaxation, balance), so closeness is read live, not frozen at departure.
+
+## A person's circle is a budget: `friend_capacity` (2026-10-30, opt-in)
+
+Zhou, Sornette, Hill & Dunbar 2005 (DOI `10.1098/rspb.2004.2970`) find nested layers of social circles, each about three times the one inside it, starting from a support clique of about 3.3; the layer above is about ten. `Tuning::friend_capacity` (`0.0` = off, the default; `10.0` is that layer) makes a tie that is not yet close gain positive affinity at `1 - close_ties / friend_capacity` of its rate (interaction, mere exposure), and at nothing once the circle is full. A tie that already is close keeps its full rate and a loss is never softened, so a full circle is stable and not eroding. The value is a design default derived from the paper's scaling ratio, not a figure it reports.
+
+**Counted from the state, not the label.** The brake counts `Tie::is_close` (affinity at `friend_affinity` and trust at `friend_trust`), not `TieLabel::Friend`. A build that read the label let a held friendship occupy capacity and so changed rival counts between `friend_band` 0 and 0.05 (`tests/label_hysteresis.rs`, 19 vs 16); reading the state keeps the label a report, and that test passes unmodified.
+
+**Why it is off by default.** It exists to make a softer `snub` safe. Measured at the same seeds against HEAD (`docs/loop/runs/2026-10-30-24/evidence/plots/before-after.png`; 17-day village, 30-day 60-person town):
+
+| | HEAD (off, `Linear` snub) | brake 10, `Linear` | brake 10, `Power(1.15)` |
+|---|---|---|---|
+| village seed 7 insults / friends / rivals | 343 / 46 / 54 | 336 / 35 / 55 | 202 / 66 / 39 |
+| village seed 99 | 361 / 35 / 66 | 371 / 34 / 68 | 167 / 80 / 30 |
+| town seed 7 | 1740 / 49 / 277 | 1729 / 42 / 331 | 781 / 249 / 49 |
+
+On the shipped `Linear` snub the brake alone does nothing useful (the town gets *more* rivals: friendship is scarce already). With `Power(1.15)` compliments to insults go from about 3:1 to about 8:1 (Baumeister et al. 2001's floor is 5:1, DOI `10.1037/1089-2680.5.4.323`) and the town's rivals fall 277 to 49. That pack change is **not** shipped: fewer insults mean fewer rumors, and the pinned `tests/rumor_book.rs::the_book_accumulates_rumors_nobody_can_tell` reads 735 rumors / 289 tellable (39%) where it requires over 1000 rumors and under 20% tellable. A host that wants it sets `friend_capacity: 10.0` and swaps the `snub` grudge curve (`runs/2026-10-30-24/snub-power-1.15.patch`). **Caveat:** the town's rival count is steep in the exponent (seed 7, brake on: `1.1` 140, `1.15` 49, `1.2` 0 rivals with 7 insults, `1.3` 5), so re-measure on any retune.

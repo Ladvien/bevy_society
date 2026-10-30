@@ -1,0 +1,4 @@
+# Review
+1. **Behavior - GREAT.** `evidence/plots/before-after.png`: with the brake on and `Power(1.15)`, insults fall 1.7-2.4x, compliments rise 21-34%, friends rise 1.4-5x, rivals fall in every run (town 277 -> 49); compliments:insults 6.6-8.8:1 (bar 5:1). Critique: the shipped default does none of this, by design; the measured combination is opt-in. The brake on the unchanged pack makes the town worse (331 vs 277 rivals), said outright in the docs.
+2. **Zoom - GREAT.** Friends plateau (town 249-255 of 3540 ordered pairs, 7%), no saturation or clipping, rivals non-zero. Critique: the exponent sweep is steep (140 / 49 / 0), recorded as a caveat.
+3. **Fresh eyes - GREAT.** Seed 99 (village and town) matches the other seeds. Default-off is byte-identical to HEAD, so no existing scenario moved. A host reads the knob from one doc paragraph.
