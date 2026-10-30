@@ -568,9 +568,9 @@ pub struct Tuning {
     /// trust (Strelan, Karremans & Krieg 2017, DOI 10.1111/bjso.12173). The papers give the direction and the
     /// mediator, not a rate: `12.0` is a **design default, chosen by measurement**. At trust 0.5 a grievance's
     /// half-life is 20 game-hours instead of 138; toward a serial offender (trust 0.1) it is 63. Measured
-    /// against `0.0` over 17 game-days at 24 people (four seeds) rival pairs fell 54-66 → 18-36 and friend
-    /// pairs rose 30-46 → 47-65; over 30 days at 60 people, 277 → 111 and 229 → 155 rivals, 49 → 101 and
-    /// 52 → 86 friends (`docs/research/memory.md`). `16.0` measured warmer but shrinks the rumor book below
+    /// against `0.0` over 17 game-days at 24 people (four seeds), directed rival ties fell 54-66 → 18-36 and
+    /// friend ties rose 30-46 → 47-65; over 30 days at 60 people, 277 → 111 and 229 → 155 rival ties, 49 → 101
+    /// and 52 → 86 friend ties (`docs/research/memory.md`). `16.0` measured warmer but shrinks the rumor book below
     /// what `tests/rumor_book.rs` pins. `0.0` turns it off and is exactly the unforgiving curve.
     /// `Memories::grudge`, which reads no tie, is unaffected.
     pub forgiveness: f32,

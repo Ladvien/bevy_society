@@ -29,7 +29,7 @@ This crate's directed trust is value and exploitation risk read together: it ris
 
 **The value 12.0 is a design default, chosen by measurement** (`docs/loop/runs/2026-10-30-25/eval.md`). At trust 0.5 a grievance's half-life is 20 hours instead of 138; at trust 0.1 (a serial offender) 63 hours. Measured against HEAD at the same seeds (17-day village of 24, 30-day town of 60):
 
-| run | insults | rival pairs | friend pairs |
+| run | insults | rival ties (directed) | friend ties (directed) |
 |---|---|---|---|
 | village seed 7 | 343 → 251 | 54 → 28 | 46 → 62 |
 | village seed 42 | 382 → 240 | 56 → 24 | 30 → 65 |

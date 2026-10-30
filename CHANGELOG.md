@@ -12,7 +12,7 @@ All notable changes to bevy_society. The format follows [Keep a Changelog](https
 
 ### Changed
 
-- **The default society forgives** (`Tuning::forgiveness` 12.0): the starter pack's `snub` reads `ctx.grudge`, so insult replies fall and rivalries stop accumulating. Same seeds against 0.6.0: a 24-person village over 17 game-days has 18-36 rival pairs instead of 54-66 and 47-65 friend pairs instead of 30-46 (four seeds); a 60-person town over 30 days has 111 and 155 rivals instead of 277 and 229, and 101 and 86 friends instead of 49 and 52. A host script reading `ctx.grudge` sees the forgiving value; set `forgiveness: 0.0` for the old one.
+- **The default society forgives** (`Tuning::forgiveness` 12.0): the starter pack's `snub` reads `ctx.grudge`, so insult replies fall and rivalries stop accumulating. Same seeds against 0.6.0, counted as directed ties: a 24-person village over 17 game-days holds 18-36 rival ties instead of 54-66 and 47-65 friend ties instead of 30-46 (four seeds); a 60-person town over 30 days holds 111 and 155 rival ties instead of 277 and 229, and 101 and 86 friend ties instead of 49 and 52. A host script reading `ctx.grudge` sees the forgiving value; set `forgiveness: 0.0` for the old one.
 
 ### Fixed
 

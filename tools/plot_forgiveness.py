@@ -19,17 +19,24 @@ import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+from PIL import Image
 
 # The village scenario runs at 64 s a game-day and 64 ticks a second.
 TICKS_PER_DAY = 64.0 * 64.0
 RUNS = (("v7", "village, seed 7"), ("v42", "village, seed 42"), ("v11", "village, seed 11"), ("t7", "town of 60, seed 7"))
 
 
+def save(fig, out, dpi):
+    """Save `fig` as a 64-colour PNG, so a committed plot stays under the 100 KB evidence limit."""
+    fig.savefig(out, dpi=dpi)
+    Image.open(out).convert("RGB").quantize(colors=64).save(out, optimize=True)
+
+
 def series(path):
     days, rivals, friends = [], [], []
     with open(path) as f:
         for i, r in enumerate(csv.DictReader(f)):
-            if i % 64:
+            if i % 256:
                 continue
             days.append(int(r["tick"]) / TICKS_PER_DAY)
             rivals.append(int(r["rivals"]))
@@ -38,7 +45,7 @@ def series(path):
 
 
 def over_time(run, out):
-    fig, axes = plt.subplots(len(RUNS), 1, figsize=(13, 12), sharex=False)
+    fig, axes = plt.subplots(len(RUNS), 1, figsize=(11, 11), sharex=False)
     for ax, (key, title) in zip(axes, RUNS):
         for label, colour, sub in (("before (HEAD)", "#c0392b", "before"), ("after (forgiveness)", "#1f77b4", "after")):
             path = run / "evidence" / sub / key / "series.csv"
@@ -48,12 +55,12 @@ def over_time(run, out):
             ax.plot(d, r, color=colour, lw=1.4, label=f"rivals, {label}")
             ax.plot(d, f, color=colour, lw=1.4, ls="--", label=f"friends, {label}")
         ax.set_title(title)
-        ax.set_ylabel("pairs")
+        ax.set_ylabel("directed ties")
         ax.grid(alpha=0.3)
         ax.legend(fontsize=8, loc="upper left")
     axes[-1].set_xlabel("game-days")
     fig.tight_layout()
-    fig.savefig(out, dpi=110)
+    save(fig, out, 70)
 
 
 def sweep(run, sweep_dir, out):
@@ -84,7 +91,7 @@ def sweep(run, sweep_dir, out):
         ax.grid(alpha=0.3)
         ax.legend(fontsize=8)
     fig.tight_layout()
-    fig.savefig(out, dpi=110)
+    save(fig, out, 110)
 
 
 def main():
