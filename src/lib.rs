@@ -173,7 +173,9 @@ pub use defs::{
     TieDelta, TopicDef, TopicId, TriggerArea, TriggerDef, TriggerOn, size_person_state,
 };
 #[cfg(feature = "dialogue")]
-pub use dialogue::{DialoguePlugin, TalkTo};
+pub use dialogue::{
+    DialoguePlugin, DialogueProblem, DialogueReferenceKind, TalkTo, dialogue_problems,
+};
 pub use economy::{EconomyPlugin, Prices, Stock, value_of};
 #[cfg(feature = "fields")]
 pub use fields::{Commotion, SocialFieldPlugin, SocialFieldSettings, SocialFields};

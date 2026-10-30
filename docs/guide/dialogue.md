@@ -113,6 +113,10 @@ a choice cannot change what the same conversation reads.
 When the conversation ends, both people record a `MemoryKind::Talked` memory (valence 0.1, importance
 0.4) and gain exposure toward each other, so talking to the player is social contact like any other.
 
+### Checking the two files agree
+
+A conversation rule, a node effect or a `DialogueNode` trigger that names a conversation or node the `DialogueScript` lacks never fires. The plugin logs each one at `error!` when either resource changes. To get them as data (an editor marking the offending rows), call `dialogue_problems(&defs, &script)`: it returns a `DialogueProblem { kind, owner, conversation, node }` per dangling reference, in definition order, empty when the two agree.
+
 ## Scripts can open a conversation
 
 `fx.converse(npc, player)` queues a conversation for the next application point. Without the feature it

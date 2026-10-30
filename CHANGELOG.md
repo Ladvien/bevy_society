@@ -4,6 +4,10 @@ All notable changes to bevy_society. The format follows [Keep a Changelog](https
 
 ## [Unreleased]
 
+### Added
+
+- **`dialogue_problems(&SocietyDefs, &DialogueScript) -> Vec<DialogueProblem>`** (feature `dialogue`): every conversation rule, node effect and `DialogueNode` trigger that names a conversation or node the script does not define, as data (`DialogueReferenceKind`, owner, conversation, node) with the plugin's log line as `Display`. The plugin's own check now uses it and also covers `DialogueNode` triggers, which it skipped before. For an editor that marks dangling rows while a conversation graph is authored. `tests/dialogue.rs`.
+
 ### Fixed
 
 - **A save now keeps the price book** (`SocietySave::prices`, `f32` bits, `#[serde(default)]`, `VERSION` stays 4). `ctx.price` reads the tick-start snapshot, frozen before the tick's own price update, so the first tick after a restore read the fresh world's book instead of the one the uninterrupted run held. `tests/economy.rs`.

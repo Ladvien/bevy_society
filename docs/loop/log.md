@@ -4904,3 +4904,10 @@ a tautological assertion removed from `tuning_covers_rates`. Full gate results a
 **Evidence.** `runs/2026-10-30-22/perf.md` (fastest/median/spread per size). Host load 11-38, spreads 28-134%, so the table says "upper bounds" outright. No code change: no plots/three-review gate. **Dead-code delta:** zero.
 **Top 5 remaining.** 1. Re-measure on a quiet host (spread under 20%). 2. Attribute the other ~50% of `decide_activities`. 3. Friendship capacity brake (#10, owner relaxes `label_hysteresis` equality). 4. Reconcile rival counts. 5. Insult ping-pong residue (41%).
 **Cleanup.** Created nothing outside the clone (`target/` is the clone's own).
+
+## 2026-10-30-23 - `dialogue_problems`: dangling dialogue references as data (bevy_emerge #106)
+
+**Change.** No open issues; parked branches older, ignored. Release skipped: v0.6.0 is under 6 h old. Friend-capacity brake still blocked (needs `label_hysteresis` equality loosened). Pick (idle ladder 1, editor need: bevy_emerge #106 wants a conversation graph "validated" and rows marked): the crate only logged conversation rules and node effects that name a conversation or node the `DialogueScript` lacks, and skipped `DialogueNode` triggers. `dialogue_problems(&defs, &script) -> Vec<DialogueProblem>` (+ `DialogueReferenceKind`) returns every one as data, covers triggers too; the plugin's log uses it.
+**Evidence.** `tests/dialogue.rs::dialogue_problems_lists_each_dangling_reference` (7/7), lib tests, `leaf`, `readme`, `guide_blocks`, clippy `-D warnings`, fmt, doc, `--no-default-features` build (5 pre-existing dead-code warnings, same as HEAD). API only: no plots/three-review gate (precedent: pass 15). **Dead-code delta:** zero.
+**Top 5 remaining.** 1. Release 0.6.1 after 6 h from v0.6.0. 2. Re-measure scale table on a quiet host. 3. Friendship capacity brake (#10). 4. Reconcile rival counts. 5. Insult ping-pong residue (41%).
+**Cleanup.** Created nothing outside the clone (`/tmp/new_fn.rs` removed).
