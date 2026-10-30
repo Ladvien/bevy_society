@@ -4748,3 +4748,10 @@ a tautological assertion removed from `tuning_covers_rates`. Full gate results a
 **Top 5 remaining.** 1. Reconcile rival count with `friendship_bound`. 2. Clock decision `travel_timeout_hours`. 3. Re-measure scale table. 4. Release 0.5.0 (breaking `MemoryKind` variant unreleased). 5. Decide whether to default the refractory on.
 
 **Release 2026-10-29-05.** Published **0.5.0** (`MemoryKind::Suffered` is breaking per semver-checks), https://crates.io/crates/bevy_society/0.5.0, tag `v0.5.0`. Also fixed `examples/evidence.rs` (non-exhaustive `Suffered` match that broke `cargo test`'s example build on `main`). **Cleanup:** created nothing outside the clone. Earlier leftovers still listed, not removed: `/home/ladvien/.cache/loop-runs/before-tree`, `/home/ladvien/.cache/price-before-src`.
+
+## 2026-10-30-01 — evidence harness counts directed ties
+
+**Change.** `examples/evidence.rs` halved the friend and rival tie counts (`/ 2`), assuming mutual ties; one-way ties were rounded down. Now directed ties, the unit `tests/friendship_bound.rs` uses (top item 3 of last pass). Library unchanged. No open issues; parked branches older, ignored. Host load ~30, so no perf re-measure and no behaviour gate.
+**Evidence.** `runs/2026-10-30-01/eval.md`, `evidence/after/summary.json` (village, 24, 6 days: friends 25, rivals 93). **Dead-code delta:** zero. Old numbers in earlier logs are halved; compare ×2.
+**Top 5 remaining.** 1. Re-measure scale table on a quiet host. 2. Decide default for `retaliation_refractory_hours`. 3. Clock decision `travel_timeout_hours`. 4. Insult ping-pong residue (41% replies). 5. Friendship capacity brake (#10).
+**Cleanup.** Created nothing outside the clone.
