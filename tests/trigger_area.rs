@@ -80,3 +80,34 @@ fn an_area_on_an_event_with_no_actor_is_refused() {
     .expect("inverted corners");
     assert!(err.to_string().contains("min <= max"), "{err}");
 }
+
+#[test]
+fn a_fired_trigger_is_reported_with_its_id_and_actor() {
+    use bevy_society::{PersonId, TriggerFired};
+    let mut app = headless(SocietyDefs::from_ron(AREA).expect("parses"), settings());
+    let inside = spawn_person(&mut app, "In", Vec2::new(5.0, 5.0));
+    let outside = spawn_person(&mut app, "Out", Vec2::new(30.0, 5.0));
+    for _ in 0..2 {
+        app.update();
+    }
+    let mut fired = Vec::new();
+    for who in [outside, inside] {
+        app.world_mut().write_message(FireTrigger {
+            name: "poke".to_owned(),
+            actor: Some(who),
+            target: None,
+        });
+        for _ in 0..2 {
+            app.update();
+            fired.extend(
+                app.world_mut()
+                    .resource_mut::<Messages<TriggerFired>>()
+                    .drain(),
+            );
+        }
+    }
+    assert_eq!(fired.len(), 1, "only the person inside the area fired it");
+    assert_eq!(fired[0].trigger, "poke");
+    assert_eq!(fired[0].actor, Some(PersonId(0)));
+    assert_eq!(fired[0].target, None);
+}
