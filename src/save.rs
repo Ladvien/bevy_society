@@ -295,6 +295,11 @@ pub struct PersonSave {
     /// restores as nothing avoided. A place without a `PlaceKey` is left out.
     #[serde(default)]
     pub failed_places: Vec<(u64, u64)>,
+    /// How close a walker had come to its target and the game-day it last got closer, as `f32` and `f64`
+    /// bits: the stall window of `Tuning::stall_timeout_hours`. Absent from an older file, which restores
+    /// as a fresh window, the state it was saved without. `VERSION` 4.
+    #[serde(default)]
+    pub travel_progress: Option<(u32, u64)>,
 }
 
 /// One rumor, with every person reference as a [`PersonKey`].
@@ -510,6 +515,7 @@ struct PersonCapture {
     velocity: Option<&'static crate::steering::SocialVelocity>,
     /// Goods held, when the pack defines any.
     stock: Option<&'static crate::Stock>,
+    progress: Option<&'static crate::behavior::TravelProgress>,
 }
 
 /// Entity to [`PlaceKey`], for the places the host keyed.
@@ -700,6 +706,9 @@ pub fn capture(world: &mut World) -> SocietySave {
                     .filter_map(|(place, until)| Some((*place_keys.get(place)?, until.to_bits())))
                     .collect()
             }),
+            travel_progress: person
+                .progress
+                .map(|p| (p.best.to_bits(), p.improved_day.to_bits())),
             signals: person.signals.clone(),
             doing,
             destination: person
@@ -1256,6 +1265,17 @@ fn write_person(
                 .filter_map(|&(key, until)| Some((*places.get(&key)?, f64::from_bits(until))))
                 .collect(),
         ));
+    }
+    match person.travel_progress {
+        Some((best, improved)) => {
+            em.insert(crate::behavior::TravelProgress {
+                best: f32::from_bits(best),
+                improved_day: f64::from_bits(improved),
+            });
+        }
+        None => {
+            em.remove::<crate::behavior::TravelProgress>();
+        }
     }
     if let Some(doing) = doing {
         em.insert(doing);
