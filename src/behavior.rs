@@ -2767,8 +2767,15 @@ fn apply_effects(
         let Some(mut ties) = world.get_mut::<Ties>(owner) else {
             continue;
         };
+        let friends = ties.friend_count(&tuning);
         let tie = ties.entry(other);
-        tie.add_affinity(delta.affinity, &tuning);
+        // The friend-capacity brake slows only a gain; a loss is never softened.
+        let scale = if delta.affinity > 0.0 {
+            tuning.bond_scale(friends, tie.is_close(&tuning))
+        } else {
+            1.0
+        };
+        tie.add_affinity(delta.affinity * scale, &tuning);
         tie.trust = (tie.trust + delta.trust).clamp(0.0, 1.0);
         tie.respect = (tie.respect + delta.respect).clamp(-1.0, 1.0);
         if delta.familiarity != 0.0 {
@@ -3402,7 +3409,10 @@ fn expose(world: &mut World, holder: Entity, other: Entity, settings: &SocietySe
     let dt = world_dt(world);
     let tuning = settings.tuning.clone();
     if let Some(mut ties) = world.get_mut::<Ties>(holder) {
-        crate::relationships::expose_toward(&mut ties, other, bias, now as f32, dt, &tuning);
+        let friends = ties.friend_count(&tuning);
+        crate::relationships::expose_toward(
+            &mut ties, other, bias, now as f32, dt, friends, &tuning,
+        );
     }
 }
 
