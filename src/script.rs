@@ -98,6 +98,60 @@ impl ScriptCompiler {
     }
 }
 
+/// What a piece of authored script text must be, so [`check_script`] parses it the way the
+/// definitions compiler will.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ScriptKind {
+    /// A single expression: a trigger `if`, a consideration, an interaction `condition`.
+    Expression,
+    /// A statement list: a trigger `then`, an effect, an interaction script.
+    Statements,
+}
+
+/// Where and why a script does not parse, from [`check_script`].
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ScriptSyntaxError {
+    /// The 1-based line of the error, when Rhai knows it.
+    pub line: Option<usize>,
+    /// The 1-based column of the error, when Rhai knows it.
+    pub column: Option<usize>,
+    /// Rhai's description of the error, without the position.
+    pub message: String,
+}
+
+impl std::fmt::Display for ScriptSyntaxError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match (self.line, self.column) {
+            (Some(line), Some(column)) => {
+                write!(f, "line {line}, column {column}: {}", self.message)
+            }
+            (Some(line), None) => write!(f, "line {line}: {}", self.message),
+            _ => f.write_str(&self.message),
+        }
+    }
+}
+
+impl std::error::Error for ScriptSyntaxError {}
+
+/// Parses script text under the same sandbox limits as the definitions compiler and reports the
+/// first syntax error with its line and column, without needing a [`DefsFile`](crate::DefsFile)
+/// or a running app. An editor calls this on every edit and refuses to save text that fails.
+/// Nothing is evaluated; a script that parses can still fail at run time (an unknown function is
+/// found only when it runs).
+pub fn check_script(source: &str, kind: ScriptKind) -> Result<(), ScriptSyntaxError> {
+    let mut engine = Engine::new_raw();
+    apply_limits(&mut engine);
+    let parsed = match kind {
+        ScriptKind::Expression => engine.compile_expression(source),
+        ScriptKind::Statements => engine.compile(source),
+    };
+    parsed.map(|_| ()).map_err(|err| ScriptSyntaxError {
+        line: err.1.line(),
+        column: err.1.position(),
+        message: err.0.to_string(),
+    })
+}
+
 fn script_error(owner: &str, err: &ParseError) -> DefsError {
     DefsError::Script {
         owner: owner.to_owned(),

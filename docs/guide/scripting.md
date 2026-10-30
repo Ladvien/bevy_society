@@ -108,6 +108,10 @@ A failure — a runtime error, a wrong return type, or the operation limit — l
 condition counts as false, a failed consideration scores 0, and a failed effect applies none of its
 queued actions.
 
+### Checking text before it is saved
+
+`check_script(source, ScriptKind::Expression | ScriptKind::Statements)` parses script text under the same limits as the definitions compiler, without a `DefsFile` or an app, and returns `ScriptSyntaxError { line, column, message }` for the first syntax error. An editor calls it on every edit and refuses to save text that fails. It evaluates nothing: an unknown function is found only when the script runs.
+
 ## Firing your own events
 
 Write a message:
