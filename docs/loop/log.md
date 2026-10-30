@@ -4730,3 +4730,11 @@ a tautological assertion removed from `tuning_covers_rates`. Full gate results a
 5. Re-measure the scale table on a quiet host.
 
 **Cleanup.** Nothing created outside the clone. Earlier leftovers unchanged: `/home/ladvien/.cache/loop-runs/before-tree`, `/home/ladvien/.cache/price-before-src` (listed, not removed).
+
+## 2026-10-29-04 — a reported deed's victim keeps a `Suffered` memory
+
+**Change.** Assumed decision (owner may override): option 2 of `needs-decision/a-victim-remembers-nothing-a-host-reported.md`. `MemoryKind::Suffered { deed, actor }` recorded at the patient of a `ReportDeed` with harm < 0, valence `-(0.3+|harm|)`; save `VERSION` 4 (3 → 4 no-op upgrade). Victim `grudge` was 0.0000 forever, now 0.8 at the deed for `brawl` (harm −0.5), so `snub` is reachable. Witnesses and bystanders unchanged. No open issues; parked branches not adopted (older, other items).
+
+**Evidence.** `tests/report_deed.rs::a_reported_victim_remembers_and_resents_the_actor`. No plots/three-review gate run (host loaded; narrow path only `ReportDeed`, no scenario uses it). **Dead-code delta:** zero.
+
+**Top 5 remaining.** 1. Insult reply ping-pong. 2. Reconcile rival count with `friendship_bound`. 3. Clock decision `travel_timeout_hours`. 4. Re-measure scale table. 5. Release (breaking change pending, 0.5.0).

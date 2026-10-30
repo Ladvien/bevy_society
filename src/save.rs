@@ -61,7 +61,7 @@ use crate::rumor::{Rumor, RumorBook, RumorId};
 /// for (currently 1). It refuses any other version rather than guessing at a layout, so a host that
 /// ships a save and later upgrades the crate gets a `Version` error it can act on instead of a
 /// silently wrong society.
-pub const VERSION: u32 = 3;
+pub const VERSION: u32 = 4;
 
 // -------------------------------------------------------------------------------------------------
 // The saved shape: plain fields, no `Entity`
@@ -156,6 +156,13 @@ pub enum MemoryKindSave {
     },
     /// A deed seen by the person.
     Witnessed {
+        /// The deed definition.
+        deed: DeedId,
+        /// Who did it, when that person is still keyed.
+        actor: Option<u64>,
+    },
+    /// A deed done to this person. `VERSION` 4.
+    Suffered {
         /// The deed definition.
         deed: DeedId,
         /// Who did it, when that person is still keyed.
@@ -367,6 +374,9 @@ impl SocietySave {
     ///   goods since the save needs no entry for them. People who are `Dormant` or `Deceased` upgrade
     ///   exactly as the living do.
     ///
+    /// - **Version 3 to 4.** The only difference is the `Suffered` memory kind, which no older file
+    ///   holds; nothing needs rewriting.
+    ///
     /// A save already at [`VERSION`] is returned unchanged.
     ///
     /// # Errors
@@ -381,6 +391,10 @@ impl SocietySave {
             // `away_since_bits` is absent from a version-2 file and deserializes as `None`: nobody
             // was away, because the marker did not exist.
             self.version = 3;
+        }
+        if self.version == 3 {
+            // Version 4 only adds `MemoryKindSave::Suffered`; no version-3 file contains one.
+            self.version = 4;
         }
         if self.version != VERSION {
             return Err(RestoreError::Version {
@@ -613,6 +627,10 @@ pub fn capture(world: &mut World) -> SocietySave {
                         initiated: *initiated,
                     },
                     MemoryKind::Witnessed { deed, actor } => MemoryKindSave::Witnessed {
+                        deed: *deed,
+                        actor: person_keys.get(actor).copied(),
+                    },
+                    MemoryKind::Suffered { deed, actor } => MemoryKindSave::Suffered {
                         deed: *deed,
                         actor: person_keys.get(actor).copied(),
                     },
@@ -1106,6 +1124,12 @@ fn write_person(
                         initiated: *initiated,
                     },
                     MemoryKindSave::Witnessed { deed, actor } => MemoryKind::Witnessed {
+                        deed: *deed,
+                        actor: actor
+                            .and_then(|key| persons.get(&key).copied())
+                            .unwrap_or(Entity::PLACEHOLDER),
+                    },
+                    MemoryKindSave::Suffered { deed, actor } => MemoryKind::Suffered {
                         deed: *deed,
                         actor: actor
                             .and_then(|key| persons.get(&key).copied())
