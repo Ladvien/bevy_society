@@ -4874,3 +4874,11 @@ a tautological assertion removed from `tuning_covers_rates`. Full gate results a
 **Evidence.** `tests/save.rs` 4/4 (was 3/4); new `tests/script_position.rs` (distance and position in a trigger's `if`; a moved person changes the answer); full `cargo test --release --all-features --no-fail-fast` green (92 binaries ok), clippy `-D warnings`, fmt, doc, `--no-default-features` build and tests. Bug fix plus API: no new behaviour scenario, no plots/three-review gate (precedent: iterations 14-15). **Dead-code delta:** zero.
 **Top 5 remaining.** 1. Release 0.6.0 (after 6 h from v0.5.0, i.e. after 06:42; new API). 2. `FailedPlaces` is also unsaved (it did not trip the test, but is the same class of divergence). 3. Re-measure scale table on a quiet host. 4. Friendship capacity brake (#10, owner relaxes `label_hysteresis` equality). 5. Reconcile rival counts.
 **Cleanup.** Created nothing outside the clone; `stash@{0}` (`iter58-wip` popped, none left from this pass).
+
+## 2026-10-30-19 - save/restore bug: the failed-place memory was not saved
+
+**Change.** No open issues; parked branches older, ignored. Pick (bug recorded in the log, top item 2 of pass 18): `FailedPlaces` (`failed_place_memory_hours`) steers `decide_activities` and was "Not saved", the same class as the retaliation refractory. `PersonSave::failed_places` (place key, until-day bits, `#[serde(default)]`, `VERSION` 4) saves and restores it; unkeyed places are left out. Release 0.6.0 follows (v0.5.0 is over 6 h old).
+**Evidence.** `tests/failed_place.rs::a_restore_keeps_the_failed_places` (feature `serde`: the failed tavern is in the save by key and a restored world recaptures the same list); full `cargo test --release --all-features` green (0 failing binaries), clippy `-D warnings`, fmt, `--no-default-features` build. Bug fix: no behaviour scenario, no plots/three-review gate (precedent: pass 18).
+**Dead-code delta:** zero.
+**Top 5 remaining.** 1. Re-measure scale table on a quiet host. 2. Attribute the other ~50% of `decide_activities`. 3. Friendship capacity brake (#10, owner relaxes `label_hysteresis` equality). 4. Reconcile rival counts. 5. Insult ping-pong residue (41%).
+**Cleanup.** Created nothing outside the clone.

@@ -29,6 +29,7 @@ All notable changes to bevy_society. The format follows [Keep a Changelog](https
 ### Fixed
 
 - **A restore now continues exactly as the uninterrupted run.** `retaliation_refractory_hours` became `Some(6.0)` by default, but the per-person `RecentHarm` it writes was not saved, so a reload let an insult through that the uninterrupted society was still refusing and `tests/save.rs::the_hundred_ticks_after_a_restore_are_the_uninterrupted_ones` failed on `main`. `PersonSave::recent_harm` carries it (`#[serde(default)]`, so older files still load and restore with no refractory running; `VERSION` stays 4).
+- **A restore keeps the places a person is avoiding.** `Tuning::failed_place_memory_hours` writes a per-person `FailedPlaces` that steers `decide_activities` and was not saved, the same class of divergence as the retaliation refractory. `PersonSave::failed_places` (place key, until-day bits; `#[serde(default)]`, `VERSION` stays 4) carries it; a place without a `PlaceKey` is left out.
 - `examples/evidence` reported `friends` and `rivals` as `ties / 2`, which assumes every tie is mutual and rounded one-way ties down. It now reports directed ties, the unit `tests/friendship_bound.rs` counts.
 
 ## [0.5.0] - 2026-10-30
