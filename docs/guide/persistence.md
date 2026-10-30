@@ -33,7 +33,7 @@ A person without a `PersonKey` is **left out of the save**, with one `warn!` per
 | `names` | The names of every definition list (needs, topics, deeds, factions, activities), in definition order. Ids are indices into these lists, so this is how a restore notices the defs have moved. |
 | `clock` | The tick count, game time in days, `dt_days`, and the fixed-step accumulator. |
 | `rng` | The one random stream's seed, stream number and word position, so the draws after a reload are the draws that would have followed. |
-| `persons` | One `PersonSave` per keyed person, ascending by key: personality, mood, emotions, needs, outgoing ties (affinity, trust, respect, familiarity peak, last contact, label), opinions, rumor knowledge, memories, memberships, signals, status, `dormant` and `deceased`, the running activity and its target, the walk destination, and the last ORCA velocity under `steering`. |
+| `persons` | One `PersonSave` per keyed person, ascending by key: personality, mood, emotions, needs, outgoing ties (affinity, trust, respect, familiarity peak, last contact, label), opinions, rumor knowledge, memories, memberships, signals, status, `dormant` and `deceased`, the running activity and its target, the walk destination, who the person has just harmed and until when (the retaliation refractory), and the last ORCA velocity under `steering`. |
 | `rumors` | The rumor book in order, so `RumorId`s stay stable. |
 | `triggers` | Which `once` triggers fired, every cooldown, the clock instant `Hour` triggers measure against, which need thresholds are armed and which reach triggers fired. |
 | `faction_stats` | The faction aggregates. |

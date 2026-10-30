@@ -284,6 +284,12 @@ pub struct PersonSave {
     /// save. `VERSION` 3.
     #[serde(default)]
     pub away_since_bits: Option<u64>,
+    /// People this person has just harmed and the game-day each may be harmed again (as `f64` bits),
+    /// in the order they were written: `Tuning::retaliation_refractory_hours`. Absent from an older file,
+    /// which restores as no refractory running, the state it was saved without. A target without a
+    /// `PersonKey` is left out.
+    #[serde(default)]
+    pub recent_harm: Vec<(u64, u64)>,
 }
 
 /// One rumor, with every person reference as a [`PersonKey`].
@@ -490,6 +496,7 @@ struct PersonCapture {
     dormant: Has<Dormant>,
     deceased: Has<crate::Deceased>,
     away: Option<&'static crate::AwaySince>,
+    harmed: Option<&'static crate::behavior::RecentHarm>,
     signals: &'static Signals,
     doing: Option<&'static Doing>,
     destination: Option<&'static Destination>,
@@ -673,6 +680,13 @@ pub fn capture(world: &mut World) -> SocietySave {
             dormant: person.dormant,
             deceased: person.deceased,
             away_since_bits: person.away.map(|since| since.0.to_bits()),
+            recent_harm: person.harmed.map_or_else(Vec::new, |harmed| {
+                harmed
+                    .0
+                    .iter()
+                    .filter_map(|(other, until)| Some((*person_keys.get(other)?, until.to_bits())))
+                    .collect()
+            }),
             signals: person.signals.clone(),
             doing,
             destination: person
@@ -1208,6 +1222,17 @@ fn write_person(
         }
     }
     em.insert(person.signals.clone());
+    if person.recent_harm.is_empty() {
+        em.remove::<crate::behavior::RecentHarm>();
+    } else {
+        em.insert(crate::behavior::RecentHarm(
+            person
+                .recent_harm
+                .iter()
+                .filter_map(|&(key, until)| Some((*persons.get(&key)?, f64::from_bits(until))))
+                .collect(),
+        ));
+    }
     if let Some(doing) = doing {
         em.insert(doing);
     } else {
