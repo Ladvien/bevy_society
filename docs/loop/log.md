@@ -4776,3 +4776,10 @@ a tautological assertion removed from `tuning_covers_rates`. Full gate results a
 **Evidence.** `tests/placement.rs` 4/4: RON round-trip equality, homes/workplace/faction/tie present after spawn, a bad reference spawns nothing and names the owner, same seed gives same positions after 200 ticks. Library-only data path: no behaviour scenario touched, so no plots/three-review gate; host load not measured. **Dead-code delta:** zero.
 **Top 5 remaining.** 1. Re-measure scale table. 2. Insult ping-pong residue (41%). 3. Friendship capacity brake (#10). 4. Reconcile rival counts. 5. Release (new API, 0.6.0 pending semver check).
 **Cleanup.** Created nothing outside the clone; scratch `/tmp/p.py` removed.
+
+## 2026-10-30-05 — `check_script`: standalone script syntax check with line and column
+
+**Change.** No open issues; parked branches older, ignored. Release skipped: `v0.5.0` is under 6 h old. Pick (editor need, bevy_emerge #105 acceptance "a syntax error is refused with the line and message"): `check_script(source, ScriptKind)` → `ScriptSyntaxError { line, column, message }`, same sandbox limits as the compiler, no app or `DefsFile` needed. Runner-ups: friendship capacity brake (#10, escalated), scale-table re-measure (host load 14-20).
+**Evidence.** `tests/check_script.rs` 2/2, `tests/leaf.rs`, clippy `-D warnings`, doc green. Library-only API: no behaviour scenario, no plots/three-review gate. **Dead-code delta:** zero.
+**Top 5 remaining.** 1. Re-measure scale table. 2. Insult ping-pong residue (41%). 3. Friendship capacity brake (#10). 4. Reconcile rival counts. 5. Release (0.6.0 pending semver check, after 6 h from v0.5.0).
+**Cleanup.** Created nothing outside the clone.

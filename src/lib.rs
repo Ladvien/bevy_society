@@ -201,7 +201,10 @@ pub use save::{
     NamesSave, PersonSave, RestoreError, RestoreReport, RngSave, RumorSave, SocietySave, TieSave,
     TriggersSave, VERSION, capture, restore,
 };
-pub use script::{ScriptEngine, ScriptError, ScriptEvent, ScriptId, ScriptValue};
+pub use script::{
+    ScriptEngine, ScriptError, ScriptEvent, ScriptId, ScriptKind, ScriptSyntaxError, ScriptValue,
+    check_script,
+};
 #[cfg(feature = "steering")]
 pub use steering::{Obstacle, SocialMover, SocialVelocity, SteeringPlugin};
 pub use trace::{Decision, DecisionTrace, ScoredOption};
