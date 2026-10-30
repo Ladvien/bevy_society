@@ -4,6 +4,10 @@ All notable changes to bevy_society. The format follows [Keep a Changelog](https
 
 ## [Unreleased]
 
+### Fixed
+
+- `examples/evidence` reported `friends` and `rivals` as `ties / 2`, which assumes every tie is mutual and rounded one-way ties down. It now reports directed ties, the unit `tests/friendship_bound.rs` counts.
+
 ## [0.5.0] - 2026-10-30
 
 ### Added

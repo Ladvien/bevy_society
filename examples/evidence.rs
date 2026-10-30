@@ -1062,8 +1062,10 @@ fn snapshot_row(
         opinion_variance: variance,
         reach,
         known_by,
-        friends: friends / 2,
-        rivals: rivals / 2,
+        // Directed ties, the unit `tests/friendship_bound.rs` counts. Halving them assumed every tie is mutual;
+        // a one-way rivalry (the common case after a snub) rounded down to nothing.
+        friends,
+        rivals,
         doing,
         store: store_spread(world_ref, &world.villagers),
         price: world_ref
@@ -1373,8 +1375,8 @@ fn summary(
         book.rumors.len(),
         knowers,
         peak_reach,
-        friends / 2,
-        rivals / 2,
+        friends,
+        rivals,
         endings.0,
         endings.1,
         rival_transitions.0,
