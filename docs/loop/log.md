@@ -4804,3 +4804,10 @@ a tautological assertion removed from `tuning_covers_rates`. Full gate results a
 **Evidence.** `tests/trigger_area.rs` 2/2 (inside fires, outside and walked-out do not, edge inclusive; bad areas refused), full `cargo test --release` green, clippy `-D warnings`, `--no-default-features` build (5 pre-existing dialogue-gated warnings). Data path only, no behaviour scenario touched: no plots/three-review gate; host load not measured. **Dead-code delta:** zero.
 **Top 5 remaining.** 1. Release 0.6.0 (after 6 h from v0.5.0). 2. Re-measure scale table. 3. Insult ping-pong residue (41%). 4. Friendship capacity brake (#10). 5. Reconcile rival counts.
 **Cleanup.** Created nothing outside the clone.
+
+## 2026-10-30-09 — `DefsFile::to_ron`: every definition type serialises (bevy_emerge #104/#105 "crate's serde types are the data")
+
+**Change.** No open issues; parked branches older, ignored. Release skipped: `v0.5.0` is 2 h old. Pick (editor need): `DefsFile` and every type under it were `Deserialize` only, so an editor could load a definitions file and never save an edited trigger, activity or need. Added `Serialize` to all of them (`Trait`, `EmotionKind`, `TieLabel`, `Curve` too, no `serde` feature needed, matching `Deserialize`) and `DefsFile::to_ron`. Runner-ups: scale-table re-measure (host load 34), friendship brake (#10, needs a source).
+**Evidence.** `tests/defs_roundtrip.rs` 3/3 (starter, starter+village: second write equals first and reloaded file compiles; an edited trigger keeps `if`, `once`, cooldown, area), `tests/leaf.rs` and `--no-default-features` green, clippy `-D warnings`, fmt. Data path only: no behaviour scenario, no plots/three-review gate. **Dead-code delta:** zero.
+**Top 5 remaining.** 1. Release 0.6.0 (after 6 h from v0.5.0; new API). 2. Re-measure scale table. 3. Insult ping-pong residue (41%). 4. Friendship capacity brake (#10). 5. Reconcile rival counts.
+**Cleanup.** Created nothing outside the clone.

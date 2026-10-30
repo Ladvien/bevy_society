@@ -282,7 +282,7 @@ the feature on, a name the script does not define is an `error!`.
 
 ## Placing persons
 
-A definitions file says what kinds of things exist; a `PlacementFile` says who and where. It is RON too, and an editor can save it and a game load it: `PlacementFile::from_ron(text)` and `.to_ron()` round-trip.
+A definitions file says what kinds of things exist (`DefsFile::from_ron(text)` and `.to_ron()` round-trip, so an editor can save what it edited); a `PlacementFile` says who and where. It is RON too, and an editor can save it and a game load it: `PlacementFile::from_ron(text)` and `.to_ron()` round-trip.
 
 ```text
 (

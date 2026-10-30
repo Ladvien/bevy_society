@@ -6,7 +6,7 @@
 
 use bevy::prelude::*;
 use bevy_emerge_rng::DetRng;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 use crate::core::require_core;
 use crate::defs::SocietyDefs;
@@ -17,8 +17,7 @@ use crate::{
 };
 
 /// The label a tie carries, recomputed each tick from affinity and familiarity (plan D4).
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Reflect, Deserialize)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize))]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Reflect, Serialize, Deserialize)]
 pub enum TieLabel {
     /// Barely known: familiarity below 0.1.
     #[default]

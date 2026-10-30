@@ -12,7 +12,7 @@ use bevy::ecs::resource::Resource;
 use bevy::ecs::system::{Commands, Query, Res};
 use bevy::log::error;
 use bevy::reflect::Reflect;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 use crate::beliefs::{Opinion, Opinions};
 use crate::core::Person;
@@ -76,7 +76,7 @@ pub struct ActivityId(pub u16);
 pub struct InteractionId(pub u16);
 
 /// Everything a host hands in, as one RON document. Every list is optional.
-#[derive(Debug, Clone, Default, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 #[serde(deny_unknown_fields, default)]
 pub struct DefsFile {
     /// Needs persons carry; they decay per game-day.
@@ -106,7 +106,7 @@ pub struct DefsFile {
 }
 
 /// A need. Level 1 is satisfied, 0 is desperate.
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct NeedDef {
     /// Unique name.
@@ -120,7 +120,7 @@ pub struct NeedDef {
 }
 
 /// A host signal. The crate never changes its value; the host sets it.
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct SignalDef {
     /// Unique name.
@@ -135,7 +135,7 @@ pub struct SignalDef {
 /// this is the endowment. The three-way grouping of Big Five traits onto kinds of work is the crate's own
 /// choice — no paper in the corpus assigns traits to trades — and each group reads exactly one trait so
 /// that the mapping is inspectable in one place.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum SkillGroup {
     /// Diligence: scales with conscientiousness.
     Craft,
@@ -160,7 +160,7 @@ impl SkillGroup {
 ///
 /// "Meat and honey are meticulously shared among the Ache, but goods purchased by money are not" —
 /// Henrich et al. 2005 (DOI `10.1017/S0140525X05000142`). A good is a level a person holds, nothing more.
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct GoodDef {
     /// Unique name.
@@ -168,7 +168,7 @@ pub struct GoodDef {
 }
 
 /// A named capability. Level comes from personality, not from stored state.
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct SkillDef {
     /// Unique name.
@@ -178,7 +178,7 @@ pub struct SkillDef {
 }
 
 /// An opinion topic.
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct TopicDef {
     /// Unique name.
@@ -186,7 +186,7 @@ pub struct TopicDef {
 }
 
 /// A deed a person can do to another. Witnesses judge it by their opinion of `topic`.
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct DeedDef {
     /// Unique name.
@@ -198,7 +198,7 @@ pub struct DeedDef {
 }
 
 /// A faction.
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct FactionDef {
     /// Unique name.
@@ -209,7 +209,7 @@ pub struct FactionDef {
 }
 
 /// Something a person can do, chosen by utility scoring.
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct ActivityDef {
     /// Unique name.
@@ -257,7 +257,7 @@ pub struct ActivityDef {
 }
 
 /// Where an activity happens.
-#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum ActivityTarget {
     /// In place, for no location.
     Itself,
@@ -278,7 +278,7 @@ pub enum ActivityTarget {
 }
 
 /// One scoring term: an input mapped through a curve.
-#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct Consideration {
     /// The signal read for the option.
@@ -288,7 +288,7 @@ pub struct Consideration {
 }
 
 /// Signals a consideration can read.
-#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum Input {
     /// The actor's level of a need.
     Need(String),
@@ -339,7 +339,7 @@ pub enum Input {
 }
 
 /// Social fields a consideration or gradient target can read.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum FieldInput {
     /// Presence of everyone at the cell, relative to its peak.
     Crowd,
@@ -354,7 +354,7 @@ pub enum FieldInput {
 }
 
 /// A social exchange between two persons.
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct InteractionDef {
     /// Unique name.
@@ -388,7 +388,7 @@ pub struct InteractionDef {
 
 /// Terms of the acceptance probability (Deffuant et al. 2000 and Byrne 1961 inform the defaults;
 /// the plan records the numbers).
-#[derive(Debug, Clone, Copy, PartialEq, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields, default)]
 pub struct AcceptDef {
     /// Base probability.
@@ -419,7 +419,7 @@ impl Default for AcceptDef {
 }
 
 /// Tie changes applied by an interaction outcome.
-#[derive(Debug, Clone, Copy, Default, PartialEq, Deserialize)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields, default)]
 pub struct TieDelta {
     /// Change in affinity.
@@ -433,7 +433,7 @@ pub struct TieDelta {
 }
 
 /// The effects of one interaction outcome.
-#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields, default)]
 pub struct EffectsDef {
     /// Tie change from actor toward target.
@@ -484,7 +484,7 @@ impl Default for EffectsDef {
 }
 
 /// Bark lines for an interaction. Templates may use `{self}`, `{target}`, `{subject}` and `{place}`.
-#[derive(Debug, Clone, Default, PartialEq, Deserialize)]
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields, default)]
 pub struct InteractionBarks {
     /// What the actor says when it starts the exchange.
@@ -496,7 +496,7 @@ pub struct InteractionBarks {
 }
 
 /// A rule that fires on a simulation event and runs a script.
-#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct TriggerDef {
     /// Unique name, used in error messages.
@@ -522,7 +522,7 @@ pub struct TriggerDef {
 }
 
 /// An axis-aligned rectangle on the society plane, edges inclusive: where an area trigger is live.
-#[derive(Debug, Clone, Copy, PartialEq, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 pub struct TriggerArea {
     /// The corner with the smaller coordinates.
     pub min: [f32; 2],
@@ -538,7 +538,7 @@ impl TriggerArea {
 }
 
 /// The events a trigger can listen to.
-#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum TriggerOn {
     /// Every simulation tick.
     Tick,
@@ -580,7 +580,7 @@ pub enum TriggerOn {
 }
 
 /// Chooses the conversation for a `TalkTo`. The highest priority matching rule wins.
-#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct ConversationRuleDef {
     /// The conversation name in the host's `DialogueScript`.
@@ -594,7 +594,7 @@ pub struct ConversationRuleDef {
 }
 
 /// Runs a script when a dialogue node is entered.
-#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct NodeEffectDef {
     /// The conversation name.
@@ -672,6 +672,13 @@ impl DefsFile {
     /// Parses a definitions file from RON text.
     pub fn from_ron(text: &str) -> Result<Self, DefsError> {
         ron::from_str(text).map_err(|err| DefsError::Ron(err.to_string()))
+    }
+
+    /// Writes the file as pretty RON; [`DefsFile::from_ron`] reads it back equal. This is what an
+    /// editor saves after it changes a definition.
+    pub fn to_ron(&self) -> Result<String, DefsError> {
+        ron::ser::to_string_pretty(self, ron::ser::PrettyConfig::default())
+            .map_err(|err| DefsError::Ron(err.to_string()))
     }
 
     /// Adds `other` to `self`. An id defined in both files, or twice in `other`, is an error and

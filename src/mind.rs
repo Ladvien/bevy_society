@@ -4,7 +4,7 @@
 use bevy::ecs::component::Component;
 use bevy::reflect::Reflect;
 use bevy_emerge_rng::DetRng;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 use crate::core::{
     Perception, Person, PersonIndex, SocietyClock, SocietySettings, SocietySystems, require_core,
@@ -25,7 +25,7 @@ use bevy::ecs::schedule::IntoScheduleConfigs;
 use bevy::ecs::system::{Query, Res};
 
 /// One of the five personality traits (McCrae & John 1992, DOI 10.1111/j.1467-6494.1992.tb00970.x).
-#[derive(Copy, Clone, Debug, PartialEq, Eq, Deserialize, Reflect)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Serialize, Deserialize, Reflect)]
 pub enum Trait {
     /// Openness to experience.
     Openness,
@@ -224,8 +224,7 @@ impl Mood {
 
 /// The OCC emotion subset (Ortony, Clore & Collins; via Gratch & Marsella 2004, DOI
 /// 10.1016/j.cogsys.2004.02.002, and Dias & Paiva 2005, DOI 10.1007/11595014_13).
-#[derive(Copy, Clone, Debug, PartialEq, Eq, Deserialize, Reflect)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize))]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Serialize, Deserialize, Reflect)]
 pub enum EmotionKind {
     /// Joy.
     Joy,
