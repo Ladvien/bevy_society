@@ -236,3 +236,13 @@ reunion Joy = reunion_fraction · level_at_return
 All three numbers are **design defaults**: `missing_cap` 0.4 (a mood word shows it; it stays under the 0.6 a close friend's death gives), `missing_days` 2.0 (an expedition's length), `reunion_fraction` 0.75 (a reunion is the missing turned over, so it never exceeds it). The level is raised *to*, not by, so it holds at the cap however long the trip and decays at the normal emotion half-life (0.1 day) after the return: measured, the friend's distress is gone within a day.
 
 **Measured behaviour** (`docs/loop/runs/2026-10-29-02/evidence/after`, seed 7, two away for three days): the closest friend's distress climbs 0.06 → 0.19 over the trip and her pleasure falls from +0.05 to -0.16; at the return she feels 0.15 of joy and both are back to baseline within half a day. Holders with no tie feel nothing; a party away together does not miss each other. The tie itself drifts during a trip (relaxation, balance), so closeness is read live, not frozen at departure.
+
+## A person's closeness is a budget: the friend-capacity brake (issue #10)
+
+- **Zhou, W.-X., Sornette, D., Hill, R. A. & Dunbar, R. I. M. (2005).** Discrete hierarchical organization of social group sizes. *Proceedings of the Royal Society B* 272: 439–444. DOI `10.1098/rspb.2004.2970`.
+
+  Personal networks are nested layers, each about three times the one inside, starting from a support clique of about 3.3 people; the layer above the clique is about ten. `Tuning::friend_capacity` (10) is that layer. The paper reports the scaling ratio, not the number 10: the value is a design default derived from it.
+
+  **Mechanism.** A tie that is not yet a friend gains positive affinity (interaction and mere exposure) at `1 - friends / friend_capacity` of its rate; at capacity it gains nothing. A tie that already is a friend keeps the full rate, so a full circle is stable, and a loss is never softened.
+
+  **Why.** With the `snub` grudge curve at `Linear` the village heard 2.9 compliments per insult, under Baumeister et al. 2001's 5:1 floor, and a softer curve alone saturated friendship (90.8% of ordered pairs at 60 people). With the brake the curve ships at `Power(1.15)`: 8:1 in the village, 3.1% friend pairs in the 60-person town over 30 days, and a plateau rather than a ramp (`docs/loop/runs/2026-10-30-16/evidence/plots/series-p115.png`).
