@@ -1,0 +1,8 @@
+# tick 68803: someone chose work (0.400), 60% below wander (1.000)
+
+ 1.000  wander
+ 0.999  compliment
+ 0.604  gossip
+ 0.525  play
+ 0.400  work   <- chosen
+ 0.336  chat
