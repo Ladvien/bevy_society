@@ -22,7 +22,9 @@ use bevy::math::Vec2;
 use bevy::transform::components::Transform;
 use serde::{Deserialize, Serialize};
 
-use crate::core::{Autonomous, BoundPlaces, Home, Person, Place, PlaceTags, SocietySettings};
+use crate::core::{
+    Autonomous, BoundPlaces, Home, Person, PersonIndex, Place, PlaceTags, SocietySettings,
+};
 use crate::defs::{DefsError, SocietyDefs};
 use crate::mind::Personality;
 use crate::relationships::Ties;
@@ -375,4 +377,68 @@ impl PlacementFile {
         }
         Ok(placed)
     }
+}
+
+/// One person who depends on a place: it is their home or one of their bound places.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct PlaceDependent {
+    /// The person.
+    pub person: Entity,
+    /// Their `Name`, when they have one.
+    pub name: Option<String>,
+    /// `"home"` for [`Home`], otherwise the binding name of a [`BoundPlaces`] entry (`"work"`).
+    pub role: String,
+}
+
+/// Everyone whose home or bound place is `place`, in ascending `PersonId` order, so an editor can
+/// refuse to delete a building that someone lives in or works at and name them. A person holding
+/// the place under several roles appears once per role.
+pub fn place_dependents(world: &World, place: Entity) -> Vec<PlaceDependent> {
+    let Some(index) = world.get_resource::<PersonIndex>() else {
+        return Vec::new();
+    };
+    let mut out = Vec::new();
+    for &(_, person) in &index.sorted {
+        let name = world.get::<Name>(person).map(|n| n.as_str().to_owned());
+        if world.get::<Home>(person).is_some_and(|h| h.0 == place) {
+            out.push(PlaceDependent {
+                person,
+                name: name.clone(),
+                role: "home".to_owned(),
+            });
+        }
+        if let Some(bound) = world.get::<BoundPlaces>(person) {
+            for (binding, target) in &bound.0 {
+                if *target == place {
+                    out.push(PlaceDependent {
+                        person,
+                        name: name.clone(),
+                        role: binding.clone(),
+                    });
+                }
+            }
+        }
+    }
+    out
+}
+
+/// Persons whose position on the society plane lies inside the rectangle `min..=max`, in ascending
+/// `PersonId` order: the selection an editor binds a trigger or a bulk edit to.
+pub fn persons_in_rect(world: &World, min: Vec2, max: Vec2) -> Vec<Entity> {
+    let (Some(index), Some(settings)) = (
+        world.get_resource::<PersonIndex>(),
+        world.get_resource::<SocietySettings>(),
+    ) else {
+        return Vec::new();
+    };
+    index
+        .sorted
+        .iter()
+        .filter_map(|&(_, person)| {
+            let p = settings
+                .plane
+                .project(world.get::<Transform>(person)?.translation);
+            (p.x >= min.x && p.x <= max.x && p.y >= min.y && p.y <= max.y).then_some(person)
+        })
+        .collect()
 }
