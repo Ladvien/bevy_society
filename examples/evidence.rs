@@ -144,6 +144,12 @@ fn main() {
     // so counting the ones that *leave* `Rival` is the direct measurement of recovery, and nothing was
     // recording it. Measured on `village-evening`: rivals 0 -> 42 over 17 game-days while friends stayed 13-18.
     let mut accepted_compliments = 0usize;
+    // **Does a person keep going back to the same partner?** The last partner of each initiator, and how
+    // many exchanges were with that same partner again.
+    let mut last_partner: BTreeMap<Entity, Entity> = BTreeMap::new();
+    let mut repeat_exchanges = 0usize;
+    let mut all_exchanges = 0usize;
+    let mut repeat_by_interaction: BTreeMap<String, (usize, usize)> = BTreeMap::new();
     // **The victim-side counter.** Every accepted `insult`, and how many of those left the victim's affinity
     // for its insulter below zero. Before the patient's affinity write existed this was `0 of N` by
     // construction — the tie was whatever mere exposure had made it, measured at `+0.034` on this scenario.
@@ -242,6 +248,15 @@ fn main() {
                 // touching the acceptance model, because the model already reads the *target's* tie.
                 if resolved.refused_by_rule {
                     continue;
+                }
+                all_exchanges += 1;
+                let counts = repeat_by_interaction
+                    .entry(resolved.interaction.clone())
+                    .or_default();
+                counts.0 += 1;
+                if last_partner.insert(resolved.actor, resolved.target) == Some(resolved.target) {
+                    repeat_exchanges += 1;
+                    counts.1 += 1;
                 }
                 if resolved.accepted {
                     accepted_approaches += 1;
@@ -404,6 +419,19 @@ fn main() {
         std::process::exit(1);
     }
     write_narrative(&mut app, tracked, &lines, &out);
+    {
+        let path = out.join("partners.txt");
+        let mut text = format!(
+            "exchanges: {all_exchanges}\nwith the initiator's previous partner: {repeat_exchanges} ({:.1}%)\n",
+            100.0 * repeat_exchanges as f32 / all_exchanges.max(1) as f32
+        );
+        for (name, (all, repeat)) in &repeat_by_interaction {
+            text.push_str(&format!("  {name}: {repeat} of {all}\n"));
+        }
+        if let Err(err) = std::fs::write(&path, text) {
+            eprintln!("evidence: cannot write {}: {err}", path.display());
+        }
+    }
     if !share_log.is_empty() {
         let path = out.join("shares.txt");
         if let Err(err) = std::fs::write(&path, share_log.join("\n") + "\n") {
