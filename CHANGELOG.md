@@ -4,6 +4,10 @@ All notable changes to bevy_society. The format follows [Keep a Changelog](https
 
 ## [Unreleased]
 
+### Added
+
+- **`PlacementFile`** (issue #41): authored places and persons as serde data, RON in and out (`from_ron`, `to_ron`). `PersonDef` carries name, personality, needs, signals, opinions, factions, `home`, named `bound` places (a workplace is `("work", "mill")`), start position and ties; `PlacementFile::spawn(&mut World)` validates the whole file against `SocietyDefs` first, spawns nothing on error, and draws no random numbers. `tests/placement.rs`.
+
 ### Changed
 
 - **`Tuning::retaliation_refractory_hours` now defaults to `Some(6.0)`** (was `None`). Every society now answers a grievance with one blow per 6 game-hours per ordered pair; set `None` for the old behaviour. Measured at the same seeds (`docs/loop/runs/2026-10-29-04/eval.md`): 60-person town reply share of snubs 55.5% → 41.2%, rivals 170 → 138. Full `cargo test --release` green, including `friendship_bound`.
