@@ -277,6 +277,38 @@ fn a_store_survives_a_round_trip_and_an_old_save_is_refused() {
     assert_eq!(report.upgraded_from, Some(1));
 }
 
+/// **The price book comes back with the stores.** `ctx.price` reads the tick-start snapshot, which is frozen
+/// before the tick's own price update, so a restore that left the fresh world's book in place made the first
+/// tick after it read a price the uninterrupted run never saw.
+#[test]
+#[cfg(feature = "serde")]
+fn a_restore_puts_the_price_book_back() {
+    use bevy_society::{PersonKey, capture, restore};
+
+    let key = |app: &mut App, villagers: &[Entity]| {
+        for (i, entity) in villagers.iter().enumerate() {
+            app.world_mut()
+                .entity_mut(*entity)
+                .insert(PersonKey(i as u64));
+        }
+    };
+    let (mut app, villagers) = village(2.0, 0.5, 3);
+    key(&mut app, &villagers);
+    common::run(&mut app, 600);
+    let saved = app.world().resource::<Prices>().0.clone();
+    let save = capture(app.world_mut());
+
+    let (mut fresh, fresh_villagers) = village(2.0, 0.5, 3);
+    key(&mut fresh, &fresh_villagers);
+    assert_ne!(
+        fresh.world().resource::<Prices>().0,
+        saved,
+        "the fixture must differ before the restore, or the test proves nothing"
+    );
+    restore(fresh.world_mut(), save).expect("the save applies");
+    assert_eq!(fresh.world().resource::<Prices>().0, saved);
+}
+
 // -------------------------------------------------------------------------------------------------
 // A meal is what was on the shelf
 // -------------------------------------------------------------------------------------------------

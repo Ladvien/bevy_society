@@ -6,6 +6,7 @@ All notable changes to bevy_society. The format follows [Keep a Changelog](https
 
 ### Fixed
 
+- **A save now keeps the price book** (`SocietySave::prices`, `f32` bits, `#[serde(default)]`, `VERSION` stays 4). `ctx.price` reads the tick-start snapshot, frozen before the tick's own price update, so the first tick after a restore read the fresh world's book instead of the one the uninterrupted run held. `tests/economy.rs`.
 - **A save now keeps a walker's stall window** (`PersonSave::travel_progress`, `#[serde(default)]`, `VERSION` stays 4). `Tuning::stall_timeout_hours` times a stalled walk out from the last meaningful improvement; a restore gave every walker a fresh window and so let a stalled walk run past the day the uninterrupted run ended it. The `failed_place_memory_hours` and `retaliation_refractory_hours` docs said "Not saved" after they were; corrected. `tests/failed_place.rs`.
 
 ## [0.6.0] - 2026-10-30
