@@ -514,6 +514,27 @@ pub struct TriggerDef {
     /// Minimum game-hours between firings per (trigger, actor).
     #[serde(default)]
     pub cooldown_hours: f32,
+    /// Fire only while the bound actor stands inside this rectangle on the society plane. An event
+    /// with no actor never fires an area trigger, so `Tick`, `Hour` and `RumorReach`, which bind
+    /// none, are refused at load. Design default: absent means anywhere.
+    #[serde(default)]
+    pub area: Option<TriggerArea>,
+}
+
+/// An axis-aligned rectangle on the society plane, edges inclusive: where an area trigger is live.
+#[derive(Debug, Clone, Copy, PartialEq, Deserialize)]
+pub struct TriggerArea {
+    /// The corner with the smaller coordinates.
+    pub min: [f32; 2],
+    /// The corner with the larger coordinates.
+    pub max: [f32; 2],
+}
+
+impl TriggerArea {
+    /// Whether `p` lies inside the rectangle, edges included.
+    pub fn contains(&self, p: [f32; 2]) -> bool {
+        p[0] >= self.min[0] && p[0] <= self.max[0] && p[1] >= self.min[1] && p[1] <= self.max[1]
+    }
 }
 
 /// The events a trigger can listen to.
@@ -1459,6 +1480,23 @@ impl SocietyDefs {
             return Err(invalid(&owner, "cooldown_hours must be 0 or more"));
         }
         let on = self.trigger_kind(&owner, &def.on)?;
+        if let Some(area) = def.area {
+            if area.min.iter().chain(&area.max).any(|v| !v.is_finite())
+                || area.min[0] > area.max[0]
+                || area.min[1] > area.max[1]
+            {
+                return Err(invalid(&owner, "area needs finite corners with min <= max"));
+            }
+            if matches!(
+                on,
+                TriggerKind::Tick | TriggerKind::Hour(_) | TriggerKind::RumorReach { .. }
+            ) {
+                return Err(invalid(
+                    &owner,
+                    "area needs an event that binds an actor; Tick, Hour and RumorReach bind none",
+                ));
+            }
+        }
         let condition = match def.condition.as_deref() {
             Some(source) => Some(scripts.expression(&format!("{owner} if"), source)?),
             None => None,
@@ -1470,6 +1508,7 @@ impl SocietyDefs {
             then,
             once: def.once,
             cooldown_hours: def.cooldown_hours,
+            area: def.area,
         });
         Ok(())
     }
@@ -1809,6 +1848,7 @@ pub(crate) struct TriggerSpec {
     pub(crate) then: ScriptId,
     pub(crate) once: bool,
     pub(crate) cooldown_hours: f32,
+    pub(crate) area: Option<TriggerArea>,
 }
 
 /// A compiled conversation rule.
