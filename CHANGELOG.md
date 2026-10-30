@@ -4,6 +4,10 @@ All notable changes to bevy_society. The format follows [Keep a Changelog](https
 
 ## [Unreleased]
 
+### Changed
+
+- **`Tuning::retaliation_refractory_hours` now defaults to `Some(6.0)`** (was `None`). Every society now answers a grievance with one blow per 6 game-hours per ordered pair; set `None` for the old behaviour. Measured at the same seeds (`docs/loop/runs/2026-10-29-04/eval.md`): 60-person town reply share of snubs 55.5% → 41.2%, rivals 170 → 138. Full `cargo test --release` green, including `friendship_bound`.
+
 ### Fixed
 
 - `examples/evidence` reported `friends` and `rivals` as `ties / 2`, which assumes every tie is mutual and rounded one-way ties down. It now reports directed ties, the unit `tests/friendship_bound.rs` counts.
@@ -12,7 +16,7 @@ All notable changes to bevy_society. The format follows [Keep a Changelog](https
 
 ### Added
 
-- **One blow per grievance: `Tuning::retaliation_refractory_hours: Option<f32>`** (default `None`, a design default; negative reciprocity from Gouldner 1960, DOI `10.2307/2092623`). With `Some(h)`, a person who attempted a harmful interaction (deed `harm < 0`, accepted or refused) does not choose another harmful activity against the same target for `h` game-hours, so the insult/reply ping-pong cannot sustain itself. A host's `Interact` is never held back; not saved. 60-person town, 6 h: reply share of snubs 55.5% → 41.2%, rivals 170 → 138.
+- **One blow per grievance: `Tuning::retaliation_refractory_hours: Option<f32>`** (default `Some(6.0)`, a design default; negative reciprocity from Gouldner 1960, DOI `10.2307/2092623`). With `Some(h)`, a person who attempted a harmful interaction (deed `harm < 0`, accepted or refused) does not choose another harmful activity against the same target for `h` game-hours, so the insult/reply ping-pong cannot sustain itself. A host's `Interact` is never held back; not saved. 60-person town, 6 h: reply share of snubs 55.5% → 41.2%, rivals 170 → 138.
 
 ### Changed
 

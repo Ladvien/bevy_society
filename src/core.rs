@@ -528,9 +528,10 @@ pub struct Tuning {
     /// insults, not one retaliation. With `Some(h)` the answer to a grievance is one blow per `h` hours
     /// per ordered pair, so the exchange cannot sustain itself faster than that.
     ///
-    /// A **design default**, `None`: negative reciprocity is documented (Gouldner 1960, DOI
-    /// 10.2307/2092623) but no paper fixes a cooling-off interval. Only the choice of a harmful activity
-    /// is held back; a host's `Interact` is never refused by it. Not saved.
+    /// A **design default**, `Some(6.0)` (a quarter of a day): negative reciprocity is documented
+    /// (Gouldner 1960, DOI 10.2307/2092623) but no paper fixes a cooling-off interval. `None` turns it
+    /// off. Only the choice of a harmful activity is held back; a host's `Interact` is never refused by
+    /// it. Not saved.
     pub retaliation_refractory_hours: Option<f32>,
     /// Walking speed in metres per **real** second, used by the core walker that moves a person
     /// toward its `Destination` when no `SocialMover` is steering. 1.4 m/s is an ordinary human
@@ -689,7 +690,7 @@ impl Default for Tuning {
             stall_timeout_hours: None,
             stall_epsilon: 0.25,
             failed_place_memory_hours: None,
-            retaliation_refractory_hours: None,
+            retaliation_refractory_hours: Some(6.0),
             walk_speed: 1.4,
             // **A design default, set by measurement.** Not from a paper; the *gate* is the paper. Every
             // contact-tell that finds an informed neighbour stifles the teller (Daley–Kendall), so pacing

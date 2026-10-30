@@ -4755,3 +4755,10 @@ a tautological assertion removed from `tuning_covers_rates`. Full gate results a
 **Evidence.** `runs/2026-10-30-01/eval.md`, `evidence/after/summary.json` (village, 24, 6 days: friends 25, rivals 93). **Dead-code delta:** zero. Old numbers in earlier logs are halved; compare ×2.
 **Top 5 remaining.** 1. Re-measure scale table on a quiet host. 2. Decide default for `retaliation_refractory_hours`. 3. Clock decision `travel_timeout_hours`. 4. Insult ping-pong residue (41% replies). 5. Friendship capacity brake (#10).
 **Cleanup.** Created nothing outside the clone.
+
+## 2026-10-30-02 — `retaliation_refractory_hours` defaults to `Some(6.0)`
+
+**Change.** Top item 2 of last pass, decided: assumed decision (owner may override): default on at 6 h (options: keep `None`; 6 h; 12 h; pick 6 h, the value measured, conservative, `None` restores old). No open issues; parked branches older, ignored.
+**Evidence.** Numbers from `runs/2026-10-29-04/eval.md` (same seeds, same 6 h): town reply share 55.5% → 41.2%, rivals 170 → 138. Full `cargo test --release` green (all suites incl. `friendship_bound`, `retaliation`). Host load ~36: no perf, no new plots. Verdicts: not re-run (reuse of 2026-10-29-04 GREENs). **Dead-code delta:** zero.
+**Top 5 remaining.** 1. Re-measure scale table. 2. Clock decision `travel_timeout_hours`. 3. Insult ping-pong residue (41%). 4. Friendship capacity brake (#10). 5. Reconcile rival counts.
+**Cleanup.** Created nothing outside the clone.
