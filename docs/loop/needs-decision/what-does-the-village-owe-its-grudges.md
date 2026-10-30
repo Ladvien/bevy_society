@@ -2,6 +2,18 @@
 
 > **Measured 2026-12-27. The mechanism works and the rate is a choice. Nothing shipped beyond the metric.**
 
+> **Assumed decision (owner may override), 2026-10-30-25: option 3, in the form the literature supports, shipped as
+> the default.** Not a second relaxation rate on negative affinity (measured 2026-12 to *double* rivalries), but the
+> grudge that drives `snub` fading at a pace set by the holder's trust in the offender: `Tuning::forgiveness` 12.0,
+> `ctx.grudge` reads each memory at `age · (1 + 12 · trust)`. The paper option 3 lacked: McCullough et al. 2010 (DOI
+> 10.1037/a0019349, forgiveness tracks relationship value), Burnette et al. 2012 (DOI 10.1177/0146167211424582,
+> value and low exploitation risk), Strelan, Karremans & Krieg 2017 (DOI 10.1111/bjso.12173, trust is the mediator).
+> Same seeds: village rivals 54/56/59/66 → 28/24/18/36 and friends 46/30/40/35 → 62/65/47/54; town of 60 rivals
+> 277/229 → 111/155, friends 49/52 → 101/86 (`runs/2026-10-30-25/eval.md`). Options were (a) this default, (b) ship
+> it opt-in at 0.0, (c) 16.0 (warmer, but under the rumor book's pinned 20% tellable line). Picked (a): it moves the
+> shipped society, `0.0` restores the old curve bit for bit, and it touches no protected check. Override by setting the
+> default back to `0.0` or up to `16.0` with `tests/rumor_book.rs` re-measured.
+
 ## The state
 
 On `village-evening` (24 people, 17 game-days) the village settles at **42 rival pairs against 18 friend pairs** —

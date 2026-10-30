@@ -6,8 +6,13 @@ All notable changes to bevy_society. The format follows [Keep a Changelog](https
 
 ### Added
 
+- **`Tuning::forgiveness`** (default `12.0`): `ctx.grudge(a, b)` reads each of `a`'s bad memories about `b` at its age times `1 + forgiveness · trust(a → b)`, so a grievance fades faster toward someone still trusted and at close to the old 138-hour rate toward a serial offender (McCullough et al. 2010, DOI 10.1037/a0019349; Burnette et al. 2012, DOI 10.1177/0146167211424582; Strelan, Karremans & Krieg 2017, DOI 10.1111/bjso.12173). `model::recall::forgiving_pace`, `Memories::grudge_at_pace`; `Memories::grudge` is unchanged. `0.0` is bit-identical to 0.6.0. `examples/evidence --forgiveness`, `tools/plot_forgiveness.py`. `tests/forgiveness.rs`; `docs/research/memory.md`.
 - **`Tuning::friend_capacity`** (default `0.0`, off; `10.0` after Zhou et al. 2005, DOI 10.1098/rspb.2004.2970): a tie not yet close gains positive affinity at `1 - close / capacity` of its rate and none at a full circle, so a host can soften the `snub` curve without friendship saturating. Closeness is `Tie::is_close` (affinity and trust), never the hysteretic label; `Ties::friend_count(&Tuning)`, `Tuning::bond_scale`. Off, a run is bit-identical to 0.6.0. `Tie::expose` takes the brake's scale (breaking). `examples/evidence --friend-capacity`. `tests/friend_capacity.rs`; `docs/research/relationships.md`.
 - **`dialogue_problems(&SocietyDefs, &DialogueScript) -> Vec<DialogueProblem>`** (feature `dialogue`): every conversation rule, node effect and `DialogueNode` trigger that names a conversation or node the script does not define, as data (`DialogueReferenceKind`, owner, conversation, node) with the plugin's log line as `Display`. The plugin's own check now uses it and also covers `DialogueNode` triggers, which it skipped before. For an editor that marks dangling rows while a conversation graph is authored. `tests/dialogue.rs`.
+
+### Changed
+
+- **The default society forgives** (`Tuning::forgiveness` 12.0): the starter pack's `snub` reads `ctx.grudge`, so insult replies fall and rivalries stop accumulating. Same seeds against 0.6.0, counted as directed ties: a 24-person village over 17 game-days holds 18-36 rival ties instead of 54-66 and 47-65 friend ties instead of 30-46 (four seeds); a 60-person town over 30 days holds 111 and 155 rival ties instead of 277 and 229, and 101 and 86 friend ties instead of 49 and 52. A host script reading `ctx.grudge` sees the forgiving value; set `forgiveness: 0.0` for the old one.
 
 ### Fixed
 

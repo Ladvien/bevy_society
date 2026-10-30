@@ -33,7 +33,7 @@ that names it.
 | `ctx.respect(a, b)` | respect in `[-1, 1]`; 0 with no tie |
 | `ctx.familiarity(a, b)` | familiarity in `[0, 1]` at the tick start; 0 with no tie |
 | `ctx.label(a, b)` | `"stranger"`, `"acquaintance"`, `"friend"` or `"rival"` |
-| `ctx.grudge(a, b)` | weight of `a`'s bad memories about `b`, `[0, 1]` |
+| `ctx.grudge(a, b)` | weight of `a`'s bad memories about `b`, `[0, 1]`; fades faster the more `a` trusts `b` (`Tuning::forgiveness`) |
 | `ctx.standing(a)` | respect conferred by familiar persons |
 | `ctx.mood(a)` | `#{ p, a, d }` |
 | `ctx.emotion(a, kind)` | summed intensity of one emotion, `[0, 1]` |
