@@ -108,6 +108,15 @@ pub(crate) struct TravelProgress {
 #[derive(Component, Debug, Clone, Default, PartialEq)]
 pub(crate) struct FailedPlaces(Vec<(Entity, f64)>);
 
+/// People this person has just harmed, and the game-day each may be harmed again
+/// (`Tuning::retaliation_refractory_hours`).
+///
+/// Written by `exchange` when an interaction whose deed has negative harm is attempted (accepted or
+/// refused); read by `decide_activities`, which drops those people from the targets of a harmful
+/// activity. Pruned on every write, in insertion order. Not saved.
+#[derive(Component, Debug, Clone, Default, PartialEq)]
+pub(crate) struct RecentHarm(Vec<(Entity, f64)>);
+
 // -------------------------------------------------------------------------------------------------
 // Messages
 // -------------------------------------------------------------------------------------------------
@@ -1506,6 +1515,16 @@ struct DecisionQueries<'w, 's> {
     >,
     doing: Query<'w, 's, &'static Doing>,
     failed: Query<'w, 's, &'static FailedPlaces>,
+    harmed: Query<'w, 's, &'static RecentHarm>,
+}
+
+/// Whether an activity's interaction carries a deed that hurts its target (`harm < 0`).
+fn activity_is_harmful(defs: &SocietyDefs, spec: &crate::defs::ActivitySpec) -> bool {
+    spec.interaction
+        .and_then(|id| defs.interactions.get(usize::from(id.0)))
+        .and_then(|interaction| interaction.deed)
+        .and_then(|deed| defs.deeds.get(usize::from(deed.0)))
+        .is_some_and(|deed| deed.harm < 0.0)
 }
 
 /// Chooses an activity for every autonomous person that has none (plan D7).
@@ -1544,6 +1563,7 @@ fn decide_activities(
         places,
         doing,
         failed,
+        harmed,
     } = world;
     use bevy_emerge_rng::DetRng;
 
@@ -1791,6 +1811,21 @@ fn decide_activities(
                         .0
                         .iter()
                         .any(|(avoided, until)| avoided == place && *until > now),
+                    _ => true,
+                });
+            }
+            // **A person this one has just harmed is not a target of another harm** until the refractory
+            // period ends (`Tuning::retaliation_refractory_hours`): the answer to a grievance is one blow,
+            // not a standing exchange of them. Filtered after `targets_for`, like the failed places.
+            if tuning.retaliation_refractory_hours.is_some()
+                && activity_is_harmful(&defs, spec)
+                && let Ok(memory) = harmed.get(person)
+            {
+                targets.retain(|target| match target {
+                    DoingTarget::Person(other) => !memory
+                        .0
+                        .iter()
+                        .any(|(spared, until)| spared == other && *until > now),
                     _ => true,
                 });
             }
@@ -2490,6 +2525,22 @@ fn exchange(
             winner: None,
         });
         return;
+    }
+
+    // A harmful attempt starts the actor's refractory period against this target, whatever the answer:
+    // a refused insult is still an attempt, and it must not feed the next (`retaliation_refractory_hours`).
+    if let Some(hours) = settings.tuning.retaliation_refractory_hours
+        && spec
+            .deed
+            .and_then(|d| defs.deeds.get(usize::from(d.0)))
+            .is_some_and(|deed| deed.harm < 0.0)
+    {
+        let mut harmed = world.get::<RecentHarm>(actor).cloned().unwrap_or_default();
+        harmed
+            .0
+            .retain(|(other, until)| *other != target && *until > now);
+        harmed.0.push((target, now + f64::from(hours) / 24.0));
+        world.entity_mut(actor).insert(harmed);
     }
 
     // (2) The acceptance draw.
