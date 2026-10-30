@@ -152,6 +152,9 @@ pub(crate) struct PersonView {
     pub(crate) memories: Memories,
     /// What the person holds of each good, in definition order.
     pub(crate) stock: crate::Stock,
+    /// Where the person stands on the society plane at the tick start; `None` for a person without a
+    /// `Transform`.
+    pub(crate) position: Option<Vec2>,
 }
 
 impl PersonView {
@@ -374,6 +377,23 @@ impl SocietySnapshot {
             .map_or_else(String::new, |id| self.names.activity_name(id).to_owned()))
     }
 
+    /// `ctx.position(a)`: where the person stood at the tick start, as `[x, y]` on the society plane
+    /// (the same two axes a trigger's `area` and a place's position use). A person without a transform
+    /// is an error naming them.
+    pub(crate) fn position(&self, a: i64) -> Result<[f32; 2], String> {
+        self.person(a)?
+            .position
+            .map(|p| p.to_array())
+            .ok_or_else(|| format!("person {a} has no position"))
+    }
+
+    /// `ctx.distance(a, b)`: plane distance between two persons at the tick start.
+    pub(crate) fn distance(&self, a: i64, b: i64) -> Result<f32, String> {
+        let [ax, ay] = self.position(a)?;
+        let [bx, by] = self.position(b)?;
+        Ok(Vec2::new(ax, ay).distance(Vec2::new(bx, by)))
+    }
+
     /// `ctx.persons()`: every live person's id, ascending.
     pub(crate) fn person_ids(&self) -> Vec<i64> {
         self.persons.iter().map(|p| i64::from(p.id.0)).collect()
@@ -431,6 +451,7 @@ pub(crate) struct SnapshotSource<'w> {
     doing: Option<&'w Doing>,
     name: Option<&'w Name>,
     stock: Option<&'w crate::Stock>,
+    transform: Option<&'w Transform>,
 }
 
 /// The current snapshot, rebuilt every tick by [`build_snapshot`]. `None` before the first tick.
@@ -482,6 +503,7 @@ pub(crate) fn build_snapshot(
             doing,
             name,
             stock,
+            transform,
         ) = (
             view.personality,
             view.mood,
@@ -497,6 +519,7 @@ pub(crate) fn build_snapshot(
             view.doing,
             view.name,
             view.stock,
+            view.transform,
         );
         let mut views: Vec<TieView> = ties
             .0
@@ -528,6 +551,7 @@ pub(crate) fn build_snapshot(
             activity: doing.map(|d| d.activity),
             memories: memories.clone(),
             stock: stock.cloned().unwrap_or_default(),
+            position: transform.map(|t| settings.plane.project(t.translation)),
         });
     }
 

@@ -49,6 +49,8 @@ that names it.
 | `ctx.faction_size(faction)` | how many persons belong to it |
 | `ctx.name(a)` | the person's `Name`, or `"someone"` |
 | `ctx.doing(a)` | the activity's name, `""` when idle |
+| `ctx.position(a)` | where `a` stood at the tick start, a map `#{x, y}` on the society plane (the axes a trigger's `area` uses); an error for a person with no transform |
+| `ctx.distance(a, b)` | plane distance between two persons at the tick start |
 | `ctx.persons()` | every live person's id, ascending |
 | `ctx.hour()` | the hour of the game-day, `[0, 24)` |
 | `ctx.day()` | whole game-days elapsed |
