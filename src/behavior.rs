@@ -104,9 +104,11 @@ pub(crate) struct TravelProgress {
 /// (`Tuning::failed_place_memory_hours`).
 ///
 /// Written by `end_activities` when a walk to a `Place` ends before arrival; read and pruned by
-/// `decide_activities`. Kept sorted by insertion, so it never depends on hash order. Not saved.
+/// `decide_activities`. Kept sorted by insertion, so it never depends on hash order. Saved
+/// (`PersonSave::failed_places`): a reload that forgot it would let a person walk back to a place the
+/// uninterrupted run was still avoiding.
 #[derive(Component, Debug, Clone, Default, PartialEq)]
-pub(crate) struct FailedPlaces(Vec<(Entity, f64)>);
+pub(crate) struct FailedPlaces(pub(crate) Vec<(Entity, f64)>);
 
 /// People this person has just harmed, and the game-day each may be harmed again
 /// (`Tuning::retaliation_refractory_hours`).

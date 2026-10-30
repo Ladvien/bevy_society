@@ -290,6 +290,11 @@ pub struct PersonSave {
     /// `PersonKey` is left out.
     #[serde(default)]
     pub recent_harm: Vec<(u64, u64)>,
+    /// Places this person recently failed to reach and the game-day each is forgiven (as `f64` bits), in
+    /// the order they were written: `Tuning::failed_place_memory_hours`. Absent from an older file, which
+    /// restores as nothing avoided. A place without a `PlaceKey` is left out.
+    #[serde(default)]
+    pub failed_places: Vec<(u64, u64)>,
 }
 
 /// One rumor, with every person reference as a [`PersonKey`].
@@ -497,6 +502,7 @@ struct PersonCapture {
     deceased: Has<crate::Deceased>,
     away: Option<&'static crate::AwaySince>,
     harmed: Option<&'static crate::behavior::RecentHarm>,
+    failed: Option<&'static crate::behavior::FailedPlaces>,
     signals: &'static Signals,
     doing: Option<&'static Doing>,
     destination: Option<&'static Destination>,
@@ -685,6 +691,13 @@ pub fn capture(world: &mut World) -> SocietySave {
                     .0
                     .iter()
                     .filter_map(|(other, until)| Some((*person_keys.get(other)?, until.to_bits())))
+                    .collect()
+            }),
+            failed_places: person.failed.map_or_else(Vec::new, |failed| {
+                failed
+                    .0
+                    .iter()
+                    .filter_map(|(place, until)| Some((*place_keys.get(place)?, until.to_bits())))
                     .collect()
             }),
             signals: person.signals.clone(),
@@ -1230,6 +1243,17 @@ fn write_person(
                 .recent_harm
                 .iter()
                 .filter_map(|&(key, until)| Some((*persons.get(&key)?, f64::from_bits(until))))
+                .collect(),
+        ));
+    }
+    if person.failed_places.is_empty() {
+        em.remove::<crate::behavior::FailedPlaces>();
+    } else {
+        em.insert(crate::behavior::FailedPlaces(
+            person
+                .failed_places
+                .iter()
+                .filter_map(|&(key, until)| Some((*places.get(&key)?, f64::from_bits(until))))
                 .collect(),
         ));
     }
