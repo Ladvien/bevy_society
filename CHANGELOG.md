@@ -4,6 +4,10 @@ All notable changes to bevy_society. The format follows [Keep a Changelog](https
 
 ## [Unreleased]
 
+### Added
+
+- **One blow per grievance: `Tuning::retaliation_refractory_hours: Option<f32>`** (default `None`, a design default; negative reciprocity from Gouldner 1960, DOI `10.2307/2092623`). With `Some(h)`, a person who attempted a harmful interaction (deed `harm < 0`, accepted or refused) does not choose another harmful activity against the same target for `h` game-hours, so the insult/reply ping-pong cannot sustain itself. A host's `Interact` is never held back; not saved. 60-person town, 6 h: reply share of snubs 55.5% → 41.2%, rivals 170 → 138.
+
 ### Changed
 
 - **A reported deed leaves its victim a memory** (the `a-victim-remembers-nothing-a-host-reported` decision, option 2, assumed). A `ReportDeed` with a `patient` and a harmful deed now records `MemoryKind::Suffered { deed, actor }` at the patient, valence `-(0.3 + |harm|)`, so `Memories::grudge` toward the actor is no longer 0. **Breaking:** `MemoryKind` and `MemoryKindSave` gain a variant, and `SocietySave::VERSION` is 4; `upgrade` steps a version-3 file with no rewrite.
