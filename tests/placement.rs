@@ -154,3 +154,49 @@ fn a_place_names_who_lives_or_works_there_and_a_rect_selects_who_stands_in_it() 
     let west = bevy_society::persons_in_rect(world, Vec2::new(-5.0, 0.0), Vec2::new(-3.0, 3.0));
     assert_eq!(west, [ada]);
 }
+
+#[test]
+fn capture_reads_a_live_edit_back_and_respawns_the_same_town() {
+    let mut app = headless(defs(), settings());
+    let placed = PlacementFile::from_ron(PLACEMENT)
+        .unwrap()
+        .spawn(app.world_mut())
+        .unwrap();
+    // The user drags Bram across the map and the mill gains a tag.
+    let bram = placed.person("Bram").unwrap();
+    app.world_mut()
+        .get_mut::<Transform>(bram)
+        .unwrap()
+        .translation = Vec3::new(7.0, 0.0, -3.0);
+    let mill = placed.place("mill").unwrap();
+    app.world_mut()
+        .get_mut::<bevy_society::PlaceTags>(mill)
+        .unwrap()
+        .0
+        .push("loud".into());
+
+    let captured = PlacementFile::capture(app.world_mut()).expect("captures");
+    let bram_def = captured.persons.iter().find(|p| p.name == "Bram").unwrap();
+    assert_eq!(bram_def.at, Some((7.0, -3.0)));
+    let ada = captured.persons.iter().find(|p| p.name == "Ada").unwrap();
+    assert_eq!(ada.bound, [("work".to_owned(), "mill".to_owned())]);
+    assert_eq!(ada.factions, ["millers"]);
+    assert_eq!(ada.ties[0].with, "Bram");
+    assert!(!bram_def.autonomous);
+    assert_eq!(captured.places[1].tags, ["work", "loud"]);
+
+    // Saved, reloaded into a fresh world, captured again: the same file.
+    let reloaded = PlacementFile::from_ron(&captured.to_ron().unwrap()).unwrap();
+    let mut fresh = headless(defs(), settings());
+    reloaded.spawn(fresh.world_mut()).unwrap();
+    assert_eq!(PlacementFile::capture(fresh.world_mut()).unwrap(), captured);
+}
+
+#[test]
+fn capture_refuses_an_unnamed_person() {
+    let mut app = headless(defs(), settings());
+    app.world_mut().spawn(bevy_society::Person);
+    run(&mut app, 1);
+    let err = PlacementFile::capture(app.world_mut()).unwrap_err();
+    assert!(err.to_string().contains("needs a Name"), "{err}");
+}
