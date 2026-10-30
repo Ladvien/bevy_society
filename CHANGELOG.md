@@ -4,6 +4,8 @@ All notable changes to bevy_society. The format follows [Keep a Changelog](https
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-10-30
+
 ### Added
 
 - **`Tuning::forgiveness`** (default `12.0`): `ctx.grudge(a, b)` reads each of `a`'s bad memories about `b` at its age times `1 + forgiveness · trust(a → b)`, so a grievance fades faster toward someone still trusted and at close to the old 138-hour rate toward a serial offender (McCullough et al. 2010, DOI 10.1037/a0019349; Burnette et al. 2012, DOI 10.1177/0146167211424582; Strelan, Karremans & Krieg 2017, DOI 10.1111/bjso.12173). `model::recall::forgiving_pace`, `Memories::grudge_at_pace`; `Memories::grudge` is unchanged. `0.0` is bit-identical to 0.6.0. `examples/evidence --forgiveness`, `tools/plot_forgiveness.py`. `tests/forgiveness.rs`; `docs/research/memory.md`.
