@@ -192,6 +192,8 @@ reach at the same time.
 
 **A place a walk failed to reach can be forgotten for a while.** A `Place` target is always the nearest tied place, so after a stall or timeout the person chose the same unreachable place again. `Tuning::failed_place_memory_hours: Some(h)` drops that place from the person's candidates for `h` game-hours, so the next choice is the next-nearest place, or another activity if none is left. It defaults to `None`; a save does not carry it. A completed walk, a `Person` target and a dormant person's suspended walk are never remembered.
 
+**A grievance can cost one blow per period.** `snub` is scored on the grudge, and the grudge outlives the insult it answers, so two people with a grievance each other's insult each other as fast as insults end. `Tuning::retaliation_refractory_hours: Some(h)` holds a person back from choosing another harmful activity (its interaction's deed has `harm < 0`) against a target they attempted one on in the last `h` game-hours, whether the attempt was accepted or refused. An `Interact` the host sends is never held back. It defaults to `None`; a save does not carry it.
+
 ## Ids
 
 Needs, signals, topics, deeds, factions, activities and interactions are interned at compile time
