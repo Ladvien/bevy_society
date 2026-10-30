@@ -488,6 +488,14 @@ pub enum MemoryKind {
         /// Who did it.
         actor: Entity,
     },
+    /// A deed done to this person: the victim's side of what a bystander keeps as `Witnessed`. A
+    /// host-reported deed leaves it, so [`Memories::grudge`] toward the actor is not left at zero.
+    Suffered {
+        /// The deed definition.
+        deed: DeedId,
+        /// Who did it.
+        actor: Entity,
+    },
     /// A rumor heard from someone.
     HeardRumor(RumorId),
     /// A conversation with the player.
