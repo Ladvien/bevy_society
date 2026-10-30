@@ -4897,3 +4897,10 @@ a tautological assertion removed from `tuning_covers_rates`. Full gate results a
 **Evidence.** `tests/economy.rs::a_restore_puts_the_price_book_back` (serde; precondition asserts the fresh book differs); economy, save, save_upgrade, leaf, readme, guide_blocks green; clippy `-D warnings`, fmt, `--no-default-features` build. Bug fix: no plots/three-review gate (precedent: passes 18-20). **Dead-code delta:** zero.
 **Top 5 remaining.** 1. Re-measure scale table on a quiet host. 2. Attribute the other ~50% of `decide_activities`. 3. Friendship capacity brake (#10, owner relaxes `label_hysteresis` equality). 4. Reconcile rival counts. 5. Insult ping-pong residue (41%).
 **Cleanup.** Created nothing outside the clone. Leftover: `stash@{0}` from pass 17, for a person to drop.
+
+## 2026-10-30-22 - scale table re-measured on v0.6.0 (docs only)
+
+**Change.** No open issues; parked branches older, ignored. Release skipped: v0.6.0 is under 6 h old and no packaged file changed. Pick (top item 1 of pass 21, ranked item 4, performance): the guide's scale table was an M1 Max from 20+ passes ago and had no 5 000-person row. `docs/guide/concepts.md` now carries a v0.6.0 table at 100/1 000/2 000/5 000 people. Save-state audit of every `Component`/`Resource` against `save.rs` found nothing further unsaved (the rest is recomputed per tick or spawn-time host data).
+**Evidence.** `runs/2026-10-30-22/perf.md` (fastest/median/spread per size). Host load 11-38, spreads 28-134%, so the table says "upper bounds" outright. No code change: no plots/three-review gate. **Dead-code delta:** zero.
+**Top 5 remaining.** 1. Re-measure on a quiet host (spread under 20%). 2. Attribute the other ~50% of `decide_activities`. 3. Friendship capacity brake (#10, owner relaxes `label_hysteresis` equality). 4. Reconcile rival counts. 5. Insult ping-pong residue (41%).
+**Cleanup.** Created nothing outside the clone (`target/` is the clone's own).
