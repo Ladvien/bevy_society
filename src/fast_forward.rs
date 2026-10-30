@@ -6,11 +6,12 @@
 //! the same number of ticks: same seed and same inputs give the same society, bit for bit.
 
 use std::fmt;
+use std::time::Duration;
 
 use bevy::ecs::change_detection::Tick;
 use bevy::ecs::message::MessageRegistry;
 use bevy::ecs::world::World;
-use bevy::time::{Fixed, run_fixed_main_schedule};
+use bevy::time::{Fixed, Time, Virtual, run_fixed_main_schedule};
 
 use crate::core::{ClockSource, SocietyClock, SocietyRng, SocietySettings};
 
@@ -32,12 +33,13 @@ pub enum FastForwardError {
     NoSociety,
     /// The app has not run its `Startup` schedule yet (no [`SocietyRng`]): update it once first.
     NotStarted,
-    /// `days` was negative or not finite.
+    /// `days` was negative or not finite, or so large that the tick count does not fit a `u64`.
     BadDays(f32),
     /// The clock follows the host's own time ([`ClockSource::Host`]), which a fast-forward cannot
     /// advance: the host owns that clock.
     HostClock,
-    /// The fixed timestep or the society tick is zero or not finite, so time cannot pass.
+    /// The world has no fixed clock (`TimePlugin` is not added), or the fixed timestep or the society
+    /// tick is zero or not finite, so time cannot pass.
     NoTimeStep,
 }
 
@@ -51,7 +53,7 @@ impl fmt::Display for FastForwardError {
             ),
             Self::BadDays(d) => write!(
                 f,
-                "cannot fast-forward {d} days: need a finite, non-negative count"
+                "cannot fast-forward {d} days: need a finite, non-negative count whose ticks fit a u64"
             ),
             Self::HostClock => write!(
                 f,
@@ -59,7 +61,8 @@ impl fmt::Display for FastForwardError {
             ),
             Self::NoTimeStep => write!(
                 f,
-                "the fixed timestep and SocietySettings::tick_secs must be positive and finite"
+                "there is no fixed clock (add TimePlugin), or the fixed timestep and \
+                 SocietySettings::tick_secs are not both positive and finite"
             ),
         }
     }
@@ -69,13 +72,16 @@ impl std::error::Error for FastForwardError {}
 
 /// Runs `days` game-days of society ticks on `world` and returns how many ticks ran.
 ///
-/// The count is `ceil(days * seconds_per_day / tick_secs)`; `0.0` runs none. Input messages already
-/// queued (`PlantRumor`, `Interact`, `FireTrigger`) are drained by the first step as in a live app.
-/// A host's `Update` systems do not run, and the app's real-time clock does not move.
+/// The count is `ceil(days * seconds_per_day / tick_secs)`; `0.0` runs none. It is exact in an app
+/// that has already drawn frames: the last frame's delta adds no extra fixed steps.
+/// Input messages already queued (`PlantRumor`, `Interact`, `FireTrigger`) are drained by the first
+/// step as in a live app. A host's `Update` systems do not run, and the app's real-time clocks are put
+/// back as the last frame left them.
 ///
 /// # Errors
 /// [`FastForwardError`] when the society is not installed, `days` is not a finite non-negative
-/// number, `Startup` has not run, the clock is [`ClockSource::Host`], or a time step is zero.
+/// number or its tick count overflows a `u64`, `Startup` has not run, the clock is
+/// [`ClockSource::Host`], or there is no fixed clock or a time step is zero.
 pub fn fast_forward(world: &mut World, days: f32) -> Result<FastForward, FastForwardError> {
     if !days.is_finite() || days < 0.0 {
         return Err(FastForwardError::BadDays(days));
@@ -95,17 +101,35 @@ pub fn fast_forward(world: &mut World, days: f32) -> Result<FastForward, FastFor
     if clock == ClockSource::Host {
         return Err(FastForwardError::HostClock);
     }
-    let timestep = world.resource::<bevy::time::Time<Fixed>>().timestep();
+    let (Some(&fixed), Some(&virtual_time), Some(&generic_time)) = (
+        world.get_resource::<Time<Fixed>>(),
+        world.get_resource::<Time<Virtual>>(),
+        world.get_resource::<Time>(),
+    ) else {
+        return Err(FastForwardError::NoTimeStep);
+    };
+    let timestep = fixed.timestep();
     if !(tick_secs.is_finite() && tick_secs > 0.0 && !timestep.is_zero()) {
         return Err(FastForwardError::NoTimeStep);
     }
 
-    let wanted =
-        (f64::from(days) * f64::from(seconds_per_day) / f64::from(tick_secs)).ceil() as u64;
-    let target = start.tick + wanted;
+    // A count that does not fit the tick counter is a bad request, not a wrapped or endless loop.
+    let wanted = (f64::from(days) * f64::from(seconds_per_day) / f64::from(tick_secs)).ceil();
+    let target = (wanted < u64::MAX as f64)
+        .then(|| start.tick.checked_add(wanted as u64))
+        .flatten()
+        .ok_or(FastForwardError::BadDays(days))?;
+
+    // `run_fixed_main_schedule` adds the last frame's `Time<Virtual>` delta to the fixed clock on every
+    // call, so after any live frame each pass would run more than one fixed step. Zero that delta for
+    // the duration: each pass then adds exactly one timestep and runs exactly one step, which is what a
+    // live app with a steady frame does.
+    world
+        .resource_mut::<Time<Virtual>>()
+        .advance_by(Duration::ZERO);
     while world.resource::<SocietyClock>().tick < target {
         world
-            .resource_mut::<bevy::time::Time<Fixed>>()
+            .resource_mut::<Time<Fixed>>()
             .accumulate_overstep(timestep);
         run_fixed_main_schedule(world);
         world.resource_scope(
@@ -114,6 +138,9 @@ pub fn fast_forward(world: &mut World, days: f32) -> Result<FastForward, FastFor
             },
         );
     }
+    // The app's own clocks are as the last frame left them, ready for the next one to advance.
+    *world.resource_mut::<Time<Virtual>>() = virtual_time;
+    *world.resource_mut::<Time>() = generic_time;
 
     let end = *world.resource::<SocietyClock>();
     Ok(FastForward {

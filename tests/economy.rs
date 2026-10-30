@@ -226,8 +226,11 @@ fn a_store_survives_a_round_trip_and_an_old_save_is_refused() {
     assert!(saved > 0.0, "the fixture must have baked something to save");
 
     let save = capture(app.world_mut());
-    assert_eq!(save.version, 4, "the format version moved with `Stock`");
-    assert_eq!(VERSION, 4);
+    assert_eq!(
+        save.version, 5,
+        "the format version moved with the trigger ids"
+    );
+    assert_eq!(VERSION, 5);
 
     let json = serde_json::to_string(&save).expect("a save is plain data");
     let reread: SocietySave = serde_json::from_str(&json).expect("the file is a save");
