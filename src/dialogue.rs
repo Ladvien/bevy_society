@@ -18,7 +18,7 @@ use crate::core::{
     PendingActions, Person, PersonId, PersonIndex, SocietyClock, SocietySettings,
     push_script_actions, require_core,
 };
-use crate::defs::SocietyDefs;
+use crate::defs::{SocietyDefs, TriggerKind};
 use crate::interact::{Feeling, SocietyBark};
 use crate::mind::{Memories, Memory, MemoryKind};
 use crate::relationships::{Ties, expose_toward};
@@ -388,39 +388,97 @@ fn emotion(feeling: Feeling) -> Emotion {
 }
 
 fn check_references(defs: Res<SocietyDefs>, script: Res<DialogueScript>) {
-    for message in reference_errors(&defs, &script) {
-        error!("{message}");
+    for problem in dialogue_problems(&defs, &script) {
+        error!("bevy_society: {problem}");
     }
 }
 
-/// Every conversation rule and node effect that names a conversation or node the
-/// `DialogueScript` does not define, as the messages the plugin logs.
-pub(crate) fn reference_errors(defs: &SocietyDefs, script: &DialogueScript) -> Vec<String> {
+/// What kind of definition names a conversation the `DialogueScript` does not hold.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum DialogueReferenceKind {
+    /// A conversation rule (`ConversationRuleDef`).
+    Rule,
+    /// A node effect (`NodeEffectDef`).
+    NodeEffect,
+    /// A trigger that fires when a node is entered (`TriggerOn::DialogueNode`).
+    Trigger,
+}
+
+/// One definition that names a conversation or node the `DialogueScript` does not define.
+///
+/// Returned by [`dialogue_problems`]; `Display` is the line the plugin logs.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct DialogueProblem {
+    /// Which kind of definition holds the reference.
+    pub kind: DialogueReferenceKind,
+    /// The definition's name: the trigger id, or the script owner (`conversation rule 2`,
+    /// `node effect t/hello`) a Rhai error would also report.
+    pub owner: String,
+    /// The conversation it names.
+    pub conversation: String,
+    /// The node it names; `None` for a conversation rule.
+    pub node: Option<String>,
+}
+
+impl std::fmt::Display for DialogueProblem {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let target = match &self.node {
+            Some(node) => format!("{}/{node}", self.conversation),
+            None => self.conversation.clone(),
+        };
+        write!(
+            f,
+            "{} names {target}, which bevy_speech_bubbles' DialogueScript does not define",
+            self.owner
+        )
+    }
+}
+
+/// Every conversation rule, node effect and node-entered trigger in `defs` that names a
+/// conversation or node `script` does not define, in definition order. Empty when the two agree.
+///
+/// The plugin logs these once when either changes; an editor calls it directly to mark the
+/// offending rows while a conversation graph is being authored.
+pub fn dialogue_problems(defs: &SocietyDefs, script: &DialogueScript) -> Vec<DialogueProblem> {
+    let node_missing = |conversation: &str, node: &str| {
+        script
+            .conversation(conversation)
+            .is_none_or(|c| !c.nodes.contains_key(node))
+    };
     let mut out = Vec::new();
     for rule in &defs.conversations {
         if script.conversation(&rule.conversation).is_none() {
-            let owner = rule.condition.map_or_else(
-                || "a conversation rule".to_owned(),
-                |id| ScriptEngine::owner(&defs.scripts, id).to_owned(),
-            );
-            out.push(format!(
-                "bevy_society: {owner} names {}, which bevy_speech_bubbles' DialogueScript does not define",
-                rule.conversation
-            ));
+            out.push(DialogueProblem {
+                kind: DialogueReferenceKind::Rule,
+                owner: rule.condition.map_or_else(
+                    || "a conversation rule".to_owned(),
+                    |id| ScriptEngine::owner(&defs.scripts, id).to_owned(),
+                ),
+                conversation: rule.conversation.clone(),
+                node: None,
+            });
         }
     }
     for effect in &defs.node_effects {
-        let missing = match script.conversation(&effect.conversation) {
-            None => true,
-            Some(conversation) => !conversation.nodes.contains_key(&effect.node),
-        };
-        if missing {
-            out.push(format!(
-                "bevy_society: {} names {}/{}, which bevy_speech_bubbles' DialogueScript does not define",
-                ScriptEngine::owner(&defs.scripts, effect.then),
-                effect.conversation,
-                effect.node
-            ));
+        if node_missing(&effect.conversation, &effect.node) {
+            out.push(DialogueProblem {
+                kind: DialogueReferenceKind::NodeEffect,
+                owner: ScriptEngine::owner(&defs.scripts, effect.then).to_owned(),
+                conversation: effect.conversation.clone(),
+                node: Some(effect.node.clone()),
+            });
+        }
+    }
+    for trigger in &defs.triggers {
+        if let TriggerKind::DialogueNode { conversation, node } = &trigger.on
+            && node_missing(conversation, node)
+        {
+            out.push(DialogueProblem {
+                kind: DialogueReferenceKind::Trigger,
+                owner: trigger.id.clone(),
+                conversation: conversation.clone(),
+                node: Some(node.clone()),
+            });
         }
     }
     out
@@ -442,8 +500,8 @@ mod tests {
             }) })"#,
         )
         .expect("the script parses");
-        let errors = reference_errors(&defs, &script);
+        let errors = dialogue_problems(&defs, &script);
         assert_eq!(errors.len(), 1, "{errors:?}");
-        assert!(errors[0].contains("t/nowhere"), "{errors:?}");
+        assert!(errors[0].to_string().contains("t/nowhere"), "{errors:?}");
     }
 }

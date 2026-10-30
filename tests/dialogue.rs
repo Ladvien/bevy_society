@@ -314,3 +314,47 @@ fn dialogue_without_speech_bubbles_panics_at_finish() {
         .add_plugins(SocietyPlugins);
     app.finish();
 }
+
+/// An editor marks the rows of a conversation graph that point nowhere: every rule, node effect and
+/// node-entered trigger that names a conversation or node the script lacks, and only those.
+#[test]
+fn dialogue_problems_lists_each_dangling_reference() {
+    let defs = SocietyDefs::from_ron(
+        r#"(
+            triggers: [
+                (id: "greet", on: DialogueNode(conversation: "talk", node: "hello"), then: "fx.emit(\"x\", #{})"),
+                (id: "lost", on: DialogueNode(conversation: "talk", node: "gone"), then: "fx.emit(\"x\", #{})"),
+            ],
+            conversations: [
+                (conversation: "talk"),
+                (conversation: "missing"),
+            ],
+            node_effects: [
+                (conversation: "talk", node: "hello", then: "fx.emit(\"x\", #{})"),
+                (conversation: "talk", node: "nowhere", then: "fx.emit(\"x\", #{})"),
+            ],
+        )"#,
+    )
+    .expect("the definitions parse");
+    let script: DialogueScript = ron::from_str(
+        r#"(conversations: { "talk": (start: "hello", nodes: {
+            "hello": Line(speaker: "npc", text: "Hi.", next: None),
+        }) })"#,
+    )
+    .expect("the script parses");
+    let problems = bevy_society::dialogue_problems(&defs, &script);
+    let found: Vec<_> = problems
+        .iter()
+        .map(|p| (p.kind, p.conversation.as_str(), p.node.as_deref()))
+        .collect();
+    use bevy_society::DialogueReferenceKind::{NodeEffect, Rule, Trigger};
+    assert_eq!(
+        found,
+        vec![
+            (Rule, "missing", None),
+            (NodeEffect, "talk", Some("nowhere")),
+            (Trigger, "talk", Some("gone")),
+        ]
+    );
+    assert!(problems[2].to_string().contains("lost"), "{}", problems[2]);
+}
