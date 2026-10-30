@@ -4,6 +4,8 @@ All notable changes to bevy_society. The format follows [Keep a Changelog](https
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-10-30
+
 ### Added
 
 - **One blow per grievance: `Tuning::retaliation_refractory_hours: Option<f32>`** (default `None`, a design default; negative reciprocity from Gouldner 1960, DOI `10.2307/2092623`). With `Some(h)`, a person who attempted a harmful interaction (deed `harm < 0`, accepted or refused) does not choose another harmful activity against the same target for `h` game-hours, so the insult/reply ping-pong cannot sustain itself. A host's `Interact` is never held back; not saved. 60-person town, 6 h: reply share of snubs 55.5% → 41.2%, rivals 170 → 138.
