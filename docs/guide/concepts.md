@@ -137,6 +137,17 @@ the median moved 18%. A single number with no repetitions is not a measurement, 
 
 Re-checked 2026-10-25 on the same M1 Max with `--reps 3`: fastest windows **0.78**, **28.9** and **101.2** ms at 100, 1 000 and 2 000 people, within 5%, 2% and 1% of the table. The spreads were 17%, 44% and 31% (the machine was shared, so by the rule above those runs say little beyond the minimum), and the table is unchanged.
 
+Re-measured 2026-10-30 on v0.6.0 (a 24-thread x86-64 Linux host, release build, starter pack, `--ticks 100 --settle 300 --reps 5`) after about twenty feature passes. The host's load average was 11 to 38 while it ran, so every spread is above the 20% line and these are upper bounds on the true cost, not a table to quote:
+
+| persons | fastest window (ms) | median (ms) | spread |
+|---|---|---|---|
+| 100 | 0.86 | 1.10 | 28% |
+| 1 000 | 43.5 | 57.4 | 55% |
+| 2 000 | 155.8 | 206.1 | 134% |
+| 5 000 | 534.8 | 702.8 | 40% |
+
+Per million pairs the cost falls from 222 ms at 100 people to 56 ms at 5 000, so a tick is not quadratic in the crowd; at 1 000 people it is about 1.5 times the M1 Max figure above. A 5 000-person society costs about half a second per society tick on this host: budget it with a `tick_secs` of a second or more, or fewer `Person`-targeted activities. Re-run `examples/benchmark` on your own hardware before planning around any of these figures.
+
 An earlier version of this table said **13.5 ms** at 1 000 and **245.1 ms** at 5 000. Those cannot be
 reproduced on this hardware: the fastest window measured here at 1 000 is 28.4 ms, more than twice that figure,
 and the discrepancy was carried for nine iterations because the only tool available reported a single mean and
