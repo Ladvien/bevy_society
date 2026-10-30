@@ -1,0 +1,4 @@
+# Review
+1. **Behavior - GREAT.** `evidence/plots/before-after.png`: insults fall 2-2.4x, compliments rise 17-34%, friends rise 3x, town rivals 170 -> 49; village rivals level (25-39). Compliments:insults 6.6-8.8:1 (bar 5:1). Critique: village rivals did not fall; accepted, they were never the problem there.
+2. **Zoom - GREAT.** Friends plateau (town 249-255 of 3540 ordered pairs = 7%), no saturation or clipping at the cap; rivals non-zero. Critique: the narrative (`evidence/v99/narrative.txt`) shows ordinary compliment/gossip/craft days, no insult runs.
+3. **Fresh eyes - GREAT, with a caveat.** Seed 99 (village and town) matches the other seeds (30 rivals, 80/255 friends). The exponent sweep in `eval.md` is steep (140 / 49 / 0 rivals at 1.1 / 1.15 / 1.2); 1.15 sits mid-transition, so the doc tells a host to re-measure after retuning. The previous NOT YET was this knife-edge; the label-coupling red is gone.

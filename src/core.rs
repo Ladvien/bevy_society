@@ -338,6 +338,30 @@ pub struct Tuning {
     /// 0.068) while familiarity does not separate them at all (0.907 against 0.908), so trust is the
     /// second thing a friend is. Design default.
     pub friend_trust: f32,
+    /// How many close ties one person can hold before a new bond stops forming. **`0.0`, the default,
+    /// turns the brake off**; a host that softens the pack's `snub` curve turns it on at `10.0`.
+    ///
+    /// A person's closeness is a budget, not a counter. Zhou, Sornette, Hill & Dunbar 2005 (DOI
+    /// `10.1098/rspb.2004.2970`) find nested layers of social groups, each about three times the one inside
+    /// it, starting from a support clique of 3.3 people; the layer above that clique is therefore about
+    /// ten. **A tie that is not yet a friend gains positive affinity at `1 - friends / friend_capacity`
+    /// of its rate**, through interaction and mere exposure, and at nothing once the person holds
+    /// `friend_capacity` friends. A tie that already is a friend keeps its full rate, so a full circle is
+    /// stable rather than eroding.
+    ///
+    /// **Why it is here.** `affinity_ceiling` stops contact alone from making a friend, but at 60 people a
+    /// softer snub rate (the pack's `snub` curve at `Power(1.2)`, which lifts compliments to insults from
+    /// 2.9:1 to above 20:1) made 90.8% of ordered pairs friends, because nothing else limits how many
+    /// friends one person can accumulate. Ten is the layer size; the value itself is a design default
+    /// derived from the paper's scaling ratio, not a figure the paper reports.
+    ///
+    /// **Why it is off.** On the shipped `Linear` snub the brake alone raises rivalry (60-person town,
+    /// seed 7: 170 -> 331 rivals) because friendship is scarce already; it earns its place only with a
+    /// softer snub (`Power(1.15)`: 49 rivals, 8:1 compliments to insults), and that pack change fails
+    /// the pinned `tests/rumor_book.rs` (fewer insults, fewer rumors). See
+    /// `docs/loop/needs-decision/snub-rate-vs-scarce-friendship.md`. Closeness is counted by
+    /// [`crate::Tie::is_close`], never by the label.
+    pub friend_capacity: f32,
     /// Familiarity at or above which, with [`Self::friend_affinity`], a tie is a friend.
     pub friend_familiarity: f32,
     /// Affinity at or below `-rival_affinity`, with [`Self::rival_familiarity`], makes a tie a rival.
@@ -611,6 +635,15 @@ impl Tuning {
         }
         (affinity / self.affinity_ceiling).clamp(-1.0, 1.0)
     }
+
+    /// The fraction of a positive affinity gain a tie receives, given how many friends its owner holds
+    /// ([`Self::friend_capacity`]). `1.0` for a tie that is already a friend, and when the brake is off.
+    pub fn bond_scale(&self, friends: usize, already_friend: bool) -> f32 {
+        if self.friend_capacity <= 0.0 || already_friend {
+            return 1.0;
+        }
+        (1.0 - friends as f32 / self.friend_capacity).clamp(0.0, 1.0)
+    }
 }
 
 impl Default for Tuning {
@@ -660,6 +693,7 @@ impl Default for Tuning {
             friend_affinity: 0.3,
             affinity_ceiling: 0.35,
             friend_trust: 0.5,
+            friend_capacity: 0.0,
             friend_familiarity: 0.3,
             // **Also under the clamp ceiling**, for the same reason `friend_affinity` is: `0.4` was
             // unreachable once affinity is bounded at `±affinity_ceiling`, so a rival could never be
