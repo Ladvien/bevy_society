@@ -41,6 +41,26 @@ pub fn grudge(memories: impl IntoIterator<Item = (f32, f32)>) -> f32 {
         .clamp(0.0, 1.0)
 }
 
+/// How many times faster a grievance fades toward someone the victim still trusts: `1 + forgiveness · trust`.
+/// The grudge's recency reads the memory's age multiplied by this pace, so at pace 2 a grievance is as faded
+/// after three days as it would have been after six.
+///
+/// **Forgiveness tracks relationship value.** McCullough, Root Luna, Berry, Tabak & Bono 2010 (DOI
+/// 10.1037/a0019349) found that forgiveness grows with time since the offence, at a rate that differs between
+/// people, and that it was "uniquely associated with participants' perceptions that their relationships with
+/// their offenders retained value". Burnette, McCullough, Van Tongeren & Davis 2012 (DOI
+/// 10.1177/0146167211424582): "the combination of low exploitation risk and high relationship value predicted
+/// the greatest forgiveness". Strelan, Karremans & Krieg 2017 (DOI 10.1111/bjso.12173): the closeness →
+/// forgiveness link is carried by post-transgression **trust**, which "always played the main mediating role".
+/// So the input is the victim's current trust in the offender — one number that rises with good conduct and
+/// falls with each new offence, which is value and exploitation risk read together.
+///
+/// The papers give the direction and the mediator, not a rate in game-days: `forgiveness` is a **design
+/// default**. `0.0` (or less) is pace 1, the recency curve unchanged; trust is clamped to `[0, 1]`.
+pub fn forgiving_pace(trust: f32, forgiveness: f32) -> f32 {
+    1.0 + forgiveness.max(0.0) * trust.clamp(0.0, 1.0)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -76,5 +96,19 @@ mod tests {
         // Clamped at one, and repeated identical offences do not exceed the offence itself.
         assert_eq!(grudge([(-0.9, 1.0), (-0.9, 1.0)]), 0.9);
         assert_eq!(grudge([(-1.4, 1.0)]), 1.0);
+    }
+
+    #[test]
+    fn a_trusted_offender_is_forgiven_faster_and_none_is_the_old_curve() {
+        // Off: exactly the old recency, whatever the trust.
+        assert_eq!(forgiving_pace(1.0, 0.0), 1.0);
+        assert_eq!(forgiving_pace(0.3, -2.0), 1.0);
+        // Pace grows with trust, and an offender nobody trusts gets none of it.
+        assert_eq!(forgiving_pace(0.0, 2.0), 1.0);
+        assert!((forgiving_pace(0.5, 2.0) - 2.0).abs() < 1e-6);
+        assert!((forgiving_pace(1.0, 2.0) - 3.0).abs() < 1e-6);
+        assert!((forgiving_pace(7.0, 2.0) - 3.0).abs() < 1e-6, "trust is clamped");
+        // At pace 2 a grievance halves in about 69 hours instead of 138.
+        assert!((recency(69.0 * forgiving_pace(0.5, 2.0)) - 0.5).abs() < 0.01);
     }
 }

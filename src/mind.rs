@@ -594,13 +594,20 @@ impl Memories {
     /// **6:5**, and rumor reach doubled **0.167 → 0.333**. `village-evening` held (travelling 58.9% →
     /// 59.0%, need mean 0.545 → 0.542).
     pub fn grudge(&self, other: Entity, now_days: f64) -> f32 {
+        self.grudge_at_pace(other, now_days, 1.0)
+    }
+
+    /// [`Self::grudge`] with each memory's age multiplied by `pace` before recency reads it, so a grievance
+    /// fades `pace` times as fast. Pace `1.0` is [`Self::grudge`] exactly. The pace `ctx.grudge` uses is
+    /// [`recall::forgiving_pace`] of the holder's trust in `other` ([`crate::Tuning::forgiveness`]).
+    pub fn grudge_at_pace(&self, other: Entity, now_days: f64, pace: f32) -> f32 {
         recall::grudge(
             self.entries
                 .iter()
                 .filter(|m| m.other == Some(other))
                 .map(|m| {
                     let hours = ((now_days - m.day as f64) * 24.0).max(0.0) as f32;
-                    (m.valence, recall::recency(hours))
+                    (m.valence, recall::recency(hours * pace))
                 }),
         )
     }
