@@ -91,13 +91,14 @@ pub struct Destination(pub Vec2);
 ///
 /// Written by `arrive_and_satisfy` while a person travels and only when a stall timeout is set; read by
 /// `end_activities`. Removed on arrival, on every ending and whenever a new `Doing` is decided, so it
-/// never outlives the walk it measures. It is not saved: a restored walker gets a fresh window.
+/// never outlives the walk it measures. Saved (`PersonSave::travel_progress`): a restored walker that got
+/// a fresh window would be allowed a stall the uninterrupted run had already timed out.
 #[derive(Component, Debug, Clone, Copy, PartialEq)]
 pub(crate) struct TravelProgress {
     /// The smallest distance to the target at the last improvement, in plane units.
-    best: f32,
+    pub(crate) best: f32,
     /// Game day of the last improvement by more than `Tuning::stall_epsilon`.
-    improved_day: f64,
+    pub(crate) improved_day: f64,
 }
 
 /// Places a person recently failed to reach, and the game-day each is forgiven
