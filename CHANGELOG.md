@@ -6,6 +6,7 @@ All notable changes to bevy_society. The format follows [Keep a Changelog](https
 
 ### Added
 
+- **`Tuning::friend_capacity`** (default `0.0`, off; `10.0` after Zhou et al. 2005, DOI 10.1098/rspb.2004.2970): a tie not yet close gains positive affinity at `1 - close / capacity` of its rate and none at a full circle, so a host can soften the `snub` curve without friendship saturating. Closeness is `Tie::is_close` (affinity and trust), never the hysteretic label; `Ties::friend_count(&Tuning)`, `Tuning::bond_scale`. Off, a run is bit-identical to 0.6.0. `Tie::expose` takes the brake's scale (breaking). `examples/evidence --friend-capacity`. `tests/friend_capacity.rs`; `docs/research/relationships.md`.
 - **`dialogue_problems(&SocietyDefs, &DialogueScript) -> Vec<DialogueProblem>`** (feature `dialogue`): every conversation rule, node effect and `DialogueNode` trigger that names a conversation or node the script does not define, as data (`DialogueReferenceKind`, owner, conversation, node) with the plugin's log line as `Display`. The plugin's own check now uses it and also covers `DialogueNode` triggers, which it skipped before. For an editor that marks dangling rows while a conversation graph is authored. `tests/dialogue.rs`.
 
 ### Fixed

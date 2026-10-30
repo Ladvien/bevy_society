@@ -1,0 +1,2 @@
+# Research
+Zhou, Sornette, Hill & Dunbar 2005, DOI 10.1098/rspb.2004.2970: nested circles, each ~3x the one inside, from a support clique of ~3.3, so the next layer is ~10. Brake: gain x (1 - close/10) for a tie not yet close, none at 10, close ties and every loss unbraked. Baumeister et al. 2001, DOI 10.1037/1089-2680.5.4.323: 5:1 positive-to-negative floor. Full note: `docs/research/relationships.md`.
