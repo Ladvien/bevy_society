@@ -4797,3 +4797,10 @@ a tautological assertion removed from `tuning_covers_rates`. Full gate results a
 **Evidence.** `tests/placement.rs` 7/7 (live edit read back; save, reload, capture again equals; unnamed person refused), `tests/leaf.rs`, clippy `-D warnings`, doc green. Library-only API: no behaviour scenario, no plots/three-review gate. **Dead-code delta:** zero.
 **Top 5 remaining.** 1. Release 0.6.0 (after 6 h from v0.5.0). 2. Re-measure scale table. 3. Insult ping-pong residue (41%). 4. Friendship capacity brake (#10). 5. Reconcile rival counts.
 **Cleanup.** Created nothing outside the clone.
+
+## 2026-10-30-08 — `TriggerDef::area`: a trigger bound to a rectangle (bevy_emerge #105)
+
+**Change.** No open issues; parked branches older, ignored. Release skipped: `v0.5.0` is under 6 h old. Pick (editor need, #105 acceptance "a trigger bound to an area fires only for people inside it"): `ctx` exposes no position, so a script could not express it. `TriggerDef.area: Option<TriggerArea>` (design default: absent = anywhere), checked in `evaluate_triggers` against the actor's current society-plane position, edges inclusive; `Tick`/`Hour`/`RumorReach` (no actor) and inverted or non-finite corners are refused at load. Assumed decision (owner may override): options were a declarative rectangle, a `ctx.position(p)` script reader, or both; picked the rectangle, since the editor edits it as data and a selection maps onto it 1:1. Runner-ups: scale-table re-measure (host load 35), friendship brake (#10, needs a source).
+**Evidence.** `tests/trigger_area.rs` 2/2 (inside fires, outside and walked-out do not, edge inclusive; bad areas refused), full `cargo test --release` green, clippy `-D warnings`, `--no-default-features` build (5 pre-existing dialogue-gated warnings). Data path only, no behaviour scenario touched: no plots/three-review gate; host load not measured. **Dead-code delta:** zero.
+**Top 5 remaining.** 1. Release 0.6.0 (after 6 h from v0.5.0). 2. Re-measure scale table. 3. Insult ping-pong residue (41%). 4. Friendship capacity brake (#10). 5. Reconcile rival counts.
+**Cleanup.** Created nothing outside the clone.

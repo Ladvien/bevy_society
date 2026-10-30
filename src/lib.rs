@@ -167,7 +167,7 @@ pub use defs::{
     DeedDef, DeedId, DefsError, DefsFile, EffectsDef, FactionDef, FactionId, FieldInput, GoodDef,
     GoodId, IDLE_ACTIVITY, Input, InteractionBarks, InteractionDef, InteractionId, NeedDef, NeedId,
     NodeEffectDef, Signal, SignalDef, SignalId, SkillDef, SkillGroup, SkillId, SocietyDefs,
-    TieDelta, TopicDef, TopicId, TriggerDef, TriggerOn, size_person_state,
+    TieDelta, TopicDef, TopicId, TriggerArea, TriggerDef, TriggerOn, size_person_state,
 };
 #[cfg(feature = "dialogue")]
 pub use dialogue::{DialoguePlugin, TalkTo};

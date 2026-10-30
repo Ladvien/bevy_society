@@ -6,6 +6,7 @@ All notable changes to bevy_society. The format follows [Keep a Changelog](https
 
 ### Added
 
+- **`TriggerDef::area`** (`TriggerArea`): a trigger fires only while its bound actor stands inside a society-plane rectangle (bevy_emerge #105, "a trigger bound to an area fires only for people inside it"). Absent means anywhere; an area on `Tick`, `Hour` or `RumorReach`, or with inverted or non-finite corners, is refused at load. `tests/trigger_area.rs`.
 - **`PlacementFile::capture(&mut World)`**: the inverse of `spawn`, so an editor saves what the user arranged live (current positions, needs, signals, opinion anchors, factions, home, bound places, ties; places sorted by name, persons by `PersonId`). Errors name an unnamed place or person. `tests/placement.rs`.
 - **`check_script`**, `ScriptKind`, `ScriptSyntaxError`: parse script text standalone and get the first syntax error with line and column, for editors that refuse to save a bad script. `tests/check_script.rs`.
 - **`PlacementFile`** (issue #41): authored places and persons as serde data, RON in and out (`from_ron`, `to_ron`). `PersonDef` carries name, personality, needs, signals, opinions, factions, `home`, named `bound` places (a workplace is `("work", "mill")`), start position and ties; `PlacementFile::spawn(&mut World)` validates the whole file against `SocietyDefs` first, spawns nothing on error, and draws no random numbers. `tests/placement.rs`.

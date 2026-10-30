@@ -18,8 +18,11 @@ use bevy::ecs::resource::Resource;
 use bevy::ecs::schedule::IntoScheduleConfigs;
 use bevy::ecs::system::{Query, Res, ResMut, SystemParam};
 use bevy::log::error;
+use bevy::transform::components::Transform;
 
-use crate::core::{PendingActions, PersonIndex, SocietyClock, SocietySystems, require_core};
+use crate::core::{
+    PendingActions, PersonIndex, SocietyClock, SocietySettings, SocietySystems, require_core,
+};
 use crate::defs::{ActivityId, InteractionId, SocietyDefs, TriggerKind, TriggerSpec};
 use crate::mind::Needs;
 use crate::relationships::{TieLabel, TieLabelChanged};
@@ -293,6 +296,8 @@ fn evaluate_triggers(
     mut label_changes: MessageReader<TieLabelChanged>,
     mut violations: MessageReader<NormViolated>,
     needs: Query<&Needs>,
+    settings: Res<SocietySettings>,
+    places: Query<&Transform>,
     mut errors: MessageWriter<ScriptError>,
 ) {
     let (Some(engine), Some(queue), Some(state), Some(pending)) = (
@@ -489,6 +494,11 @@ fn evaluate_triggers(
             if !event.matches(&spec.on) || !state.may_fire(which, bindings.actor, spec, now) {
                 continue;
             }
+            if let Some(area) = spec.area
+                && !actor_in_area(&index, &places, &settings, bindings.actor, area)
+            {
+                continue;
+            }
             if let Some(condition) = spec.condition
                 && !condition_holds(&engine, &defs, condition, &snapshot, bindings, &mut errors)
             {
@@ -501,6 +511,24 @@ fn evaluate_triggers(
             state.record(which, bindings.actor, spec, now);
         }
     }
+}
+
+/// Whether the person with id `actor` stands inside `area` now. No such person is outside.
+fn actor_in_area(
+    index: &PersonIndex,
+    transforms: &Query<&Transform>,
+    settings: &SocietySettings,
+    actor: i64,
+    area: crate::defs::TriggerArea,
+) -> bool {
+    let Some(&(_, entity)) = index.sorted.iter().find(|(id, _)| i64::from(id.0) == actor) else {
+        return false;
+    };
+    let Ok(transform) = transforms.get(entity) else {
+        return false;
+    };
+    let p = settings.plane.project(transform.translation);
+    area.contains([p.x, p.y])
 }
 
 /// Whether a trigger's `if` holds. An error is an `error!` and a `ScriptError`, and the condition
