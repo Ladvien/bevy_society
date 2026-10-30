@@ -1510,6 +1510,7 @@ impl SocietyDefs {
         };
         let then = scripts.statements(&owner, &def.then)?;
         self.triggers.push(TriggerSpec {
+            id: def.id.clone(),
             on,
             condition,
             then,
@@ -1850,6 +1851,7 @@ pub(crate) enum TriggerKind {
 /// A compiled trigger.
 #[derive(Debug, Clone)]
 pub(crate) struct TriggerSpec {
+    pub(crate) id: String,
     pub(crate) on: TriggerKind,
     pub(crate) condition: Option<ScriptId>,
     pub(crate) then: ScriptId,

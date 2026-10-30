@@ -98,6 +98,10 @@ runtime error at `emit` time, so a script cannot smuggle a struct into a game ev
 A condition that fails to evaluate counts as **false** and writes a `ScriptError`; it does not stop the
 other triggers.
 
+Each trigger that runs to completion writes `TriggerFired { trigger, actor, target }` (the authored id and the
+people the event bound), in the order the triggers ran. A trigger whose `then` errors writes `ScriptError`
+instead.
+
 ## Errors and limits
 
 Every evaluation runs sandboxed: 10 000 operations, 16 call levels, 1 KiB strings, 256-element arrays

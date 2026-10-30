@@ -21,7 +21,8 @@ use bevy::log::error;
 use bevy::transform::components::Transform;
 
 use crate::core::{
-    PendingActions, PersonIndex, SocietyClock, SocietySettings, SocietySystems, require_core,
+    PendingActions, PersonId, PersonIndex, SocietyClock, SocietySettings, SocietySystems,
+    require_core,
 };
 use crate::defs::{ActivityId, InteractionId, SocietyDefs, TriggerKind, TriggerSpec};
 use crate::mind::Needs;
@@ -41,6 +42,22 @@ pub struct FireTrigger {
     pub actor: Option<Entity>,
     /// The person the event is directed at, if any.
     pub target: Option<Entity>,
+}
+
+/// A trigger ran: its event matched, its `area` and `if` held and its `then` finished without error.
+///
+/// Written once per firing, in the order the triggers ran, so an editor can list which triggers
+/// fired against a fast-forwarded society. A trigger whose `then` failed writes a [`ScriptError`]
+/// instead. `actor` and `target` are the people the event bound, `None` when it bound none or the
+/// person has since despawned.
+#[derive(Message, Debug, Clone, PartialEq, Eq)]
+pub struct TriggerFired {
+    /// The authored `TriggerDef::id`.
+    pub trigger: String,
+    /// The person the event was about, if it bound one.
+    pub actor: Option<PersonId>,
+    /// The person the event was directed at, if it bound one.
+    pub target: Option<PersonId>,
 }
 
 /// One event waiting for this tick's trigger evaluation (plan D8).
@@ -202,6 +219,7 @@ impl Plugin for RulesPlugin {
             .init_resource::<NeedArmed>()
             .init_resource::<RumorReported>()
             .add_message::<FireTrigger>()
+            .add_message::<TriggerFired>()
             .add_systems(
                 FixedUpdate,
                 queue_fired_triggers.in_set(SocietySystems::Clock),
@@ -299,6 +317,7 @@ fn evaluate_triggers(
     settings: Res<SocietySettings>,
     places: Query<&Transform>,
     mut errors: MessageWriter<ScriptError>,
+    mut fired: MessageWriter<TriggerFired>,
 ) {
     let (Some(engine), Some(queue), Some(state), Some(pending)) = (
         engine,
@@ -505,12 +524,24 @@ fn evaluate_triggers(
                 continue;
             }
             match engine.run(&defs.scripts, spec.then, &snapshot, bindings) {
-                Ok(actions) => pending.0.extend(actions),
+                Ok(actions) => {
+                    pending.0.extend(actions);
+                    fired.write(TriggerFired {
+                        trigger: spec.id.clone(),
+                        actor: person_id(bindings.actor),
+                        target: person_id(bindings.target),
+                    });
+                }
                 Err(err) => report(&defs, spec.then, err, &mut errors),
             }
             state.record(which, bindings.actor, spec, now);
         }
     }
+}
+
+/// The [`PersonId`] a binding carries, `None` for the `-1` of "no person".
+fn person_id(bound: i64) -> Option<PersonId> {
+    u32::try_from(bound).ok().map(PersonId)
 }
 
 /// Whether the person with id `actor` stands inside `area` now. No such person is outside.

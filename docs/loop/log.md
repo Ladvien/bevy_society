@@ -4811,3 +4811,10 @@ a tautological assertion removed from `tuning_covers_rates`. Full gate results a
 **Evidence.** `tests/defs_roundtrip.rs` 3/3 (starter, starter+village: second write equals first and reloaded file compiles; an edited trigger keeps `if`, `once`, cooldown, area), `tests/leaf.rs` and `--no-default-features` green, clippy `-D warnings`, fmt. Data path only: no behaviour scenario, no plots/three-review gate. **Dead-code delta:** zero.
 **Top 5 remaining.** 1. Release 0.6.0 (after 6 h from v0.5.0; new API). 2. Re-measure scale table. 3. Insult ping-pong residue (41%). 4. Friendship capacity brake (#10). 5. Reconcile rival counts.
 **Cleanup.** Created nothing outside the clone.
+
+## 2026-10-30-10 — `TriggerFired`: which triggers ran (bevy_emerge #105)
+
+**Change.** No open issues; parked branches older, ignored. Release skipped: `v0.5.0` is 2 h old. Pick (editor need, #105 "see which triggers fired" against a fast-forwarded society): no observable existed besides a script's own `fx.emit`. Added `TriggerFired { trigger, actor, target }` (authored id, `PersonId`s), written when a trigger's `then` completes without error; failures keep writing `ScriptError`. Runner-ups: live defs hot-reload (needs a design: ids are indices, saves compare names), scale-table re-measure (host load 30).
+**Evidence.** `tests/trigger_area.rs` 3/3 (new: inside actor reported once with id and `PersonId`, outside actor not), `tests/leaf.rs`, `guide_blocks`, clippy `-D warnings`, doc, `--no-default-features` build (5 pre-existing warnings). Message surface only: no behaviour scenario, no plots/three-review gate. **Dead-code delta:** zero.
+**Top 5 remaining.** 1. Release 0.6.0 (after 6 h from v0.5.0). 2. Defs hot-reload at runtime (#105 "editing a script in the running game"). 3. Re-measure scale table. 4. Insult ping-pong residue (41%). 5. Friendship capacity brake (#10).
+**Cleanup.** Created nothing outside the clone.
