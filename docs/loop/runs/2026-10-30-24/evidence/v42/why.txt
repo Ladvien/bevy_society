@@ -1,0 +1,8 @@
+# tick 69626: someone chose wander (1.000), the best option
+
+ 1.000  wander   <- chosen
+ 0.999  compliment
+ 0.786  eat
+ 0.644  gossip
+ 0.400  work
+ 0.280  play
