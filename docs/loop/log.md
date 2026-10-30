@@ -4825,3 +4825,10 @@ a tautological assertion removed from `tuning_covers_rates`. Full gate results a
 **Evidence.** `tests/trigger_area.rs` 4/4 (new: edited script runs for a new actor, spent `once` stays spent through the edit, new trigger live, uncompilable and renamed-need edits refused leaving the last good defs), `leaf`, `guide_blocks`, `defs`, `defs_roundtrip`, clippy `-D warnings`, doc, `--no-default-features` build. API only: no behaviour scenario, no plots/three-review gate. **Dead-code delta:** zero.
 **Top 5 remaining.** 1. Release 0.6.0 (after 6 h from v0.5.0). 2. Re-measure scale table. 3. Insult ping-pong residue (41%). 4. Friendship capacity brake (#10). 5. Reconcile rival counts.
 **Cleanup.** Created nothing outside the clone.
+
+## 2026-10-30-12 — `TriggerDef::factions` / `persons`: bind a trigger to people and factions (bevy_emerge #105)
+
+**Change.** No open issues; parked branches older, ignored. Release skipped: `v0.5.0` is 2.4 h old. Pick (editor need, #105 "bind a trigger to people, factions or a map area"; only the area existed): `factions: Vec<String>` (actor belongs to any) and `persons: Vec<u32>` (actor's `PersonId`), both empty = any actor (design default), both listed = either; unknown faction and either list on `Tick`/`Hour`/`RumorReach` refused at load. Runner-ups: scale-table re-measure (host load 19), friendship brake (#10, needs a source).
+**Evidence.** `tests/trigger_area.rs` 6/6 (new: faction member and listed id fire, a stranger does not; bad lists refused), full `cargo test --release` green, clippy `-D warnings`, fmt, `--no-default-features` build. Data path only: no behaviour scenario, no plots/three-review gate. **Dead-code delta:** zero.
+**Top 5 remaining.** 1. Release 0.6.0 (after 6 h from v0.5.0). 2. Re-measure scale table. 3. Insult ping-pong residue (41%). 4. Friendship capacity brake (#10). 5. Reconcile rival counts.
+**Cleanup.** Created nothing outside the clone.

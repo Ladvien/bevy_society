@@ -519,6 +519,14 @@ pub struct TriggerDef {
     /// none, are refused at load. Design default: absent means anywhere.
     #[serde(default)]
     pub area: Option<TriggerArea>,
+    /// Fire only for an actor who belongs to at least one of these factions. Needs an event that
+    /// binds an actor, like `area`. Design default: empty means any actor.
+    #[serde(default)]
+    pub factions: Vec<String>,
+    /// Fire only for an actor with one of these `PersonId`s. Needs an event that binds an actor,
+    /// like `area`. Design default: empty means any actor.
+    #[serde(default)]
+    pub persons: Vec<u32>,
 }
 
 /// An axis-aligned rectangle on the society plane, edges inclusive: where an area trigger is live.
@@ -1542,6 +1550,10 @@ impl SocietyDefs {
             return Err(invalid(&owner, "cooldown_hours must be 0 or more"));
         }
         let on = self.trigger_kind(&owner, &def.on)?;
+        let binds_no_actor = matches!(
+            on,
+            TriggerKind::Tick | TriggerKind::Hour(_) | TriggerKind::RumorReach { .. }
+        );
         if let Some(area) = def.area {
             if area.min.iter().chain(&area.max).any(|v| !v.is_finite())
                 || area.min[0] > area.max[0]
@@ -1549,14 +1561,26 @@ impl SocietyDefs {
             {
                 return Err(invalid(&owner, "area needs finite corners with min <= max"));
             }
-            if matches!(
-                on,
-                TriggerKind::Tick | TriggerKind::Hour(_) | TriggerKind::RumorReach { .. }
-            ) {
+            if binds_no_actor {
                 return Err(invalid(
                     &owner,
                     "area needs an event that binds an actor; Tick, Hour and RumorReach bind none",
                 ));
+            }
+        }
+        if binds_no_actor && (!def.factions.is_empty() || !def.persons.is_empty()) {
+            return Err(invalid(
+                &owner,
+                "factions and persons need an event that binds an actor; Tick, Hour and RumorReach bind none",
+            ));
+        }
+        let mut factions = Vec::with_capacity(def.factions.len());
+        for name in &def.factions {
+            match self.faction_id(name) {
+                Some(id) => factions.push(id),
+                None => {
+                    return Err(invalid(&owner, format!("unknown faction '{name}'")));
+                }
             }
         }
         let condition = match def.condition.as_deref() {
@@ -1572,6 +1596,8 @@ impl SocietyDefs {
             once: def.once,
             cooldown_hours: def.cooldown_hours,
             area: def.area,
+            factions,
+            persons: def.persons.clone(),
         });
         Ok(())
     }
@@ -1913,6 +1939,8 @@ pub(crate) struct TriggerSpec {
     pub(crate) once: bool,
     pub(crate) cooldown_hours: f32,
     pub(crate) area: Option<TriggerArea>,
+    pub(crate) factions: Vec<FactionId>,
+    pub(crate) persons: Vec<u32>,
 }
 
 /// A compiled conversation rule.
