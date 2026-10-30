@@ -4846,3 +4846,10 @@ a tautological assertion removed from `tuning_covers_rates`. Full gate results a
 **Evidence.** `tests/test_trigger.rs` 2/2 (each check reported, repeat call identical, nothing emitted; unknown id and failing script are errors), `tests/leaf.rs`, `guide_blocks`, clippy `-D warnings`, fmt, `--no-default-features` build (5 pre-existing warnings). API only: no behaviour scenario, no plots/three-review gate. **Dead-code delta:** zero.
 **Top 5 remaining.** 1. Release 0.6.0 (after 6 h from v0.5.0). 2. Re-measure scale table. 3. Insult ping-pong residue (41%). 4. Friendship capacity brake (#10). 5. Reconcile rival counts.
 **Cleanup.** Created nothing outside the clone.
+
+## 2026-10-30-15 — `preview_forward`: run forward, report, reset (bevy_emerge #104)
+
+**Change.** No open issues; parked branches older, ignored. Release skipped: `v0.5.0` is 2.9 h old. Pick (editor need, #104 "run the society forward ... show where people go and how their ties change, then reset"): `fast_forward` had no reset and no report. `preview_forward(world, days) -> Preview` = capture, fast_forward, capture, restore, plus each person's `Transform` put back; reports per `PersonKey` position before/after, activity before/after and changed ties. Needs `PersonKey` on every person (placement does not write one; the crate never writes keys by design), else `PreviewError::Unkeyed` before anything runs. Feature `serde`. Runner-ups: scale-table re-measure (host load 17), friendship brake (#10, needs a source).
+**Evidence.** `tests/fast_forward.rs` 5/5 with `--features serde` (new: a 1-day preview moves both villagers, whole-society hash after equals before, a repeat preview is identical; unkeyed refused untouched), `tests/leaf.rs`, clippy `-D warnings`, fmt, doc, `--no-default-features` build. API only: no behaviour scenario, no plots/three-review gate. **Dead-code delta:** zero.
+**Top 5 remaining.** 1. Release 0.6.0 (after 6 h from v0.5.0). 2. Re-measure scale table. 3. Insult ping-pong residue (41%). 4. Friendship capacity brake (#10). 5. Reconcile rival counts.
+**Cleanup.** Created nothing outside the clone.

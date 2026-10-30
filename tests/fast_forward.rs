@@ -105,3 +105,49 @@ fn fast_forward_refuses_what_it_cannot_advance() {
         Err(FastForwardError::HostClock)
     );
 }
+
+#[cfg(feature = "serde")]
+mod preview {
+    use super::*;
+    use bevy_society::{PersonKey, PreviewError, preview_forward};
+
+    fn keyed_village() -> App {
+        let mut app = village();
+        let mut persons: Vec<Entity> = app
+            .world_mut()
+            .query_filtered::<Entity, With<bevy_society::Person>>()
+            .iter(app.world())
+            .collect();
+        persons.sort();
+        for (i, e) in persons.into_iter().enumerate() {
+            app.world_mut()
+                .entity_mut(e)
+                .insert(PersonKey(i as u64 + 1));
+        }
+        app
+    }
+
+    #[test]
+    fn a_preview_reports_where_people_went_and_leaves_the_society_as_it_was() {
+        let mut app = keyed_village();
+        let before = hash(&app);
+        let report = preview_forward(app.world_mut(), 1.0).unwrap();
+        assert_eq!(report.persons.len(), 2);
+        assert!(report.run.ticks > 0);
+        // They walked to the mill (10, 0) from the cottage (-4, 2).
+        assert!(report.persons.iter().all(|p| p.from != p.to), "{report:?}");
+        // …and the world is back where it started, positions included.
+        assert_eq!(hash(&app), before);
+        // The same preview twice reports the same thing.
+        assert_eq!(preview_forward(app.world_mut(), 1.0).unwrap(), report);
+    }
+
+    #[test]
+    fn an_unkeyed_person_refuses_the_preview_before_anything_runs() {
+        let mut app = village();
+        let before = hash(&app);
+        let err = preview_forward(app.world_mut(), 1.0).unwrap_err();
+        assert_eq!(err, PreviewError::Unkeyed(2));
+        assert_eq!(hash(&app), before);
+    }
+}

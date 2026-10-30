@@ -140,6 +140,8 @@ mod interact;
 mod mind;
 mod placement;
 mod plugins;
+#[cfg(feature = "serde")]
+mod preview;
 mod relationships;
 mod reputation;
 mod rules;
@@ -196,6 +198,8 @@ pub use placement::{
     persons_in_rect, place_dependents,
 };
 pub use plugins::SocietyPlugins;
+#[cfg(feature = "serde")]
+pub use preview::{PersonPreview, Preview, PreviewError, TieChange, preview_forward};
 pub use relationships::{RelationshipsPlugin, Tie, TieLabel, TieLabelChanged, Ties};
 pub use reputation::NormViolated;
 pub use rules::{
