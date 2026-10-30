@@ -4883,3 +4883,10 @@ a tautological assertion removed from `tuning_covers_rates`. Full gate results a
 **Top 5 remaining.** 1. Re-measure scale table on a quiet host. 2. Attribute the other ~50% of `decide_activities`. 3. Friendship capacity brake (#10, owner relaxes `label_hysteresis` equality). 4. Reconcile rival counts. 5. Insult ping-pong residue (41%).
 **Cleanup.** Created nothing outside the clone.
 **Release.** v0.6.0 published, https://crates.io/crates/bevy_society/0.6.0 (semver-checks: breaking, new pub fields on TriggerDef and PersonSave).
+
+## 2026-10-30-20 - save/restore: a walker's stall window was not saved
+
+**Change.** No open issues; parked branches older, ignored. Pick (same class as passes 18-19, found by grepping `Not saved` in `src/`): `TravelProgress` (the `stall_timeout_hours` window) was dropped by a save, so a restored walker got a fresh window. `PersonSave::travel_progress` (`(f32 bits, f64 bits)`, `#[serde(default)]`, `VERSION` 4) saves and restores it; two stale "Not saved" doc lines on `Tuning` corrected. Release skipped: v0.6.0 is under 6 h old.
+**Evidence.** `tests/failed_place.rs::a_restore_keeps_the_stall_window_of_a_walker` (feature `serde`); full `cargo test --release --all-features` and `--no-default-features` green, clippy `-D warnings`, fmt. Bug fix: no plots/three-review gate (precedent: passes 18-19). **Dead-code delta:** zero.
+**Top 5 remaining.** 1. Re-measure scale table on a quiet host. 2. Attribute the other ~50% of `decide_activities`. 3. Friendship capacity brake (#10). 4. Reconcile rival counts. 5. Insult ping-pong residue (41%).
+**Cleanup.** Created nothing outside the clone. Leftover from pass 17: `stash@{0}` for a person to drop.
