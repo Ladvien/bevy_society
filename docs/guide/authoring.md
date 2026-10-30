@@ -291,7 +291,7 @@ A definitions file says what kinds of things exist; a `PlacementFile` says who a
 )
 ```
 
-`placement.spawn(world)` checks every name against the world's `SocietyDefs`, spawns nothing when a line is wrong, and returns a `Placed` that maps names to entities. A person starts at `at`, else at their home. A trait left out is `0.5`, a tie's `trust` left out is `0.5`, and `autonomous` is `true` unless given. Spawning draws no random numbers.
+`placement.spawn(world)` checks every name against the world's `SocietyDefs`, spawns nothing when a line is wrong, and returns a `Placed` that maps names to entities. A person starts at `at`, else at their home. A trait left out is `0.5`, a tie's `trust` left out is `0.5`, and `autonomous` is `true` unless given. Spawning draws no random numbers. `PlacementFile::capture(world)` reads a live world back into a file (positions as they are now, opinions as their anchors), so what a user moved can be saved with `to_ron()`; every place and person must have a `Name`.
 
 ## Errors
 

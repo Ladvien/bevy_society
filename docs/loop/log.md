@@ -4790,3 +4790,10 @@ a tautological assertion removed from `tuning_covers_rates`. Full gate results a
 **Evidence.** `tests/placement.rs` 5/5 (new test: cottage lists Ada and Bram as home, mill lists Ada as work, rects select the right person), `tests/leaf.rs`, clippy `-D warnings`, `--no-default-features` build green. Library-only queries: no behaviour change, no plots/three-review gate. **Dead-code delta:** zero.
 **Top 5 remaining.** 1. Release 0.6.0 (after 6 h from v0.5.0). 2. Re-measure scale table. 3. Insult ping-pong residue (41%). 4. Friendship capacity brake (#10). 5. Reconcile rival counts.
 **Cleanup.** Created nothing outside the clone.
+
+## 2026-10-30-07 — `PlacementFile::capture`: save a live world as a placement file
+
+**Change.** No open issues; parked branches older, ignored. Release skipped: `v0.5.0` is under 6 h old. Pick (editor need, bevy_emerge #104 "saved in a game's project and edited live"): `capture(&mut World)` is the inverse of `spawn`; needs, signals, positions are current, opinions are anchors, unnamed place/person is an error. Runner-ups: scale-table re-measure (host load 38, unreliable), friendship brake (#10, needs a source).
+**Evidence.** `tests/placement.rs` 7/7 (live edit read back; save, reload, capture again equals; unnamed person refused), `tests/leaf.rs`, clippy `-D warnings`, doc green. Library-only API: no behaviour scenario, no plots/three-review gate. **Dead-code delta:** zero.
+**Top 5 remaining.** 1. Release 0.6.0 (after 6 h from v0.5.0). 2. Re-measure scale table. 3. Insult ping-pong residue (41%). 4. Friendship capacity brake (#10). 5. Reconcile rival counts.
+**Cleanup.** Created nothing outside the clone.

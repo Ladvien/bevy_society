@@ -22,11 +22,15 @@ use bevy::math::Vec2;
 use bevy::transform::components::Transform;
 use serde::{Deserialize, Serialize};
 
+use bevy::ecs::query::With;
+
+use crate::beliefs::Opinions;
 use crate::core::{
-    Autonomous, BoundPlaces, Home, Person, PersonIndex, Place, PlaceTags, SocietySettings,
+    Autonomous, BoundPlaces, Home, Person, PersonId, PersonIndex, Place, PlaceTags, SocietySettings,
 };
-use crate::defs::{DefsError, SocietyDefs};
-use crate::mind::Personality;
+use crate::defs::{DefsError, NeedId, SignalId, SocietyDefs, TopicId};
+use crate::groups::Memberships;
+use crate::mind::{Needs, Personality, Signals};
 use crate::relationships::Ties;
 
 /// A list of places and persons, as one RON document. Both lists are optional.
@@ -376,6 +380,149 @@ impl PlacementFile {
             }
         }
         Ok(placed)
+    }
+
+    /// Reads the world back into a file: the inverse of [`PlacementFile::spawn`], for an editor that
+    /// saves what the user arranged live.
+    ///
+    /// Every [`Place`] and every [`Person`] must carry a [`Name`], and the names must be unique
+    /// (checked by [`PlacementFile::validate`] on the result), else the error names the entity.
+    /// Places come out sorted by name, persons in ascending `PersonId`. A person's `at` is where they
+    /// stand now, `needs` and `signals` are their current levels, and `opinions` are their anchors
+    /// (the authored, Friedkin–Johnsen starting value; drifted values and stubbornness are runtime
+    /// state that belongs in [`crate::SocietySave`]). Opinions anchored at `0.0` and signals at `0.0`
+    /// are left out, as that is what an unlisted id starts at. Ties to an entity that is not a named
+    /// person are dropped.
+    pub fn capture(world: &mut World) -> Result<Self, DefsError> {
+        let plane = world
+            .get_resource::<SocietySettings>()
+            .map(|s| s.plane)
+            .unwrap_or_default();
+        let mut place_names: BTreeMap<Entity, String> = BTreeMap::new();
+        let mut places = Vec::new();
+        let mut query = world.query::<(
+            Entity,
+            &Place,
+            Option<&Name>,
+            Option<&PlaceTags>,
+            &Transform,
+        )>();
+        for (entity, place, name, tags, transform) in query.iter(world) {
+            let name = name.map(|n| n.as_str().to_owned()).ok_or_else(|| {
+                invalid(format!("place {entity}"), "a captured place needs a Name")
+            })?;
+            let at = plane.project(transform.translation);
+            place_names.insert(entity, name.clone());
+            places.push(PlaceDef {
+                id: name,
+                at: (at.x, at.y),
+                capacity: place.capacity,
+                tags: tags.map(|t| t.0.clone()).unwrap_or_default(),
+            });
+        }
+        places.sort_by(|a, b| a.id.cmp(&b.id));
+
+        let mut found: Vec<(PersonId, Entity)> = world
+            .query_filtered::<(&PersonId, Entity), With<Person>>()
+            .iter(world)
+            .map(|(id, e)| (*id, e))
+            .collect();
+        found.sort();
+        let mut person_names: BTreeMap<Entity, String> = BTreeMap::new();
+        for &(_, entity) in &found {
+            let name = world.get::<Name>(entity).ok_or_else(|| {
+                invalid(format!("person {entity}"), "a captured person needs a Name")
+            })?;
+            person_names.insert(entity, name.as_str().to_owned());
+        }
+
+        let defs = world
+            .get_resource::<SocietyDefs>()
+            .ok_or_else(|| invalid("placement".to_owned(), "the world has no SocietyDefs"))?;
+        let mut persons = Vec::with_capacity(found.len());
+        for &(_, entity) in &found {
+            let owner = format!("person '{}'", person_names[&entity]);
+            let place_name = |target: Entity| {
+                place_names.get(&target).cloned().ok_or_else(|| {
+                    invalid(
+                        owner.clone(),
+                        "its home or bound place is not a named Place",
+                    )
+                })
+            };
+            let e = world.entity(entity);
+            let personality = e
+                .get::<Personality>()
+                .map_or_else(PersonalityDef::default, |p| PersonalityDef {
+                    openness: p.openness,
+                    conscientiousness: p.conscientiousness,
+                    extraversion: p.extraversion,
+                    agreeableness: p.agreeableness,
+                    neuroticism: p.neuroticism,
+                });
+            let needs = e.get::<Needs>().map_or_else(Vec::new, |n| {
+                (0..n.0.len())
+                    .map(|i| (defs.need_name(NeedId(i as u16)).to_owned(), n.0[i]))
+                    .collect()
+            });
+            let signals = e.get::<Signals>().map_or_else(Vec::new, |s| {
+                (0..s.0.len())
+                    .filter(|&i| s.0[i] != 0.0)
+                    .map(|i| (defs.signal_name(SignalId(i as u16)).to_owned(), s.0[i]))
+                    .collect()
+            });
+            let opinions = e.get::<Opinions>().map_or_else(Vec::new, |o| {
+                (0..o.0.len())
+                    .filter(|&i| o.0[i].anchor != 0.0)
+                    .map(|i| (defs.topic_name(TopicId(i as u16)).to_owned(), o.0[i].anchor))
+                    .collect()
+            });
+            let factions = e.get::<Memberships>().map_or_else(Vec::new, |m| {
+                m.0.iter()
+                    .map(|&f| defs.faction_name(f).to_owned())
+                    .collect()
+            });
+            let home = e.get::<Home>().map(|h| place_name(h.0)).transpose()?;
+            let mut bound = Vec::new();
+            if let Some(b) = e.get::<BoundPlaces>() {
+                for (binding, target) in &b.0 {
+                    bound.push((binding.clone(), place_name(*target)?));
+                }
+            }
+            let at = e
+                .get::<Transform>()
+                .map(|t| plane.project(t.translation))
+                .map(|p| (p.x, p.y));
+            let mut ties = Vec::new();
+            if let Some(t) = e.get::<Ties>() {
+                for tie in &t.0 {
+                    if let Some(with) = person_names.get(&tie.target) {
+                        ties.push(TieSpec {
+                            with: with.clone(),
+                            affinity: tie.affinity,
+                            trust: tie.trust,
+                        });
+                    }
+                }
+                ties.sort_by(|a, b| a.with.cmp(&b.with));
+            }
+            persons.push(PersonDef {
+                name: person_names[&entity].clone(),
+                personality,
+                needs,
+                signals,
+                opinions,
+                factions,
+                home,
+                bound,
+                at,
+                ties,
+                autonomous: e.contains::<Autonomous>(),
+            });
+        }
+        let file = Self { places, persons };
+        file.validate(defs)?;
+        Ok(file)
     }
 }
 
