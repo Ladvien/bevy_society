@@ -29,7 +29,7 @@ A person without a `PersonKey` is **left out of the save**, with one `warn!` per
 
 | field | holds |
 |---|---|
-| `version` | The format version, `bevy_society::VERSION` (currently `2`). |
+| `version` | The format version, `bevy_society::VERSION` (currently `4`). |
 | `names` | The names of every definition list (needs, topics, deeds, factions, activities), in definition order. Ids are indices into these lists, so this is how a restore notices the defs have moved. |
 | `clock` | The tick count, game time in days, `dt_days`, and the fixed-step accumulator. |
 | `rng` | The one random stream's seed, stream number and word position, so the draws after a reload are the draws that would have followed. |

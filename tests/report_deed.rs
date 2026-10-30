@@ -355,3 +355,39 @@ fn witness_order_does_not_change_the_result() {
         "the order the host lists witnesses in must not change the society"
     );
 }
+
+/// A reported deed leaves its victim a `Suffered` memory (not a `Witnessed` one), so the victim's grudge
+/// toward the actor is above zero; the actor and an uninvolved witness hold no grudge.
+#[test]
+fn a_reported_victim_remembers_and_resents_the_actor() {
+    let mut app = app();
+    let actor = spawn_person(&mut app, "Bram", Vec2::ZERO);
+    let patient = spawn_person(&mut app, "Ada", Vec2::new(1.0, 0.0));
+    let witness = spawn_person(&mut app, "Cole", Vec2::new(20.0, 0.0));
+    app.world_mut().write_message(ReportDeed {
+        actor,
+        patient: Some(patient),
+        deed: "brawl".to_owned(),
+        witnesses: vec![witness],
+    });
+    app.update();
+    app.update();
+    let now = app
+        .world()
+        .resource::<bevy_society::SocietyClock>()
+        .now_days;
+    let victim = app.world().get::<bevy_society::Memories>(patient).unwrap();
+    assert!(
+        victim
+            .entries
+            .iter()
+            .any(|m| matches!(m.kind, MemoryKind::Suffered { actor: a, .. } if a == actor))
+    );
+    assert_eq!(witnessed_memories(&app, patient), 0);
+    assert!(
+        victim.grudge(actor, now) > 0.5,
+        "0.3 + |-0.5| = 0.8 at the moment of the deed"
+    );
+    let by = app.world().get::<bevy_society::Memories>(witness).unwrap();
+    assert_eq!(by.grudge(actor, now), 0.0, "a bystander is not wronged");
+}
