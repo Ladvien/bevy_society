@@ -4746,3 +4746,5 @@ a tautological assertion removed from `tuning_covers_rates`. Full gate results a
 **Evidence** (`runs/2026-10-29-04/`, run docs from the parked tree, numbers in its `eval.md`): town 60: reply share of snubs 55.5% → 41.2%, rivals 170 → 138; village seeds 7/11 improve, 42 flat. `tests/retaliation.rs` 3/3. **Verdicts:** GREAT / GREAT (limit stated) / GREAT per its `review.md`. Default `None`: no run changes. **Dead-code delta:** zero.
 
 **Top 5 remaining.** 1. Reconcile rival count with `friendship_bound`. 2. Clock decision `travel_timeout_hours`. 3. Re-measure scale table. 4. Release 0.5.0 (breaking `MemoryKind` variant unreleased). 5. Decide whether to default the refractory on.
+
+**Release 2026-10-29-05.** Published **0.5.0** (`MemoryKind::Suffered` is breaking per semver-checks), https://crates.io/crates/bevy_society/0.5.0, tag `v0.5.0`. Also fixed `examples/evidence.rs` (non-exhaustive `Suffered` match that broke `cargo test`'s example build on `main`). **Cleanup:** created nothing outside the clone. Earlier leftovers still listed, not removed: `/home/ladvien/.cache/loop-runs/before-tree`, `/home/ladvien/.cache/price-before-src`.
