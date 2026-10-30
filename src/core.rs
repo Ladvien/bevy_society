@@ -519,7 +519,7 @@ pub struct Tuning {
     /// A **design default**, `None`: no paper gives a retry delay; it is a host's judgement of how long a
     /// closed route stays closed (reinforcement-learning agents likewise stop re-trying an action whose last
     /// outcome was a failure, but no corpus paper fixes the interval). Only a `Place` target is remembered;
-    /// a `Person` target moves and is chosen afresh. Not saved: a restored person forgets.
+    /// a `Person` target moves and is chosen afresh. Saved: a restored person still avoids it.
     pub failed_place_memory_hours: Option<f32>,
     /// How long, in game-hours, a person who has just attempted a **harmful** interaction (one whose deed
     /// has `harm < 0`, such as an insult) will not choose another harmful activity against the same
@@ -531,7 +531,7 @@ pub struct Tuning {
     /// A **design default**, `Some(6.0)` (a quarter of a day): negative reciprocity is documented
     /// (Gouldner 1960, DOI 10.2307/2092623) but no paper fixes a cooling-off interval. `None` turns it
     /// off. Only the choice of a harmful activity is held back; a host's `Interact` is never refused by
-    /// it. Not saved.
+    /// it. Saved.
     pub retaliation_refractory_hours: Option<f32>,
     /// Walking speed in metres per **real** second, used by the core walker that moves a person
     /// toward its `Destination` when no `SocialMover` is steering. 1.4 m/s is an ordinary human
