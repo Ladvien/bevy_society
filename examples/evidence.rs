@@ -77,6 +77,9 @@ fn main() {
     if let Some(hours) = args.stall_timeout {
         settings.tuning.stall_timeout_hours = Some(hours);
     }
+    if let Some(capacity) = args.friend_capacity {
+        settings.tuning.friend_capacity = capacity;
+    }
     if let Some(hours) = args.retaliation_refractory {
         settings.tuning.retaliation_refractory_hours = Some(hours);
     }
@@ -1488,6 +1491,8 @@ struct Args {
     stall_timeout: Option<f32>,
     /// Overrides `Tuning::failed_place_memory_hours`, in game hours.
     failed_place_memory: Option<f32>,
+    /// Overrides `Tuning::friend_capacity`.
+    friend_capacity: Option<f32>,
     /// Overrides `Tuning::retaliation_refractory_hours`, in game hours.
     retaliation_refractory: Option<f32>,
     /// Runs for this many game-days instead of the scenario's `ticks:`, so a long run is one flag rather
@@ -1505,6 +1510,7 @@ impl Args {
             seconds_per_day: None,
             stall_timeout: None,
             failed_place_memory: None,
+            friend_capacity: None,
             retaliation_refractory: None,
             positivity_offset: None,
             friend_affinity: None,
@@ -1532,6 +1538,9 @@ impl Args {
                 }
                 "--label-hysteresis" => {
                     args.label_hysteresis = argv.next().and_then(|v| v.parse().ok())
+                }
+                "--friend-capacity" => {
+                    args.friend_capacity = argv.next().and_then(|v| v.parse().ok())
                 }
                 "--friend-band" => args.friend_band = argv.next().and_then(|v| v.parse().ok()),
                 "--rival-band" => args.rival_band = argv.next().and_then(|v| v.parse().ok()),
