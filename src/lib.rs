@@ -137,6 +137,7 @@ mod fields;
 mod groups;
 mod interact;
 mod mind;
+mod placement;
 mod plugins;
 mod relationships;
 mod reputation;
@@ -188,6 +189,7 @@ pub use mind::{
     ActiveEmotion, Appraise, EmotionKind, Emotions, Memories, Memory, MemoryKind, Mood, MoodRates,
     Needs, Personality, Signals, Trait,
 };
+pub use placement::{PersonDef, PersonalityDef, PlaceDef, Placed, PlacementFile, TieSpec};
 pub use plugins::SocietyPlugins;
 pub use relationships::{RelationshipsPlugin, Tie, TieLabel, TieLabelChanged, Ties};
 pub use reputation::NormViolated;

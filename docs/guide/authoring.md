@@ -280,6 +280,19 @@ These name conversations and nodes that live in the host's `bevy_speech_bubbles:
 are inert data without the `dialogue` feature, so one definitions file serves every feature set; with
 the feature on, a name the script does not define is an `error!`.
 
+## Placing persons
+
+A definitions file says what kinds of things exist; a `PlacementFile` says who and where. It is RON too, and an editor can save it and a game load it: `PlacementFile::from_ron(text)` and `.to_ron()` round-trip.
+
+```text
+(
+    places: [(id: "mill", at: (10.0, 0.0), capacity: 3, tags: ["work"]), (id: "cottage", at: (-4.0, 2.0), capacity: 2)],
+    persons: [(name: "Ada", home: Some("cottage"), bound: [("work", "mill")], factions: ["millers"], needs: [("hunger", 0.4)], personality: (extraversion: 0.9), ties: [(with: "Bram", affinity: 0.2)])],
+)
+```
+
+`placement.spawn(world)` checks every name against the world's `SocietyDefs`, spawns nothing when a line is wrong, and returns a `Placed` that maps names to entities. A person starts at `at`, else at their home. A trait left out is `0.5`, a tie's `trust` left out is `0.5`, and `autonomous` is `true` unless given. Spawning draws no random numbers.
+
 ## Errors
 
 `DefsError` is `Display` and implements `std::error::Error`:
