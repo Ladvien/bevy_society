@@ -113,9 +113,10 @@ pub(crate) struct FailedPlaces(Vec<(Entity, f64)>);
 ///
 /// Written by `exchange` when an interaction whose deed has negative harm is attempted (accepted or
 /// refused); read by `decide_activities`, which drops those people from the targets of a harmful
-/// activity. Pruned on every write, in insertion order. Not saved.
+/// activity. Pruned on every write, in insertion order. Saved (`PersonSave::recent_harm`): a reload that
+/// forgot it would let the next tick's insult through a refractory the uninterrupted run was still holding.
 #[derive(Component, Debug, Clone, Default, PartialEq)]
-pub(crate) struct RecentHarm(Vec<(Entity, f64)>);
+pub(crate) struct RecentHarm(pub(crate) Vec<(Entity, f64)>);
 
 // -------------------------------------------------------------------------------------------------
 // Messages
