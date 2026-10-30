@@ -521,6 +521,17 @@ pub struct Tuning {
     /// outcome was a failure, but no corpus paper fixes the interval). Only a `Place` target is remembered;
     /// a `Person` target moves and is chosen afresh. Not saved: a restored person forgets.
     pub failed_place_memory_hours: Option<f32>,
+    /// How long, in game-hours, a person who has just attempted a **harmful** interaction (one whose deed
+    /// has `harm < 0`, such as an insult) will not choose another harmful activity against the same
+    /// target, accepted or refused. Measured on the village, 73% of snubs answered an insult the snubber
+    /// had *received*, and the reply gave the first insulter a fresh grievance: a standing exchange of
+    /// insults, not one retaliation. With `Some(h)` the answer to a grievance is one blow per `h` hours
+    /// per ordered pair, so the exchange cannot sustain itself faster than that.
+    ///
+    /// A **design default**, `None`: negative reciprocity is documented (Gouldner 1960, DOI
+    /// 10.2307/2092623) but no paper fixes a cooling-off interval. Only the choice of a harmful activity
+    /// is held back; a host's `Interact` is never refused by it. Not saved.
+    pub retaliation_refractory_hours: Option<f32>,
     /// Walking speed in metres per **real** second, used by the core walker that moves a person
     /// toward its `Destination` when no `SocialMover` is steering. 1.4 m/s is an ordinary human
     /// walking speed. `SocialMover::speed` overrides it per person.
@@ -678,6 +689,7 @@ impl Default for Tuning {
             stall_timeout_hours: None,
             stall_epsilon: 0.25,
             failed_place_memory_hours: None,
+            retaliation_refractory_hours: None,
             walk_speed: 1.4,
             // **A design default, set by measurement.** Not from a paper; the *gate* is the paper. Every
             // contact-tell that finds an informed neighbour stifles the teller (Daley–Kendall), so pacing
