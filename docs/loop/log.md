@@ -4738,3 +4738,11 @@ a tautological assertion removed from `tuning_covers_rates`. Full gate results a
 **Evidence.** `tests/report_deed.rs::a_reported_victim_remembers_and_resents_the_actor`. No plots/three-review gate run (host loaded; narrow path only `ReportDeed`, no scenario uses it). **Dead-code delta:** zero.
 
 **Top 5 remaining.** 1. Insult reply ping-pong. 2. Reconcile rival count with `friendship_bound`. 3. Clock decision `travel_timeout_hours`. 4. Re-measure scale table. 5. Release (breaking change pending, 0.5.0).
+
+## 2026-10-29-05 — one blow per grievance (`retaliation_refractory_hours`), adopted from parked pass 40
+
+**Change.** Adopted `wiggum/parked-pass-40-…` (the insult-reply ping-pong item): opt-in `Tuning::retaliation_refractory_hours` (default `None`, design default; Gouldner 1960, DOI 10.2307/2092623). Applied only its `behavior.rs`/`core.rs`/`evidence.rs` hunks and its tests/run docs; its other files predate `main` and were not taken. No open issues. Other parked branches (20/28/36/37) older, ignored.
+
+**Evidence** (`runs/2026-10-29-04/`, run docs from the parked tree, numbers in its `eval.md`): town 60: reply share of snubs 55.5% → 41.2%, rivals 170 → 138; village seeds 7/11 improve, 42 flat. `tests/retaliation.rs` 3/3. **Verdicts:** GREAT / GREAT (limit stated) / GREAT per its `review.md`. Default `None`: no run changes. **Dead-code delta:** zero.
+
+**Top 5 remaining.** 1. Reconcile rival count with `friendship_bound`. 2. Clock decision `travel_timeout_hours`. 3. Re-measure scale table. 4. Release 0.5.0 (breaking `MemoryKind` variant unreleased). 5. Decide whether to default the refractory on.
