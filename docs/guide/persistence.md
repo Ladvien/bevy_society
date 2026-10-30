@@ -29,13 +29,13 @@ A person without a `PersonKey` is **left out of the save**, with one `warn!` per
 
 | field | holds |
 |---|---|
-| `version` | The format version, `bevy_society::VERSION` (currently `4`). |
+| `version` | The format version, `bevy_society::VERSION` (currently `5`). A file written by an older version is brought up by `SocietySave::upgrade`, which `restore` calls itself. |
 | `names` | The names of every definition list (needs, topics, deeds, factions, activities), in definition order. Ids are indices into these lists, so this is how a restore notices the defs have moved. |
 | `clock` | The tick count, game time in days, `dt_days`, and the fixed-step accumulator. |
 | `rng` | The one random stream's seed, stream number and word position, so the draws after a reload are the draws that would have followed. |
-| `persons` | One `PersonSave` per keyed person, ascending by key: personality, mood, emotions, needs, outgoing ties (affinity, trust, respect, familiarity peak, last contact, label), opinions, rumor knowledge, memories, memberships, signals, status, `dormant` and `deceased`, the running activity and its target, the walk destination, who the person has just harmed and until when (the retaliation refractory), and the last ORCA velocity under `steering`. |
+| `persons` | One `PersonSave` per keyed person, ascending by `PersonId` (then by key): personality, mood, emotions, needs, goods held (`stock`), outgoing ties (affinity, trust, respect, familiarity peak, last contact, label), opinions, rumor knowledge, memories, memberships, signals, status, `dormant` and `deceased`, when an absence began (`away_since_bits`), the running activity and its target, the walk destination, the stall window of a walker (`travel_progress`), who the person has just harmed and until when (`recent_harm`, the retaliation refractory), the places a walk just failed to reach (`failed_places`), and the last ORCA velocity under `steering`. |
 | `rumors` | The rumor book in order, so `RumorId`s stay stable. |
-| `triggers` | Which `once` triggers fired, every cooldown, the clock instant `Hour` triggers measure against, which need thresholds are armed and which reach triggers fired. |
+| `triggers` | Which `once` triggers fired and every cooldown, each under the trigger's authored `id` (`ids`, so a restore into an edited defs file finds the same trigger; state for an id the defs no longer have is dropped with a warning), the clock instant `Hour` triggers measure against, which people have fired a `NeedBelow` line and not yet recovered (`need_disarmed`), and which reach triggers fired. |
 | `faction_stats` | The faction aggregates. |
 | `prices` | The price book, one number per good. It is recomputed from the stores each tick, but `ctx.price` reads the tick-start snapshot, which is frozen before that recomputation, so the first tick after a restore needs the saved book. Empty without `EconomyPlugin`. |
 | `fields` | Under `fields`, the crowd grid and each faction grid's cells; `None` when the plugin is not in the app. |
