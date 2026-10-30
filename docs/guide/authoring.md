@@ -260,7 +260,7 @@ valid names. Every row above is asserted by `tests/guide_blocks.rs` against the 
 from the crate without a test failing.
 
 `if` is an optional Rhai condition; `once` fires at most once per (trigger, actor) and `cooldown_hours` gates by
-actor. See [`scripting.md`](scripting.md).
+actor. `area: Some((min: (x, y), max: (x, y)))` limits a trigger to an actor standing inside that rectangle on the society plane (edges inclusive); `Tick`, `Hour` and `RumorReach` bind no actor, so the loader refuses an area on them. See [`scripting.md`](scripting.md).
 
 ## Conversations and node effects
 
