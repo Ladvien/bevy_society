@@ -198,7 +198,10 @@ pub use placement::{
 pub use plugins::SocietyPlugins;
 pub use relationships::{RelationshipsPlugin, Tie, TieLabel, TieLabelChanged, Ties};
 pub use reputation::NormViolated;
-pub use rules::{FireTrigger, RulesPlugin, TriggerFired, reload_defs};
+pub use rules::{
+    FireTrigger, RulesPlugin, TriggerFired, TriggerTest, TriggerTestError, reload_defs,
+    test_trigger,
+};
 pub use rumor::{PlantRumor, Rumor, RumorBook, RumorId, RumorLearned};
 #[cfg(feature = "serde")]
 pub use save::{
