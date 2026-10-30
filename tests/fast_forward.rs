@@ -4,6 +4,7 @@
 mod common;
 
 use bevy::prelude::*;
+use bevy::time::Fixed;
 use bevy_society::{
     ClockSource, FastForwardError, PlacementFile, SocietyClock, SocietyDefs, SocietySettings,
     fast_forward,
@@ -103,6 +104,48 @@ fn fast_forward_refuses_what_it_cannot_advance() {
     assert_eq!(
         fast_forward(host.world_mut(), 1.0),
         Err(FastForwardError::HostClock)
+    );
+}
+
+#[test]
+fn fast_forward_after_a_live_frame_runs_exactly_the_ticks_asked() {
+    let mut fast = village();
+    // A live frame: `Time<Virtual>::delta()` is now one timestep, as in any running game.
+    fast.update();
+    let start = fast.world().resource::<SocietyClock>().tick;
+    // ceil(3/256 * 4 / (1/64)) = 3
+    let done = fast_forward(fast.world_mut(), 3.0 / 256.0).unwrap();
+    assert_eq!(done.ticks, 3);
+    assert_eq!(fast.world().resource::<SocietyClock>().tick - start, 3);
+
+    // The same ticks in a live app are the same society.
+    let mut live = village();
+    live.update();
+    while live.world().resource::<SocietyClock>().tick < start + 3 {
+        live.update();
+    }
+    assert_eq!(hash(&fast), hash(&live));
+
+    // The app's own clocks are as the last frame left them: one timestep.
+    let delta = fast.world().resource::<Time<Virtual>>().delta();
+    assert_eq!(delta, fast.world().resource::<Time<Fixed>>().timestep());
+    assert_eq!(fast.world().resource::<Time>().delta(), delta);
+}
+
+#[test]
+fn fast_forward_refuses_a_count_the_clock_cannot_hold_and_a_world_without_time() {
+    let mut app = village();
+    let start = app.world().resource::<SocietyClock>().tick;
+    assert!(matches!(
+        fast_forward(app.world_mut(), f32::MAX),
+        Err(FastForwardError::BadDays(_))
+    ));
+    assert_eq!(app.world().resource::<SocietyClock>().tick, start, "nothing ran");
+
+    app.world_mut().remove_resource::<Time<Fixed>>();
+    assert_eq!(
+        fast_forward(app.world_mut(), 1.0),
+        Err(FastForwardError::NoTimeStep)
     );
 }
 
