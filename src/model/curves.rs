@@ -3,12 +3,12 @@
 //! ch. 13, "Choosing Effective Utility-Based Considerations"; corpus doc
 //! `gameaipro3-ch13-choosing-effective-utility-ba…`).
 
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 /// A response curve applied to one consideration's input, always yielding a value in `[0, 1]`.
 ///
 /// `Hours` reads the hour of day, so its input is the normalised hour `h / 24`.
-#[derive(Debug, Clone, Copy, PartialEq, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 pub enum Curve {
     /// `clamp(m·x + b, 0, 1)`.
     Linear(f32, f32),
