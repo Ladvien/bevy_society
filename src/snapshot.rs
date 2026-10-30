@@ -175,6 +175,8 @@ pub(crate) struct SocietySnapshot {
     names: Names,
     /// Prices by good, in definition order, as of the tick start.
     prices: Vec<f32>,
+    /// `Tuning::forgiveness` at the tick start: how much faster `ctx.grudge` fades toward a trusted offender.
+    forgiveness: f32,
     /// Persons in ascending id order.
     persons: Vec<PersonView>,
     /// Per-tick generator for `ctx.rand()`, seeded from [`SocietyRng`].
@@ -231,11 +233,15 @@ impl SocietySnapshot {
         self.tie_value(a, b, |tie| tie.familiarity, 0.0)
     }
 
-    /// `ctx.grudge(a, b)`: the weight of `a`'s bad memories about `b`, in `[0, 1]`.
+    /// `ctx.grudge(a, b)`: the weight of `a`'s bad memories about `b`, in `[0, 1]`, each read at its age times
+    /// [`crate::model::recall::forgiving_pace`] of `a`'s trust in `b` (0.5, a fresh tie's, when there is no
+    /// tie). With `Tuning::forgiveness` at 0 the pace is 1 and this is `Memories::grudge`.
     pub(crate) fn grudge(&self, a: i64, b: i64) -> Result<f32, String> {
         let person = self.person(a)?;
         let other = self.entity(b)?;
-        Ok(person.memories.grudge(other, self.now_days))
+        let trust = person.tie_to_id(other).map_or(0.5, |tie| tie.trust);
+        let pace = crate::model::recall::forgiving_pace(trust, self.forgiveness);
+        Ok(person.memories.grudge_at_pace(other, self.now_days, pace))
     }
 
     /// `ctx.label(a, b)`: the tie's label as a lowercase name, `"stranger"` when there is no tie.
@@ -568,6 +574,7 @@ pub(crate) fn build_snapshot(
             .as_deref()
             .map(|p| p.0.clone())
             .unwrap_or_default(),
+        forgiveness: tuning.forgiveness,
         persons,
         rng: Mutex::new(seeded(seed)),
     }));
