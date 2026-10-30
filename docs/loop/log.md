@@ -4762,3 +4762,10 @@ a tautological assertion removed from `tuning_covers_rates`. Full gate results a
 **Evidence.** Numbers from `runs/2026-10-29-04/eval.md` (same seeds, same 6 h): town reply share 55.5% → 41.2%, rivals 170 → 138. Full `cargo test --release` green (all suites incl. `friendship_bound`, `retaliation`). Host load ~36: no perf, no new plots. Verdicts: not re-run (reuse of 2026-10-29-04 GREENs). **Dead-code delta:** zero.
 **Top 5 remaining.** 1. Re-measure scale table. 2. Clock decision `travel_timeout_hours`. 3. Insult ping-pong residue (41%). 4. Friendship capacity brake (#10). 5. Reconcile rival counts.
 **Cleanup.** Created nothing outside the clone.
+
+## 2026-10-30-03 — evidence harness measures partner repetition; compliment social-need gate rejected
+
+**Change.** `examples/evidence.rs` writes `partners.txt` (share of exchanges with the initiator's previous partner, per interaction). Library unchanged. No open issues; parked branches older, ignored. `travel_timeout_hours` clock decision is already dissolved by `Locomotion::Host` (`needs-decision/travel-time-in-two-clocks.md`): no work left.
+**Evidence.** `runs/2026-10-30-02/eval.md`: 33.0% of exchanges repeat the previous partner (village, 24, 6 days). A `Need("social")` gate on `compliment` left it at 32.1% and made friends 26 → 16, rivals 77 → 105; reverted. No behaviour change shipped, so no plots/three-review gate. Host load ~30: no perf. **Dead-code delta:** zero.
+**Top 5 remaining.** 1. Decide whether partner repetition is implausible (needs a source; a per-tie `last_exchange_day` would be the lever). 2. Re-measure scale table on a quiet host. 3. Insult ping-pong residue (41%). 4. Friendship capacity brake (#10). 5. Reconcile rival counts (77 directed rivals of 552 pairs).
+**Cleanup.** Scratch `/tmp/ev0 /tmp/ev1 /tmp/ev2 /tmp/ev3` removed.
