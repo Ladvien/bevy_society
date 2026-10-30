@@ -53,16 +53,16 @@ use crate::groups::{FactionStats, Memberships, Status};
 use crate::mind::Signals;
 use crate::mind::{EmotionKind, Emotions, Memories, MemoryKind, Mood, Needs, Personality};
 use crate::relationships::{Tie, Ties};
-use crate::rules::{LastDays, NeedDisarmed, RumorReported, TriggerRemap, TriggerState};
+use crate::rules::{LastDays, NeedArmed, RumorReported, TriggerState};
 use crate::rumor::{Rumor, RumorBook, RumorId};
 
 /// Version of the [`SocietySave`] format this build writes and reads.
 ///
 /// [`restore`] reads this version and the older ones [`SocietySave::upgrade`] knows a lossless step
-/// for (currently 1 to 4). It refuses any other version rather than guessing at a layout, so a host
-/// that ships a save and later upgrades the crate gets a `Version` error it can act on instead of a
+/// for (currently 1). It refuses any other version rather than guessing at a layout, so a host that
+/// ships a save and later upgrades the crate gets a `Version` error it can act on instead of a
 /// silently wrong society.
-pub const VERSION: u32 = 5;
+pub const VERSION: u32 = 4;
 
 // -------------------------------------------------------------------------------------------------
 // The saved shape: plain fields, no `Entity`
@@ -327,30 +327,21 @@ pub struct RumorSave {
 }
 
 /// The trigger bookkeeping: which triggers have fired once, which are cooling, what the clock's
-/// previous instant was, which people have fired a need threshold and not yet recovered, and which
-/// (deed, rumor) reach triggers have already fired.
+/// previous instant was, which need thresholds are armed, and which (deed, rumor) reach triggers
+/// have already fired.
 ///
 /// A once-trigger that fired before the save must not fire again after it, and a cooling trigger
 /// must not become available because the reload forgot when it last fired.
 #[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
 pub struct TriggersSave {
-    /// The authored `id` of each trigger, at the index `fired` and `cooling` use for it, so that
-    /// [`restore`] can find the same trigger again after the defs file was edited (a trigger inserted,
-    /// removed or moved). Empty in a file written before `VERSION` 5, whose indices are then applied
-    /// as they stand.
-    #[serde(default)]
-    pub ids: Vec<String>,
     /// `(trigger index, actor id)` pairs that have fired once.
     pub fired: Vec<(u32, i64)>,
     /// `(trigger index, actor id, last firing day)` for every cooling trigger.
     pub cooling: Vec<(u32, i64, f64)>,
     /// The clock's instant at the previous tick, which `Hour` triggers measure against.
     pub last_days: Option<f64>,
-    /// `(need index, threshold as f32 bits, person id)` for every person who fired a `NeedBelow`
-    /// threshold and has not yet recovered above it by the re-arm band. A person not listed is armed.
-    /// `VERSION` 5; an older file's one-flag-per-threshold `need_armed` is not read.
-    #[serde(default)]
-    pub need_disarmed: Vec<(u16, u32, u32)>,
+    /// Which need thresholds are armed, indexed by need and then by definition order.
+    pub need_armed: Vec<Vec<bool>>,
     /// The `(deed id, rumor id)` pairs whose reach trigger has fired.
     pub rumor_reported: Vec<(u16, u32)>,
 }
@@ -409,12 +400,6 @@ impl SocietySave {
     /// - **Version 3 to 4.** The only difference is the `Suffered` memory kind, which no older file
     ///   holds; nothing needs rewriting.
     ///
-    /// - **Version 4 to 5.** A version-4 file keeps its `once` and cooldown rows by trigger index and
-    ///   has no [`TriggersSave::ids`], so [`restore`] applies those indices as they stand (the
-    ///   defs must not have moved a trigger since the save). Its `need_armed`, one flag per
-    ///   threshold for the whole town, cannot say which person fired and is dropped: everyone is
-    ///   armed after the restore, so a person already below a `NeedBelow` threshold fires once more.
-    ///
     /// A save already at [`VERSION`] is returned unchanged.
     ///
     /// # Errors
@@ -433,10 +418,6 @@ impl SocietySave {
         if self.version == 3 {
             // Version 4 only adds `MemoryKindSave::Suffered`; no version-3 file contains one.
             self.version = 4;
-        }
-        if self.version == 4 {
-            // Version 5 adds `TriggersSave::ids` and `need_disarmed`, which deserialize as empty.
-            self.version = 5;
         }
         if self.version != VERSION {
             return Err(RestoreError::Version {
@@ -828,9 +809,6 @@ fn names_of(defs: &SocietyDefs) -> NamesSave {
 /// The trigger bookkeeping, as plain vectors so a JSON map never needs a tuple key.
 fn capture_triggers(world: &World) -> TriggersSave {
     let mut save = TriggersSave::default();
-    if let Some(defs) = world.get_resource::<SocietyDefs>() {
-        save.ids = defs.triggers.iter().map(|t| t.id.clone()).collect();
-    }
     if let Some(state) = world.get_resource::<TriggerState>() {
         save.fired = state
             .fired_set()
@@ -846,8 +824,8 @@ fn capture_triggers(world: &World) -> TriggersSave {
     if let Some(last) = world.get_resource::<LastDays>() {
         save.last_days = last.0;
     }
-    if let Some(disarmed) = world.get_resource::<NeedDisarmed>() {
-        save.need_disarmed = disarmed.0.iter().copied().collect();
+    if let Some(armed) = world.get_resource::<NeedArmed>() {
+        save.need_armed = armed.0.clone();
     }
     if let Some(reported) = world.get_resource::<RumorReported>() {
         save.rumor_reported = reported
@@ -896,10 +874,7 @@ fn capture_fields(world: &World) -> Option<FieldsSave> {
 ///   circulating, because nothing can spread a rumor about somebody the world does not have;
 /// - the clock, the tick accumulator, the RNG's exact position and every trigger's
 ///   once/cooldown bookkeeping are set back to what the save recorded, which is what makes the
-///   ticks after a reload identical to the ticks that would have followed without one. The
-///   bookkeeping follows each trigger's authored `id`, so a defs file edited since the save (a trigger
-///   inserted, removed or moved) keeps every surviving trigger's own state; state for an id the defs
-///   no longer have is dropped, with one warning naming them;
+///   ticks after a reload identical to the ticks that would have followed without one.
 ///
 /// # Errors
 ///
@@ -1087,56 +1062,26 @@ pub fn restore(world: &mut World, save: SocietySave) -> Result<RestoreReport, Re
     }
 
     // --- triggers -------------------------------------------------------------------------------
-    // A save that names its triggers is matched to the current defs by authored id, so an edit that
-    // inserted, removed or moved a trigger leaves each surviving trigger its own once/cooldown state.
-    // A save from before the ids were written has indices only, which are applied as they stand.
     if let Some(mut state) = world.get_resource_mut::<TriggerState>() {
-        let current: Vec<String> = defs.triggers.iter().map(|t| t.id.clone()).collect();
-        let remap = (!save.triggers.ids.is_empty())
-            .then(|| TriggerRemap::new(&save.triggers.ids, &current));
-        let mut gone: BTreeSet<String> = BTreeSet::new();
-        let mut resolve = |saved: u32| -> Option<usize> {
-            let Some(remap) = &remap else {
-                return Some(saved as usize);
-            };
-            let found = remap.get(saved as usize);
-            if found.is_none() {
-                gone.insert(
-                    save.triggers
-                        .ids
-                        .get(saved as usize)
-                        .cloned()
-                        .unwrap_or_else(|| format!("#{saved}")),
-                );
-            }
-            found
-        };
         let fired: BTreeSet<(usize, i64)> = save
             .triggers
             .fired
             .iter()
-            .filter_map(|&(index, actor)| resolve(index).map(|n| (n, actor)))
+            .map(|&(index, actor)| (index as usize, actor))
             .collect();
         let cooling: BTreeMap<(usize, i64), f64> = save
             .triggers
             .cooling
             .iter()
-            .filter_map(|&(index, actor, day)| resolve(index).map(|n| ((n, actor), day)))
+            .map(|&(index, actor, day)| ((index as usize, actor), day))
             .collect();
-        if !gone.is_empty() {
-            warn!(
-                "bevy_society: the save has once/cooldown state for triggers the defs no longer \
-                 have ({}); it is dropped",
-                gone.into_iter().collect::<Vec<_>>().join(", ")
-            );
-        }
         state.replace(fired, cooling);
     }
     if let Some(mut last) = world.get_resource_mut::<LastDays>() {
         last.0 = save.triggers.last_days;
     }
-    if let Some(mut disarmed) = world.get_resource_mut::<NeedDisarmed>() {
-        disarmed.0 = save.triggers.need_disarmed.iter().copied().collect();
+    if let Some(mut armed) = world.get_resource_mut::<NeedArmed>() {
+        armed.0 = save.triggers.need_armed.clone();
     }
     if let Some(mut reported) = world.get_resource_mut::<RumorReported>() {
         reported.0 = save.triggers.rumor_reported.iter().copied().collect();
