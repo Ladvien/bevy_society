@@ -525,7 +525,7 @@ pub struct Tuning {
     ///
     /// A **design default**, `None`: no paper gives a stall limit, it is a host's judgement of how long a
     /// queue is allowed to be. A `Person` target moves, so progress is measured against its current point and
-    /// a chase that closes counts. A save does not carry the tracker; a restored walker gets a fresh window.
+    /// a chase that closes counts. A save carries the tracker, so a restored walker keeps its window.
     /// [`TravelFailed`](crate::TravelFailed) is unaffected.
     pub stall_timeout_hours: Option<f32>,
     /// How much closer to its destination, in the plane's units, a travelling person must get to count as

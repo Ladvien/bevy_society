@@ -154,5 +154,6 @@ Events are reported in a fixed order, so the same inputs give the same society:
 6. `NeedBelow`, persons in id order and needs in id order.
 7. `RumorReach`, rumors in id order, the first time a living rumor of that deed reaches its fraction.
 
-Within one event, triggers are evaluated in definition order. `NeedBelow` re-arms only once the need
-is back above `below + 0.05`, so a level hovering at the threshold does not fire every tick.
+Within one event, triggers are evaluated in definition order. `NeedBelow` fires once per person per
+crossing: that person re-arms only once their need is back above `below + 0.05`, so a level hovering
+at the threshold does not fire every tick, and one person's level never arms the line for another.
