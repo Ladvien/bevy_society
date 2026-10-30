@@ -6,6 +6,7 @@ All notable changes to bevy_society. The format follows [Keep a Changelog](https
 
 ### Added
 
+- **`ctx.position(a)` and `ctx.distance(a, b)`** in scripts: where a person stood at the tick start (`#{x, y}` on the society plane, the axes a trigger's `area` uses) and the plane distance between two. A person without a `Transform` is a script error naming them. Lets a trigger's `if` ask who is near whom or inside a rectangle it computes, not only the fixed `area` (bevy_emerge #105 noted `ctx` had no position reader). `tests/script_position.rs`.
 - **`preview_forward(world, days)`**, `Preview`, `PersonPreview`, `TieChange`, `PreviewError` (feature `serde`): fast-forward a society, report each person's start and end position, activity before and after and every tie that appeared, vanished or changed affinity, then put the society back (`restore`, plus each person's `Transform`) so an editor can preview and reset (bevy_emerge #104, "run the society forward ... then reset"). Every person needs a `PersonKey`; an unkeyed society is refused before anything runs. `Prices` and host components are not part of a save and are not reset. `tests/fast_forward.rs`.
 - **`test_trigger(world, id, actor, target)`**, `TriggerTest`, `TriggerTestError`: dry-run one authored trigger against the society the last tick froze and report whether it is selected, in its area, its `if` held and what its `then` would write, without spending `once`/cooldown state or queueing anything (bevy_emerge #105, "test it against a snapshot of the fast-forwarded society").
 - **`fast_forward(world, days)`**, `FastForward`, `FastForwardError`: run a live society N game-days in one call (`FixedMain` step by step, message buffers rotated), so an editor can preview where people go and how ties change (bevy_emerge #104, "run the society forward"). The result hashes equal to a live app after the same ticks (`tests/fast_forward.rs`). Refuses negative or non-finite days, a society that has not run `Startup`, and `ClockSource::Host`.
@@ -27,6 +28,7 @@ All notable changes to bevy_society. The format follows [Keep a Changelog](https
 
 ### Fixed
 
+- **A restore now continues exactly as the uninterrupted run.** `retaliation_refractory_hours` became `Some(6.0)` by default, but the per-person `RecentHarm` it writes was not saved, so a reload let an insult through that the uninterrupted society was still refusing and `tests/save.rs::the_hundred_ticks_after_a_restore_are_the_uninterrupted_ones` failed on `main`. `PersonSave::recent_harm` carries it (`#[serde(default)]`, so older files still load and restore with no refractory running; `VERSION` stays 4).
 - `examples/evidence` reported `friends` and `rivals` as `ties / 2`, which assumes every tie is mutual and rounded one-way ties down. It now reports directed ties, the unit `tests/friendship_bound.rs` counts.
 
 ## [0.5.0] - 2026-10-30
