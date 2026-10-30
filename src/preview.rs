@@ -3,8 +3,8 @@
 //!
 //! [`preview_forward`] is [`capture`] + [`fast_forward`] + [`capture`] + [`restore`], with the
 //! persons' `Transform`s put back too (a save holds the activity and the walk target, not the
-//! host-owned position). It is as exact as a save: what [`SocietySave`] does not hold (the `Prices`
-//! book, host components) is not reset.
+//! host-owned position). It is as exact as a save: what [`SocietySave`] does not hold (host
+//! components) is not reset.
 
 use std::collections::BTreeMap;
 use std::fmt;

@@ -37,6 +37,7 @@ A person without a `PersonKey` is **left out of the save**, with one `warn!` per
 | `rumors` | The rumor book in order, so `RumorId`s stay stable. |
 | `triggers` | Which `once` triggers fired, every cooldown, the clock instant `Hour` triggers measure against, which need thresholds are armed and which reach triggers fired. |
 | `faction_stats` | The faction aggregates. |
+| `prices` | The price book, one number per good. It is recomputed from the stores each tick, but `ctx.price` reads the tick-start snapshot, which is frozen before that recomputation, so the first tick after a restore needs the saved book. Empty without `EconomyPlugin`. |
 | `fields` | Under `fields`, the crowd grid and each faction grid's cells; `None` when the plugin is not in the app. |
 
 **Not saved:** positions (on your ground, `Transform` is yours: stand the reloaded people where your own save puts them), the places themselves and their `Place` / `PlaceTags` / `Obstacle` components, messages in flight, and a conversation's open node. `Locomotion::Host` is the contract that says walking is yours.

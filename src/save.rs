@@ -48,6 +48,7 @@ use crate::core::{
     SocietyRng, SocietyTick,
 };
 use crate::defs::{ActivityId, DeedId, InteractionId, SocietyDefs};
+use crate::economy::Prices;
 use crate::groups::{FactionStats, Memberships, Status};
 use crate::mind::Signals;
 use crate::mind::{EmotionKind, Emotions, Memories, MemoryKind, Mood, Needs, Personality};
@@ -373,6 +374,12 @@ pub struct SocietySave {
     pub triggers: TriggersSave,
     /// The faction aggregates.
     pub faction_stats: FactionStats,
+    /// [`Prices`] as `f32` bits, one per good, empty when the app has no `EconomyPlugin` (or the save
+    /// is older than this field). Derived from the stores every tick, but a tick's snapshot (what
+    /// `ctx.price` reads) is frozen *before* the price update, so a restore that left the old
+    /// book in place made the first tick after it read a price the uninterrupted run did not.
+    #[serde(default)]
+    pub prices: Vec<u32>,
     /// The social grids, when the `fields` feature is on and the plugin is in the app.
     #[cfg(feature = "fields")]
     pub fields: Option<FieldsSave>,
@@ -775,6 +782,10 @@ pub fn capture(world: &mut World) -> SocietySave {
             .get_resource::<FactionStats>()
             .cloned()
             .unwrap_or_default(),
+        prices: world
+            .get_resource::<Prices>()
+            .map(|prices| prices.0.iter().map(|price| price.to_bits()).collect())
+            .unwrap_or_default(),
         #[cfg(feature = "fields")]
         fields: capture_fields(world),
     }
@@ -1098,6 +1109,15 @@ pub fn restore(world: &mut World, save: SocietySave) -> Result<RestoreReport, Re
     // --- aggregates and fields ------------------------------------------------------------------
     if let Some(mut stats) = world.get_resource_mut::<FactionStats>() {
         stats.0 = save.faction_stats.0.clone();
+    }
+    if !save.prices.is_empty()
+        && let Some(mut prices) = world.get_resource_mut::<Prices>()
+    {
+        prices.0 = save
+            .prices
+            .iter()
+            .map(|&bits| f32::from_bits(bits))
+            .collect();
     }
     #[cfg(feature = "fields")]
     restore_fields(world, save.fields.as_ref());

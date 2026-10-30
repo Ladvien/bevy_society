@@ -4890,3 +4890,10 @@ a tautological assertion removed from `tuning_covers_rates`. Full gate results a
 **Evidence.** `tests/failed_place.rs::a_restore_keeps_the_stall_window_of_a_walker` (feature `serde`); full `cargo test --release --all-features` and `--no-default-features` green, clippy `-D warnings`, fmt. Bug fix: no plots/three-review gate (precedent: passes 18-19). **Dead-code delta:** zero.
 **Top 5 remaining.** 1. Re-measure scale table on a quiet host. 2. Attribute the other ~50% of `decide_activities`. 3. Friendship capacity brake (#10). 4. Reconcile rival counts. 5. Insult ping-pong residue (41%).
 **Cleanup.** Created nothing outside the clone. Leftover from pass 17: `stash@{0}` for a person to drop.
+
+## 2026-10-30-21 - save/restore: the price book was not saved
+
+**Change.** No open issues; parked branches older, ignored. Release skipped: v0.6.0 is under 6 h old. Pick (same class as passes 18-20, found by auditing resources against `save.rs`): `Prices` is recomputed from stores each tick, but `ctx.price` reads the tick-start snapshot, frozen before that update, so the first tick after a restore (or a `preview_forward` reset) read the fresh world's book. `SocietySave::prices` (`f32` bits, `#[serde(default)]`, `VERSION` 4) saves and restores it; `preview` doc corrected. Other resources audited: queues are drained within a tick; `Home`/`BoundPlaces`/`Autonomous` are spawn-time host data.
+**Evidence.** `tests/economy.rs::a_restore_puts_the_price_book_back` (serde; precondition asserts the fresh book differs); economy, save, save_upgrade, leaf, readme, guide_blocks green; clippy `-D warnings`, fmt, `--no-default-features` build. Bug fix: no plots/three-review gate (precedent: passes 18-20). **Dead-code delta:** zero.
+**Top 5 remaining.** 1. Re-measure scale table on a quiet host. 2. Attribute the other ~50% of `decide_activities`. 3. Friendship capacity brake (#10, owner relaxes `label_hysteresis` equality). 4. Reconcile rival counts. 5. Insult ping-pong residue (41%).
+**Cleanup.** Created nothing outside the clone. Leftover: `stash@{0}` from pass 17, for a person to drop.
