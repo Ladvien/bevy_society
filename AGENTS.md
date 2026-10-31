@@ -63,6 +63,7 @@ Pinned to **Bevy 0.20.0**. Read the vendored source (`~/.cargo/registry/src/inde
 - `tests/defs.rs` — definition parsing, merging, id interning and error messages.
 - `tests/fields.rs` — millers' presence field points toward their cluster (feature `fields`).
 - `tests/economy.rs` — a balanced economy's price rests and a shortage moves it; `Stock` survives a save.
+- `tests/starting_larder.rs` — a person is created holding each good's `initial` (held at the ceiling, a short `Stock` grows with it, a host's full-length one is left alone), and a loaf a head removes the second game-day's famine.
 - `tests/trade.rs` — a good changes hands only on a surplus above `trade_reserve` and `trade_margin`, a two-good swap conserves both, and trade narrows the spread of stores.
 - `tests/leaf.rs` — the crate boundary: dependency list, forbidden names, engine-free `src/model/`, lookup-only hash collections.
 - `tests/mind.rs` — emotion half-life, mood lift toward Joy and return to baseline, needs decay at `decay_per_day`.
