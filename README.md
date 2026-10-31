@@ -142,7 +142,7 @@ A player character is a `Person` without `Autonomous`: it does only what the gam
 )
 ```
 
-Options are scored by compensated considerations, tiered by `rank`, and drawn by weight.
+Options are scored by compensated considerations, tiered by `rank`, and drawn by weight. A rank can follow a need: `urgent: Some((need: "food", below: 0.25, rank: 1))` puts an activity in the higher tier while that need is low. The provisioning overlay (`examples/assets/provisioning.society.ron`) uses it on `eat` and `bake`, so a hungry villager eats, or bakes when the shelf is bare, before work, company and play; the starter pack leaves it off (`docs/guide/authoring.md`).
 
 ### Relationships
 
