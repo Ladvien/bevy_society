@@ -1,0 +1,21 @@
+share of approaches followed by another approach to the same person within the window
+
+person-days with an approach: 1841, approaches per person-day 10.84, different people per person-day 6.21 (42.7% of approaches go to someone already approached that day)
+
+after a refused approach (7970 of them)
+  window_h   any  not_an_insult  same_interaction
+         1  10.0%   0.8%           0.0%
+         3  12.9%   1.0%           0.0%
+         6  15.0%   1.2%           0.0%
+        12  17.6%   1.6%           0.9%
+        24  34.9%  17.2%          10.7%
+  median gap to the next approach: 29.20 h
+
+after a accepted approach (11980 of them)
+  window_h   any  not_an_insult  same_interaction
+         1  39.6%  38.8%          26.9%
+         3  47.1%  45.9%          31.7%
+         6  53.0%  51.6%          35.3%
+        12  59.9%  57.3%          39.6%
+        24  69.3%  65.2%          45.5%
+  median gap to the next approach: 1.80 h

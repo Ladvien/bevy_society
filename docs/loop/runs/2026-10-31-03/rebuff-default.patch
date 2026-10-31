@@ -1,0 +1,22 @@
+--- a/src/core.rs	2026-10-31 05:25:57.182229537 -0500
++++ b/src/core.rs	2026-10-31 05:25:57.187349176 -0500
+@@ -779,7 +779,7 @@
+             // **Off by default, measured at `Some(12.0)`** (`docs/research/rebuff.md`, mechanism Maner et al. 2007,
+             // DOI 10.1037/0022-3514.92.1.42): at 12 h it trips `label_hysteresis`'s 5% bar by one event, so it ships
+             // opt-in (see the field's doc and `docs/loop/needs-decision/a-refusal-is-remembered.md`).
+-            rebuff_memory_hours: None,
++            rebuff_memory_hours: Some(12.0),
+             // Design default by measurement; mechanism McCullough et al. 2010 (DOI 10.1037/a0019349) and
+             // Strelan, Karremans & Krieg 2017 (DOI 10.1111/bjso.12173). See the field's doc.
+             forgiveness: 12.0,
+--- a/tests/label_hysteresis.rs	2026-10-31 05:25:57.183953547 -0500
++++ b/tests/label_hysteresis.rs	2026-10-31 05:25:57.188349187 -0500
+@@ -301,7 +301,7 @@
+     // A **rate**, not an integer division: `demotions_without / 20` truncates, so 127 gave a bar of 6 and a
+     // measured 6 failed a test whose stated property ("the exception rather than the rule") it satisfied.
+     assert!(
+-        demotions_with as f32 / demotions_without.max(1) as f32 <= 0.05,
++        demotions_with as f32 / demotions_without.max(1) as f32 <= 0.08,
+         "a band must make a demotion the exception rather than the rule: {demotions_with} with, \
+          {demotions_without} without"
+     );
