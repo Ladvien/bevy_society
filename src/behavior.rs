@@ -1305,7 +1305,16 @@ fn end_activities(
             || match doing.target {
                 DoingTarget::Person(target) => dormant.get(target).is_ok(),
                 _ => false,
-            };
+            }
+            // **A walk toward someone who has since fallen asleep ends** the same way: there is nobody to
+            // meet. An exchange already under way is not undone.
+            || (doing.arrived_day.is_none()
+                && match doing.target {
+                    DoingTarget::Person(target) => {
+                        people.get(target).is_ok_and(|theirs| is_unavailable(&defs, theirs))
+                    }
+                    _ => false,
+                });
         if suspended {
             endings.push((person, spec.name.clone(), false));
             continue;
@@ -1451,6 +1460,8 @@ struct Decision {
     /// ever looks at `close_ties`, so filtering to them is the same answer at a `close_ties`-sized cost.
     close_doing: Vec<(Entity, u16)>,
     hour: f32,
+    /// The hour on this person's own clock: `hour` less their [`Chronotype`](crate::Chronotype).
+    body_hour: f32,
     perception_radius: f32,
     /// The actor's own goods, so `Surplus` can ask what a unit is worth to it.
     stock: crate::Stock,
@@ -1476,6 +1487,7 @@ struct Decider<'w> {
     emotions: &'w Emotions,
     home: Option<&'w crate::Home>,
     bound: Option<&'w crate::BoundPlaces>,
+    chronotype: Option<&'w crate::Chronotype>,
 }
 
 /// Everything a `Signal::Script` consideration needs to be evaluated (plan D7).
@@ -1520,6 +1532,16 @@ struct DecisionQueries<'w, 's> {
     doing: Query<'w, 's, &'static Doing>,
     failed: Query<'w, 's, &'static FailedPlaces>,
     harmed: Query<'w, 's, &'static RecentHarm>,
+}
+
+/// Whether a person is doing an `unavailable` activity ([`ActivityDef::unavailable`](crate::ActivityDef)) *now*:
+/// they have arrived at it. A person still walking to bed is heading there, not asleep, and can be approached.
+fn is_unavailable(defs: &SocietyDefs, doing: &Doing) -> bool {
+    doing.arrived_day.is_some()
+        && defs
+            .activities
+            .get(usize::from(doing.activity.0))
+            .is_some_and(|spec| spec.unavailable)
 }
 
 /// Whether an activity's interaction carries a deed that hurts its target (`harm < 0`).
@@ -1587,6 +1609,9 @@ fn decide_activities(
             .iter()
             .any(|term| matches!(term.signal, Signal::Surplus(_)))
     });
+    // **Looking up what each neighbour is doing costs a query per neighbour**, which a pack with no
+    // `unavailable` activity has no use for.
+    let any_unavailable = defs.activities.iter().any(|activity| activity.unavailable);
     let tier_cutoff = tuning.tier_cutoff;
     let hour = clock.hour();
 
@@ -1700,6 +1725,15 @@ fn decide_activities(
                 if other == person {
                     continue;
                 }
+                // **A person who is asleep cannot be approached**: they are not a `Person` target and not a
+                // neighbour for `Distance`. Skipped for both lists, so the two stay index-aligned.
+                if any_unavailable
+                    && doing
+                        .get(other)
+                        .is_ok_and(|theirs| is_unavailable(&defs, theirs))
+                {
+                    continue;
+                }
                 near.push((other, pos));
                 near_ids.push(index.sorted.get(j).map_or(u32::MAX, |(id, _)| id.0));
             }
@@ -1729,6 +1763,7 @@ fn decide_activities(
                 .copied()
                 .collect(),
             hour,
+            body_hour: view.chronotype.copied().unwrap_or_default().body_hour(hour),
             perception_radius: settings.perception_radius,
             trade_reserve: tuning.trade_reserve,
             trade_margin: tuning.trade_margin,
@@ -2377,6 +2412,7 @@ fn signal_value(
             .copied()
             .unwrap_or(0.0),
         Signal::Hour => decision.hour / 24.0,
+        Signal::BodyHour => decision.body_hour / 24.0,
         Signal::Pleasure => (decision.mood[0] + 1.0) / 2.0,
         Signal::Arousal => (decision.mood[1] + 1.0) / 2.0,
         Signal::Dominance => (decision.mood[2] + 1.0) / 2.0,

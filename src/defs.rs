@@ -261,6 +261,17 @@ pub struct ActivityDef {
     /// A higher rank for as long as one need is low (see [`UrgentDef`]); `None` keeps `rank` always.
     #[serde(default)]
     pub urgent: Option<UrgentDef>,
+    /// Whether a person doing this cannot be approached. From the moment they arrive at it they are in
+    /// nobody's `near` list, so no one chooses them as the target of a `Person` activity (and they are not a
+    /// `Distance` neighbour), and an activity still walking toward them ends (`completed: false`). Someone
+    /// still walking to it is on their way, not yet unavailable. `false` by default.
+    ///
+    /// This is what `sleep` needs once people keep their own hours ([`Chronotype`](crate::Chronotype)): an
+    /// owl awake at 01:00 stands among sleeping neighbours, and without the flag the village would
+    /// compliment its sleepers. It is the per-activity form of the rule [`Dormant`](crate::Dormant) states
+    /// per person (out of perception, no exchanges).
+    #[serde(default)]
+    pub unavailable: bool,
     /// Multiplies the option's score.
     #[serde(default = "one")]
     pub weight: f32,
@@ -336,6 +347,12 @@ pub enum Input {
     Signal(String),
     /// The clock hour divided by 24.
     Hour,
+    /// The hour on the actor's own clock divided by 24: the clock hour less the actor's
+    /// [`Chronotype`](crate::Chronotype). `Hour` is the village's (social) clock and is the same for
+    /// everybody; this is the actor's body clock, and equals `Hour` for a person with no offset. Use it for
+    /// what the body decides (when to sleep), and `Hour` for what the village decides (when the workshop
+    /// opens). Takes the `Hours` curve like `Hour`.
+    BodyHour,
     /// The actor's mood pleasure, rescaled to [0, 1].
     Pleasure,
     /// The actor's mood arousal, rescaled to [0, 1].
@@ -895,6 +912,7 @@ impl SocietyDefs {
                 duration_hours: 1.0,
                 rank: 0,
                 urgent: None,
+                unavailable: false,
                 weight: 1.0,
                 considerations: Vec::new(),
                 satisfies: Vec::new(),
@@ -1545,6 +1563,7 @@ impl SocietyDefs {
             duration_hours: def.duration_hours,
             rank: def.rank,
             urgent,
+            unavailable: def.unavailable,
             weight: def.weight,
             considerations,
             satisfies,
@@ -1583,8 +1602,13 @@ impl SocietyDefs {
         scripts: &mut ScriptCompiler,
     ) -> Result<Term, DefsError> {
         check_input(owner, &term.input, target)?;
-        if matches!(term.curve, Curve::Hours(..)) && !matches!(term.input, Input::Hour) {
-            return Err(invalid(owner, "an Hours curve needs the Hour input"));
+        if matches!(term.curve, Curve::Hours(..))
+            && !matches!(term.input, Input::Hour | Input::BodyHour)
+        {
+            return Err(invalid(
+                owner,
+                "an Hours curve needs the Hour or BodyHour input",
+            ));
         }
         let signal = match &term.input {
             Input::Need(name) => Signal::Need(require(self.need_id(name), "need", name, owner)?),
@@ -1592,6 +1616,7 @@ impl SocietyDefs {
                 Signal::Host(require(self.signal_id(name), "signal", name, owner)?)
             }
             Input::Hour => Signal::Hour,
+            Input::BodyHour => Signal::BodyHour,
             Input::Pleasure => Signal::Pleasure,
             Input::Arousal => Signal::Arousal,
             Input::Dominance => Signal::Dominance,
@@ -1894,6 +1919,8 @@ pub(crate) struct ActivitySpec {
     pub(crate) rank: u8,
     /// The rank taken while a need is low; see [`UrgentDef`].
     pub(crate) urgent: Option<Urgent>,
+    /// Whether a person doing this is out of everyone else's `near` list; see [`ActivityDef::unavailable`].
+    pub(crate) unavailable: bool,
     pub(crate) weight: f32,
     pub(crate) considerations: Vec<Term>,
     pub(crate) satisfies: Vec<(NeedId, f32)>,
@@ -1946,6 +1973,8 @@ pub enum Signal {
     Host(SignalId),
     /// Clock hour / 24.
     Hour,
+    /// Body-clock hour / 24 ([`Input::BodyHour`]).
+    BodyHour,
     /// Mood pleasure.
     Pleasure,
     /// Mood arousal.

@@ -1,0 +1,29 @@
+hour asleep_pct began woke
+00   63.3    36     0
+01   78.1    11     0
+02   86.0    18     0
+03   90.6    15     0
+04   92.0     3     0
+05   92.3     2     0
+06   81.5     0    84
+07   55.5     0   134
+08   29.2     0    69
+09   14.4     0    55
+10    6.4     0    20
+11    1.8     0    12
+12    0.4     0     2
+13    0.1     0     1
+14    0.0     0     0
+15    0.0     0     0
+16    0.0     0     0
+17    0.0     0     0
+18    0.0     0     0
+19    0.0     0     0
+20    0.0     0     0
+21    0.0     0     0
+22   11.0   286     0
+23   37.0    75     0
+
+sleeps started 446, completed 377, interrupted 69 (15.5% of those that ended)
+exchanges aimed at somebody asleep: 324 of 4381 (7.40%)
+asleep share at the peak 92.3%, at the trough 0.0%; clock hours with between 10% and 90% asleep: 9
