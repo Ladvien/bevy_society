@@ -1,0 +1,8 @@
+# tick 69186: someone weighed nothing
+
+ 1.000  work
+ 1.000  wander
+ 0.992  compliment
+ 0.711  play
+ 0.670  chat
+ 0.659  snub
