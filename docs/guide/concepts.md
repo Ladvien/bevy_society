@@ -101,7 +101,7 @@ true:
 1. Every simulation loop walks `PersonIndex::sorted` (ascending `PersonId`, which is spawn order).
    Nothing iterates a `HashMap` or `HashSet`.
 2. The only randomness is `SocietyRng`, a ChaCha8 stream seeded from `SocietySettings::seed`. Draws
-   use `bevy_emerge_rng::DetRng` (`unit()`, `below(n)`).
+   use `bevy_grimoire_rng::DetRng` (`unit()`, `below(n)`).
 3. `PersonId`s are handed out by an `On<Add<Person>>` observer, so they follow spawn order.
 
 A script's `ctx.rand()` comes from a generator seeded once per tick from the same stream, so scripts

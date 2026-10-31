@@ -103,7 +103,7 @@ Every formula traces to a paper; every rate is a named field on `Tuning`; every 
 | bevy_speech_bubbles | barks and conversations (`dialogue`) | <https://crates.io/crates/bevy_speech_bubbles> |
 | bevy_stigmergy | per-cell presence and commotion fields (`fields`) | <https://crates.io/crates/bevy_stigmergy> |
 | bevy_orca | reciprocal collision avoidance for walkers (`steering`) | <https://crates.io/crates/bevy_orca> |
-| bevy_emerge_rng | the seeded ChaCha8 stream | <https://crates.io/crates/bevy_emerge_rng> |
+| bevy_grimoire_rng | the seeded ChaCha8 stream | <https://crates.io/crates/bevy_grimoire_rng> |
 | Rhai | trigger and effect scripts | <https://github.com/rhaiscript/rhai> |
 | serde | authored definitions | <https://github.com/serde-rs/serde> |
 | RON | the definitions' file format | <https://github.com/ron-rs/ron> |

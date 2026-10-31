@@ -6,7 +6,7 @@ use bevy::ecs::resource::Resource;
 use bevy::ecs::schedule::IntoScheduleConfigs;
 use bevy::prelude::{App, FixedUpdate, Plugin, Query, Res, ResMut};
 use bevy::reflect::Reflect;
-use bevy_emerge_rng::DetRng;
+use bevy_grimoire_rng::DetRng;
 
 use crate::core::require_core;
 use crate::defs::{FactionId, SocietyDefs};

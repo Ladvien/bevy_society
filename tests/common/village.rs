@@ -8,7 +8,7 @@
 
 use bevy::app::PluginGroup;
 use bevy::prelude::*;
-use bevy_emerge_rng::{DetRng, seeded};
+use bevy_grimoire_rng::{DetRng, seeded};
 use bevy_society::{
     Autonomous, DefsFile, Home, Person, Personality, Place, PlaceTags, SocietyDefs, SocietyPlugins,
     SocietySettings,

@@ -18,7 +18,7 @@ const ALLOWED_DEPS: &[&str] = &[
     "serde",
     "ron",
     "rand_chacha",
-    "bevy_emerge_rng",
+    "bevy_grimoire_rng",
     "bevy_speech_bubbles",
     "bevy_stigmergy",
     "bevy_orca",

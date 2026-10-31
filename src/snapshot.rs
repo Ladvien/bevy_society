@@ -10,7 +10,7 @@ use std::sync::{Arc, Mutex};
 use bevy::ecs::query::QueryData;
 use bevy::ecs::system::SystemParam;
 use bevy::prelude::*;
-use bevy_emerge_rng::{DetRng, seeded};
+use bevy_grimoire_rng::{DetRng, seeded};
 use rand_chacha::ChaCha8Rng;
 
 use crate::behavior::Doing;
