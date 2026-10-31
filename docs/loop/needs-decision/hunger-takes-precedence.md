@@ -30,8 +30,10 @@ say a low need should win the choice outright, and a satisfied one should take n
 
 ## To take it for every host
 
-Flip the starter pack to the provisioning overlay (`households-provision-themselves.md`, one patch and one deleted assertion); the
-`urgent` lines come with it. Until then a host that wants hunger to take precedence copies the overlay's two activities.
+Flip the starter pack to the provisioning overlay with its `urgent` lines: `docs/loop/runs/2026-10-30-29/provisioning-urgent-default.patch`
+(applies to `main`), and delete `tests/starting_larder.rs::a_starting_larder_removes_the_second_days_famine`, whose two assertions both
+fail on the flipped pack because the day-2 floor is `0.000` with and without a larder (`households-provision-themselves.md`, "Update,
+2026-10-30-29"). Until then a host that wants hunger to take precedence copies the overlay's two activities.
 
 ## What the owner can override
 
