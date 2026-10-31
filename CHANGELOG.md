@@ -4,6 +4,14 @@ All notable changes to bevy_society. The format follows [Keep a Changelog](https
 
 ## [Unreleased]
 
+### Added
+
+- **`GoodDef::initial`** (default `0.0`): what a person holds of a good when created, held at `Tuning::stock_ceiling`, the way `NeedDef::initial` is the level a need starts at. `size_person_state` gives a new `Stock`, and the slots a short one gains, the starting level; a `Stock` of the right length the host spawned is left alone. A negative or non-finite value is a `DefsError` naming the good. A saved person is not a new one: `restore` gives a person whose save holds no stock (a version-1 file) a zero-filled `Stock` instead of leaving the next tick to hand them a loaf (`tests/save_upgrade.rs`). `examples/evidence` writes `floor0`..`floor3` to `series.csv` (villagers with need *k* below 0.05). `tests/starting_larder.rs`; `docs/research/economics.md`.
+
+### Changed
+
+- **The starter pack's bread starts at `1.0` a head.** A society began with every larder empty: the 24-villager village held no bread for its first 22 game-hours and spent its second game-day with 38.7 % of its villager-ticks at `food` below 0.05, against 1.4-10.7 % from the third day on (a start-up transient, filed as "needs hit the floor"). With a loaf a head the second day's share is 4.7 % at the same seed (`tests/starting_larder.rs`). Murray & Kelton 1988 (DOI 10.1145/318123.318252) on starting in a typical state, Winterhalder et al. 2015 (DOI 10.1179/1749631415y.0000000025) on the household store; the value is a design default where `price_full_store`, `trade_reserve` and a quarter-loaf meal agree. `initial: 0.0` is the old behaviour. `docs/loop/needs-decision/a-village-begins-with-empty-larders.md`.
+
 ## [0.7.0] - 2026-10-30
 
 ### Added

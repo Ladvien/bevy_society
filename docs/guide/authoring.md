@@ -178,7 +178,12 @@ Any other `{...}` is rejected at compile time rather than printed literally.
 ## Goods, stores and trade
 
 `goods: [(id: "bread")]` declares a **quantity**, not a currency. Every person carries a `Stock` with one level
-per good, in `[0, Tuning::stock_ceiling]`. An activity can `produces: [("bread", 3.0)]` and `consumes:
+per good, in `[0, Tuning::stock_ceiling]`. A person starts holding the good's `initial` (`goods: [(id: "bread",
+initial: 1.0)]`; `0.0` when omitted, held at the ceiling), the way a need starts at its `initial`: a society
+whose larders all begin empty has nothing to eat for its first game-day and is starving on its second, because
+nothing has yet been made to eat
+(the starter pack starts every person with one loaf, `docs/loop/runs/2026-10-30-27/`). A `Stock` the host
+spawned with the right length is left as it is. An activity can `produces: [("bread", 3.0)]` and `consumes:
 [("bread", 1.0)]`, applied once, when it **completes** (an interrupted one pays nothing, like `satisfies`). Each
 good has a price in `Prices`, read off **how full the village's stores are, per head**:
 `price = 2 · (1 − r)` below half full and `1.5 − r` above it, where `r` is
