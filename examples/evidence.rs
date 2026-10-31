@@ -50,6 +50,7 @@ fn main() {
         args.provisioning,
         args.urgent,
         args.sleepers_available,
+        args.weekly.as_deref(),
     ) {
         Ok(defs) => defs,
         Err(err) => {
@@ -69,6 +70,9 @@ fn main() {
     }
     if let Some(band) = args.label_hysteresis {
         settings.tuning.label_hysteresis = band;
+    }
+    if let Some(weekday) = args.start_weekday {
+        settings.start_weekday = weekday;
     }
     if let Some(band) = args.friend_band {
         settings.tuning.friend_band = band;
@@ -216,6 +220,7 @@ fn main() {
     let mut floor_ledger = FloorLedger::new(app.world().resource::<SocietyDefs>());
     let mut sleep_ledger = SleepLedger::default();
     let mut reapproach_ledger = ReapproachLedger::default();
+    let mut week_ledger = WeekLedger::new(&app, &world);
     for tick in 0..ticks {
         // Each villager's first-good store **before** this update, so a share can be logged as
         // `before -> after` for both sides. After alone read as a bug: "Dena holds 0.0, Hilda holds 0.0" is
@@ -293,6 +298,7 @@ fn main() {
                         doing.label(app.world().resource::<SocietyDefs>()) == "sleep"
                     });
                 sleep_ledger.exchange(&resolved.interaction, slept);
+                week_ledger.approach(&app, resolved);
                 reapproach_ledger
                     .approach(app.world().resource::<SocietyClock>().now_days, resolved);
                 let counts = repeat_by_interaction
@@ -417,6 +423,7 @@ fn main() {
             }
         }
         floor_ledger.record(&app, &world, tick > 0);
+        week_ledger.record(&app, &world, tick > 0);
         sleep_ledger.record(&app, &world, tick > 0);
         let mut row = snapshot_row(&app, tick as f64, &world, planted);
         row.shares = shares;
@@ -533,6 +540,7 @@ fn main() {
     floor_ledger.write(&out);
     sleep_ledger.write(&out);
     reapproach_ledger.write(&out);
+    week_ledger.write(&out);
     write_chronotypes(&app, &world, &out);
     series(&rows, &out);
     summary(
@@ -802,6 +810,7 @@ fn society_defs(
     provisioning: bool,
     urgent: Option<Option<f32>>,
     sleepers_available: bool,
+    weekly: Option<&str>,
 ) -> Result<SocietyDefs, String> {
     let mut file = bevy_society::DefsFile::starter().map_err(|e| e.to_string())?;
     if provisioning {
@@ -821,6 +830,38 @@ fn society_defs(
             bevy_society::DefsFile::from_ron(include_str!("assets/village.society.ron"))
                 .map_err(|e| e.to_string())?;
         file.merge(additions).map_err(|e| e.to_string())?;
+    }
+    // `--weekly` puts the week overlay on: its `work` replaces the starter's (shut on the rest days) and `laze` is added.
+    // The village pack's `craft` is the other workday activity, so the rest-day gate `work` carries is copied to every
+    // activity that is a profession's task, which is what the overlay's header asks a host to do.
+    if let Some(text) = weekly {
+        let overlay = bevy_society::DefsFile::from_ron(text).map_err(|e| e.to_string())?;
+        let gate = overlay
+            .activities
+            .iter()
+            .find(|a| a.id == "work")
+            .and_then(|a| {
+                a.considerations
+                    .iter()
+                    .find(|c| matches!(c.input, bevy_society::Input::Week))
+                    .cloned()
+            })
+            .ok_or("the weekly overlay's `work` has no Week consideration")?;
+        for activity in overlay.activities {
+            match file.activities.iter_mut().find(|a| a.id == activity.id) {
+                Some(slot) => *slot = activity,
+                None => file.activities.push(activity),
+            }
+        }
+        for activity in &mut file.activities {
+            let gated = activity
+                .considerations
+                .iter()
+                .any(|c| matches!(c.input, bevy_society::Input::Week));
+            if activity.profession.is_some() && !gated {
+                activity.considerations.push(gate.clone());
+            }
+        }
     }
     // `--urgent BELOW` puts `eat` (and, on the provisioning overlay, `bake`) in the rank-1 bucket while `food` is
     // under BELOW; `--no-urgent` takes every activity out of it, so the overlay can be read with and without.
@@ -1847,6 +1888,12 @@ struct Args {
     /// `--track N`: the narrative follows the N-th villager in spawn order (0, the first, by default), so a lark's day
     /// and an owl's can be read from one run.
     track: Option<usize>,
+    /// `--weekly`: runs the scenario on `examples/assets/weekly.society.ron` (work shut on the rest days, a rest-day
+    /// `laze`), so the same seed can be read with and without a week. `--weekly-file PATH` reads another overlay instead
+    /// (a draft being tuned reads from disk without a rebuild).
+    weekly: Option<String>,
+    /// `--start-weekday N`: the weekday of game-day 0 (`SocietySettings::start_weekday`).
+    start_weekday: Option<u8>,
 }
 
 impl Args {
@@ -1878,6 +1925,8 @@ impl Args {
             chronotype_sd: None,
             sleepers_available: false,
             track: None,
+            weekly: None,
+            start_weekday: None,
         };
         let mut argv = std::env::args().skip(1);
         while let Some(flag) = argv.next() {
@@ -1888,6 +1937,20 @@ impl Args {
                 "--chronotype-sd" => args.chronotype_sd = argv.next().and_then(|v| v.parse().ok()),
                 "--sleepers-available" => args.sleepers_available = true,
                 "--track" => args.track = argv.next().and_then(|v| v.parse().ok()),
+                "--weekly" => {
+                    args.weekly = Some(include_str!("assets/weekly.society.ron").to_owned())
+                }
+                "--weekly-file" => {
+                    let path = argv.next().unwrap_or_default();
+                    match std::fs::read_to_string(&path) {
+                        Ok(text) => args.weekly = Some(text),
+                        Err(err) => {
+                            eprintln!("evidence: cannot read {path}: {err}");
+                            std::process::exit(1);
+                        }
+                    }
+                }
+                "--start-weekday" => args.start_weekday = argv.next().and_then(|v| v.parse().ok()),
                 "--people" => args.people = argv.next().and_then(|v| v.parse().ok()),
                 "--seconds-per-day" => {
                     args.seconds_per_day = argv.next().and_then(|v| v.parse().ok())
@@ -2184,6 +2247,198 @@ impl ReapproachLedger {
         }
         if let Err(err) = std::fs::write(out.join("reapproach.txt"), text) {
             eprintln!("evidence: cannot write reapproach.txt: {err}");
+        }
+    }
+}
+
+/// **What a week looks like.** Per weekday, over the *full* game-days only (the scenarios start mid-day, so the first and the
+/// last day are partial and would bias a weekday): where person-ticks went by kind of activity, how many exchanges a villager
+/// started and with how many *different* people, how many were with a friend (affinity at or above
+/// `Tuning::friend_affinity` when the exchange resolved), and the mean `social` and `fun` need.
+/// `week.txt` is that table, with a summary row for the workdays and the rest days of the overlay (weekdays 0-4 and 5-6).
+struct WeekLedger {
+    start_weekday: u8,
+    ticks_per_day: u64,
+    villagers: usize,
+    friend_bar: f32,
+    /// The `social` and `fun` slots of `Needs`, `None` in a pack without them.
+    social: Option<usize>,
+    fun: Option<usize>,
+    /// Game-day -> ticks recorded.
+    ticks: BTreeMap<u32, u64>,
+    /// `(game-day, kind of activity) -> person-ticks`.
+    doing: BTreeMap<(u32, usize), u64>,
+    /// Game-day -> `[approaches, accepted, with a friend]`.
+    exchanges: BTreeMap<u32, [u64; 3]>,
+    /// `(actor, game-day) ->` the people they were with.
+    partners: BTreeMap<(Entity, u32), std::collections::BTreeSet<Entity>>,
+    /// Game-day -> `[sum of social, sum of fun]` over villager-ticks.
+    needs: BTreeMap<u32, [f64; 2]>,
+}
+
+/// The kinds of activity a person-tick is sorted into.
+const WEEK_KINDS: [&str; 6] = ["work", "company", "leisure", "sleep", "food", "other"];
+
+fn week_kind(label: &str) -> usize {
+    match label {
+        "work" | "craft" => 0,
+        "chat" | "gossip" | "play" | "compliment" | "snub" | "share" => 1,
+        "relax" | "wander" | "laze" => 2,
+        "sleep" => 3,
+        "eat" | "bake" => 4,
+        _ => 5,
+    }
+}
+
+/// Everything one weekday's full days add up to.
+#[derive(Default)]
+struct WeekAgg {
+    days: u32,
+    doing: [u64; 6],
+    exchanges: [u64; 3],
+    distinct: u64,
+    needs: [f64; 2],
+    person_ticks: u64,
+}
+
+impl WeekLedger {
+    fn new(app: &App, world: &World) -> Self {
+        let ecs = app.world();
+        let settings = ecs.resource::<SocietySettings>();
+        let defs = ecs.resource::<SocietyDefs>();
+        Self {
+            start_weekday: settings.start_weekday,
+            ticks_per_day: (settings.seconds_per_day / settings.tick_secs.max(1.0e-6)).round()
+                as u64,
+            villagers: world.villagers.len(),
+            friend_bar: settings.tuning.friend_affinity,
+            social: defs.need_id("social").map(|id| usize::from(id.0)),
+            fun: defs.need_id("fun").map(|id| usize::from(id.0)),
+            ticks: BTreeMap::new(),
+            doing: BTreeMap::new(),
+            exchanges: BTreeMap::new(),
+            partners: BTreeMap::new(),
+            needs: BTreeMap::new(),
+        }
+    }
+
+    fn record(&mut self, app: &App, world: &World, live: bool) {
+        if !live {
+            return;
+        }
+        let ecs = app.world();
+        let day = ecs.resource::<SocietyClock>().day();
+        let defs = ecs.resource::<SocietyDefs>();
+        *self.ticks.entry(day).or_default() += 1;
+        for &entity in &world.villagers {
+            let label = ecs
+                .get::<Doing>(entity)
+                .map_or_else(|| "nothing".to_owned(), |doing| doing.label(defs));
+            *self
+                .doing
+                .entry((day, week_kind(&label)))
+                .or_default() += 1;
+            if let Some(needs) = ecs.get::<Needs>(entity) {
+                let sums = self.needs.entry(day).or_default();
+                for (slot, sum) in [self.social, self.fun].into_iter().zip(sums.iter_mut()) {
+                    *sum += f64::from(slot.and_then(|s| needs.0.get(s).copied()).unwrap_or(0.0));
+                }
+            }
+        }
+    }
+
+    fn approach(&mut self, app: &App, resolved: &InteractionResolved) {
+        let ecs = app.world();
+        let day = ecs.resource::<SocietyClock>().day();
+        let entry = self.exchanges.entry(day).or_default();
+        entry[0] += 1;
+        entry[1] += u64::from(resolved.accepted);
+        let friend = ecs
+            .get::<Ties>(resolved.actor)
+            .and_then(|ties| ties.get(resolved.target))
+            .is_some_and(|tie| tie.affinity >= self.friend_bar);
+        entry[2] += u64::from(friend);
+        self.partners
+            .entry((resolved.actor, day))
+            .or_default()
+            .insert(resolved.target);
+    }
+
+    /// The full days summed by weekday (`None` is every weekday).
+    fn aggregate(&self, weekdays: &[u32]) -> WeekAgg {
+        let mut agg = WeekAgg::default();
+        let full = |day: u32| self.ticks.get(&day).is_some_and(|n| *n + 1 >= self.ticks_per_day);
+        let wanted =
+            |day: u32| weekdays.contains(&((u32::from(self.start_weekday) + day) % 7));
+        for (&day, &ticks) in &self.ticks {
+            if !full(day) || !wanted(day) {
+                continue;
+            }
+            agg.days += 1;
+            agg.person_ticks += ticks * self.villagers as u64;
+            for kind in 0..WEEK_KINDS.len() {
+                agg.doing[kind] += self.doing.get(&(day, kind)).copied().unwrap_or(0);
+            }
+            for (slot, n) in self.exchanges.get(&day).copied().unwrap_or_default().iter().enumerate() {
+                agg.exchanges[slot] += n;
+            }
+            for (sum, add) in agg
+                .needs
+                .iter_mut()
+                .zip(self.needs.get(&day).copied().unwrap_or_default())
+            {
+                *sum += add;
+            }
+        }
+        agg.distinct = self
+            .partners
+            .iter()
+            .filter(|((_, day), _)| full(*day) && wanted(*day))
+            .map(|(_, set)| set.len() as u64)
+            .sum();
+        agg
+    }
+
+    fn row(&self, label: &str, weekdays: &[u32]) -> String {
+        let agg = self.aggregate(weekdays);
+        let ticks = agg.person_ticks.max(1) as f64;
+        let villager_days = (agg.days as usize * self.villagers).max(1) as f64;
+        let mut row = format!("{label:<10} {:>4}", agg.days);
+        for kind in 0..WEEK_KINDS.len() {
+            let _ = write!(row, " {:>6.1}", 100.0 * agg.doing[kind] as f64 / ticks);
+        }
+        let approaches = agg.exchanges[0].max(1) as f64;
+        let _ = write!(
+            row,
+            " {:>8.2} {:>8.2} {:>7.1} {:>7.1} {:>7.3} {:>7.3}",
+            agg.exchanges[0] as f64 / villager_days,
+            agg.distinct as f64 / villager_days,
+            100.0 * agg.exchanges[2] as f64 / approaches,
+            100.0 * agg.exchanges[1] as f64 / approaches,
+            agg.needs[0] / ticks,
+            agg.needs[1] / ticks,
+        );
+        row
+    }
+
+    /// `week.txt`: a row per weekday, then the workdays (0-4) and rest days (5-6) of the overlay. Percentages are shares of
+    /// villager-ticks; the exchange columns are per villager-day.
+    fn write(&self, out: &Path) {
+        let mut text = String::new();
+        let _ = writeln!(
+            text,
+            "weekday  days   work company leisure  sleep   food  other  approach distinct friend% accept%  social     fun"
+        );
+        for weekday in 0..7u32 {
+            text.push_str(&self.row(&weekday.to_string(), &[weekday]));
+            text.push('\n');
+        }
+        text.push_str(&self.row("workdays", &[0, 1, 2, 3, 4]));
+        text.push('\n');
+        text.push_str(&self.row("rest", &[5, 6]));
+        text.push('\n');
+        if let Err(err) = std::fs::write(out.join("week.txt"), text) {
+            eprintln!("evidence: cannot write week.txt: {err}");
         }
     }
 }

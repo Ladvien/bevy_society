@@ -54,6 +54,7 @@ that names it.
 | `ctx.persons()` | every live person's id, ascending |
 | `ctx.hour()` | the hour of the game-day, `[0, 24)` |
 | `ctx.day()` | whole game-days elapsed |
+| `ctx.weekday()` | the weekday, `0` to `6`, counted from `SocietySettings::start_weekday` on game-day 0 |
 | `ctx.rand()` | a uniform draw in `[0, 1)` |
 
 Emotion names are `joy`, `distress`, `hope`, `fear`, `pride`, `shame`, `admiration`, `reproach`,
