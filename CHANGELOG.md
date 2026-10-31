@@ -4,6 +4,19 @@ All notable changes to bevy_society. The format follows [Keep a Changelog](https
 
 ## [Unreleased]
 
+### Added
+
+- **Kin.** `Tie::kin: Option<Kin>` says what the other person is to this one, and `Kin` (`Parent`, `Child`, `Sibling`, `HalfSibling`, `Grandparent`, `Grandchild`, `AuntUncle`, `NieceNephew`, `Cousin`) carries the coefficient of relatedness `r` of Hamilton 1964 (DOI 10.1016/0022-5193(64)90038-4): 0.5, 0.25 or 0.125 (`Kin::relatedness()`, `Tie::relatedness()`; `Kin::converse()` names the other direction). The crate had no family: "kin, role or structural ties" was on the relationships note's list of what the model leaves out, and a family member grieved only because the author gave them a high familiarity. Read-through in `docs/research/kinship.md`, decision in `docs/loop/needs-decision/kin-is-a-property-of-a-tie.md`.
+- **`TieSpec::kin`** (`Option<Kin>`, default `None`): authored on a placement file's tie. Spawning makes the other person's tie (created neutral when they listed none) with the converse relation and both at a familiarity of `1.0`; two authored directions that are not converses are refused with both people named; `PlacementFile::capture` writes the relation back.
+- **`Input::Kinship`** (`Signal::Kinship`): `2r` for a `Person` target, 1.0 for a parent, a child or a sibling, 0 for anyone who is not a relative. **`ctx.kin(a, b)`** reads `r`. **`TieSave::kin`** (`#[serde(default)]`, `VERSION` stays 5): a save carries it and a save from the previous release loads every tie as no relative.
+- **`Tuning::kin_premium`** (default `1.0`, a design default; mechanism and direction from Curry, Roberts & Dunbar 2013, DOI 10.1111/j.2044-8295.2012.02119.x, and Burton-Chellew & Dunbar 2015, DOI 10.1093/beheco/aru165): an activity whose interaction **gives goods and takes none** scores `1 + kin_premium · 2r` times as much toward a relative, where the giver holds more than the receiver by more than `Tuning::trade_reserve` in every good given. `0.0` is the previous release. The first version favoured every gift to a relative and **8.5-24.5 % of accepted shares were then a loaf returned within three hours** (1.7 % without kin); a unit handed to someone within the reserve of the giver's own store only swaps the two shelves, so the premium is withheld there (`docs/research/kinship.md`).
+- `examples/evidence --households N` (groups the villagers into households of `N` full siblings), `--cousins`, `--kin-premium P`, a `kin.txt` (accepted shares by what the receiver is to the giver against the share of pairs each relation is, and the bread variance within and between households), and `(sibling)` marks on the tracked person's narrative; `tools/plot_kin.py`.
+
+### Changed
+
+- **A relative's tie is never trimmed** by the Dunbar cap (`Ties::trim_keeping` holds a tie with `kin` set, as it holds a dead person's) **and counts as close** for grief, for missing someone away and for the reunion (`absence::closeness`), whatever its label and familiarity; the intensity is still `0.5 · (1 + affinity)`.
+- **`Tie`, `TieSpec`, `TieSave` and `Tuning` gain a public field, `Input` and `Signal` a variant**, in structs and enums that are not `#[non_exhaustive]`: a host that builds a `Tie`, `TieSpec`, `TieSave` or `Tuning` with a struct literal and no `..Default::default()` must name `kin` (`None`) or `kin_premium`, and one that matches `Input` or `Signal` exhaustively gains an arm. A society with no relative is the previous release byte for byte (the harness at seed 7, 6 game-days, `cmp`: `summary.json`, `narrative.txt`, `series.csv`, `activities.txt`, `partners.txt`, `reapproach.txt`, `shares.txt`).
+
 ## [0.9.0] - 2026-10-31
 
 ### Added
