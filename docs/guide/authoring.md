@@ -106,6 +106,17 @@ between 22:00 and 06:00, more so when tired, and rest while there":
     `Place` is a wiring mistake and warns once per person and name.
 - `rank` groups options into tiers; the highest rank with any viable option wins. Within a tier,
   options below `Tuning::tier_cutoff` × the best score are dropped and one is drawn by weight.
+- `urgent` raises the rank **while one need is low**: `urgent: Some((need: "food", below: 0.25, rank: 1))` puts the
+  activity in rank 1 whenever the actor's `food` is under `0.25`, and leaves it at its own `rank` otherwise. It is
+  Maslow's prepotency in utility-AI form (*The Sims* buckets motives by urgency, so "a starving Sim will never even
+  consider watching TV unless they fail to find anything that can solve their hunger"): a hungry person's meal is in
+  a tier above the work, the company and the play it would otherwise be drawn against, and when the meal has no
+  candidate (no place tagged for it) the lower tiers decide as before. `below` is in `(0, 1]`, the urgent `rank`
+  must exceed the activity's own, and an unknown need is an error naming the activity. **Put in the bucket every
+  activity that solves the need, not only the one that satisfies it**: a household with a bare shelf solves its
+  hunger by baking, so `bake` carries the line too (`examples/assets/provisioning.society.ron`), and a prepotent
+  `eat` on a pack that prices an empty shelf instead of reading it empties the shelves and starves the village
+  (`docs/loop/runs/2026-10-30-29/research.md`).
 - `weight` (default 1.0) multiplies the whole score.
 - `satisfies` is a need delta **per game-hour arrived**, not per tick.
 - `interaction` runs a social exchange on arrival; it requires a `Person` target.

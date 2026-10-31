@@ -14,10 +14,14 @@
 //!   variance, rumor reach, friendship and rivalry counts). `tools/plots.py` turns it into PNGs.
 //! - `activities.txt` — per game-day, how many times each activity was started, completed and interrupted, and the
 //!   clock hour each was chosen at: "nobody bakes" told apart from "nobody decides inside the baking window".
+//! - `floor.txt` — who is at the floor on `food` and what they are doing, and how long each spell of hunger lasts
+//!   from the tick `food` falls under the `eat` midpoint to the tick it is back over it.
 //! - `summary.json` — the end state, for a test or a log entry to assert against.
 //!
 //! `--provisioning` runs the scenario on `examples/assets/provisioning.society.ron`, whose `bake` and `eat` read the
 //! actor's own shelf (`Input::Stock`), so the same seed can be read with and without households that provision themselves.
+//! That overlay also carries an `urgent` rank on both (hunger takes precedence); `--no-urgent` removes it and
+//! `--urgent BELOW` sets the level, so the same seed can be read with and without it.
 //!
 //! The scenarios themselves are declared in `docs/loop/scenarios.yaml`; this file implements the ones
 //! it can build from the crate's own definitions and prints a clear error for the rest.
@@ -41,7 +45,7 @@ use std::path::{Path, PathBuf};
 
 fn main() {
     let args = Args::parse();
-    let defs = match society_defs(&args.scenario, args.provisioning) {
+    let defs = match society_defs(&args.scenario, args.provisioning, args.urgent) {
         Ok(defs) => defs,
         Err(err) => {
             eprintln!("evidence: {err}");
@@ -194,6 +198,7 @@ fn main() {
     // **Who did what, when.** One count per game-day and activity, and a histogram of the hour each
     // activity was chosen at, so "nobody bakes" can be told from "nobody decides inside the baking window".
     let mut ledger = Ledger::default();
+    let mut floor_ledger = FloorLedger::new(app.world().resource::<SocietyDefs>());
     for tick in 0..ticks {
         // Each villager's first-good store **before** this update, so a share can be logged as
         // `before -> after` for both sides. After alone read as a bug: "Dena holds 0.0, Hilda holds 0.0" is
@@ -369,6 +374,7 @@ fn main() {
                 }
             }
         }
+        floor_ledger.record(&app, &world, tick > 0);
         let mut row = snapshot_row(&app, tick as f64, &world, planted);
         row.shares = shares;
         // The first row is the pre-society state: `size_person_state` has not run, so `Needs` is empty
@@ -481,6 +487,7 @@ fn main() {
         }
     }
     ledger.write(&out);
+    floor_ledger.write(&out);
     series(&rows, &out);
     summary(
         app.world(),
@@ -585,6 +592,121 @@ impl Ledger {
     }
 }
 
+/// **Who is at the floor on `food`, and what are they doing.** A share of person-ticks under [`FLOOR`] says how much of
+/// the day goes hungry; this says whose fault it is (asleep, walking, busy with something else, or at the table) and
+/// whether the household had a meal in hand. A spell is one stretch with `food` under [`HUNGRY`], the `eat` curve's
+/// midpoint: the hours it lasts are what a hunger that takes precedence would shorten.
+struct FloorLedger {
+    /// The `food` slot of `Needs`, `None` in a pack without one.
+    food: Option<usize>,
+    /// The first good's holding a person needs to count as holding a meal (`eat` consumes a quarter loaf).
+    meal: f32,
+    /// `(what the person is doing, holds a meal) -> person-ticks at the floor`, from game-day 2 on.
+    doing: BTreeMap<(String, bool), u64>,
+    /// Person-ticks counted (every villager, every tick, from game-day 2 on) and how many were at the floor.
+    ticks: (u64, u64),
+    /// When each villager's current spell began, in game-days.
+    since: BTreeMap<Entity, f64>,
+    /// Finished spells, in game-hours.
+    spells: Vec<f32>,
+}
+
+/// `food` under this starts a spell of hunger: `eat`'s `Logistic(-10, 0.35)` is half way to its ceiling here.
+const HUNGRY: f32 = 0.35;
+
+impl FloorLedger {
+    fn new(defs: &SocietyDefs) -> Self {
+        Self {
+            food: defs.need_id("food").map(|id| usize::from(id.0)),
+            meal: 0.25,
+            doing: BTreeMap::new(),
+            ticks: (0, 0),
+            since: BTreeMap::new(),
+            spells: Vec::new(),
+        }
+    }
+
+    fn record(&mut self, app: &App, world: &World, live: bool) {
+        let (Some(slot), true) = (self.food, live) else {
+            return;
+        };
+        let ecs = app.world();
+        let now = ecs.resource::<SocietyClock>().now_days;
+        let defs = ecs.resource::<SocietyDefs>();
+        for &entity in &world.villagers {
+            let Some(level) = ecs
+                .get::<Needs>(entity)
+                .and_then(|needs| needs.0.get(slot).copied())
+            else {
+                continue;
+            };
+            if level < HUNGRY {
+                self.since.entry(entity).or_insert(now);
+            } else if let Some(began) = self.since.remove(&entity) {
+                self.spells.push(((now - began) * 24.0) as f32);
+            }
+            if now < 2.0 {
+                continue;
+            }
+            self.ticks.0 += 1;
+            if level >= FLOOR {
+                continue;
+            }
+            self.ticks.1 += 1;
+            let label = ecs
+                .get::<Doing>(entity)
+                .map_or_else(|| "nothing".to_owned(), |doing| doing.label(defs));
+            let holds = ecs
+                .get::<bevy_society::Stock>(entity)
+                .is_some_and(|stock| stock.get(GoodId(0)) >= self.meal);
+            *self.doing.entry((label, holds)).or_default() += 1;
+        }
+    }
+
+    fn write(&self, out: &Path) {
+        let (total, floor) = self.ticks;
+        let mut text = format!(
+            "person-ticks from game-day 2: {total}\nat the floor on food (< {FLOOR}): {floor} ({:.1}%)\n\n",
+            100.0 * floor as f64 / total.max(1) as f64
+        );
+        let _ = writeln!(
+            text,
+            "what the person at the floor was doing, and whether the household held a meal ({} of the first good):",
+            self.meal
+        );
+        let mut rows: Vec<(&(String, bool), &u64)> = self.doing.iter().collect();
+        rows.sort_by(|a, b| b.1.cmp(a.1).then(a.0.cmp(b.0)));
+        for ((label, holds), n) in rows {
+            let _ = writeln!(
+                text,
+                "{n:>9}  {:>5.1}%  {label}  [{}]",
+                100.0 * *n as f64 / floor.max(1) as f64,
+                if *holds { "holds a meal" } else { "no meal" }
+            );
+        }
+        let mut spells = self.spells.clone();
+        spells.sort_by(f32::total_cmp);
+        let at = |q: f32| {
+            spells
+                .get(((spells.len() as f32 - 1.0) * q).round().max(0.0) as usize)
+                .copied()
+                .unwrap_or(0.0)
+        };
+        let mean = spells.iter().sum::<f32>() / spells.len().max(1) as f32;
+        let _ = writeln!(
+            text,
+            "\nspells of hunger (food under {HUNGRY} until back over it), game-hours: {} finished, mean {mean:.2}, median {:.2}, p90 {:.2}, max {:.2}",
+            spells.len(),
+            at(0.5),
+            at(0.9),
+            at(1.0)
+        );
+        if let Err(err) = std::fs::write(out.join("floor.txt"), text) {
+            eprintln!("evidence: cannot write floor.txt: {err}");
+        }
+    }
+}
+
 // -------------------------------------------------------------------------------------------------
 // Scenarios
 // -------------------------------------------------------------------------------------------------
@@ -629,7 +751,11 @@ struct Row {
 
 /// The starter pack, plus whatever the village scenario adds, and (`provisioning`) the overlay whose `bake` and
 /// `eat` answer to the actor's own shelf.
-fn society_defs(scenario: &str, provisioning: bool) -> Result<SocietyDefs, String> {
+fn society_defs(
+    scenario: &str,
+    provisioning: bool,
+    urgent: Option<Option<f32>>,
+) -> Result<SocietyDefs, String> {
     let mut file = bevy_society::DefsFile::starter().map_err(|e| e.to_string())?;
     if provisioning {
         let overlay =
@@ -648,6 +774,27 @@ fn society_defs(scenario: &str, provisioning: bool) -> Result<SocietyDefs, Strin
             bevy_society::DefsFile::from_ron(include_str!("assets/village.society.ron"))
                 .map_err(|e| e.to_string())?;
         file.merge(additions).map_err(|e| e.to_string())?;
+    }
+    // `--urgent BELOW` puts `eat` (and, on the provisioning overlay, `bake`) in the rank-1 bucket while `food` is
+    // under BELOW; `--no-urgent` takes every activity out of it, so the overlay can be read with and without.
+    match urgent {
+        Some(Some(below)) => {
+            for activity in &mut file.activities {
+                if activity.id == "eat" || (provisioning && activity.id == "bake") {
+                    activity.urgent = Some(bevy_society::UrgentDef {
+                        need: "food".to_owned(),
+                        below,
+                        rank: 1,
+                    });
+                }
+            }
+        }
+        Some(None) => {
+            for activity in &mut file.activities {
+                activity.urgent = None;
+            }
+        }
+        None => {}
     }
     SocietyDefs::compile(file).map_err(|e| e.to_string())
 }
@@ -1633,6 +1780,8 @@ struct Args {
     /// Replaces the starter pack's `bake` and `eat` with `assets/provisioning.society.ron`'s, which read the
     /// actor's own shelf (`Input::Stock`), so the same scenario can be read with households that provision themselves.
     provisioning: bool,
+    /// `--urgent BELOW` / `--no-urgent`: override the pack's `urgent` rank (see `UrgentDef`); `None` leaves it.
+    urgent: Option<Option<f32>>,
 }
 
 impl Args {
@@ -1659,6 +1808,7 @@ impl Args {
             rejection_penalty: None,
             days: None,
             provisioning: false,
+            urgent: None,
         };
         let mut argv = std::env::args().skip(1);
         while let Some(flag) = argv.next() {
@@ -1696,6 +1846,8 @@ impl Args {
                 }
                 "--days" => args.days = argv.next().and_then(|v| v.parse().ok()),
                 "--provisioning" => args.provisioning = true,
+                "--urgent" => args.urgent = argv.next().and_then(|v| v.parse().ok()).map(Some),
+                "--no-urgent" => args.urgent = Some(None),
                 "--stall-timeout" => args.stall_timeout = argv.next().and_then(|v| v.parse().ok()),
                 "--retaliation-refractory" => {
                     args.retaliation_refractory = argv.next().and_then(|v| v.parse().ok())

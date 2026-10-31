@@ -1573,7 +1573,7 @@ fn decide_activities(
 
     // (person, scored options, the host signals the options were scored with) for the trace; only
     // filled when a host added the resource.
-    type Scored = (String, f32, bool);
+    type Scored = (String, f32, bool, u8);
     let mut recorded: Vec<(Entity, Vec<Scored>, Vec<f32>)> = Vec::new();
 
     let now = clock.now_days;
@@ -1792,7 +1792,7 @@ fn decide_activities(
         let mut best: Option<(u8, Vec<Candidate>)> = None;
         // Every option that scored, for the trace only. `best` keeps the winning rank tier, so
         // without this a host would never see the lower-rank activities a choice ruled out.
-        let mut all_scored: Vec<(String, f32)> = Vec::new();
+        let mut all_scored: Vec<(String, f32, u8)> = Vec::new();
         for (i, spec) in defs.activities.iter().enumerate() {
             // Index 0 is the reserved idle activity: it is the fallback, never a candidate.
             if i == 0 {
@@ -1895,28 +1895,33 @@ fn decide_activities(
                 weight: spec.weight,
                 score,
             };
+            // **The rank follows the need** for an activity that carries an `urgent` rank (Maslow's prepotency,
+            // the Sims' need buckets): while the named need is low the option is in a higher tier than the
+            // options that are not, and when it has no candidate the lower tiers decide as before.
+            let rank = spec.rank_for(&needs.0);
             if trace.is_some() {
                 all_scored.push((
                     defs.activity_name(ActivityId(candidate.activity))
                         .to_owned(),
                     candidate.score,
+                    rank,
                 ));
             }
             match &mut best {
-                Some((rank, list)) if *rank == spec.rank => list.push(candidate),
-                Some((rank, list)) if spec.rank > *rank => {
-                    *rank = spec.rank;
+                Some((tier, list)) if *tier == rank => list.push(candidate),
+                Some((tier, list)) if rank > *tier => {
+                    *tier = rank;
                     *list = vec![candidate];
                 }
                 Some(_) => {}
-                None => best = Some((spec.rank, vec![candidate])),
+                None => best = Some((rank, vec![candidate])),
             }
         }
 
         if trace.is_some() {
-            let mut scored: Vec<(String, f32, bool)> = all_scored
+            let mut scored: Vec<Scored> = all_scored
                 .into_iter()
-                .map(|(name, score)| (name, score, false))
+                .map(|(name, score, rank)| (name, score, false, rank))
                 .collect();
             scored.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap_or(std::cmp::Ordering::Equal));
             recorded.push((person, scored, decision.signals.clone()));
@@ -1978,9 +1983,10 @@ fn decide_activities(
                     defs.activity_name(crate::defs::IDLE_ACTIVITY).to_owned(),
                     1.0,
                     true,
+                    0,
                 ));
             } else {
-                for (name, _, is_chosen) in scored.iter_mut() {
+                for (name, _, is_chosen, _) in scored.iter_mut() {
                     *is_chosen = defs.activity_id(name).map(|id| id.0) == chosen;
                 }
             }
@@ -2024,11 +2030,14 @@ fn decide_activities(
                 signals,
                 options: scored
                     .into_iter()
-                    .map(|(activity, score, chosen)| crate::trace::ScoredOption {
-                        activity,
-                        score,
-                        chosen,
-                    })
+                    .map(
+                        |(activity, score, chosen, rank)| crate::trace::ScoredOption {
+                            activity,
+                            score,
+                            chosen,
+                            rank,
+                        },
+                    )
                     .collect(),
             });
         }
