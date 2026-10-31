@@ -4,6 +4,8 @@ All notable changes to bevy_society. The format follows [Keep a Changelog](https
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-10-31
+
 ### Added
 
 - **A week.** `Input::Week` (`Signal::Week`) is how far through the week it is, `(weekday + hour / 24) / 7`, and `Curve::Days(from, to)` is a wrapping window over it in days from the start of the week, the analogue of `Hour` and `Hours` (`Days(5.0, 7.0)` is the last two days, `Days(4.75, 6.0)` opens at 18:00 on day 4). A `Days` curve on any input but `Week`, or an end outside `0..=7`, is a `DefsError` naming the activity. `SocietySettings::start_weekday` (`u8`, default 0, wraps modulo 7) is the weekday of game-day 0; `SocietyClock::weekday(start)`, `SocietyClock::week_position(start)`, `ctx.weekday()` in a script, and `model::DAYS_PER_WEEK` (7, a calendar convention and not a `Tuning` rate). The week is the village's clock: a `Chronotype` never shifts it. Sources: Sekara, Stopczynski & Lehmann 2016 (DOI 10.1073/pnas.1602803113: weekends are more stationary and spent with a few selected friends), Dodds et al. 2011 (DOI 10.1371/journal.pone.0026752: the weekly cycle exists). The starter pack has no week, so a society that never writes `Week` is the previous release's byte for byte (`cmp` of the harness's `summary.json`, `series.csv` and `narrative.txt` at seed 7, 29 game-days). `Input`, `Signal` and `Curve` gain a variant and `SocietySettings` a field, which is breaking for a host that matches the enums exhaustively or builds the settings without `..Default::default()`. `tests/week.rs`, `docs/research/weekly-rhythm.md`, `docs/guide/authoring.md` ("A week").
