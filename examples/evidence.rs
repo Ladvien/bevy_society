@@ -293,7 +293,8 @@ fn main() {
                         doing.label(app.world().resource::<SocietyDefs>()) == "sleep"
                     });
                 sleep_ledger.exchange(&resolved.interaction, slept);
-                reapproach_ledger.approach(app.world().resource::<SocietyClock>().now_days, resolved);
+                reapproach_ledger
+                    .approach(app.world().resource::<SocietyClock>().now_days, resolved);
                 let counts = repeat_by_interaction
                     .entry(resolved.interaction.clone())
                     .or_default();
@@ -2133,9 +2134,12 @@ impl ReapproachLedger {
             "share of approaches followed by another approach to the same person within the window\n",
         );
         let days = self.per_day.len().max(1) as f64;
-        let (approaches, distinct) = self.per_day.values().fold((0u64, 0u64), |(a, d), (n, set)| {
-            (a + u64::from(*n), d + set.len() as u64)
-        });
+        let (approaches, distinct) = self
+            .per_day
+            .values()
+            .fold((0u64, 0u64), |(a, d), (n, set)| {
+                (a + u64::from(*n), d + set.len() as u64)
+            });
         let _ = writeln!(
             text,
             "\nperson-days with an approach: {}, approaches per person-day {:.2}, different people per person-day {:.2} ({:.1}% of approaches go to someone already approached that day)",

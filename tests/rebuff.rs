@@ -93,7 +93,10 @@ fn a_refusal_is_one_approach_until_the_memory_runs_out() {
     // 40 ticks are 0.625 game-days (15 h); a 24 h memory outlasts the run.
     let (resolved, _, _) = run(-1.0, false, Some(24.0), 1, 40);
     assert_eq!(resolved.len(), 1, "{resolved:?}");
-    assert!(!resolved[0].accepted, "the guard: the first exchange was refused");
+    assert!(
+        !resolved[0].accepted,
+        "the guard: the first exchange was refused"
+    );
 }
 
 #[test]
@@ -143,7 +146,9 @@ fn a_restore_keeps_the_memory_of_a_refusal() {
         let mut app = headless(defs(-1.0, false), settings);
         let actor = spawn_person(&mut app, "A", Vec2::ZERO);
         let other = spawn_person(&mut app, "B", Vec2::new(1.0, 0.0));
-        app.world_mut().entity_mut(actor).insert((Autonomous, PersonKey(0)));
+        app.world_mut()
+            .entity_mut(actor)
+            .insert((Autonomous, PersonKey(0)));
         app.world_mut().entity_mut(other).insert(PersonKey(1));
         (app, actor, other)
     }
