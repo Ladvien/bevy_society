@@ -1,0 +1,72 @@
+# Dena's day
+
+At the end: doing Some("work"), needs Some([0.72680664, 0.7910058, 0.2624247, 0.0]), mood P0.14 A0.05 D0.00
+
+d1 15h00: started work
+d1 15h00: compliment approached by Corin (accepted)
+d1 20h17: started compliment
+d1 20h17: finished work (completed)
+d1 20h17: compliment with Edric (refused)
+d1 20h29: started gossip
+d1 20h29: finished compliment (completed)
+d1 20h29: gossip with Edric (accepted)
+d1 20h48: started compliment
+d1 20h48: finished gossip (completed)
+d1 20h48: compliment with Fenna (accepted)
+d1 21h00: started compliment
+d1 21h00: finished compliment (completed)
+d1 21h00: compliment with Fenna (accepted)
+d1 21h12: started gossip
+d1 21h12: finished compliment (completed)
+d1 21h12: gossip with Edric (refused)
+d1 21h30: started compliment
+d1 21h30: finished gossip (completed)
+d1 21h30: compliment with Fenna (accepted)
+d1 21h42: compliment approached by Fenna (refused)
+d1 21h43: started snub
+d1 21h43: finished compliment (completed)
+d1 21h43: insult with Fenna (accepted)
+d1 21h49: started wander
+d1 21h49: finished snub (completed)
+d1 22h19: started sleep
+d1 22h19: finished wander (completed)
+d2 08h43: started work
+d2 08h43: finished sleep (completed)
+d2 11h51: insult approached by Fenna (refused)
+d2 14h18: gossip approached by Lira (accepted)
+d2 14h33: chat approached by Bram (refused)
+d2 14h36: gossip approached by Lira (accepted)
+d2 14h55: gossip approached by Lira (accepted)
+d2 15h03: insult approached by Bram (accepted)
+d2 15h13: gossip approached by Lira (accepted)
+d2 15h15: started play
+d2 15h15: finished work (completed)
+d2 15h15: chat with Perrin (accepted)
+d2 15h45: started work
+d2 15h45: finished play (completed)
+d2 19h45: started eat
+d2 19h45: finished work (interrupted)
+d2 20h57: compliment approached by Bram (accepted)
+d2 21h09: gossip approached by Ysolde (refused)
+d2 21h28: gossip approached by Ysolde (accepted)
+d2 21h39: started compliment
+d2 21h39: finished eat (completed)
+d2 21h39: compliment approached by Bram (refused)
+d2 23h17: started sleep
+d2 23h17: finished compliment (interrupted)
+d3 08h49: started compliment
+d3 08h49: finished sleep (completed)
+d3 08h49: compliment with Alys (accepted)
+d3 09h01: started play
+d3 09h01: finished compliment (completed)
+d3 09h01: chat with Alys (accepted)
+d3 09h31: started compliment
+d3 09h31: finished play (completed)
+d3 10h02: compliment with Alys (accepted)
+d3 10h14: started gossip
+d3 10h14: finished compliment (completed)
+d3 10h14: gossip with Nera (refused)
+d3 10h33: started wander
+d3 10h33: finished gossip (completed)
+d3 10h56: compliment approached by Alys (accepted)
+d3 11h
