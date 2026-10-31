@@ -29,6 +29,10 @@ pub struct ScoredOption {
     pub score: f32,
     /// Whether this option was the one taken.
     pub chosen: bool,
+    /// The tier the option was in: its activity's `rank`, raised to its `urgent` rank while the need
+    /// it names was low. A chosen option whose rank is above the best scorer's was chosen by tier, not
+    /// by luck.
+    pub rank: u8,
 }
 
 /// Why one person chose the activity it chose, at one tick.
@@ -82,6 +86,16 @@ impl Decision {
                 self.tick,
                 chosen.activity,
                 format_args!("{:.3}", chosen.score)
+            ),
+            Some(chosen) if self.best().is_some_and(|best| chosen.rank > best.rank) => format!(
+                "tick {}: {who} chose {} ({:.3}, rank {}) over {} ({:.3}, rank {}): a higher rank outranks a higher score",
+                self.tick,
+                chosen.activity,
+                chosen.score,
+                chosen.rank,
+                self.best().map_or("the best", |b| b.activity.as_str()),
+                self.best().map_or(0.0, |b| b.score),
+                self.best().map_or(0, |b| b.rank)
             ),
             Some(chosen) => format!(
                 "tick {}: {who} chose {} ({:.3}), {:.0}% below {} ({:.3})",
@@ -206,11 +220,13 @@ mod tests {
                     activity: "eat".to_owned(),
                     score: 0.8,
                     chosen: true,
+                    rank: 0,
                 },
                 ScoredOption {
                     activity: "chat".to_owned(),
                     score: 0.2,
                     chosen: false,
+                    rank: 0,
                 },
             ],
         }
@@ -252,11 +268,13 @@ mod tests {
                     activity: "snub".to_owned(),
                     score: 1.0,
                     chosen: false,
+                    rank: 0,
                 },
                 ScoredOption {
                     activity: "compliment".to_owned(),
                     score: 0.75,
                     chosen: true,
+                    rank: 0,
                 },
             ],
         });
@@ -281,10 +299,40 @@ mod tests {
                 activity: "sleep".to_owned(),
                 score: 1.0,
                 chosen: true,
+                rank: 0,
             }],
         });
         let only = trace.last_for(person()).expect("just pushed");
         assert_eq!(only.shortfall(), 0.0);
         assert!(only.took_the_best());
+    }
+
+    #[test]
+    fn a_higher_rank_is_named_when_it_beat_a_higher_score() {
+        let decision = Decision {
+            tick: 3,
+            person: person(),
+            name: Some("Ada".to_owned()),
+            signals: Vec::new(),
+            options: vec![
+                ScoredOption {
+                    activity: "work".to_owned(),
+                    score: 0.9,
+                    chosen: false,
+                    rank: 0,
+                },
+                ScoredOption {
+                    activity: "eat".to_owned(),
+                    score: 0.5,
+                    chosen: true,
+                    rank: 1,
+                },
+            ],
+        };
+        let text = decision.describe(&[]);
+        assert!(
+            text.contains("eat (0.500, rank 1) over work (0.900, rank 0)"),
+            "{text}"
+        );
     }
 }
