@@ -106,3 +106,22 @@ fn an_unknown_version_is_refused_and_leaves_the_world_alone() {
         assert_eq!(before.persons, after.persons);
     }
 }
+
+/// **A saved person is not a new one.** The pack gives every new person a starting loaf, and a version-1 file
+/// says nothing about stock; its people must still hold nothing a tick after they come back, not be handed the
+/// larder `size_person_state` gives somebody who has never held a `Stock`.
+#[test]
+fn a_version_one_save_holds_nothing_a_tick_after_it_restores() {
+    let mut app = keyed_village();
+    restore(app.world_mut(), v1()).expect("a v1 save restores");
+    for _ in 0..2 {
+        app.update();
+    }
+    let mut q = app.world_mut().query::<&Stock>();
+    let mut seen = 0;
+    for stock in q.iter(app.world()) {
+        seen += 1;
+        assert_eq!(stock.get(bevy_society::GoodId(0)), 0.0);
+    }
+    assert_eq!(seen, 4, "every restored person has a Stock again");
+}

@@ -17,7 +17,23 @@
     // money and no exchange rate here: a good is a level a person holds, and the price is an observation of
     // what the village produced against what it ate.
     goods: [
-        (id: "bread"),
+        (
+            id: "bread",
+            // **A household begins with a loaf, not an empty shelf.** A person was created holding nothing,
+            // `bake` is a one-hour dawn errand and the run starts mid-morning, so the first bread existed 22
+            // game-hours in and the second game-day had 38.8 % of its person-ticks with `food` below 0.05
+            // (24 villagers, seed 99; steady state is 1-11 %). Starting in a state typical of the running
+            // system is the standard remedy for initialization bias (Murray & Kelton 1988,
+            // `10.1145/318123.318252`), and a household that holds a store is the typical state (Winterhalder,
+            // Puleston & Ross 2015, `10.1179/1749631415y.0000000025`).
+            //
+            // **One loaf is the value three of this pack's numbers already agree on**: `Tuning::price_full_store`
+            // (a full store), `Tuning::trade_reserve` (a giver must hold *more than* it to share, so a village
+            // begins with no surplus to give away) and a meal of a quarter loaf at about one meal a day (four
+            // days of food, enough to reach the first bake). A design default; no paper gives loaves.
+            // `docs/loop/runs/2026-10-30-27/`.
+            initial: 1.0,
+        ),
     ],
     skills: [
         (id: "craft", group: Craft),

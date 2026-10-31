@@ -15,7 +15,7 @@ use bevy::reflect::Reflect;
 use serde::{Deserialize, Serialize};
 
 use crate::beliefs::{Opinion, Opinions};
-use crate::core::Person;
+use crate::core::{Person, SocietySettings};
 use crate::groups::Memberships;
 use crate::mind::{EmotionKind, Needs, Signals, Trait};
 use crate::model::curves::Curve;
@@ -160,11 +160,23 @@ impl SkillGroup {
 ///
 /// "Meat and honey are meticulously shared among the Ache, but goods purchased by money are not" —
 /// Henrich et al. 2005 (DOI `10.1017/S0140525X05000142`). A good is a level a person holds, nothing more.
+///
+/// **`initial` is what a person holds when they are created**, the way [`NeedDef::initial`] is the level a need
+/// starts at. A society that begins with every larder empty has a transient the running society does not:
+/// the starter pack's village held no bread for its first 22 game-hours and spent the second game-day with 39 %
+/// of its person-ticks at `food` below 0.05 (`docs/loop/runs/2026-10-30-27/research.md`). Starting in a state
+/// typical of the running system is the standard remedy for that initialization bias (Murray & Kelton 1988, DOI
+/// `10.1145/318123.318252`), and a household holding a store is the typical state (Winterhalder et al. 2015, DOI
+/// `10.1179/1749631415y.0000000025`). The default `0.0` is what every pack that omits the field has always had.
+/// A value above `Tuning::stock_ceiling` is held at the ceiling.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct GoodDef {
     /// Unique name.
     pub id: String,
+    /// Units of this good a new person holds, 0 or more.
+    #[serde(default)]
+    pub initial: f32,
 }
 
 /// A named capability. Level comes from personality, not from stored state.
@@ -798,6 +810,8 @@ pub struct SocietyDefs {
     pub(crate) skills: Vec<SkillGroup>,
     /// Goods, in definition order. Public so a host can count what its pack declares.
     pub goods: Vec<String>,
+    /// What a new person holds of each good, parallel to `goods` ([`GoodDef::initial`]).
+    pub(crate) good_initial: Vec<f32>,
     pub(crate) topics: Vec<TopicSpec>,
     pub(crate) deeds: Vec<DeedSpec>,
     pub(crate) factions: Vec<FactionSpec>,
@@ -833,6 +847,7 @@ impl SocietyDefs {
             signals: Vec::new(),
             skills: Vec::new(),
             goods: Vec::new(),
+            good_initial: Vec::new(),
             good_ids: HashMap::new(),
             topics: Vec::new(),
             deeds: Vec::new(),
@@ -1274,8 +1289,13 @@ impl SocietyDefs {
     }
 
     fn add_good(&mut self, def: GoodDef) -> Result<(), DefsError> {
+        let owner = format!("good '{}'", def.id);
+        if !def.initial.is_finite() || def.initial < 0.0 {
+            return Err(invalid(&owner, "initial must be a number, 0 or more"));
+        }
         register(&mut self.good_ids, "good", &def.id, self.goods.len())?;
         self.goods.push(def.id);
+        self.good_initial.push(def.initial);
         Ok(())
     }
 
@@ -1700,9 +1720,12 @@ type PersonStateQuery<'w, 's> = Query<
 /// changes only when a length actually differs.
 ///
 /// **`Stock` is added here too**, as a `Component` when the pack declares goods, so a host that adds a good
-/// to its definitions file does not also have to remember to spawn one.
+/// to its definitions file does not also have to remember to spawn one. A new `Stock`, and the slots a short
+/// one gains, start at each good's [`GoodDef::initial`] (held at `Tuning::stock_ceiling`), exactly as a need
+/// starts at its `initial`; a `Stock` of the right length is the host's own and is left alone.
 pub fn size_person_state(
     defs: Res<SocietyDefs>,
+    settings: Res<SocietySettings>,
     mut commands: Commands,
     mut people: PersonStateQuery,
 ) {
@@ -1710,19 +1733,24 @@ pub fn size_person_state(
     let signal_count = defs.signals.len();
     let topic_count = defs.topics.len();
     let good_count = defs.goods.len();
+    let ceiling = settings.tuning.stock_ceiling;
+    let starting = |slot: usize| defs.good_initial.get(slot).map_or(0.0, |&n| n.min(ceiling));
     for (entity, mut needs, mut signals, mut opinions, stock) in &mut people {
         // **Stock is sized with the rest of the per-person state**, so a host that adds a good to its
         // definitions file does not have to remember to spawn a component for it.
         match stock {
             Some(mut stock) => {
-                if stock.0.len() != good_count {
-                    stock.0.resize(good_count, 0.0);
+                let have = stock.0.len();
+                if have > good_count {
+                    stock.0.truncate(good_count);
+                } else if have < good_count {
+                    stock.0.extend((have..good_count).map(starting));
                 }
             }
             None if good_count > 0 => {
                 commands
                     .entity(entity)
-                    .insert(crate::Stock(vec![0.0; good_count]));
+                    .insert(crate::Stock((0..good_count).map(starting).collect()));
             }
             None => {}
         }
