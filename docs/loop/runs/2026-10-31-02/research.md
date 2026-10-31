@@ -40,7 +40,7 @@ With uniform schedules the village is asleep together or awake together, so nobo
 ## What believable output looks like
 
 - Sleep starts spread over about four hours (the 22:00-hour share falls from 62 % toward the share of a normal distribution's central hour, about 25-30 %), and the share of the village asleep at a given clock hour rises and falls smoothly where it is now a step.
-- Interrupted sleeps fall (the queue at a home place is no longer a queue).
+- ~~Interrupted sleeps fall (the queue at a home place is no longer a queue).~~ **Struck after measurement** (`eval.md`): the interrupted-sleep rate stays 10-18 % with or without body clocks. At 64 s/day the cause is the walk home (2.7 game-hours for 10 m), not a queue at the bed; the prediction came from the crate's own warning text, which blames the queue, and was written down before it was tested.
 - A narrative reads as a person with their own day: a lark's first meal at 04:30, with nobody about; an owl compliments someone at 01:00 who is awake.
 - Nobody is the target of an exchange while asleep.
 - A person with `Chronotype(0.0)` is bit-identical to the crate before this change.

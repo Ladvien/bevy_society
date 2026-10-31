@@ -1,0 +1,116 @@
+bake: day started completed interrupted
+    2      4      3      1
+    3      2      2      0
+    4      5      5      0
+    5      4      3      1
+    6      5      5      0
+    7      3      3      0
+chat: day started completed interrupted
+    1      2      2      0
+    2     12     12      0
+    3     10     10      0
+    4     13     13      0
+    5      8      8      0
+    6     15     15      0
+    7      7      7      0
+compliment: day started completed interrupted
+    1    173    172      0
+    2    176    177      0
+    3    166    164      2
+    4    174    174      0
+    5    133    131      2
+    6    193    193      0
+    7     62     61      0
+craft: day started completed interrupted
+    1      4      4      0
+    2      9      9      0
+    3      4      4      0
+    4     10     10      0
+    5      8      8      0
+    6      9      8      1
+    7      3      2      0
+eat: day started completed interrupted
+    2     26     24      2
+    3     25     23      2
+    4     25     24      1
+    5     27     24      3
+    6     24     20      4
+    7     17     16      0
+gossip: day started completed interrupted
+    1     52     52      0
+    2    103    103      0
+    3    116    116      0
+    4     88     88      0
+    5    113    113      0
+    6    129    129      0
+    7     57     55      0
+play: day started completed interrupted
+    1      4      4      0
+    2     26     26      0
+    3     30     30      0
+    4     28     28      0
+    5     30     30      0
+    6     32     32      0
+    7     18     17      0
+relax: day started completed interrupted
+    1     14     14      0
+    2     12     11      0
+    3     10     11      0
+    4     11     11      0
+    5     13     13      0
+    6      9      7      1
+    7      0      1      0
+share: day started completed interrupted
+    2     10     10      0
+    3     46     46      0
+    4     76     75      1
+    5     31     30      1
+    6     22     22      0
+    7      6      5      0
+sleep: day started completed interrupted
+    1     23      0      0
+    2     29     20      9
+    3     26     23      2
+    4     25     23      2
+    5     25     24      1
+    6     23     24      0
+    7      3     22      4
+snub: day started completed interrupted
+    1     32     32      0
+    2     47     47      0
+    3     59     59      0
+    4     42     42      0
+    5     42     42      0
+    6     54     54      0
+    7     18     18      0
+wander: day started completed interrupted
+    1      8      8      0
+    2      8      8      0
+    3      7      7      0
+    4     10     10      0
+    5      6      6      0
+    6      8      8      0
+    7      1      1      0
+work: day started completed interrupted
+    1     17     17      0
+    2     33     33      0
+    3     34     32      2
+    4     32     31      1
+    5     32     32      0
+    6     33     30      3
+    7     35     18      0
+
+hour of day each activity was chosen at (all days):
+      bake:     0     0     0     0     0     0    23     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0
+      chat:     0     0     0     0     0     0    12    11     7     0     0     1     5     5     2     4     5     2     2     6     3     2     0     0
+compliment:     0     0     0     0     0     0    54    89    46    32    26    34    42    43    37    60    52    56    83   137   155   131     0     0
+     craft:     0     0     0     0     0     0     0     0    24     0     1     2    11     2     0     7     0     0     0     0     0     0     0     0
+       eat:     0     0     0     0     0     0    33    48    16     3     6     3     8     3     4     2     4     4     2     2     2     4     0     0
+    gossip:     0     0     0     0     0     0    31    60    34    19    20    21    23    31    30    15    23    40    43    74    78   116     0     0
+      play:     0     0     0     0     0     0    19    25    14     5     4     7    10    12     8     8     8    12     4     9    15     8     0     0
+     relax:     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0    10    12     9    25    13     0     0
+     share:     0     0     0     0     0     0     9    18    20     9     7     5     9     5     9     5     3     7    12    23    24    26     0     0
+     sleep:     3     0     4     6     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0     0   115    26
+      snub:     0     0     0     0     0     0    13    31    10    13     7     6    14    13    14     8    15    14    26    31    48    31     0     0
+    wander:     0     0     0     0     0     0     2     3     3     4     0     0     0     2     2     4     4     3     1     5     9     6     0     0
+      work:     0     0     0     0     0     0     0     0    53    21     9    16    21    20    22    32    22     0     0     0     0     0     0     0
