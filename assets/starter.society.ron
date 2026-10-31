@@ -100,8 +100,13 @@
             target: Home,
             duration_hours: 8.0,
             rank: 1,
+            // **The body's decision, not the village's.** `BodyHour` is the clock hour less the person's
+            // `Chronotype`, so a lark goes to bed early and an owl late; a person with no offset reads the
+            // same hour as `Hour` and this is the window it always was. A sleeper cannot be approached: an
+            // owl awake at 01:00 does not compliment the neighbours who are asleep. `docs/research/chronotype.md`.
+            unavailable: true,
             considerations: [
-                (input: Hour, curve: Hours(22.0, 6.0)),
+                (input: BodyHour, curve: Hours(22.0, 6.0)),
                 (input: Need("rest"), curve: Linear(-1.0, 1.0)),
             ],
             satisfies: [("rest", 0.15)],

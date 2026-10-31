@@ -80,7 +80,8 @@ like `activity 'eat' consideration 2`.
 ## Activities
 
 An activity is an option a person can choose, scored by considerations. This one says "sleep at home
-between 22:00 and 06:00, more so when tired, and rest while there":
+between 22:00 and 06:00 by your own clock, more so when tired, and rest while there; nobody walks up to
+you meanwhile":
 
 ```ron
 (
@@ -88,8 +89,9 @@ between 22:00 and 06:00, more so when tired, and rest while there":
     target: Home,
     duration_hours: 8.0,
     rank: 1,
+    unavailable: true,
     considerations: [
-        (input: Hour, curve: Hours(22.0, 6.0)),
+        (input: BodyHour, curve: Hours(22.0, 6.0)),
         (input: Need("rest"), curve: Linear(-1.0, 1.0)),
     ],
     satisfies: [("rest", 0.15)],
@@ -120,6 +122,12 @@ between 22:00 and 06:00, more so when tired, and rest while there":
 - `weight` (default 1.0) multiplies the whole score.
 - `satisfies` is a need delta **per game-hour arrived**, not per tick.
 - `interaction` runs a social exchange on arrival; it requires a `Person` target.
+- `unavailable` (default `false`) makes a person **who has arrived at the activity** impossible to approach: they are in
+  nobody's `near` list, so no one picks them as the target of a `Person` activity (and they are not a `Distance`
+  neighbour), and an activity still walking toward them ends, `completed: false`, when they arrive. Someone still
+  walking to bed is on their way, not asleep. It is the per-activity form of `Dormant`'s "out of perception, no
+  exchanges", and it is what `sleep` needs once people keep their own hours (below): without it an owl awake at 01:00
+  would compliment the neighbours who are asleep.
 - `barks` are thought lines, one per activity start with probability `SocietySettings::bark_chance`.
 - `duration_hours` must be above zero.
 - A place that is **full** is not unavailable — it costs `Tuning::crowding_penalty` (0.6) of the option's score, so a
@@ -127,7 +135,7 @@ between 22:00 and 06:00, more so when tired, and rest while there":
   **closed**: nobody ever goes. A full place used to produce no target at all, which was measured to remove a
   village's working day once it outgrew its seats (`docs/loop/runs/2026-10-25-10/eval.md`).
 
-A consideration's `input` is normalised to `[0, 1]` before its `curve` sees it: `Hour` is `h / 24`,
+A consideration's `input` is normalised to `[0, 1]` before its `curve` sees it: `Hour` and `BodyHour` are `h / 24`,
 mood axes and `Affinity`/`Respect` are `(x + 1) / 2`, `Distance` is `d / perception_radius`. `Trust`,
 `Familiarity` and `SocialProof` are already in `[0, 1]`, and `Need`/`Signal` are read as they stand,
 so a signal the host writes outside `[0, 1]` is clamped after the curve. `Signal("x")` names a
@@ -146,7 +154,7 @@ Curves turn that number into utility:
 | `Power(k)` | `x^k` |
 | `Logistic(k, x0)` | `1 / (1 + e^(−k(x − x0)))` |
 | `Step(at)` | `1` when `x ≥ at` |
-| `Hours(from, to)` | `1` inside the wrapping hour window; only with `input: Hour` |
+| `Hours(from, to)` | `1` inside the wrapping hour window; only with `input: Hour` or `input: BodyHour` |
 
 `Affinity`, `Trust`, `Respect`, `Familiarity` and `SocialProof` are only valid on a `Person` target,
 and `Distance` is valid on `Place`, `Home` and `Person`. A definition that breaks that rule is
@@ -156,6 +164,21 @@ rejected with the offending consideration named.
 when a town should drift toward trouble: it is written by a witnessed deed's `|harm|` and by any host
 that writes a `Commotion { at, amount }` message, and a `Gradient(Commotion, true)` target walks a
 person up the slope toward it.
+
+### Two clocks: `Hour` and `BodyHour`
+
+`Hour` is the village's clock, the same for everyone: shop hours, the baker's dawn, the working day. `BodyHour` is the
+actor's own: the clock hour less their `Chronotype` (hours; positive is an owl, negative a lark; the default `0.0` makes
+it equal to `Hour`). Both are `h / 24` and both take the `Hours(from, to)` curve. Write what the body decides (when to
+sleep) on `BodyHour` and what the village decides (when the workshop opens) on `Hour`; the gap between the two is what
+chronobiology calls social jetlag (Wittmann et al. 2006, DOI `10.1080/07420520500545979`), and an owl who sleeps
+until 09:00 beside a workshop that opens at 08:00 is a story the pack's author can use or leave out.
+
+The crate never draws a chronotype; the host writes one the way it writes a `Personality`:
+`Chronotype::sample(&mut rng, Chronotype::POPULATION_SD_HOURS)` for a population like the measured ones (a normal of
+1.5 h, cut at three deviations), or `chronotype_hours: -2.0` on a `PersonDef` in a placement file. A save keeps it
+(`PersonSave::chronotype`; a file from before it restores as `0.0`). Without one a person keeps the village's clock
+and behaves exactly as before. `docs/research/chronotype.md`.
 
 ## Interactions
 
