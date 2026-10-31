@@ -88,8 +88,10 @@
             // 42: 33 -> 0, measured). An hour at first light sits where `work`'s `Hours(8, 17)` window is
             // shut, so it adds a morning without taking the day.
             considerations: [
-                (input: Hour, curve: Hours(6.0, 7.0)),
+                (input: Hour, curve: Hours(6.0, 20.0)),
                 (input: Skill("craft"), curve: Linear(1.0, 0.0)),
+                (input: Stock("bread"), curve: Linear(-1.0, 1.0)),
+                (input: Need("food"), curve: Logistic(-10.0, 0.5)),
             ],
             satisfies: [],
             interaction: None,
@@ -114,6 +116,7 @@
             duration_hours: 0.75,
             considerations: [
                 (input: Need("food"), curve: Logistic(-10.0, 0.35)),
+                (input: Stock("bread"), curve: Linear(4.0, 0.05)),
             ],
             satisfies: [("food", 1.2)],
             // **Eating uses up bread when there is any, and a meal is a QUARTER of a loaf.**
