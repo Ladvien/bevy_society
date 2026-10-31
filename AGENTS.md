@@ -25,6 +25,7 @@ Pinned to **Bevy 0.20.0**. Read the vendored source (`~/.cargo/registry/src/inde
 - `src/lib.rs` — crate docs and flat re-exports (no prelude).
 - `examples/assets/starter.society.ron` — the starter pack every host starts from.
 - `examples/assets/village.society.ron` — the village's additions to the starter pack.
+- `examples/assets/provisioning.society.ron` — an overlay (opt-in) whose `bake` and `eat` read the actor's own shelf (`Input::Stock`): a hungry household with a bare shelf makes bread, one holding bread does not. A host replaces the starter's two activities by id; the starter pack itself is unchanged (`docs/loop/needs-decision/households-provision-themselves.md`).
 - `examples/common/recorder.rs` — the headless PNG recorder the capture example drives.
 - `tools/gif.py` — frames to a caption-burned GIF (Pillow only; this is the encoder). `tools/gif.sh` is the ffmpeg and ImageMagick variant and cannot run where those are absent.
 - `docs/README.md` — the documentation index.
@@ -65,6 +66,8 @@ Pinned to **Bevy 0.20.0**. Read the vendored source (`~/.cargo/registry/src/inde
 - `tests/economy.rs` — a balanced economy's price rests and a shortage moves it; `Stock` survives a save.
 - `tests/starting_larder.rs` — a person is created holding each good's `initial` (held at the ceiling, a short `Stock` grows with it, a host's full-length one is left alone), and a loaf a head removes the second game-day's famine.
 - `tests/trade.rs` — a good changes hands only on a surplus above `trade_reserve` and `trade_margin`, a two-good swap conserves both, and trade narrows the spread of stores.
+- `tests/stock_input.rs` — `Input::Stock` reads the actor's own holding, clamped to `[0, 1]`; a curve rescales it; an undeclared good is refused at load.
+- `tests/provisioning.rs` — a hungry household with a bare shelf bakes at noon where the starter's dawn window is shut, and a household holding bread makes none (the overlay against the starter pack).
 - `tests/leaf.rs` — the crate boundary: dependency list, forbidden names, engine-free `src/model/`, lookup-only hash collections.
 - `tests/mind.rs` — emotion half-life, mood lift toward Joy and return to baseline, needs decay at `decay_per_day`.
 - `tests/dialogue.rs` — conversation choice and `if` conditions, node effects, barks, speaker lifetime and the missing-plugin panic (feature `dialogue`).

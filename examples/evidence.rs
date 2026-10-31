@@ -5,14 +5,19 @@
 //! cargo run --example evidence -- --scenario village-evening --out docs/loop/runs/<run>/evidence
 //! ```
 //!
-//! Four artefacts per run:
+//! The artefacts of a run:
 //!
 //! - `narrative.txt` — one person's day in readable lines: when they chose what, whom they talked to,
 //!   what it did to their mood and needs. Read it as a stranger would.
 //! - `shares.txt` — one line per accepted `share`: when, who gave to whom, and both stores before and after that tick.
 //! - `series.csv` — one row per tick: the aggregates a plot needs (mean need levels, mood, opinion
 //!   variance, rumor reach, friendship and rivalry counts). `tools/plots.py` turns it into PNGs.
+//! - `activities.txt` — per game-day, how many times each activity was started, completed and interrupted, and the
+//!   clock hour each was chosen at: "nobody bakes" told apart from "nobody decides inside the baking window".
 //! - `summary.json` — the end state, for a test or a log entry to assert against.
+//!
+//! `--provisioning` runs the scenario on `examples/assets/provisioning.society.ron`, whose `bake` and `eat` read the
+//! actor's own shelf (`Input::Stock`), so the same seed can be read with and without households that provision themselves.
 //!
 //! The scenarios themselves are declared in `docs/loop/scenarios.yaml`; this file implements the ones
 //! it can build from the crate's own definitions and prints a clear error for the rest.
