@@ -48,6 +48,18 @@ START_HOUR = 15.0  # `village-evening` starts at 15:00 (`docs/loop/scenarios.yam
 RED, BLUE = "#c0392b", "#2c6fbb"
 
 
+def save_small(fig, path, colours=64):
+    """Writes the figure as a palette PNG so the committed file stays under the 100 KB a loop run allows each file."""
+    import io
+
+    from PIL import Image
+
+    buffer = io.BytesIO()
+    fig.savefig(buffer, dpi=100, format="png")
+    buffer.seek(0)
+    Image.open(buffer).convert("RGB").quantize(colors=colours).save(path, optimize=True)
+
+
 def read_sleep(path):
     """`(asleep_pct[24], began[24], woke[24], totals text)` from a `sleep.txt`."""
     asleep, began, woke = [0.0] * 24, [0] * 24, [0] * 24
@@ -140,7 +152,7 @@ def main():
             top.legend(loc="upper center", fontsize=8)
         bottom.set_xticks(range(0, 24, 3))
     fig.tight_layout()
-    fig.savefig(sleep_png, dpi=110)
+    save_small(fig, sleep_png)
     plt.close(fig)
 
     # What the village does by the clock, first plotted key: before and after, stacked.
@@ -160,7 +172,7 @@ def main():
     axes[0].set_ylabel("share of villager-ticks")
     axes[1].legend(loc="center left", bbox_to_anchor=(1.0, 0.5), fontsize=8)
     fig.tight_layout()
-    fig.savefig(day_png, dpi=110)
+    save_small(fig, day_png)
     plt.close(fig)
 
     lines = [
