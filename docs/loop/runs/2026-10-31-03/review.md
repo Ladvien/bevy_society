@@ -23,3 +23,7 @@ What the review does not let through: (1) the prediction that the refused share 
 What a skeptic would still ask: does it generalise past the starter pack's `chat`/`gossip`/`compliment`? The filter reads the interaction's deed and the activity's `Person` target, not any name, so a host's pack with its own affiliative activities is covered; `tests/rebuff.rs` pins it on a pack that names only `chat` and `insult`.
 
 **Verdict: GREAT.**
+
+## What the verdicts do not cover: the default
+
+All three verdicts are about the behaviour at `Some(12.0)`. The memory ships **off** because that value fails one protected check (`label_hysteresis`'s 5 % bar, 16 against 311 events, 5.14 %); the probe in `eval.md` section 6 shows the check is a Poisson count at its edge (2.8-6.0 % across seven memories, 3.8 % with it off), not a finding about the memory. That is a decision for the owner, recorded with a patch that was run (`needs-decision/a-refusal-is-remembered.md`, `rebuff-default.patch`), not one this pass took by loosening a pin or by choosing 18 or 24 hours for passing it.
