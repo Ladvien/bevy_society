@@ -69,8 +69,11 @@ tick 413: Alys chose chat (0.480), 21% below work (0.608)
 | `activity` | the activity's name as authored |
 | `score` | `weight · Π compensated consideration`, in `[0, 1]` |
 | `chosen` | whether it was the one taken |
+| `rank` | the tier it was in: the activity's `rank`, raised to its `urgent` rank while the need it names was low |
 
 A score is what `docs/guide/authoring.md` describes: the activity's `weight` times the product of its considerations, each passed through its curve. A small `shortfall` says the choice was close; a large one says the person took something unlikely, which is what the draw is for.
+
+`describe` names the ranks when the chosen option scored below the best one because it was in a higher tier: `chose eat (0.500, rank 1) over work (0.900, rank 0)`. That is not luck in the draw, it is hunger (or whatever the pack made `urgent`) taking precedence.
 
 ## Next
 

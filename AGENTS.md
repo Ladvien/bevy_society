@@ -68,6 +68,7 @@ Pinned to **Bevy 0.20.0**. Read the vendored source (`~/.cargo/registry/src/inde
 - `tests/trade.rs` — a good changes hands only on a surplus above `trade_reserve` and `trade_margin`, a two-good swap conserves both, and trade narrows the spread of stores.
 - `tests/stock_input.rs` — `Input::Stock` reads the actor's own holding, clamped to `[0, 1]`; a curve rescales it; an undeclared good is refused at load.
 - `tests/provisioning.rs` — a hungry household with a bare shelf bakes at noon where the starter's dawn window is shut, and a household holding bread makes none (the overlay against the starter pack).
+- `tests/urgent.rs` — `ActivityDef::urgent` raises a rank while a need is low (a hungry person eats where a fed one plays, strictly under the line, falling through when the meal has nowhere to happen, tiers against a static rank, the trace records the tier, malformed lines refused at load) and the provisioning overlay puts a hungry household first.
 - `tests/leaf.rs` — the crate boundary: dependency list, forbidden names, engine-free `src/model/`, lookup-only hash collections.
 - `tests/mind.rs` — emotion half-life, mood lift toward Joy and return to baseline, needs decay at `decay_per_day`.
 - `tests/dialogue.rs` — conversation choice and `if` conditions, node effects, barks, speaker lifetime and the missing-plugin panic (feature `dialogue`).
