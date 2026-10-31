@@ -293,6 +293,11 @@ pub struct PersonSave {
     /// `PersonKey` is left out.
     #[serde(default)]
     pub recent_harm: Vec<(u64, u64)>,
+    /// People who have just refused this person and the game-day each may be approached again (as `f64` bits), in
+    /// the order they were written: `Tuning::rebuff_memory_hours`. Absent from an older file, which restores as
+    /// nobody avoided, the state it was saved without. A person without a `PersonKey` is left out.
+    #[serde(default)]
+    pub rebuffed: Vec<(u64, u64)>,
     /// Places this person recently failed to reach and the game-day each is forgiven (as `f64` bits), in
     /// the order they were written: `Tuning::failed_place_memory_hours`. Absent from an older file, which
     /// restores as nothing avoided. A place without a `PlaceKey` is left out.
@@ -541,6 +546,7 @@ struct PersonCapture {
     deceased: Has<crate::Deceased>,
     away: Option<&'static crate::AwaySince>,
     harmed: Option<&'static crate::behavior::RecentHarm>,
+    rebuffed: Option<&'static crate::behavior::Rebuffed>,
     failed: Option<&'static crate::behavior::FailedPlaces>,
     signals: &'static Signals,
     doing: Option<&'static Doing>,
@@ -729,6 +735,13 @@ pub fn capture(world: &mut World) -> SocietySave {
             away_since_bits: person.away.map(|since| since.0.to_bits()),
             recent_harm: person.harmed.map_or_else(Vec::new, |harmed| {
                 harmed
+                    .0
+                    .iter()
+                    .filter_map(|(other, until)| Some((*person_keys.get(other)?, until.to_bits())))
+                    .collect()
+            }),
+            rebuffed: person.rebuffed.map_or_else(Vec::new, |rebuffed| {
+                rebuffed
                     .0
                     .iter()
                     .filter_map(|(other, until)| Some((*person_keys.get(other)?, until.to_bits())))
@@ -1342,6 +1355,17 @@ fn write_person(
         em.insert(crate::behavior::RecentHarm(
             person
                 .recent_harm
+                .iter()
+                .filter_map(|&(key, until)| Some((*persons.get(&key)?, f64::from_bits(until))))
+                .collect(),
+        ));
+    }
+    if person.rebuffed.is_empty() {
+        em.remove::<crate::behavior::Rebuffed>();
+    } else {
+        em.insert(crate::behavior::Rebuffed(
+            person
+                .rebuffed
                 .iter()
                 .filter_map(|&(key, until)| Some((*persons.get(&key)?, f64::from_bits(until))))
                 .collect(),
