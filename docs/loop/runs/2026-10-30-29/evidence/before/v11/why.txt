@@ -1,0 +1,8 @@
+# tick 68919: someone weighed nothing
+
+ 1.000  wander
+ 1.000  share
+ 0.998  compliment
+ 0.930  eat
+ 0.767  chat
+ 0.644  gossip
