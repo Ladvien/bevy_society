@@ -6,7 +6,7 @@
 
 use bevy::ecs::name::Name;
 use bevy::prelude::*;
-use bevy_emerge_rng::{DetRng, seeded};
+use bevy_grimoire_rng::{DetRng, seeded};
 #[cfg(feature = "steering")]
 use bevy_society::Obstacle;
 use bevy_society::{Autonomous, Home, Needs, Person, Personality, Place, PlaceTags, SocietyDefs};

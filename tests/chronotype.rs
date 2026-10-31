@@ -12,7 +12,7 @@ mod common;
 
 use bevy::ecs::message::Messages;
 use bevy::prelude::*;
-use bevy_emerge_rng::seeded;
+use bevy_grimoire_rng::seeded;
 use bevy_society::{
     ActivityEnded, ActivityStarted, Autonomous, Chronotype, DefsFile, Doing, DoingTarget, Home,
     Needs, Place, PlacementFile, SocietyClock, SocietyDefs,

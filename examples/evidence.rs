@@ -2009,7 +2009,7 @@ impl Args {
 /// other draw of the run are the ones it has without `--chronotype-sd`.
 fn give_body_clocks(app: &mut App, world: &World, sd: f32) {
     let seed = app.world().resource::<SocietySettings>().seed;
-    let mut rng = bevy_emerge_rng::seeded(seed ^ 0xC1C0_C10C);
+    let mut rng = bevy_grimoire_rng::seeded(seed ^ 0xC1C0_C10C);
     for &entity in &world.villagers {
         let chronotype = Chronotype::sample(&mut rng, sd);
         app.world_mut().entity_mut(entity).insert(chronotype);

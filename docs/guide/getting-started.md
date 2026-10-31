@@ -11,7 +11,7 @@ bevy_society = "0.9"
 ```
 
 It is on crates.io, and its ladvien dependencies (`bevy_speech_bubbles`, `bevy_stigmergy`,
-`bevy_orca`, `bevy_emerge_rng`) are crates.io versions too, so a consumer needs no `[patch]`. Pin an
+`bevy_orca`, `bevy_grimoire_rng`) are crates.io versions too, so a consumer needs no `[patch]`. Pin an
 exact version in a real project (`bevy_society = "=0.9.0"`), since a pre-1.0 minor bump may break.
 `bevy_fairy` is only a **dev**-dependency of this repository's examples and never reaches a consumer.
 

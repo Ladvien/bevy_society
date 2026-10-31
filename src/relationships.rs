@@ -5,7 +5,7 @@
 //! every iteration is deterministic.
 
 use bevy::prelude::*;
-use bevy_emerge_rng::DetRng;
+use bevy_grimoire_rng::DetRng;
 use serde::{Deserialize, Serialize};
 
 use crate::core::require_core;

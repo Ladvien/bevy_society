@@ -3,7 +3,7 @@
 
 use bevy::ecs::component::Component;
 use bevy::reflect::Reflect;
-use bevy_emerge_rng::DetRng;
+use bevy_grimoire_rng::DetRng;
 use serde::{Deserialize, Serialize};
 
 use crate::core::{
@@ -831,7 +831,7 @@ fn decay_needs(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use bevy_emerge_rng::seeded;
+    use bevy_grimoire_rng::seeded;
 
     fn ent(bits: u64) -> Entity {
         Entity::from_bits(bits)

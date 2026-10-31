@@ -7,7 +7,7 @@
 use bevy::ecs::query::QueryData;
 use bevy::prelude::*;
 use bevy::transform::components::Transform;
-use bevy_emerge_rng::DetRng;
+use bevy_grimoire_rng::DetRng;
 
 use crate::Tuning;
 use crate::core::{Perception, PersonIndex, SocietyClock, SocietySettings};
@@ -1605,7 +1605,7 @@ fn decide_activities(
         harmed,
         rebuffed,
     } = world;
-    use bevy_emerge_rng::DetRng;
+    use bevy_grimoire_rng::DetRng;
 
     // (person, scored options, the host signals the options were scored with) for the trace; only
     // filled when a host added the resource.
@@ -2247,7 +2247,7 @@ fn targets_for(
     fields: Option<&FieldGrids>,
     rng: &mut rand_chacha::ChaCha8Rng,
 ) -> Vec<DoingTarget> {
-    use bevy_emerge_rng::DetRng;
+    use bevy_grimoire_rng::DetRng;
     match target {
         ActivityTarget::Itself => vec![DoingTarget::Itself],
         ActivityTarget::Home => home.map_or_else(Vec::new, |h| vec![DoingTarget::Place(h)]),

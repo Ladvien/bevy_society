@@ -1271,7 +1271,7 @@ fn setup_society(
     host: Option<Res<HostClock>>,
     mut clock: ResMut<SocietyClock>,
 ) {
-    commands.insert_resource(SocietyRng(bevy_emerge_rng::seeded(settings.seed)));
+    commands.insert_resource(SocietyRng(bevy_grimoire_rng::seeded(settings.seed)));
     clock.now_days = match (settings.clock, host.as_deref()) {
         (ClockSource::Host, Some(host)) => host.now_days,
         _ => f64::from(settings.start_hour) / 24.0,
