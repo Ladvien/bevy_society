@@ -1,56 +1,22 @@
 # bevy_society
 
-Give your Bevy world a living society: villagers who remember, gossip, take sides, fall out and make up — and who you can script.
+> ⚠️ **Vibe Coded.** Written by AI agents working from a human's direction, covered by tests rather than a line-by-line human review. Read the code before you rely on it for something you care about.
 
-[![CI](https://github.com/bevy-coven/bevy_society/actions/workflows/ci.yml/badge.svg)](https://github.com/bevy-coven/bevy_society/actions/workflows/ci.yml)
+Give your Bevy world a living society: villagers who remember, gossip, take sides, fall out and make up, and whose days you can script.
 
-## The demo
+[![crates.io](https://img.shields.io/crates/v/bevy_society.svg)](https://crates.io/crates/bevy_society) [![docs.rs](https://img.shields.io/docsrs/bevy_society)](https://docs.rs/bevy_society) [![CI](https://github.com/bevy-coven/bevy_society/actions/workflows/ci.yml/badge.svg)](https://github.com/bevy-coven/bevy_society/actions/workflows/ci.yml) [![Bevy 0.20](https://img.shields.io/badge/bevy-0.20-purple.svg)](https://bevyengine.org) [![license](https://img.shields.io/badge/license-MIT%20OR%20Apache--2.0-blue.svg)](LICENSE-MIT)
 
-![A rumor spreads through a village](https://github.com/bevy-coven/bevy_society/raw/main/docs/media/village.gif)
+![A rumor spreads through a village: tie lines turn green as friendships form, a red line marks the one rivalry, and a magenta ring marks who knows the rumor](docs/media/village.gif)
 
-One afternoon in a village of twenty-four people: a weaver tells the rumor that Bram stole bread, and in the six game-hours the clip covers (14:00 to 20:00) it passes to one more villager — the plate in the corner reads `known by 2/24` on the last frame. The same run recorded twice as long, twelve game-hours, is still at 2, and which weaver tells matters: of ten tellers tried, four passed it on inside six hours and six did not (`docs/DEMOS.md`), so this clip tells it from one of the four. A rumor crosses a village in game-days, not hours, because each telling is one choice among many and the Daley–Kendall rule stifles a teller whose listener already knew. Tie lines show friendships green; the magenta ring marks whoever knows the rumor.
+*`cargo run --release --example capture -- --scene village`: one afternoon in a village of twenty-four people. A weaver tells the rumor that Bram stole bread, ties form and thicken, and the plate in the corner counts friendships and rivalries.*
 
-Every clip below is the same village, same seed, same run — only the overlay changes, except **Goods**, which also opens with bread handed out and says so. None of them draws a rivalry: the plate reads `Rivalries 0` from first frame to last, because six game-hours is not long enough for one to form. A longer run does form them — 28 directed rival ties against 62 friend ties at seed 7 over 17 game-days (`examples/evidence`, `docs/loop/runs/2026-10-30-25/eval.md`). The clips were recorded on 2026-10-25, before `Tuning::forgiveness` (2026-10-30) changed how the settled village's ties form; they show the village as it was then.
+**Status:** usable · Bevy 0.20 · MSRV 1.97.1
 
-### One clip per feature
-
-| | |
-|---|---|
-| ![Mood](https://github.com/bevy-coven/bevy_society/raw/main/docs/media/mood.gif) **Mood** — a halo on every villager. Green is pleased, amber neutral, red displeased; halo size is arousal. The colour scale is normalised to the ±0.45 this village actually spans (`MOOD_SPAN`), so a small mood shift is a visible colour change rather than every villager the same olive. | ![Opinion](https://github.com/bevy-coven/bevy_society/raw/main/docs/media/opinions.gif) **Opinions** — one bar per villager on the honesty topic, green above the midpoint and red below, length by strength, all drawn from a fixed origin so a near-neutral opinion is still legible. |
-| ![Needs](https://github.com/bevy-coven/bevy_society/raw/main/docs/media/needs.gif) **Needs** — a full green halo is a fed villager, a small red one is hungry. | ![Ties](https://github.com/bevy-coven/bevy_society/raw/main/docs/media/ties.gif) **Relationships** — the tie graph alone: green friendship, red rivalry, brightness by familiarity, and only for pairs already familiar. Every line in this clip is green — the village has no rivalry yet. |
-| ![Factions](https://github.com/bevy-coven/bevy_society/raw/main/docs/media/factions.gif) **Factions** — orange millers, green weavers, violet watch, no ties, so the group structure is the only thing on screen. | ![Goods](https://github.com/bevy-coven/bevy_society/raw/main/docs/media/goods.gif) **Goods** — a gold ring is a villager holding bread, sized by how much; a small dark one holds none; a white line is a loaf being shared. The recording opens with every other villager holding four loaves (the village's own stores sat near zero when this was recorded, so a clip from the settled state had nothing to show; they no longer do — a 24-villager village holds about five loaves a head by its seventh game-day, and from this release every person starts with a loaf), and the plate reads `0 loaves shared · 12 hold bread` on the first frame and `5 loaves shared · 17 hold bread` on the last. The hero clip above is the same run with every overlay on. |
-
-`docs/DEMOS.md` is the recipe: the scene each clip is recorded from, the camera, the encode, and what a visual review has caught in each rebuild.
-
-## What you get
-
-- **People with a mind** — Big Five personalities, moods on a pleasure/arousal/dominance axis, an OCC emotion set, needs that decay, and memories that fade. [personality-and-mood](https://github.com/bevy-coven/bevy_society/blob/main/docs/research/personality-and-mood.md), [memory](https://github.com/bevy-coven/bevy_society/blob/main/docs/research/memory.md) Each person can **keep their own hours**: a `Chronotype` is how far their body clock runs behind the village's, `Input::BodyHour` reads it, and a sleeping person is out of everyone else's reach. Measured on the 24-person village over 17 game-days, four seeds: 60-64 % of the sleeps used to begin in one clock hour and 7-9 % of all exchanges were aimed at somebody asleep; with a population of lark and owl offsets the busiest hour holds 19-27 % of them and under 0.1 % of exchanges find a sleeper. A person with no offset keeps the village's own clock. [chronotype](https://github.com/bevy-coven/bevy_society/blob/main/docs/research/chronotype.md)
-- **Daily life and trades** — utility-AI decisions over tagged places and other people, with travel, arrival, durations and need satisfaction. A **task is not a skill**: an activity can declare a `profession`, and a `Skill("craft")` consideration reads the trait that capability comes from, so who does the skilled work is decided by comparative advantage rather than by assignment. Nothing is gated — an unskilled villager can still take the task, at a lower score. [needs-and-utility](https://github.com/bevy-coven/bevy_society/blob/main/docs/research/needs-and-utility.md) A **full place costs** instead of vanishing: a place with no free seat keeps `1 - Tuning::crowding_penalty` of its score, so a villager with an alternative goes elsewhere and one with none still arrives, while `capacity: 0` is closed. Measured, this holds a village's rival density at 2.9-6.1% of pairs as it grows from 24 to 48 people in a 30-seat village, where the old veto took it to 23% and lost the working day. [capacity](https://github.com/bevy-coven/bevy_society/blob/main/docs/loop/runs/2026-10-25-10/eval.md)
-- **A week** — `Input::Week` and a `Days(from, to)` curve are the day-of-week analogue of `Hour` and `Hours` (with `SocietySettings::start_weekday` and `ctx.weekday()`), so a pack can shut the workshop on rest days without a script. The starter pack has no week; `examples/assets/weekly.society.ron` is an opt-in overlay with two rest days. **Shutting `work` alone damages the village** (the freed hours go to company: friend ties 51 → 25 and rival ties 44 → 80 at seed 7), so the overlay adds a `laze` that takes two-hour spells of nothing; measured over seven runs, a rest day then has 7.5 approaches a villager against 10.7 on a workday, 3.6 different people met against 4.7, and 44 % of approaches to a friend against 37 % (Sekara et al. 2016: weekends are spent with a few selected friends), at the price of a `social` need 0.05 lower. [weekly-rhythm](https://github.com/bevy-coven/bevy_society/blob/main/docs/research/weekly-rhythm.md)
-- **Relationships** — directed ties carrying affinity, trust, respect and familiarity, with power-law forgetting, structural balance, a Dunbar-style cap and friend/rival labels. Affinity is **clamped to `±Tuning::affinity_ceiling` (0.35)** and a `Friend` needs trust as well, so a large town with daily contact keeps friendship scarce: measured, 60 people over 30 game-days reach 155 friend ties of 3 540 ordered pairs (**4.4%**). A person who has been **turned down can be made to not ask the same person again**: set `Tuning::rebuff_memory_hours` to `Some(12.0)` (off by default; Maner et al. 2007, excluded people do not seek reconnection with those who excluded them) and, measured on the 24-person village and towns of 40 and 60, a refused approach that was followed within the hour by another to the same person 24-29 % of the time is followed by one 0.3-1.1 % of the time, and people approach 5.2-6.3 different people a day where they approached 4.1-5.1. [relationships](https://github.com/bevy-coven/bevy_society/blob/main/docs/research/relationships.md), [rebuff](https://github.com/bevy-coven/bevy_society/blob/main/docs/research/rebuff.md), [the measurement](https://github.com/bevy-coven/bevy_society/blob/main/docs/loop/needs-decision/friendship-has-no-diminishing-return.md)
-- **Opinions** — bounded-confidence influence, stubborn anchors and conformity to a clear group majority. [opinion-dynamics](https://github.com/bevy-coven/bevy_society/blob/main/docs/research/opinion-dynamics.md)
-- **Rumors and reputation** — gossip with the Daley–Kendall stifling rule, belief scaled by trust, witnesses who judge deeds and hold grudges. [rumor-and-reputation](https://github.com/bevy-coven/bevy_society/blob/main/docs/research/rumor-and-reputation.md)
-- **Factions and status** — in-group affinity, standing as conferred respect, contests and intergroup contact. [groups-and-status](https://github.com/bevy-coven/bevy_society/blob/main/docs/research/groups-and-status.md)
-- **Crowd fields** — a stigmergy grid of presence and commotion per cell, readable as a `Field(Crowd)` consideration and walkable as a `Gradient` target, so an activity can be "join the crowd" without naming a place. [needs-and-utility](https://github.com/bevy-coven/bevy_society/blob/main/docs/research/needs-and-utility.md)
-- **Scripts** — Rhai triggers over a per-tick snapshot, with a `ctx` reader and an `fx` writer that cannot see its own writes. [scripting](https://github.com/bevy-coven/bevy_society/blob/main/docs/guide/scripting.md)
-- **Dialogue** — barks and conversations through `bevy_speech_bubbles`. [dialogue](https://github.com/bevy-coven/bevy_society/blob/main/docs/guide/dialogue.md)
-- **Decision traces** — why a person chose what they did: every option weighed, its score, and how far the chosen one fell short of the best. Insert a `DecisionTrace` and read it; recording changes no outcome. [decisions](https://github.com/bevy-coven/bevy_society/blob/main/docs/guide/decisions.md)
-- **Obstacles** — solid buildings that walkers path around, as hard walls in the ORCA solver, with a resolver that pushes anyone who lands inside back out. [getting started](https://github.com/bevy-coven/bevy_society/blob/main/docs/guide/getting-started.md#solid-buildings-obstacle)
-- **A basic economy** — goods as quantities rather than currency, a per-person store, `produces`/`consumes` on a task, a price per good **read from how full the village's stores are, per head** — empty is double, full is half, the shape the corpus's own game-economy model uses ([economics](https://github.com/bevy-coven/bevy_society/blob/main/docs/research/economics.md)) and readable from a script as `ctx.price("bread")`, plus **goods that change hands**: an interaction can `actor_gives` / `target_gives` a good, and a `Surplus` consideration scores a transfer by the joint surplus of two stores. In the village that is sharing — measured over nine seeds, it cuts the spread of bread across the village by 38% — and the engine does a two-way swap too. Nothing gates: an empty store never stops anyone eating — but it stops the meal **feeding** them, because a task's `satisfies` is paid in proportion to what its `consumes` actually found, so a meal from an empty larder costs the walk and restores nothing while half a loaf feeds half. Measured, that closed a village fed by arithmetic: 4.80 loaves baked a game-day against 21.06 meals, ~77% of them out of an empty shelf. A person starts holding each good's authored `initial` (the starter pack gives one loaf), so a fresh village is fed at its first dawn; with every larder empty, 39% of its second game-day's villager-ticks were spent with `food` below 0.05. A consideration can read the actor's own shelf (`Stock("bread")`), so a pack can make production answer to the larder instead of the clock: a hungry household with nothing bakes, one holding bread does not (`examples/assets/provisioning.society.ron`; on the evidence town of sixty it is the difference between a store that holds and one that runs out). [economics](https://github.com/bevy-coven/bevy_society/blob/main/docs/research/economics.md) · [authoring](https://github.com/bevy-coven/bevy_society/blob/main/docs/guide/authoring.md#goods-stores-and-trade)
-- **Persistence** — the whole society captured and restored through `serde`: ties, memories, rumors, the clock, the random stream and every trigger's bookkeeping, keyed by your own ids, so the ticks after a reload are the ticks that would have followed. [persistence](https://github.com/bevy-coven/bevy_society/blob/main/docs/guide/persistence.md)
-
-Every formula traces to a paper; every rate is a named field on `Tuning`; every default either comes from a paper or says it is a design default.
-
-## Install
-
-```toml
-[dependencies]
-bevy_society = "0.9"
-```
+**Why this crate rather than writing your own villagers:** every model here is one social-psychology or game-AI paper's mechanism with its numbers in the open as named fields on `Tuning`, so a village behaves like one — friendship stays scarce, a rumor crosses the village in game-days rather than hours, a full tavern costs instead of vanishing — and every behaviour is deterministic for a seed, so a bug is reproducible and a save reloads into the society that would have followed.
 
 ## Quick start
 
-This is the crate's own doctest, and `tests/readme.rs` fails if the two ever differ.
+The starter pack supplies the needs, activities, interactions and triggers; spawn a place and some people and the village runs. This block is the crate's own doctest — `tests/readme.rs` fails if the two ever differ.
 
 ```rust,no_run
 use bevy::prelude::*;
@@ -91,107 +57,43 @@ for _ in 0..600 {
 assert!(app.world().resource::<SocietyClock>().tick > 0);
 ```
 
-Run it headlessly with `cargo run --example quickstart`. The example sets a short 16-second game-day, so 600 updates are enough for the village to start talking; on this code it reports `229 social exchanges, 112 accepted`.
+`cargo run --example quickstart` runs exactly this headlessly and reports `229 social exchanges, 112 accepted` on this code.
 
-The full village, with balloons and the debug server:
+## Try it
 
-```
+```sh
 cargo run --example village -- /System/Library/Fonts/Supplemental/Arial.ttf
 ```
 
-Font paths: macOS `/System/Library/Fonts/Supplemental/Arial.ttf`; Linux `/usr/share/fonts/liberation/LiberationSans-Regular.ttf`; Windows `C:\Windows\Fonts\arial.ttf`.
+The full village — the scene the clip above is recorded from — with speech balloons and a debug server. Font paths: macOS `/System/Library/Fonts/Supplemental/Arial.ttf`, Linux `/usr/share/fonts/liberation/LiberationSans-Regular.ttf`, Windows `C:\Windows\Fonts\arial.ttf`.
+
+## What you can do
+
+- **Give people a mind.** Big Five personalities, moods on a pleasure/arousal/dominance (PAD) axis, an OCC emotion set, needs that decay and memories that fade, and a `Chronotype`, so a lark and an owl keep their own hours in one village. [features](docs/guide/features.md#people-with-a-mind)
+- **Let them decide their own day.** Utility-AI scoring over tagged places and other people, with travel, arrival, durations and per-tier ranks; an activity can declare an urgency that wins its tier while a need is low. [features](docs/guide/features.md#daily-life-and-trades)
+- **Watch relationships form and break.** Directed ties with affinity, trust, respect and familiarity, a Dunbar-style cap (Dunbar's number, the limit on how many people one person keeps up with), friend and rival labels with hysteresis, and rebuff memory, so someone turned down stops asking. [features](docs/guide/features.md#relationships)
+- **Run opinions, rumors, reputation and factions.** Bounded-confidence influence, Daley–Kendall gossip (a teller is stifled when the listener already knows), witnesses who judge deeds and hold grudges, in-group affinity and conferred standing. [features](docs/guide/features.md#opinions-rumors-reputation-and-factions)
+- **Script it in Rhai.** Triggers over a per-tick snapshot, bound to an area, a faction or named people, with a `ctx` reader and an `fx` writer that cannot see its own writes. [scripting](docs/guide/scripting.md)
+- **Give it an economy and a save file.** Goods as quantities with a per-head price, sharing and swapping between people, and `capture`/`restore` of the whole society: ties, memories, rumors, the clock and the random stream. [features](docs/guide/features.md#a-basic-economy) · [persistence](docs/guide/persistence.md)
+- **Drive it from an editor.** `fast_forward`, `preview_forward` (run a day, report what moved, put it back), `test_trigger`, `check_script` and `place_dependents`. [editor](docs/guide/editor.md)
+
+Every formula traces to a paper; every rate is a named field on `Tuning`; every default either comes from a paper or says it is a design default.
+
+## Part of the Coven
+
+`bevy_society` is one crate of [the Bevy Coven](https://github.com/bevy-coven), a family that builds the hand-authored parts of games — levels, set dressing, dialogue, villagers' lives, UI and weather — so they scale under agent use. [Grimoire](https://github.com/bevy-coven/bevy_grimoire) hosts it as an optional cargo feature and edits its settings file live; [the book](https://bevy-coven.github.io/crates/bevy_society.html) shows how.
 
 ## Cargo features
 
 | feature | default | turns on |
 |---|---|---|
 | `dialogue` | yes | `DialoguePlugin`, `TalkTo`, barks and conversations through `bevy_speech_bubbles`. The host adds `SpeechBubblesPlugin` over its own camera. |
-| `steering` | yes | `SteeringPlugin`: `SocialMover` walking under ORCA (`bevy_orca`), and `Obstacle`. |
+| `steering` | yes | `SteeringPlugin`: `SocialMover` walking under ORCA (optimal reciprocal collision avoidance, `bevy_orca`), and `Obstacle`. |
 | `fields` | yes | `SocialFieldPlugin`: crowd presence and commotion grids and per-faction presence grids (`bevy_stigmergy`), the `Field` consideration and the `Gradient` target. |
-| `serde` | no | `SocietySave`, `capture` and `restore`: save and load the whole society. |
+| `serde` | no | `SocietySave`, `capture`, `restore` and `preview_forward`: save, load and preview the whole society. |
 | none (`--no-default-features`) | | the core: mind, daily life, relationships, opinions, rumors, reputation, factions, scripts and `DecisionTrace`. |
 
-## A tour
-
-### People
-
-```rust,ignore
-app.world_mut().spawn((
-    Person,            // brings personality, mood, emotions, needs, signals, ties, opinions, knowledge,
-    Autonomous,        // memories, memberships and status
-    Name::new("Bram"),
-    Home(well),
-    Transform::from_xyz(2.0, 0.0, 0.0),
-));
-```
-
-A player character is a `Person` without `Autonomous`: it does only what the game tells it.
-
-### Needs and daily life
-
-```ron
-(
-    id: "sleep",
-    target: Home,
-    duration_hours: 8.0,
-    rank: 1,
-    considerations: [
-        (input: Hour, curve: Hours(22.0, 6.0)),
-        (input: Need("rest"), curve: Linear(-1.0, 1.0)),
-    ],
-    satisfies: [("rest", 0.15)],
-)
-```
-
-Options are scored by compensated considerations, tiered by `rank`, and drawn by weight. A rank can follow a need: `urgent: Some((need: "food", below: 0.25, rank: 1))` puts an activity in the higher tier while that need is low. The provisioning overlay (`examples/assets/provisioning.society.ron`) uses it on `eat` and `bake`, so a hungry villager eats, or bakes when the shelf is bare, before work, company and play; the starter pack leaves it off (`docs/guide/authoring.md`).
-
-### Relationships
-
-`Ties` holds one directed edge per person with affinity, trust, respect and familiarity. Labels are recomputed each tick and a change writes `TieLabelChanged`. **A label is a latitude, not a line**: entering a category and leaving it are different tests (`Tuning::label_hysteresis` at the low end, `Tuning::friend_band` for a friendship, `Tuning::rival_band` for a rivalry), so a value resting on a bar does not announce a relationship change every time the model nudges it. Measured on `village-evening` at seed 7, a friendship now lasts a median **1.01 game-days** instead of **0.36** (`CHANGELOG.md`, 0.3.0), and a rivalry **2.64** instead of **0.29** — before the rival band a `Rival` was released when its affinity climbed **0.0001** above the bar, so the village made rivalries it could not keep ([the sweep](https://github.com/bevy-coven/bevy_society/blob/main/docs/loop/runs/2026-10-27-02/eval.md)).
-
-### Opinions
-
-An accepted chat pulls both sides' opinions toward each other inside their confidence bounds, and a confident group majority pulls an agreeable person further, one tick at a time.
-
-### Rumors and reputation
-
-```rust,ignore
-app.world_mut().write_message(PlantRumor {
-    origin: watchman,
-    subject: bram,
-    patient: None,
-    deed: "steal".to_owned(),
-    truth: false,
-});
-```
-
-Every witness who knows it can pass it on; a listener who already knows it stifles the teller.
-
-### Factions and status
-
-```ron
-(factions: [(id: "millers"), (id: "weavers"), (id: "watch", ingroup_bias: 0.3)])
-```
-
-Two co-members start a tie with in-group affinity, and standing is the respect conferred by everyone who knows a person well enough.
-
-### Triggers and scripting
-
-```ron
-(
-    id: "watch_stops_theft",
-    on: NormViolated("steal"),
-    if: Some("ctx.member(actor, \"watch\")"),
-    then: "fx.bark(actor, \"Stop, thief!\")",
-)
-```
-
-### Dialogue
-
-```rust,ignore
-app.add_plugins(bevy_speech_bubbles::SpeechBubblesPlugin::<MyCamera>::default());
-app.world_mut().write_message(TalkTo { npc: bram, player });
-```
+`SocietySettings` and `SocietyDefs` must be inserted **before** `SocietyPlugins`. With `dialogue` on, `DialoguePlugin` **panics in `finish`** without `bevy_speech_bubbles::SpeechBubblesPlugin::<YourCamera>`: add that first, or `.disable::<DialoguePlugin>()` as the quick start does.
 
 ## Built on
 
@@ -208,38 +110,43 @@ app.world_mut().write_message(TalkTo { npc: bram, player });
 | rand_chacha | names the ChaCha8 generator the stream comes from | <https://github.com/rust-random/rand> |
 | bevy_fairy | the agentic debugger in the village example | <https://github.com/bevy-coven/bevy_fairy> |
 
-## The science
-
-| Module | Key papers | Note |
-|---|---|---|
-| Personality and mood | Mehrabian 1996 · Gebhard 2005 (ALMA) | [note](https://github.com/bevy-coven/bevy_society/blob/main/docs/research/personality-and-mood.md) |
-| Body clocks | Roenneberg et al. 2007 · Fischer et al. 2017 · Wittmann et al. 2006 | [note](https://github.com/bevy-coven/bevy_society/blob/main/docs/research/chronotype.md) |
-| A week | Sekara et al. 2016 · Dodds et al. 2011 | [note](https://github.com/bevy-coven/bevy_society/blob/main/docs/research/weekly-rhythm.md) |
-| Needs and utility | Mark & Dill (Game AI Pro 3 ch. 13) · Dill 2015 | [note](https://github.com/bevy-coven/bevy_society/blob/main/docs/research/needs-and-utility.md) |
-| Relationships | Heider 1946 · Zajonc 1968 · Dunbar 1992 | [note](https://github.com/bevy-coven/bevy_society/blob/main/docs/research/relationships.md) |
-| Rejection and re-approach | Maner et al. 2007 · Downey & Feldman 1996 · Bondü & Richter 2016 | [note](https://github.com/bevy-coven/bevy_society/blob/main/docs/research/rebuff.md) |
-| Opinions | Deffuant et al. 2000 · Friedkin & Johnsen 1990 · Asch 1956 | [note](https://github.com/bevy-coven/bevy_society/blob/main/docs/research/opinion-dynamics.md) |
-| Rumors and reputation | Daley & Kendall 1964 · Nowak & Sigmund 1998 · Ohtsuki & Iwasa 2004 | [note](https://github.com/bevy-coven/bevy_society/blob/main/docs/research/rumor-and-reputation.md) |
-| Factions and status | Tajfel et al. 1971 · Pettigrew & Tropp 2006 · Bonabeau et al. 1995 | [note](https://github.com/bevy-coven/bevy_society/blob/main/docs/research/groups-and-status.md) |
-| Memory | Park et al. 2023 · Anderson & Schooler 1991 | [note](https://github.com/bevy-coven/bevy_society/blob/main/docs/research/memory.md) |
-| Social simulation in games | Game AI Pro chapters · McCoy et al. 2014 | [note](https://github.com/bevy-coven/bevy_society/blob/main/docs/research/social-simulation-games.md) |
-
-The papers were gathered with [home-still](https://github.com/bevy-coven/bevy_society/blob/main/docs/research/corpus/README.md), a local corpus pipeline; `docs/research/README.md` lists a DOI and a corpus id for every mechanism.
-
 ## Bevy compatibility
 
 | bevy_society | Bevy |
 |---|---|
-| 0.1, 0.2, 0.3 | 0.20 |
+| 0.1 to 0.9 | 0.20 |
 
-## Documentation
+## Learn more
 
-[Getting started](https://github.com/bevy-coven/bevy_society/blob/main/docs/guide/getting-started.md) · [Concepts](https://github.com/bevy-coven/bevy_society/blob/main/docs/guide/concepts.md) · [Authoring](https://github.com/bevy-coven/bevy_society/blob/main/docs/guide/authoring.md) · [Scripting](https://github.com/bevy-coven/bevy_society/blob/main/docs/guide/scripting.md) · [Dialogue](https://github.com/bevy-coven/bevy_society/blob/main/docs/guide/dialogue.md) · [Decisions](https://github.com/bevy-coven/bevy_society/blob/main/docs/guide/decisions.md) · [Persistence](https://github.com/bevy-coven/bevy_society/blob/main/docs/guide/persistence.md) · [Research](https://github.com/bevy-coven/bevy_society/blob/main/docs/research/README.md) · [Demos](https://github.com/bevy-coven/bevy_society/blob/main/docs/DEMOS.md)
+- [docs.rs](https://docs.rs/bevy_society) — the API.
+- [The book page](https://bevy-coven.github.io/crates/bevy_society.html) — this material with the full gallery.
+- [`docs/guide/`](docs/guide/README.md) — getting started, concepts, a tour, features, authoring, scripting, dialogue, decisions, persistence, editors.
+- [`examples/`](examples) — `quickstart`, `village`, `capture`, `benchmark`, `absence`, `evidence`.
+- [The gallery](docs/gallery.md) — one clip per feature, and the recipe for each.
+- [`CHANGELOG.md`](CHANGELOG.md) — what changed in each release.
 
-## Contributing
+## The science
 
-Issues and pull requests are welcome. Agents working in this repository should read `AGENTS.md` first: it lists the invariants (determinism, the message rule, the single script-application point) that a change must not break.
+Every model is distilled from a paper held in a local corpus. `docs/research/README.md` maps each source module to its papers and its note, and every note says which constants are design defaults.
 
-## License
+| Module | Key papers | Note |
+|---|---|---|
+| Personality and mood | Mehrabian 1996 · Gebhard 2005 (ALMA) | [note](docs/research/personality-and-mood.md) |
+| Body clocks | Roenneberg et al. 2007 · Fischer et al. 2017 · Wittmann et al. 2006 | [note](docs/research/chronotype.md) |
+| A week | Sekara et al. 2016 · Dodds et al. 2011 | [note](docs/research/weekly-rhythm.md) |
+| Needs and utility | Mark & Dill (Game AI Pro 3 ch. 13) · Dill 2015 | [note](docs/research/needs-and-utility.md) |
+| Relationships | Heider 1946 · Zajonc 1968 · Dunbar 1992 | [note](docs/research/relationships.md) |
+| Rejection and re-approach | Maner et al. 2007 · Downey & Feldman 1996 · Bondü & Richter 2016 | [note](docs/research/rebuff.md) |
+| Opinions | Deffuant et al. 2000 · Friedkin & Johnsen 1990 · Asch 1956 | [note](docs/research/opinion-dynamics.md) |
+| Rumors and reputation | Daley & Kendall 1964 · Nowak & Sigmund 1998 · Ohtsuki & Iwasa 2004 | [note](docs/research/rumor-and-reputation.md) |
+| Factions and status | Tajfel et al. 1971 · Pettigrew & Tropp 2006 · Bonabeau et al. 1995 | [note](docs/research/groups-and-status.md) |
+| Memory | Park et al. 2023 · Anderson & Schooler 1991 | [note](docs/research/memory.md) |
+| Social simulation in games | Game AI Pro chapters · McCoy et al. 2014 | [note](docs/research/social-simulation-games.md) |
+
+The papers were gathered with [home-still](docs/research/corpus/README.md), a local corpus pipeline; `docs/research/README.md` lists a DOI and a corpus id for every mechanism.
+
+## Who and licence
+
+Maintained by [@Ladvien](https://github.com/Ladvien). Bug reports and questions go to [the issues](https://github.com/bevy-coven/bevy_society/issues); contributions follow the org's [`CONTRIBUTING.md`](https://github.com/bevy-coven/.github/blob/main/CONTRIBUTING.md), and agents working in this repository should read [`AGENTS.md`](AGENTS.md) first (it lists the invariants a change must not break).
 
 MIT OR Apache-2.0, at your option.

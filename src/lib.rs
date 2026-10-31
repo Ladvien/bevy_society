@@ -222,3 +222,12 @@ pub use script::{
 #[cfg(feature = "steering")]
 pub use steering::{Obstacle, SocialMover, SocialVelocity, SteeringPlugin};
 pub use trace::{Decision, DecisionTrace, ScoredOption};
+
+/// **The README's code blocks are compiled by `cargo test --doc`.**
+///
+/// The quick start is already the crate's own doctest above, and `tests/readme.rs` asserts the two are
+/// the same text; this makes the rest of the README compile too, so a block added to it later cannot
+/// rot. A block that needs a window is marked `no_run`, never `ignore`.
+#[cfg(doctest)]
+#[doc = include_str!("../README.md")]
+struct ReadmeDoctests;

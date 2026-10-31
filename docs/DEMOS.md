@@ -7,25 +7,25 @@
 
 | file | `--scene` | what it shows | burned-in caption (the argument to `tools/gif.py`) |
 |---|---|---|---|
-| `village.gif` | `village` | the whole thing: rumor halos, tie lines, counters | `a rumor spreads · ties form · relationships change` |
+| `village.gif` | `village` | the whole thing: rumor halos, tie lines, counters. Also the still `village.png`, frame 120 of the same run | `a rumor spreads · ties form · relationships change` |
 | `mood.gif` | `mood` | mood halos — green pleased, amber neutral, red displeased; size is arousal | `mood: green pleased · amber neutral · red displeased · ring size = arousal` |
 | `opinions.gif` | `opinions` | one opinion bar per villager on **honesty**: green high, red low | `opinion on honesty: green above the middle, red below` |
 | `needs.gif` | `needs` | **hunger** halos — big green is fed, small red is hungry | `food: a full green ring is fed, a small red one is hungry` |
-| `ties.gif` | `ties` | the tie graph alone: green friendship lines | `ties: green is friendship · the village forms them faster than it falls out` |
+| `ties.gif` | `ties` | the tie graph alone: green friendship lines, and the run's one red rivalry line | `ties: green is friendship · red is rivalry` |
 | `factions.gif` | `factions` | the three faction colours, no lines | `faction colour · orange millers, green weavers, violet watch` |
 | `goods.gif` | `goods` | a ring per villager sized by their bread (gold holds some, small dark holds none), a white line for each loaf shared, and a HUD line counting loaves shared and who holds bread | `bread: gold ring = loaves held, dark = none · a white line is a loaf shared` |
 
-All seven are the same village, same seed and the same run, **except `goods`**: `{"frames": 240, "rumor_reach": 0.080,
-"friends": 24, "rivals": 0, "barks": 637}`, recorded 2026-10-25 against the pack that has `share` and a three-loaf
-`bake`. Only what is drawn differs, which is the point — a feature clip is a different *view* of one simulation,
-not a different simulation.
+All seven were re-recorded on **2026-10-31** against 0.9.0, and all seven are the same village, same seed and the
+same run, **except `goods`**: `{"frames": 240, "rumor_reach": 0.080, "friends": 27, "rivals": 1, "barks": 592}`.
+Only what is drawn differs, which is the point — a feature clip is a different *view* of one simulation, not a
+different simulation. `docs/media/README.md` lists each file with its date and version.
 
 **`goods` also opens with bread handed out** (`stock_bakers` in `examples/capture.rs`): every other villager holds
 four loaves at frame 0. The settled village's stores sit near zero — a loaf is eaten as fast as it is baked, 0.05 a
 person measured over nine seeds — so a clip taken from the settled state would show 24 dark rings and nothing to
 see. The model, its rates and every number printed above are untouched; only the recording's starting state
-differs, and the README says so. `{"frames": 240, "rumor_reach": 0.040, "friends": 23, "rivals": 0, "barks": 613}`.
-In its six game-hours **5 loaves are shared** and the people holding bread go from 12 to 17.
+differs, and the gallery says so. `{"frames": 240, "rumor_reach": 0.080, "friends": 31, "rivals": 1, "barks": 561}`.
+In its six game-hours **8 loaves are shared** and the people holding bread go from 12 to 20.
 
 ### Which teller, and what the rumor line means
 
@@ -149,14 +149,18 @@ a demo look better: the defaults are the model.
 ### Current result
 
 ```
-{"frames": 240, "rumor_reach": 0.080, "friends": 24, "rivals": 0, "barks": 637}
-{"frames": 480, "rumor_reach": 0.080, "friends": 23, "rivals": 0, "barks": 677}
+{"frames": 240, "rumor_reach": 0.080, "friends": 27, "rivals": 1, "barks": 592}   village, 2026-10-31
+{"frames": 240, "rumor_reach": 0.080, "friends": 31, "rivals": 1, "barks": 561}   goods, 2026-10-31
+{"frames": 240, "rumor_reach": 0.080, "friends": 24, "rivals": 0, "barks": 637}   village, 2026-10-25
+{"frames": 480, "rumor_reach": 0.080, "friends": 23, "rivals": 0, "barks": 677}   village, twice as long, 2026-10-25
 ```
 
-The first line is the clips of 2026-10-25, the second the same village recorded twice as long. Three of the four
-thresholds are met (`rumor_reach ≥ 0.08`, `barks ≥ 6`, `friends ≥ 3`); **`rivals ≥ 1` is not**, and has not been
-since the clips were rebuilt: a rivalry takes game-days to form and the clip is six game-hours, so no clip draws
-one and the README says so. **The rumor threshold is not what it was**: an earlier documentation claimed
+**All four thresholds are now met** (`rumor_reach ≥ 0.08`, `barks ≥ 6`, `friends ≥ 3`, `rivals ≥ 1`) on the
+2026-10-31 recording: the plate reads `Rivalries 1` from its first frame to its last, and the `ties` clip draws
+that red line among its green ones. The `rivals` threshold is new behaviour, not a new threshold: the 2026-10-25
+clips predate `Tuning::forgiveness` (0.7.0), which is what lets a rivalry survive the 3 800 settle steps.
+
+**The rumor threshold is not what it was**: an earlier documentation claimed
 `rumor_reach` of 0.520 and 0.360 against a threshold of 0.5, but that number counted the **newest alive rumor**,
 which is whichever deed the village last made a story of — the settle steps create dozens — and not the one the
 clip plants. Measured against the planted rumor the reach is **2 of 24 at 240 frames and still 2 at 480**. It is

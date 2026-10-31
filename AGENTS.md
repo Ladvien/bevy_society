@@ -2,6 +2,8 @@
 
 A Bevy 0.20 library that simulates societies of NPCs: personalities, moods, needs, memories, relationships, opinions, rumors, reputation, factions and status; utility-AI daily lives; Rhai-scripted triggers; and dialogue and barks through `bevy_speech_bubbles`. Every model is distilled from social-psychology and game-AI papers held in the home-still corpus, and every behaviour is deterministic for a given seed.
 
+README and docs follow https://github.com/bevy-coven/.github/blob/main/DOCUMENTATION.md; a feature is not done until its README line and, if visible, its GIF exist.
+
 ## Force pushes and deletions need the user's express permission
 
 Never do any of the following unless the user has approved that specific action, by name, in the current conversation. A loop brief, a skill, a standing instruction such as "commit, push, PR, merge", or an earlier session's approval is not permission.
