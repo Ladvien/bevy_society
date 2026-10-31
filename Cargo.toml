@@ -5,7 +5,7 @@ edition = "2024"
 rust-version = "1.97.1"
 description = "Living societies for Bevy: personalities, moods, needs, memories, relationships, opinions, rumors, reputation and factions; utility-AI daily lives; Rhai triggers; dialogue through bevy_speech_bubbles."
 license = "MIT OR Apache-2.0"
-repository = "https://github.com/Ladvien/bevy_society"
+repository = "https://github.com/bevy-coven/bevy_society"
 keywords = ["bevy", "gamedev", "ai", "simulation", "npc"]
 categories = ["game-development", "simulation"]
 # Everything a consumer needs and nothing else. `docs/` is 623 MB of research notes and GIFs and never ships.
@@ -33,10 +33,10 @@ rand_chacha = "0.10"   # https://github.com/rust-random/rand — names ChaCha8Rn
 # The ladvien dependencies are crates.io versions rather than git revs, so a consumer needs no
 # `[patch]` and the whole family can be published. They move together: `bevy_orca` and
 # `bevy_stigmergy` are 0.2, which is the interface release that added `Crowd` and `CellFrame`.
-bevy_emerge_rng = "0.1"                                                                  # https://github.com/Ladvien/bevy_emerge — the seeded ChaCha8 stream and DetRng draws
-bevy_orca = { version = "0.2", optional = true }                                          # https://github.com/Ladvien/bevy_orca — ORCA reciprocal collision avoidance for walking persons (steering feature)
-bevy_stigmergy = { version = "0.2", optional = true, features = ["reflect"] }             # https://github.com/Ladvien/bevy_stigmergy — per-cell presence and commotion fields (fields feature)
-bevy_speech_bubbles = { version = "0.2", optional = true }                                # https://github.com/Ladvien/bevy_speech_bubbles — barks and conversations (dialogue feature)
+bevy_emerge_rng = "0.1"                                                                  # https://github.com/bevy-coven/bevy_grimoire — the seeded ChaCha8 stream and DetRng draws
+bevy_orca = { version = "0.2", optional = true }                                          # https://github.com/bevy-coven/bevy_orca — ORCA reciprocal collision avoidance for walking persons (steering feature)
+bevy_stigmergy = { version = "0.2", optional = true, features = ["reflect"] }             # https://github.com/bevy-coven/bevy_stigmergy — per-cell presence and commotion fields (fields feature)
+bevy_speech_bubbles = { version = "0.2", optional = true }                                # https://github.com/bevy-coven/bevy_speech_bubbles — barks and conversations (dialogue feature)
 
 [[example]]
 name = "benchmark"
@@ -65,7 +65,7 @@ required-features = ["dialogue"]
 
 [dev-dependencies]
 bevy = { version = "0.20.0" }                                                            # full umbrella, examples/tests only
-bevy_fairy = { git = "https://github.com/Ladvien/bevy_fairy", rev = "04d120e729affdac4cf592b8894c71ff1b8e031e", default-features = false, features = ["plugin"] }  # https://github.com/Ladvien/bevy_fairy — the agentic debugger in the village example
+bevy_fairy = { git = "https://github.com/bevy-coven/bevy_fairy", rev = "04d120e729affdac4cf592b8894c71ff1b8e031e", default-features = false, features = ["plugin"] }  # https://github.com/bevy-coven/bevy_fairy — the agentic debugger in the village example
 serde_json = "1"                                                                         # https://github.com/serde-rs/json — the example's debug-command payloads
 
 [lints.rust]

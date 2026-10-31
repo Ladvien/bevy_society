@@ -14,7 +14,7 @@ When one of these seems necessary, stop and ask. Name the exact command, what it
 
 ## Source of truth
 
-This repository, [`Ladvien/bevy_society`](https://github.com/Ladvien/bevy_society), is canonical. MIT OR Apache-2.0. Its ladvien dependencies (`bevy_speech_bubbles`, `bevy_stigmergy`, `bevy_orca`, `bevy_emerge_rng`, and `bevy_fairy` in the examples) are consumed from **crates.io by version**, except `bevy_fairy`, which stays a git dev-dependency and is stripped by `cargo publish`. A missing feature or a bug in one of them becomes an issue (`enhancement` or `bug`) or a PR on that repository, never a patch or a copy here: search its open issues first and add to a matching one. Bump a version here in its own commit, and move the whole family together.
+This repository, [`bevy-coven/bevy_society`](https://github.com/bevy-coven/bevy_society), is canonical. MIT OR Apache-2.0. Its ladvien dependencies (`bevy_speech_bubbles`, `bevy_stigmergy`, `bevy_orca`, `bevy_emerge_rng`, and `bevy_fairy` in the examples) are consumed from **crates.io by version**, except `bevy_fairy`, which stays a git dev-dependency and is stripped by `cargo publish`. A missing feature or a bug in one of them becomes an issue (`enhancement` or `bug`) or a PR on that repository, never a patch or a copy here: search its open issues first and add to a matching one. Bump a version here in its own commit, and move the whole family together.
 
 ## Version pin
 

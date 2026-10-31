@@ -92,7 +92,7 @@ people; it used to produce no target at all, and that was measured to be a large
 7.8% to 20.1% of pairs, because the same hostile events landed on a contact graph made dense by unemployment. If
 you want a crowd to be *unattractive* rather than impossible, say so in a consideration — `Place(tag)` already
 picks the nearest place, so a host can price a busy one itself. The measurement is
-[`runs/2026-10-25-10`](https://github.com/Ladvien/bevy_society/blob/main/docs/loop/runs/2026-10-25-10/eval.md).
+[`runs/2026-10-25-10`](https://github.com/bevy-coven/bevy_society/blob/main/docs/loop/runs/2026-10-25-10/eval.md).
 
 ### Solid buildings: `Obstacle`
 
