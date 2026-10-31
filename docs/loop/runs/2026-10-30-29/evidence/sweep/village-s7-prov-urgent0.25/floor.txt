@@ -1,0 +1,13 @@
+person-ticks from game-day 2: 1536000
+at the floor on food (< 0.05): 41649 (2.7%)
+
+what the person at the floor was doing, and whether the household held a meal (0.25 of the first good):
+    24962   59.9%  travelling:eat  [holds a meal]
+    10897   26.2%  sleep  [holds a meal]
+     3190    7.7%  travelling:bake  [holds a meal]
+     1887    4.5%  bake  [holds a meal]
+      518    1.2%  eat  [holds a meal]
+      172    0.4%  craft  [holds a meal]
+       23    0.1%  travelling:sleep  [holds a meal]
+
+spells of hunger (food under 0.35 until back over it), game-hours: 383 finished, mean 6.75, median 6.42, p90 10.53, max 23.81
