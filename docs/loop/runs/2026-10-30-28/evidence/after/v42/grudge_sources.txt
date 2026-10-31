@@ -1,0 +1,13 @@
+snubs started: 517
+    21    4.1%  interaction 0 initiated refused
+     6    1.2%  interaction 0 received refused
+    31    6.0%  interaction 1 initiated refused
+    22    4.3%  interaction 1 received refused
+    54   10.4%  interaction 2 initiated refused
+    27    5.2%  interaction 2 received refused
+    71   13.7%  interaction 3 initiated refused
+   255   49.3%  interaction 3 received accepted
+     6    1.2%  interaction 3 received refused
+     6    1.2%  interaction 4 initiated refused
+     6    1.2%  interaction 4 received refused
+    12    2.3%  rumor
