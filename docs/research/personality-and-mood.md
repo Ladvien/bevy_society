@@ -32,7 +32,7 @@ Each person has five personality traits (`Personality`, the OCEAN dimensions in 
 
 - Mood-dependent appraisal: emotions are appraised from events, not from the current mood.
 - Individual differences in contagion beyond the contact count and weight.
-- Physiology: no stress, hormones or circadian effects.
+- Physiology: no stress or hormones. Circadian timing is a separate model, a per-person body-clock offset ([chronotype.md](chronotype.md)); there is no light exposure, free-running drift or sleep-pressure model.
 - Cultural display rules; van Kleef & Côté discuss them, the crate does not model them.
 - Long-term mood disorders or trait change over time; traits are fixed per person.
 
