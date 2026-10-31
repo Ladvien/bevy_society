@@ -1,0 +1,8 @@
+# tick 69165: someone chose share (1.000), 0% below wander (1.000)
+
+ 1.000  wander
+ 1.000  share   <- chosen
+ 0.999  compliment
+ 0.643  gossip
+ 0.578  chat
+ 0.557  play
