@@ -1,0 +1,8 @@
+# tick 68976: someone chose work (0.400), 60% below wander (1.000)
+
+ 1.000  wander
+ 0.995  compliment
+ 0.642  gossip
+ 0.400  work   <- chosen
+ 0.370  snub
+ 0.250  craft

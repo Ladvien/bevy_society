@@ -568,12 +568,20 @@ pub struct Tuning {
     /// toward new sources of affiliation (Maner, DeWall, Baumeister & Schaller 2007, DOI
     /// 10.1037/0022-3514.92.1.42); the response to perceived rejection is withdrawal (Downey & Feldman 1996,
     /// DOI 10.1037/0022-3514.70.6.1327). The papers give the direction, not an interval: the number of hours is
-    /// a **design default, chosen by measurement** (`docs/research/rebuff.md`). The memory is written when the
-    /// target's acceptance draw says no (a `requires` rule refusing it writes nothing), is dropped when it
-    /// expires, and does not touch the acceptance model, `rejection_affinity_penalty` or any tie. A *harmful*
-    /// approach is not covered: hostility after a rejection is its own response (Bondü & Richter 2016, DOI
-    /// 10.3389/fpsyg.2016.00795) and is held by [`retaliation_refractory_hours`](Self::retaliation_refractory_hours).
-    /// A host's `Interact` is never refused by it. `None` turns it off and is exactly the old curve. Saved.
+    /// a **design default, chosen by measurement**, `Some(12.0)` (a waking day: someone refused at midday is asked
+    /// again the next morning, where 24 hours would hold them out until the same hour tomorrow and leave no retry
+    /// within the day at all, 1.8% at seed 7). Measured over 17 game-days at 24 people (four seeds) the share of
+    /// refused approaches followed within an hour by another to the same person (not an insult) fell 24-29% →
+    /// 0.3-1.1%, and within a day 44-50% →
+    /// 18-20%; the people a person approaches in a day rose 4.1-4.4 → 5.2-5.4 (`docs/research/rebuff.md`). The
+    /// refused share of all approaches did not move (35-37%).
+    ///
+    /// The memory is written when the target's acceptance draw says no (a `requires` rule refusing it writes
+    /// nothing), is dropped when it expires, and does not touch the acceptance model,
+    /// `rejection_affinity_penalty` or any tie. A *harmful* approach is not covered: hostility after a rejection
+    /// is its own response (Bondü & Richter 2016, DOI 10.3389/fpsyg.2016.00795) and is held by
+    /// [`retaliation_refractory_hours`](Self::retaliation_refractory_hours). A host's `Interact` is never refused
+    /// by it. `None` turns it off and is exactly the old curve. Saved.
     pub rebuff_memory_hours: Option<f32>,
     /// How much faster a **grievance fades toward someone its holder still trusts**: `ctx.grudge(a, b)` reads
     /// each of `a`'s bad memories about `b` at its age times `1 + forgiveness · trust(a → b)`
@@ -760,7 +768,10 @@ impl Default for Tuning {
             stall_epsilon: 0.25,
             failed_place_memory_hours: None,
             retaliation_refractory_hours: Some(6.0),
-            rebuff_memory_hours: None,
+            // **Design default by measurement** (`docs/research/rebuff.md`): re-approaching a refuser within an hour
+            // 24-29% -> under 1.2%, within 24 h 44-50% -> 18-20% at 12 h; mechanism Maner et al. 2007, DOI
+            // 10.1037/0022-3514.92.1.42. See the field's doc.
+            rebuff_memory_hours: Some(12.0),
             // Design default by measurement; mechanism McCullough et al. 2010 (DOI 10.1037/a0019349) and
             // Strelan, Karremans & Krieg 2017 (DOI 10.1111/bjso.12173). See the field's doc.
             forgiveness: 12.0,
