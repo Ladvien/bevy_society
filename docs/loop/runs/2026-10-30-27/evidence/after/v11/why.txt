@@ -1,0 +1,8 @@
+# tick 68992: someone chose work (1.000), the best option
+
+ 1.000  work   <- chosen
+ 1.000  wander
+ 0.999  compliment
+ 0.740  eat
+ 0.663  snub
+ 0.643  gossip
