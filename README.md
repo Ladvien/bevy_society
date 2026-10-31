@@ -4,9 +4,9 @@
 
 Give your Bevy world a living society: villagers who remember, gossip, take sides, fall out and make up, and whose days you can script.
 
-[![crates.io](https://img.shields.io/crates/v/bevy_society.svg)](https://crates.io/crates/bevy_society) [![docs.rs](https://img.shields.io/docsrs/bevy_society)](https://docs.rs/bevy_society) [![CI](https://github.com/bevy-coven/bevy_society/actions/workflows/ci.yml/badge.svg)](https://github.com/bevy-coven/bevy_society/actions/workflows/ci.yml) [![Bevy 0.20](https://img.shields.io/badge/bevy-0.20-purple.svg)](https://bevyengine.org) [![license](https://img.shields.io/badge/license-MIT%20OR%20Apache--2.0-blue.svg)](LICENSE-MIT)
+[![crates.io](https://img.shields.io/crates/v/bevy_society.svg)](https://crates.io/crates/bevy_society) [![docs.rs](https://img.shields.io/docsrs/bevy_society)](https://docs.rs/bevy_society) [![CI](https://github.com/bevy-coven/bevy_society/actions/workflows/ci.yml/badge.svg)](https://github.com/bevy-coven/bevy_society/actions/workflows/ci.yml) [![Bevy 0.20](https://img.shields.io/badge/bevy-0.20-purple.svg)](https://bevyengine.org) [![license](https://img.shields.io/badge/license-MIT%20OR%20Apache--2.0-blue.svg)](https://github.com/bevy-coven/bevy_society/blob/main/LICENSE-MIT)
 
-![A rumor spreads through a village: tie lines turn green as friendships form, a red line marks the one rivalry, and a magenta ring marks who knows the rumor](docs/media/village.gif)
+![A rumor spreads through a village: tie lines turn green as friendships form, a red line marks the one rivalry, and a magenta ring marks who knows the rumor](https://raw.githubusercontent.com/bevy-coven/bevy_society/main/docs/media/village.gif)
 
 *`cargo run --release --example capture -- --scene village`: one afternoon in a village of twenty-four people. A weaver tells the rumor that Bram stole bread, ties form and thicken, and the plate in the corner counts friendships and rivalries.*
 
@@ -69,13 +69,13 @@ The full village — the scene the clip above is recorded from — with speech b
 
 ## What you can do
 
-- **Give people a mind.** Big Five personalities, moods on a pleasure/arousal/dominance (PAD) axis, an OCC emotion set, needs that decay and memories that fade, and a `Chronotype`, so a lark and an owl keep their own hours in one village. [features](docs/guide/features.md#people-with-a-mind)
-- **Let them decide their own day.** Utility-AI scoring over tagged places and other people, with travel, arrival, durations and per-tier ranks; an activity can declare an urgency that wins its tier while a need is low. [features](docs/guide/features.md#daily-life-and-trades)
-- **Watch relationships form and break.** Directed ties with affinity, trust, respect and familiarity, a Dunbar-style cap (Dunbar's number, the limit on how many people one person keeps up with), friend and rival labels with hysteresis, and rebuff memory, so someone turned down stops asking. [features](docs/guide/features.md#relationships)
-- **Run opinions, rumors, reputation and factions.** Bounded-confidence influence, Daley–Kendall gossip (a teller is stifled when the listener already knows), witnesses who judge deeds and hold grudges, in-group affinity and conferred standing. [features](docs/guide/features.md#opinions-rumors-reputation-and-factions)
-- **Script it in Rhai.** Triggers over a per-tick snapshot, bound to an area, a faction or named people, with a `ctx` reader and an `fx` writer that cannot see its own writes. [scripting](docs/guide/scripting.md)
-- **Give it an economy and a save file.** Goods as quantities with a per-head price, sharing and swapping between people, and `capture`/`restore` of the whole society: ties, memories, rumors, the clock and the random stream. [features](docs/guide/features.md#a-basic-economy) · [persistence](docs/guide/persistence.md)
-- **Drive it from an editor.** `fast_forward`, `preview_forward` (run a day, report what moved, put it back), `test_trigger`, `check_script` and `place_dependents`. [editor](docs/guide/editor.md)
+- **Give people a mind.** Big Five personalities, moods on a pleasure/arousal/dominance (PAD) axis, an OCC emotion set, needs that decay and memories that fade, and a `Chronotype`, so a lark and an owl keep their own hours in one village. [features](https://github.com/bevy-coven/bevy_society/blob/main/docs/guide/features.md#people-with-a-mind)
+- **Let them decide their own day.** Utility-AI scoring over tagged places and other people, with travel, arrival, durations and per-tier ranks; an activity can declare an urgency that wins its tier while a need is low. [features](https://github.com/bevy-coven/bevy_society/blob/main/docs/guide/features.md#daily-life-and-trades)
+- **Watch relationships form and break.** Directed ties with affinity, trust, respect and familiarity, a Dunbar-style cap (Dunbar's number, the limit on how many people one person keeps up with), friend and rival labels with hysteresis, and rebuff memory, so someone turned down stops asking. [features](https://github.com/bevy-coven/bevy_society/blob/main/docs/guide/features.md#relationships)
+- **Run opinions, rumors, reputation and factions.** Bounded-confidence influence, Daley–Kendall gossip (a teller is stifled when the listener already knows), witnesses who judge deeds and hold grudges, in-group affinity and conferred standing. [features](https://github.com/bevy-coven/bevy_society/blob/main/docs/guide/features.md#opinions-rumors-reputation-and-factions)
+- **Script it in Rhai.** Triggers over a per-tick snapshot, bound to an area, a faction or named people, with a `ctx` reader and an `fx` writer that cannot see its own writes. [scripting](https://github.com/bevy-coven/bevy_society/blob/main/docs/guide/scripting.md)
+- **Give it an economy and a save file.** Goods as quantities with a per-head price, sharing and swapping between people, and `capture`/`restore` of the whole society: ties, memories, rumors, the clock and the random stream. [features](https://github.com/bevy-coven/bevy_society/blob/main/docs/guide/features.md#a-basic-economy) · [persistence](https://github.com/bevy-coven/bevy_society/blob/main/docs/guide/persistence.md)
+- **Drive it from an editor.** `fast_forward`, `preview_forward` (run a day, report what moved, put it back), `test_trigger`, `check_script` and `place_dependents`. [editor](https://github.com/bevy-coven/bevy_society/blob/main/docs/guide/editor.md)
 
 Every formula traces to a paper; every rate is a named field on `Tuning`; every default either comes from a paper or says it is a design default.
 
@@ -120,10 +120,10 @@ Every formula traces to a paper; every rate is a named field on `Tuning`; every 
 
 - [docs.rs](https://docs.rs/bevy_society) — the API.
 - [The book page](https://bevy-coven.github.io/crates/bevy_society.html) — this material with the full gallery.
-- [`docs/guide/`](docs/guide/README.md) — getting started, concepts, a tour, features, authoring, scripting, dialogue, decisions, persistence, editors.
-- [`examples/`](examples) — `quickstart`, `village`, `capture`, `benchmark`, `absence`, `evidence`.
-- [The gallery](docs/gallery.md) — one clip per feature, and the recipe for each.
-- [`CHANGELOG.md`](CHANGELOG.md) — what changed in each release.
+- [`docs/guide/`](https://github.com/bevy-coven/bevy_society/blob/main/docs/guide/README.md) — getting started, concepts, a tour, features, authoring, scripting, dialogue, decisions, persistence, editors.
+- [`examples/`](https://github.com/bevy-coven/bevy_society/tree/main/examples) — `quickstart`, `village`, `capture`, `benchmark`, `absence`, `evidence`.
+- [The gallery](https://github.com/bevy-coven/bevy_society/blob/main/docs/gallery.md) — one clip per feature, and the recipe for each.
+- [`CHANGELOG.md`](https://github.com/bevy-coven/bevy_society/blob/main/CHANGELOG.md) — what changed in each release.
 
 ## The science
 
@@ -131,22 +131,22 @@ Every model is distilled from a paper held in a local corpus. `docs/research/REA
 
 | Module | Key papers | Note |
 |---|---|---|
-| Personality and mood | Mehrabian 1996 · Gebhard 2005 (ALMA) | [note](docs/research/personality-and-mood.md) |
-| Body clocks | Roenneberg et al. 2007 · Fischer et al. 2017 · Wittmann et al. 2006 | [note](docs/research/chronotype.md) |
-| A week | Sekara et al. 2016 · Dodds et al. 2011 | [note](docs/research/weekly-rhythm.md) |
-| Needs and utility | Mark & Dill (Game AI Pro 3 ch. 13) · Dill 2015 | [note](docs/research/needs-and-utility.md) |
-| Relationships | Heider 1946 · Zajonc 1968 · Dunbar 1992 | [note](docs/research/relationships.md) |
-| Rejection and re-approach | Maner et al. 2007 · Downey & Feldman 1996 · Bondü & Richter 2016 | [note](docs/research/rebuff.md) |
-| Opinions | Deffuant et al. 2000 · Friedkin & Johnsen 1990 · Asch 1956 | [note](docs/research/opinion-dynamics.md) |
-| Rumors and reputation | Daley & Kendall 1964 · Nowak & Sigmund 1998 · Ohtsuki & Iwasa 2004 | [note](docs/research/rumor-and-reputation.md) |
-| Factions and status | Tajfel et al. 1971 · Pettigrew & Tropp 2006 · Bonabeau et al. 1995 | [note](docs/research/groups-and-status.md) |
-| Memory | Park et al. 2023 · Anderson & Schooler 1991 | [note](docs/research/memory.md) |
-| Social simulation in games | Game AI Pro chapters · McCoy et al. 2014 | [note](docs/research/social-simulation-games.md) |
+| Personality and mood | Mehrabian 1996 · Gebhard 2005 (ALMA) | [note](https://github.com/bevy-coven/bevy_society/blob/main/docs/research/personality-and-mood.md) |
+| Body clocks | Roenneberg et al. 2007 · Fischer et al. 2017 · Wittmann et al. 2006 | [note](https://github.com/bevy-coven/bevy_society/blob/main/docs/research/chronotype.md) |
+| A week | Sekara et al. 2016 · Dodds et al. 2011 | [note](https://github.com/bevy-coven/bevy_society/blob/main/docs/research/weekly-rhythm.md) |
+| Needs and utility | Mark & Dill (Game AI Pro 3 ch. 13) · Dill 2015 | [note](https://github.com/bevy-coven/bevy_society/blob/main/docs/research/needs-and-utility.md) |
+| Relationships | Heider 1946 · Zajonc 1968 · Dunbar 1992 | [note](https://github.com/bevy-coven/bevy_society/blob/main/docs/research/relationships.md) |
+| Rejection and re-approach | Maner et al. 2007 · Downey & Feldman 1996 · Bondü & Richter 2016 | [note](https://github.com/bevy-coven/bevy_society/blob/main/docs/research/rebuff.md) |
+| Opinions | Deffuant et al. 2000 · Friedkin & Johnsen 1990 · Asch 1956 | [note](https://github.com/bevy-coven/bevy_society/blob/main/docs/research/opinion-dynamics.md) |
+| Rumors and reputation | Daley & Kendall 1964 · Nowak & Sigmund 1998 · Ohtsuki & Iwasa 2004 | [note](https://github.com/bevy-coven/bevy_society/blob/main/docs/research/rumor-and-reputation.md) |
+| Factions and status | Tajfel et al. 1971 · Pettigrew & Tropp 2006 · Bonabeau et al. 1995 | [note](https://github.com/bevy-coven/bevy_society/blob/main/docs/research/groups-and-status.md) |
+| Memory | Park et al. 2023 · Anderson & Schooler 1991 | [note](https://github.com/bevy-coven/bevy_society/blob/main/docs/research/memory.md) |
+| Social simulation in games | Game AI Pro chapters · McCoy et al. 2014 | [note](https://github.com/bevy-coven/bevy_society/blob/main/docs/research/social-simulation-games.md) |
 
-The papers were gathered with [home-still](docs/research/corpus/README.md), a local corpus pipeline; `docs/research/README.md` lists a DOI and a corpus id for every mechanism.
+The papers were gathered with [home-still](https://github.com/bevy-coven/bevy_society/blob/main/docs/research/corpus/README.md), a local corpus pipeline; `docs/research/README.md` lists a DOI and a corpus id for every mechanism.
 
 ## Who and licence
 
-Maintained by [@Ladvien](https://github.com/Ladvien). Bug reports and questions go to [the issues](https://github.com/bevy-coven/bevy_society/issues); contributions follow the org's [`CONTRIBUTING.md`](https://github.com/bevy-coven/.github/blob/main/CONTRIBUTING.md), and agents working in this repository should read [`AGENTS.md`](AGENTS.md) first (it lists the invariants a change must not break).
+Maintained by [@Ladvien](https://github.com/Ladvien). Bug reports and questions go to [the issues](https://github.com/bevy-coven/bevy_society/issues); contributions follow the org's [`CONTRIBUTING.md`](https://github.com/bevy-coven/.github/blob/main/CONTRIBUTING.md), and agents working in this repository should read [`AGENTS.md`](https://github.com/bevy-coven/bevy_society/blob/main/AGENTS.md) first (it lists the invariants a change must not break).
 
 MIT OR Apache-2.0, at your option.
