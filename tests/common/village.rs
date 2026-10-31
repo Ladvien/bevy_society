@@ -41,6 +41,29 @@ pub fn village_defs() -> SocietyDefs {
     SocietyDefs::compile(file).expect("the village compiles")
 }
 
+/// [`village_defs`] with the starter pack's `bake` and `eat` **replaced** by the overlay
+/// `examples/assets/provisioning.society.ron`, whose activities read the actor's own shelf (`Input::Stock`).
+pub fn provisioned_village_defs() -> SocietyDefs {
+    let mut file = DefsFile::starter().expect("the starter pack parses");
+    let overlay = DefsFile::from_ron(include_str!(
+        "../../examples/assets/provisioning.society.ron"
+    ))
+    .expect("the provisioning overlay parses");
+    for activity in overlay.activities {
+        let slot = file
+            .activities
+            .iter_mut()
+            .find(|a| a.id == activity.id)
+            .expect("the starter pack has the activity the overlay replaces");
+        *slot = activity;
+    }
+    let additions = DefsFile::from_ron(include_str!("../../examples/assets/village.society.ron"))
+        .expect("the village additions parse");
+    file.merge(additions)
+        .expect("the village adds to the starter");
+    SocietyDefs::compile(file).expect("the provisioned village compiles")
+}
+
 /// Builds a village of `people` villagers on the crate's default day, one column per faction.
 ///
 /// The layout: villager `i` stands at column `i / 8` and row `i % 8`, spaced 14 m and 4 m apart, in
