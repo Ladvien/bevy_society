@@ -3,7 +3,7 @@
 //! `GoodDef::initial` is to a good what `NeedDef::initial` is to a need: the level a new person starts at. A
 //! society whose larders all start empty has a transient the running society does not. Measured on the starter
 //! pack's village (24 people, seed 99, `docs/loop/runs/2026-10-30-27/research.md`): nobody held bread for the first
-//! 22 game-hours, so the second game-day had 38.8 % of its person-ticks with `food` below 0.05 against 1-11 % from the
+//! 22 game-hours, so the second game-day had 38.7 % of its person-ticks with `food` below 0.05 against 1-11 % from the
 //! third day on.
 mod common;
 

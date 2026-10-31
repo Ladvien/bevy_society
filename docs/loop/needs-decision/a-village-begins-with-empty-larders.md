@@ -7,7 +7,7 @@
 
 A person is created with every need at its `initial` level (1.0) and every good at `0.0`. The starter pack's `eat`
 consumes bread and its `bake` is a one-hour dawn errand, so a fresh society holds no food for its first 22 game-hours.
-A village of 24 at seed 99: **99.8 %** of game-day 1's person-ticks have an empty larder and **38.8 %** of game-day
+A village of 24 at seed 99: **99.8 %** of game-day 1's person-ticks have an empty larder and **38.7 %** of game-day
 2's have `food` below 0.05; days 3-10 sit at 1.4-10.7 %. It was filed as "needs hit the floor" and is a start-up
 transient, not a steady-state shortage.
 
