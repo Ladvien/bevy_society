@@ -36,7 +36,7 @@ use std::path::{Path, PathBuf};
 
 fn main() {
     let args = Args::parse();
-    let defs = match society_defs(&args.scenario) {
+    let defs = match society_defs(&args.scenario, args.provisioning) {
         Ok(defs) => defs,
         Err(err) => {
             eprintln!("evidence: {err}");
@@ -186,6 +186,9 @@ fn main() {
     // once per tick — 57 000 times in a 67 200-tick run, each printing a warning for every `settings:`
     // key the harness does not read.
     let plant_tick = plant_at(&args.scenario);
+    // **Who did what, when.** One count per game-day and activity, and a histogram of the hour each
+    // activity was chosen at, so "nobody bakes" can be told from "nobody decides inside the baking window".
+    let mut ledger = Ledger::default();
     for tick in 0..ticks {
         // Each villager's first-good store **before** this update, so a share can be logged as
         // `before -> after` for both sides. After alone read as a bug: "Dena holds 0.0, Hilda holds 0.0" is
@@ -324,6 +327,19 @@ fn main() {
         // counters drain every `ActivityEnded` for everybody, which is what a steering change has to
         // be judged on.
         {
+            let now = app.world().resource::<SocietyClock>().now_days;
+            let hour = app.world().resource::<SocietyClock>().hour();
+            let started = app
+                .world()
+                .resource::<bevy::ecs::message::Messages<ActivityStarted>>();
+            for message in started.iter_current_update_messages() {
+                ledger.started(now, hour, &message.activity);
+            }
+            for message in &ended_now {
+                ledger.ended(now, &message.activity, message.completed);
+            }
+        }
+        {
             for message in &ended_now {
                 if message.completed {
                     completed_endings += 1;
@@ -459,6 +475,7 @@ fn main() {
             eprintln!("evidence: cannot write grudge_sources.txt: {err}");
         }
     }
+    ledger.write(&out);
     series(&rows, &out);
     summary(
         app.world(),
@@ -486,6 +503,72 @@ fn main() {
         world.places.len(),
         out.display()
     );
+}
+
+/// What each activity did, per game-day, and the hour of day it was chosen at.
+#[derive(Default)]
+struct Ledger {
+    /// `(game-day, activity) -> (started, completed, interrupted)`.
+    days: BTreeMap<(u32, String), (u32, u32, u32)>,
+    /// `(activity, hour of day) -> chosen`.
+    hours: BTreeMap<(String, u32), u32>,
+}
+
+impl Ledger {
+    fn started(&mut self, now: f64, hour: f32, activity: &str) {
+        self.days
+            .entry((now.floor() as u32 + 1, activity.to_owned()))
+            .or_default()
+            .0 += 1;
+        *self
+            .hours
+            .entry((activity.to_owned(), hour.floor() as u32 % 24))
+            .or_default() += 1;
+    }
+
+    fn ended(&mut self, now: f64, activity: &str, completed: bool) {
+        let entry = self
+            .days
+            .entry((now.floor() as u32 + 1, activity.to_owned()))
+            .or_default();
+        if completed {
+            entry.1 += 1;
+        } else {
+            entry.2 += 1;
+        }
+    }
+
+    /// `activities.txt`: a table per activity of `day  started completed interrupted`, then the hour
+    /// histogram of when each was chosen.
+    fn write(&self, out: &Path) {
+        let mut names: Vec<&str> = self.days.keys().map(|(_, name)| name.as_str()).collect();
+        names.sort_unstable();
+        names.dedup();
+        let mut text = String::new();
+        for name in &names {
+            let _ = writeln!(text, "{name}: day started completed interrupted");
+            for ((day, activity), (started, completed, interrupted)) in &self.days {
+                if activity == name {
+                    let _ = writeln!(text, "  {day:>3} {started:>6} {completed:>6} {interrupted:>6}");
+                }
+            }
+        }
+        let _ = writeln!(text, "\nhour of day each activity was chosen at (all days):");
+        for name in &names {
+            let mut row = format!("{name:>10}:");
+            for hour in 0..24u32 {
+                let _ = write!(
+                    row,
+                    " {:>5}",
+                    self.hours.get(&(name.to_string(), hour)).copied().unwrap_or(0)
+                );
+            }
+            let _ = writeln!(text, "{row}");
+        }
+        if let Err(err) = std::fs::write(out.join("activities.txt"), text) {
+            eprintln!("evidence: cannot write activities.txt: {err}");
+        }
+    }
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -530,9 +613,22 @@ struct Row {
     shares: usize,
 }
 
-/// The starter pack, plus whatever the village scenario adds.
-fn society_defs(scenario: &str) -> Result<SocietyDefs, String> {
+/// The starter pack, plus whatever the village scenario adds, and (`provisioning`) the overlay whose `bake` and
+/// `eat` answer to the actor's own shelf.
+fn society_defs(scenario: &str, provisioning: bool) -> Result<SocietyDefs, String> {
     let mut file = bevy_society::DefsFile::starter().map_err(|e| e.to_string())?;
+    if provisioning {
+        let overlay =
+            bevy_society::DefsFile::from_ron(include_str!("assets/provisioning.society.ron"))
+                .map_err(|e| e.to_string())?;
+        for activity in overlay.activities {
+            let slot = file.activities.iter_mut().find(|a| a.id == activity.id);
+            match slot {
+                Some(slot) => *slot = activity,
+                None => return Err(format!("the starter pack has no '{}'", activity.id)),
+            }
+        }
+    }
     if scenario.starts_with("village") {
         let additions =
             bevy_society::DefsFile::from_ron(include_str!("assets/village.society.ron"))
@@ -1520,6 +1616,9 @@ struct Args {
     /// Runs for this many game-days instead of the scenario's `ticks:`, so a long run is one flag rather
     /// than an arithmetic exercise. The friendship bound needs thirty days.
     days: Option<f32>,
+    /// Replaces the starter pack's `bake` and `eat` with `assets/provisioning.society.ron`'s, which read the
+    /// actor's own shelf (`Input::Stock`), so the same scenario can be read with households that provision themselves.
+    provisioning: bool,
 }
 
 impl Args {
@@ -1545,6 +1644,7 @@ impl Args {
             negativity_ratio: None,
             rejection_penalty: None,
             days: None,
+            provisioning: false,
         };
         let mut argv = std::env::args().skip(1);
         while let Some(flag) = argv.next() {
@@ -1581,6 +1681,7 @@ impl Args {
                     args.friend_affinity = argv.next().and_then(|v| v.parse().ok())
                 }
                 "--days" => args.days = argv.next().and_then(|v| v.parse().ok()),
+                "--provisioning" => args.provisioning = true,
                 "--stall-timeout" => args.stall_timeout = argv.next().and_then(|v| v.parse().ok()),
                 "--retaliation-refractory" => {
                     args.retaliation_refractory = argv.next().and_then(|v| v.parse().ok())
