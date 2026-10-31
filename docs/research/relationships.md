@@ -154,7 +154,7 @@ Each person keeps a `Ties` component: one `Tie` per person they know. A tie hold
 - Strength of ties from shared activities or time spent together, beyond exposure.
 - Dissolution of ties through conflict, except through the rival label.
 - Group-based tie formation beyond the faction bias applied in D7.
-- Kin, role or structural ties (family, employer); only interaction history counts.
+- Roles and structural ties other than blood (employer, spouse, in-laws); only interaction history counts for them. **Blood relatives are now a fact on the tie** (`Tie::kin`; [kinship.md](kinship.md)): a relative's tie is never trimmed by the Dunbar cap, counts as close for grief and for missing someone, and earns `Tuning::kin_premium` on a gift.
 
 ## Open contradictions and departures
 

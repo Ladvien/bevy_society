@@ -38,7 +38,7 @@ use bevy_society::{
     Knowledge, Mood, Needs, Opinions, Person, Place, PlaceTags, PlantRumor, RumorBook,
     SocietyClock, SocietyDefs, SocietyPlugins, SocietySettings, TieLabel, TieLabelChanged, Ties,
 };
-use bevy_society::{Chronotype, Memories, MemoryKind};
+use bevy_society::{Chronotype, Kin, Memories, MemoryKind};
 use std::collections::BTreeMap;
 use std::fmt::Write as _;
 use std::path::{Path, PathBuf};
@@ -110,6 +110,9 @@ fn main() {
     if let Some(memory) = args.rebuff_memory {
         settings.tuning.rebuff_memory_hours = memory;
     }
+    if let Some(premium) = args.kin_premium {
+        settings.tuning.kin_premium = premium;
+    }
     if let Some(seed) = args.seed {
         settings.seed = seed;
     }
@@ -142,6 +145,10 @@ fn main() {
     if let Some(sd) = args.chronotype_sd {
         give_body_clocks(&mut app, &world, sd);
     }
+    let households = match args.households {
+        Some(size) => give_households(&mut app, &world, size, args.cousins),
+        None => Vec::new(),
+    };
 
     // `--days` overrides the scenario's own `ticks:` with `days · seconds_per_day / tick_secs`, so a
     // thirty-day run is one flag rather than an arithmetic exercise.
@@ -221,6 +228,7 @@ fn main() {
     let mut sleep_ledger = SleepLedger::default();
     let mut reapproach_ledger = ReapproachLedger::default();
     let mut week_ledger = WeekLedger::new(&app, &world);
+    let mut kin_ledger = KinLedger::new(&app, &world, households);
     for tick in 0..ticks {
         // Each villager's first-good store **before** this update, so a share can be logged as
         // `before -> after` for both sides. After alone read as a bug: "Dena holds 0.0, Hilda holds 0.0" is
@@ -284,6 +292,7 @@ fn main() {
                 if resolved.interaction == "share" && resolved.accepted {
                     shares += 1;
                     shared_now.push((resolved.actor, resolved.target));
+                    kin_ledger.share(&app, resolved);
                 }
                 // Every approach, accepted or refused. A reciprocity step should move this ratio without
                 // touching the acceptance model, because the model already reads the *target's* tie.
@@ -424,6 +433,7 @@ fn main() {
         }
         floor_ledger.record(&app, &world, tick > 0);
         week_ledger.record(&app, &world, tick > 0);
+        kin_ledger.sample(&app, tick);
         sleep_ledger.record(&app, &world, tick > 0);
         let mut row = snapshot_row(&app, tick as f64, &world, planted);
         row.shares = shares;
@@ -541,6 +551,7 @@ fn main() {
     sleep_ledger.write(&out);
     reapproach_ledger.write(&out);
     week_ledger.write(&out);
+    kin_ledger.write(&out);
     write_chronotypes(&app, &world, &out);
     series(&rows, &out);
     summary(
@@ -1544,6 +1555,16 @@ fn drain_narrative(
                     .world()
                     .get::<Name>(other)
                     .map_or_else(|| "someone".to_owned(), |n| n.as_str().to_owned());
+                // What the other is to the tracked person, when they are kin: "Edric (sibling)".
+                let other_name = match app
+                    .world()
+                    .get::<Ties>(tracked)
+                    .and_then(|ties| ties.get(other))
+                    .and_then(|tie| tie.kin)
+                {
+                    Some(kin) => format!("{other_name} ({})", kin_word(Some(kin))),
+                    None => other_name,
+                };
                 let role = if message.actor == tracked {
                     "with"
                 } else {
@@ -1871,6 +1892,12 @@ struct Args {
     forgiveness: Option<f32>,
     /// `--rebuff-memory H` / `--no-rebuff`: override `Tuning::rebuff_memory_hours` (in game hours; `None` is off).
     rebuff_memory: Option<Option<f32>>,
+    /// `--households N`: groups the villagers, in spawn order, into households of `N` full siblings (`Kin::Sibling`, both
+    /// directions, familiarity 1.0); `--cousins` also makes each pair of neighbouring households first cousins.
+    households: Option<usize>,
+    cousins: bool,
+    /// `--kin-premium P`: overrides `Tuning::kin_premium` (`0` is the previous release's ranking).
+    kin_premium: Option<f32>,
     /// Runs for this many game-days instead of the scenario's `ticks:`, so a long run is one flag rather
     /// than an arithmetic exercise. The friendship bound needs thirty days.
     days: Option<f32>,
@@ -1910,6 +1937,9 @@ impl Args {
             retaliation_refractory: None,
             forgiveness: None,
             rebuff_memory: None,
+            households: None,
+            cousins: false,
+            kin_premium: None,
             positivity_offset: None,
             friend_affinity: None,
             label_hysteresis: None,
@@ -1995,6 +2025,9 @@ impl Args {
                     args.rebuff_memory = argv.next().and_then(|v| v.parse().ok()).map(Some)
                 }
                 "--no-rebuff" => args.rebuff_memory = Some(None),
+                "--households" => args.households = argv.next().and_then(|v| v.parse().ok()),
+                "--cousins" => args.cousins = true,
+                "--kin-premium" => args.kin_premium = argv.next().and_then(|v| v.parse().ok()),
                 other => {
                     eprintln!("evidence: unknown argument {other}");
                     std::process::exit(1);
@@ -2002,6 +2035,182 @@ impl Args {
             }
         }
         args
+    }
+}
+
+/// What `kin` is, as a word.
+fn kin_word(kin: Option<Kin>) -> &'static str {
+    match kin {
+        None => "stranger",
+        Some(Kin::Parent) => "parent",
+        Some(Kin::Child) => "child",
+        Some(Kin::Sibling) => "sibling",
+        Some(Kin::HalfSibling) => "half-sibling",
+        Some(Kin::Grandparent) => "grandparent",
+        Some(Kin::Grandchild) => "grandchild",
+        Some(Kin::AuntUncle) => "aunt-uncle",
+        Some(Kin::NieceNephew) => "niece-nephew",
+        Some(Kin::Cousin) => "cousin",
+    }
+}
+
+/// Makes relatives of the villagers: consecutive groups of `size` become households of full siblings, and with
+/// `cousins` each pair of neighbouring households (0 and 1, 2 and 3, ...) are first cousins. Both directions of every
+/// pair get the same relation and a familiarity of 1.0 (a relative is known from the start), and nothing else about
+/// the tie changes. Draws no random number, so every other draw of the run is the one it has without it.
+/// Returns the households.
+fn give_households(app: &mut App, world: &World, size: usize, cousins: bool) -> Vec<Vec<Entity>> {
+    let size = size.max(1);
+    let households: Vec<Vec<Entity>> = world
+        .villagers
+        .chunks(size)
+        .map(<[Entity]>::to_vec)
+        .collect();
+    let mut relate = |a: Entity, b: Entity, kin: Kin| {
+        if let Some(mut ties) = app.world_mut().get_mut::<Ties>(a) {
+            let tie = ties.entry(b);
+            tie.kin = Some(kin);
+            tie.familiarity_peak = 1.0;
+        }
+    };
+    for household in &households {
+        for &a in household {
+            for &b in household {
+                if a != b {
+                    relate(a, b, Kin::Sibling);
+                }
+            }
+        }
+    }
+    if cousins {
+        for pair in households.chunks(2) {
+            if let [first, second] = pair {
+                for &a in first {
+                    for &b in second {
+                        relate(a, b, Kin::Cousin);
+                        relate(b, a, Kin::Cousin);
+                    }
+                }
+            }
+        }
+    }
+    households
+}
+
+/// **Do relatives get the loaf?** Every accepted `share`, sorted by what the receiver is to the giver; the share of
+/// ordered villager pairs each relation is, which is what a pick blind to kin would give it; and, once a game-day, how
+/// level the bread is inside a household against between households (variance within, variance of the household
+/// means). `kin.txt` is that table.
+struct KinLedger {
+    households: Vec<Vec<Entity>>,
+    /// Accepted shares by what the receiver is to the giver.
+    shares: BTreeMap<&'static str, u64>,
+    /// Ordered villager pairs by what the second is to the first.
+    pairs: BTreeMap<&'static str, u64>,
+    ticks_per_day: u64,
+    samples: u64,
+    within: f64,
+    between: f64,
+}
+
+impl KinLedger {
+    fn new(app: &App, world: &World, households: Vec<Vec<Entity>>) -> Self {
+        let settings = app.world().resource::<SocietySettings>();
+        let mut pairs: BTreeMap<&'static str, u64> = BTreeMap::new();
+        for &a in &world.villagers {
+            for &b in &world.villagers {
+                if a == b {
+                    continue;
+                }
+                let kin = app
+                    .world()
+                    .get::<Ties>(a)
+                    .and_then(|ties| ties.get(b))
+                    .and_then(|tie| tie.kin);
+                *pairs.entry(kin_word(kin)).or_default() += 1;
+            }
+        }
+        Self {
+            households,
+            shares: BTreeMap::new(),
+            pairs,
+            ticks_per_day: (settings.seconds_per_day / settings.tick_secs.max(1.0e-6)).round()
+                as u64,
+            samples: 0,
+            within: 0.0,
+            between: 0.0,
+        }
+    }
+
+    fn share(&mut self, app: &App, resolved: &InteractionResolved) {
+        let kin = app
+            .world()
+            .get::<Ties>(resolved.actor)
+            .and_then(|ties| ties.get(resolved.target))
+            .and_then(|tie| tie.kin);
+        *self.shares.entry(kin_word(kin)).or_default() += 1;
+    }
+
+    /// Once a game-day, on the day's first tick after the first, the bread variance within and between households.
+    fn sample(&mut self, app: &App, tick: usize) {
+        if self.households.len() < 2 || tick == 0 || tick as u64 % self.ticks_per_day.max(1) != 0 {
+            return;
+        }
+        let held = |e: Entity| {
+            f64::from(
+                app.world()
+                    .get::<bevy_society::Stock>(e)
+                    .map_or(0.0, |stock| stock.get(GoodId(0))),
+            )
+        };
+        let variance = |values: &[f64]| {
+            let mean = values.iter().sum::<f64>() / values.len().max(1) as f64;
+            values.iter().map(|v| (v - mean).powi(2)).sum::<f64>() / values.len().max(1) as f64
+        };
+        let mut within = 0.0;
+        let mut means = Vec::with_capacity(self.households.len());
+        for household in &self.households {
+            let stocks: Vec<f64> = household.iter().map(|&e| held(e)).collect();
+            within += variance(&stocks);
+            means.push(stocks.iter().sum::<f64>() / stocks.len().max(1) as f64);
+        }
+        self.within += within / self.households.len() as f64;
+        self.between += variance(&means);
+        self.samples += 1;
+    }
+
+    fn write(&self, out: &Path) {
+        if self.households.is_empty() {
+            return;
+        }
+        let total_shares: u64 = self.shares.values().sum();
+        let total_pairs: u64 = self.pairs.values().sum();
+        let mut text = format!(
+            "households: {} (of {}); accepted shares: {total_shares}\n\
+             relation          shares  share_of_shares  share_of_ordered_pairs\n",
+            self.households.len(),
+            self.households.first().map_or(0, Vec::len),
+        );
+        for (relation, pairs) in &self.pairs {
+            let shares = self.shares.get(relation).copied().unwrap_or(0);
+            let _ = writeln!(
+                text,
+                "{relation:<16} {shares:>7}  {:>14.1}%  {:>21.1}%",
+                100.0 * shares as f64 / total_shares.max(1) as f64,
+                100.0 * *pairs as f64 / total_pairs.max(1) as f64,
+            );
+        }
+        let samples = self.samples.max(1) as f64;
+        let (within, between) = (self.within / samples, self.between / samples);
+        let _ = writeln!(
+            text,
+            "bread variance, mean of {} game-day samples: within households {within:.3}, between household means {between:.3}, within / (within + between) {:.3}",
+            self.samples,
+            within / (within + between).max(f64::EPSILON),
+        );
+        if let Err(err) = std::fs::write(out.join("kin.txt"), text) {
+            eprintln!("evidence: cannot write kin.txt: {err}");
+        }
     }
 }
 

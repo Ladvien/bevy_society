@@ -1,0 +1,5 @@
+households: 6 (of 4); accepted shares: 181
+relation          shares  share_of_shares  share_of_ordered_pairs
+sibling               32            17.7%                   13.0%
+stranger             149            82.3%                   87.0%
+bread variance, mean of 16 game-day samples: within households 1.071, between household means 0.288, within / (within + between) 0.788
