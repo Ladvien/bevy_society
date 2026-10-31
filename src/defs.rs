@@ -927,7 +927,7 @@ impl SocietyDefs {
                 duration_hours: 1.0,
                 rank: 0,
                 urgent: None,
-                gives: false,
+                gifts: Vec::new(),
                 unavailable: false,
                 weight: 1.0,
                 considerations: Vec::new(),
@@ -1574,14 +1574,19 @@ impl SocietyDefs {
         let produces = self.good_list(&owner, &def.produces)?;
         let consumes = self.good_list(&owner, &def.consumes)?;
         // A **gift**: goods leave the actor and none come back. A swap (`target_gives`) is an exchange, and the
-        // premium is for altruism (Curry, Roberts & Dunbar 2013).
-        let gives = interaction.is_some_and(|id| {
-            self.interactions
-                .get(usize::from(id.0))
-                .is_some_and(|spec| {
-                    !spec.on_accept.actor_gives.is_empty() && spec.on_accept.target_gives.is_empty()
-                })
-        });
+        // premium is for altruism (Curry, Roberts & Dunbar 2013). The goods are kept so the premium can ask, of each,
+        // whether giving it leaves the receiver no better off than the giver.
+        let gifts: Vec<GoodId> = interaction
+            .and_then(|id| self.interactions.get(usize::from(id.0)))
+            .filter(|spec| spec.on_accept.target_gives.is_empty())
+            .map(|spec| {
+                spec.on_accept
+                    .actor_gives
+                    .iter()
+                    .map(|(good, _)| *good)
+                    .collect()
+            })
+            .unwrap_or_default();
         self.activities.push(ActivitySpec {
             name: def.id,
             target: def.target,
@@ -1593,7 +1598,7 @@ impl SocietyDefs {
             considerations,
             satisfies,
             interaction,
-            gives,
+            gifts,
             produces,
             consumes,
             barks: def.barks,
@@ -1968,9 +1973,10 @@ pub(crate) struct ActivitySpec {
     pub(crate) considerations: Vec<Term>,
     pub(crate) satisfies: Vec<(NeedId, f32)>,
     pub(crate) interaction: Option<InteractionId>,
-    /// Whether the interaction is a **gift** when accepted (`actor_gives` is not empty and `target_gives` is
-    /// empty): the activities [`Tuning::kin_premium`](crate::Tuning) favours toward a relative.
-    pub(crate) gives: bool,
+    /// The goods the interaction hands over when accepted, when it is a **gift** (`actor_gives` is not empty and
+    /// `target_gives` is empty); empty otherwise. [`Tuning::kin_premium`](crate::Tuning) favours these activities
+    /// toward a relative.
+    pub(crate) gifts: Vec<GoodId>,
     /// Goods made per completed use.
     pub(crate) produces: Vec<(GoodId, f32)>,
     /// Goods used up per completed use.

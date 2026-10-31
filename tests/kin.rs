@@ -155,6 +155,27 @@ fn a_relative_with_a_full_shelf_is_not_given_to() {
     );
 }
 
+/// **A gift that only swaps two shelves is not favoured.** The giver holds 1.8, the sibling 0.8 and a stranger
+/// 0.8: a loaf to either leaves the receiver holding what the giver did, and the loaf would be passed back. The
+/// premium applies only where the giver holds more than the receiver by more than `Tuning::trade_reserve`, so
+/// here the two tie as they do with no premium and the draw splits them. Without the test, favouring relatives
+/// made 8-25 % of accepted shares a loaf returned within three hours (`docs/loop/runs/2026-10-31-05/eval.md`).
+#[test]
+fn a_gift_that_only_swaps_shelves_is_not_favoured() {
+    let relations = [(1, Some(Kin::Sibling))];
+    let mut counts = [0; 4];
+    for seed in 0..16 {
+        let (mut app, people) = gift_village(seed, 4.0, &relations, &[1.8, 0.8, 0.8]);
+        if let Some(who) = first_receiver(&mut app, &people) {
+            counts[who] += 1;
+        }
+    }
+    assert!(
+        counts[1] > 0 && counts[2] > 0,
+        "a swap must not be steered to the relative: {counts:?}"
+    );
+}
+
 /// **`Input::Kinship` reads `2r`** for a pack that wants to tilt an activity without the premium: a `Step`
 /// at `0.9` admits only a first-degree relative, and at `0.2` a cousin (`2r = 0.25`) too, and never a
 /// stranger, who reads 0.

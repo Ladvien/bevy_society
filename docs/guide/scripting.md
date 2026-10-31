@@ -32,6 +32,7 @@ that names it.
 | `ctx.trust(a, b)` | trust in `[0, 1]`; 0.5 with no tie |
 | `ctx.respect(a, b)` | respect in `[-1, 1]`; 0 with no tie |
 | `ctx.familiarity(a, b)` | familiarity in `[0, 1]` at the tick start; 0 with no tie |
+| `ctx.kin(a, b)` | relatedness `r` of `b` to `a`, in `[0, 1]`: 0.5 for a parent, child or sibling, 0.25 for a grandparent, aunt or uncle, half-sibling, 0.125 for a cousin; 0 for anyone else or with no tie |
 | `ctx.label(a, b)` | `"stranger"`, `"acquaintance"`, `"friend"` or `"rival"` |
 | `ctx.grudge(a, b)` | weight of `a`'s bad memories about `b`, `[0, 1]`; fades faster the more `a` trusts `b` (`Tuning::forgiveness`) |
 | `ctx.standing(a)` | respect conferred by familiar persons |

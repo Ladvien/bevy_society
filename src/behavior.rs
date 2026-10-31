@@ -1617,11 +1617,13 @@ fn decide_activities(
     // **Neighbours' stores are copied only when some activity reads them.** `near_stock` is a `Vec` of
     // `Stock`s per person per tick, which is cost a host with no `Surplus` consideration would pay for
     // nothing: the benchmark has none and runs at 5 000 people.
+    // A gift activity reads them too, for the kin premium's own test of whether giving helps.
     let reads_stores = defs.activities.iter().any(|activity| {
-        activity
-            .considerations
-            .iter()
-            .any(|term| matches!(term.signal, Signal::Surplus(_)))
+        (tuning.kin_premium > 0.0 && !activity.gifts.is_empty())
+            || activity
+                .considerations
+                .iter()
+                .any(|term| matches!(term.signal, Signal::Surplus(_)))
     });
     // **Who is asleep, once per tick and by slot.** A neighbour check inside the per-person loop is a query per
     // neighbour per decision, and at a society where everybody re-decides each tick that is the population times
@@ -1951,10 +1953,11 @@ fn decide_activities(
                 // every activity pays it — including ones a host wrote — without a definitions-file change.
                 score *= crowding_price(target, &place_views, tuning.crowding_penalty);
                 // **What a relative's gift is worth beyond the liking.** A gift to a relative scores `1 + premium · 2r`
-                // times what the same surplus scores toward a stranger (`Tuning::kin_premium`); every other activity
-                // and every other target is untouched, so a society with no relatives is the previous release's.
-                if spec.gives {
-                    score *= kin_price(target, &decision.ties, tuning.kin_premium);
+                // times what the same surplus scores toward a stranger (`Tuning::kin_premium`), where giving leaves the
+                // giver holding more than the receiver by the reserve; every other activity and every other target is
+                // untouched, so a society with no relatives is the previous release's.
+                if !spec.gifts.is_empty() {
+                    score *= kin_price(target, &decision, &spec.gifts, tuning.kin_premium);
                 }
                 if score <= 0.0 {
                     continue;
@@ -2234,20 +2237,53 @@ fn crowding_price(target: DoingTarget, places: &[PlaceView], penalty: f32) -> f3
 }
 
 /// The factor a **gift** to `target` is multiplied by: `1 + premium · 2r` for a relative with coefficient of
-/// relatedness `r`, `1.0` for anyone else (Curry, Roberts & Dunbar 2013, DOI `10.1111/j.2044-8295.2012.02119.x`;
-/// Burton-Chellew & Dunbar 2015, DOI `10.1093/beheco/aru165`). `premium == 0` makes this exactly `1.0`
+/// relatedness `r` (Curry, Roberts & Dunbar 2013, DOI `10.1111/j.2044-8295.2012.02119.x`; Burton-Chellew & Dunbar
+/// 2015, DOI `10.1093/beheco/aru165`), and `1.0` for anyone else. `premium == 0` makes this exactly `1.0`
 /// everywhere, which is how the previous release's ranking is restored. See
 /// [`Tuning::kin_premium`](crate::Tuning).
-fn kin_price(target: DoingTarget, ties: &[crate::relationships::Tie], premium: f32) -> f32 {
+///
+/// **Only where giving helps.** The premium is for altruism, and a unit handed to someone who holds within the
+/// reserve of the giver's own store only swaps the two shelves: the receiver, now holding more, would be the one
+/// with a surplus, and the loaf is passed back. Measured, favouring relatives without this test made 8.5-24.5 % of
+/// accepted shares a loaf returned within three hours (1.7 % without kin; `docs/loop/runs/2026-10-31-05/eval.md`),
+/// so the factor is `1.0` unless the giver holds more than the receiver by more than
+/// [`Tuning::trade_reserve`](crate::Tuning), in every good the gift hands over. A neighbour whose store is not known
+/// (the decision copies stores of the people in `near`) is not favoured.
+fn kin_price(
+    target: DoingTarget,
+    decision: &Decision,
+    gifts: &[crate::defs::GoodId],
+    premium: f32,
+) -> f32 {
     if premium <= 0.0 {
         return 1.0;
     }
     let DoingTarget::Person(other) = target else {
         return 1.0;
     };
-    ties.iter()
+    let relatedness = decision
+        .ties
+        .iter()
         .find(|tie| tie.target == other)
-        .map_or(1.0, |tie| 1.0 + premium * 2.0 * tie.relatedness())
+        .map_or(0.0, crate::relationships::Tie::relatedness);
+    if relatedness <= 0.0 {
+        return 1.0;
+    }
+    let Some((_, theirs)) = decision
+        .near_stock
+        .iter()
+        .find(|(entity, _)| *entity == other)
+    else {
+        return 1.0;
+    };
+    let helps = gifts
+        .iter()
+        .all(|&good| decision.stock.get(good) - theirs.get(good) > decision.trade_reserve);
+    if helps {
+        1.0 + premium * 2.0 * relatedness
+    } else {
+        1.0
+    }
 }
 
 /// The targets an activity offers this decision (plan D7), with closed places excluded.

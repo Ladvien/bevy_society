@@ -137,7 +137,8 @@ you meanwhile":
 
 A consideration's `input` is normalised to `[0, 1]` before its `curve` sees it: `Hour` and `BodyHour` are `h / 24`, `Week` is
 `(weekday + h / 24) / 7`, mood axes and `Affinity`/`Respect` are `(x + 1) / 2`, `Distance` is `d / perception_radius`. `Trust`,
-`Familiarity` and `SocialProof` are already in `[0, 1]`, and `Need`/`Signal` are read as they stand,
+`Familiarity` and `SocialProof` are already in `[0, 1]`, `Kinship` is twice the target's relatedness to the actor (1.0 for a parent, a
+child or a sibling, 0.5 for a grandparent or an aunt, 0.25 for a cousin, 0 for anyone who is not a relative), and `Need`/`Signal` are read as they stand,
 so a signal the host writes outside `[0, 1]` is clamped after the curve. `Signal("x")` names a
 signal declared in `signals`; an undeclared name is a `DefsError::UnknownId` at load, not a score of
 zero at run time.
@@ -157,7 +158,7 @@ Curves turn that number into utility:
 | `Hours(from, to)` | `1` inside the wrapping hour window; only with `input: Hour` or `input: BodyHour` |
 | `Days(from, to)` | `1` inside the wrapping week window, in days from the start of the week (`Days(5.0, 7.0)` is the last two); only with `input: Week` |
 
-`Affinity`, `Trust`, `Respect`, `Familiarity` and `SocialProof` are only valid on a `Person` target,
+`Affinity`, `Trust`, `Respect`, `Familiarity`, `Kinship` and `SocialProof` are only valid on a `Person` target,
 and `Distance` is valid on `Place`, `Home` and `Person`. A definition that breaks that rule is
 rejected with the offending consideration named.
 
@@ -401,6 +402,8 @@ A definitions file says what kinds of things exist (`DefsFile::from_ron(text)` a
 ```
 
 `placement.spawn(world)` checks every name against the world's `SocietyDefs`, spawns nothing when a line is wrong, and returns a `Placed` that maps names to entities. A person starts at `at`, else at their home. A trait left out is `0.5`, a tie's `trust` left out is `0.5`, and `autonomous` is `true` unless given. Spawning draws no random numbers. `PlacementFile::capture(world)` reads a live world back into a file (positions as they are now, opinions as their anchors), so what a user moved can be saved with `to_ron()`; every place and person must have a `Name`.
+
+A tie may also name **what the other person is to this one**: `ties: [(with: "Mara", affinity: 0.2, kin: Some(Parent))]` is Ada's tie to her mother (`Kin` is `Parent`, `Child`, `Sibling`, `HalfSibling`, `Grandparent`, `Grandchild`, `AuntUncle`, `NieceNephew` or `Cousin`, each with the coefficient of relatedness `r` of Hamilton 1964: 0.5, 0.25 or 0.125). Relatedness is symmetric, so spawning answers it: Mara's tie to Ada is made `Child` (and created, neutral, if Mara listed none), both start at a familiarity of `1.0`, and two ties that name relations that are not each other's converse are refused with both names. A relative's tie is never trimmed by the Dunbar cap, counts as close for grief and for missing someone, and earns `Tuning::kin_premium` (1.0) on a gift: an activity whose interaction hands goods over and takes none scores `1 + premium · 2r` times as much toward a relative, so a bread-holder gives to a hungry sibling before an equally hungry stranger (Curry, Roberts & Dunbar 2013). `Input::Kinship` lets any other activity tilt toward relatives, and `ctx.kin(a, b)` reads `r` in a script. `PlacementFile::capture` writes the relation back.
 
 ## Errors
 
