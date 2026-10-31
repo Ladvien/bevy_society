@@ -353,6 +353,13 @@ pub enum Input {
     /// what the body decides (when to sleep), and `Hour` for what the village decides (when the workshop
     /// opens). Takes the `Hours` curve like `Hour`.
     BodyHour,
+    /// **How far through the week it is**, `(weekday + hour / 24) / 7`, in `[0, 1)`: the village's clock, the same for
+    /// everybody, never shifted by a [`Chronotype`](crate::Chronotype). The weekday counts from
+    /// [`SocietySettings::start_weekday`](crate::SocietySettings) on game-day 0, and day 0 is whatever the host calls the
+    /// first day of its week. It is the input of the `Days(from, to)` curve, the way `Hour` is of `Hours`: `Days(0.0, 5.0)`
+    /// is the first five days and `Days(5.0, 7.0)` the last two. It carries the hour of the day as well, so a window may
+    /// start mid-day (`Days(4.75, 6.0)` opens at 18:00 on day 4).
+    Week,
     /// The actor's mood pleasure, rescaled to [0, 1].
     Pleasure,
     /// The actor's mood arousal, rescaled to [0, 1].
@@ -1610,6 +1617,21 @@ impl SocietyDefs {
                 "an Hours curve needs the Hour or BodyHour input",
             ));
         }
+        if let Curve::Days(from, to) = term.curve {
+            if !matches!(term.input, Input::Week) {
+                return Err(invalid(owner, "a Days curve needs the Week input"));
+            }
+            let days = 0.0..=f32::from(crate::model::DAYS_PER_WEEK);
+            if !days.contains(&from) || !days.contains(&to) {
+                return Err(invalid(
+                    owner,
+                    format!(
+                        "Days({from}, {to}) is outside the week: both ends must be in 0..={}",
+                        crate::model::DAYS_PER_WEEK
+                    ),
+                ));
+            }
+        }
         let signal = match &term.input {
             Input::Need(name) => Signal::Need(require(self.need_id(name), "need", name, owner)?),
             Input::Signal(name) => {
@@ -1617,6 +1639,7 @@ impl SocietyDefs {
             }
             Input::Hour => Signal::Hour,
             Input::BodyHour => Signal::BodyHour,
+            Input::Week => Signal::Week,
             Input::Pleasure => Signal::Pleasure,
             Input::Arousal => Signal::Arousal,
             Input::Dominance => Signal::Dominance,
@@ -1975,6 +1998,8 @@ pub enum Signal {
     Hour,
     /// Body-clock hour / 24 ([`Input::BodyHour`]).
     BodyHour,
+    /// Position in the week / 7 ([`Input::Week`]).
+    Week,
     /// Mood pleasure.
     Pleasure,
     /// Mood arousal.
