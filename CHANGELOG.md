@@ -4,6 +4,8 @@ All notable changes to bevy_society. The format follows [Keep a Changelog](https
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-10-31
+
 ### Added
 
 - **`Input::Stock(good)`**: the actor's own holding of a good, clamped to `[0, 1]` like every input (`Signal::Stock`, `Decision::stock`, the copy `Surplus` already makes). A pack can score an activity by whether the shelf has what it consumes, or by whether the shelf is bare of what it makes; before this nothing a consideration could read told a person about its own larder, so production could only run on the clock. A good the pack never declares is a `DefsError::UnknownId`; `Input` gains a variant, which is breaking for a host that matches it exhaustively. `examples/assets/provisioning.society.ron` is an overlay that replaces the starter's `bake` and `eat` with versions that read it (a hungry household with a bare shelf makes bread in daylight; eating from an empty shelf is priced at `0.05`, not forbidden), **opt-in**: the starter pack is unchanged (`docs/loop/needs-decision/households-provision-themselves.md`). On the evidence town of sixty it replaces a store that runs out (bread 0.05 a head and 86 % of person-ticks at `food` below 0.05 by game-day 12 at the 240-second day) with one that holds (1.4 loaves a head and 23 % at the floor over the last six game-days, 16-43 % on any one day). `examples/evidence` gains `--provisioning` and writes `activities.txt` (starts, completions and interruptions per game-day and activity, and the clock hour each was chosen at). `tests/stock_input.rs`, `tests/provisioning.rs`; `docs/guide/authoring.md`, `docs/research/economics.md`.
