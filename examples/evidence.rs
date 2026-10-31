@@ -2099,6 +2099,9 @@ struct ReapproachLedger {
     /// For each approach that was followed by another to the same target: `(gap in hours, same interaction,
     /// the follow-up was an `insult`)`, by the outcome of the earlier one, `[refused, accepted]`.
     gaps: [Vec<(f32, bool, bool)>; 2],
+    /// `(actor, game-day) -> (approaches, who they were to)`: how many different people a person approaches in
+    /// a day, against how many times.
+    per_day: BTreeMap<(Entity, u32), (u32, std::collections::BTreeSet<Entity>)>,
 }
 
 impl ReapproachLedger {
@@ -2106,6 +2109,10 @@ impl ReapproachLedger {
     const WINDOWS: [f32; 5] = [1.0, 3.0, 6.0, 12.0, 24.0];
 
     fn approach(&mut self, now_days: f64, resolved: &InteractionResolved) {
+        let day = now_days.floor() as u32;
+        let entry = self.per_day.entry((resolved.actor, day)).or_default();
+        entry.0 += 1;
+        entry.1.insert(resolved.target);
         let key = (resolved.actor, resolved.target);
         if let Some((then, accepted, interaction)) = self.last.get(&key) {
             let gap = ((now_days - then) * 24.0) as f32;
@@ -2124,6 +2131,18 @@ impl ReapproachLedger {
     fn write(&self, out: &Path) {
         let mut text = String::from(
             "share of approaches followed by another approach to the same person within the window\n",
+        );
+        let days = self.per_day.len().max(1) as f64;
+        let (approaches, distinct) = self.per_day.values().fold((0u64, 0u64), |(a, d), (n, set)| {
+            (a + u64::from(*n), d + set.len() as u64)
+        });
+        let _ = writeln!(
+            text,
+            "\nperson-days with an approach: {}, approaches per person-day {:.2}, different people per person-day {:.2} ({:.1}% of approaches go to someone already approached that day)",
+            self.per_day.len(),
+            approaches as f64 / days,
+            distinct as f64 / days,
+            100.0 * (approaches - distinct) as f64 / approaches.max(1) as f64
         );
         for (outcome, label) in [(0usize, "refused"), (1usize, "accepted")] {
             let all = self.approaches[outcome].max(1) as f64;
