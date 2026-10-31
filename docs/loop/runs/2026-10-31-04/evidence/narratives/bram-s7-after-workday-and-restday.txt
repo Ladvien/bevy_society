@@ -1,0 +1,63 @@
+# Bram's day
+(Bram, village seed 7; d3 = game-day 2 = weekday 2, a workday; d6 = game-day 5 = weekday 5, a rest day in the weekly run; d1 is the first, partial day from 15:00. 'finished' lines left out.)
+
+d3 07h32: started gossip
+d3 07h32: gossip with Hilda (refused)
+d3 07h50: started compliment
+d3 08h12: compliment with Jena (refused)
+d3 08h22: chat approached by Dena (accepted)
+d3 08h24: started work
+d3 08h35: compliment approached by Garet (accepted)
+d3 08h40: compliment approached by Dena (refused)
+d3 08h47: gossip approached by Garet (accepted)
+d3 12h24: started play
+d3 12h24: chat with Fenna (accepted)
+d3 12h54: started compliment
+d3 12h54: compliment with Dena (accepted)
+d3 13h07: started gossip
+d3 13h07: gossip with Fenna (accepted)
+d3 13h10: insult approached by Edric (accepted)
+d3 13h25: started compliment
+d3 13h25: compliment with Dena (accepted)
+d3 13h37: started gossip
+d3 13h37: gossip with Fenna (accepted)
+d3 13h56: started compliment
+d3 13h56: compliment with Dena (accepted)
+d3 14h08: started gossip
+d3 14h08: gossip with Fenna (refused)
+d3 14h26: started eat
+d3 17h51: started compliment
+d3 19h07: compliment with Oswin (accepted)
+d3 19h19: started chat
+d3 19h19: chat with Perrin (accepted)
+d3 19h37: started compliment
+d3 20h38: compliment with Dena (accepted)
+d3 20h50: started snub
+d3 21h09: insult with Edric (refused)
+d3 21h15: started play
+d3 21h15: chat with Dena (accepted)
+d3 21h45: started gossip
+d3 21h45: gossip with Wren (refused)
+d3 22h03: started sleep
+d6 07h51: started compliment
+d6 08h35: compliment with Dena (accepted)
+d6 08h48: started chat
+d6 08h48: chat with Hilda (accepted)
+d6 09h06: started laze
+d6 09h37: compliment approached by Dena (accepted)
+d6 11h06: started laze
+d6 13h06: started eat
+d6 13h50: compliment approached by Dena (accepted)
+d6 15h16: started gossip
+d6 15h16: gossip with Alys (accepted)
+d6 15h35: started laze
+d6 17h35: started laze
+d6 19h35: started compliment
+d6 19h35: compliment with Dena (accepted)
+d6 19h47: started laze
+d6 21h09: compliment approached by Oswin (accepted)
+d6 21h35: chat approached by Oswin (accepted)
+d6 21h48: started compliment
+d6 21h48: compliment with Oswin (refused)
+d6 22h00: started sleep
+d6 22h14: insult approached by Nera (accepted)
