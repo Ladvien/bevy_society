@@ -401,10 +401,11 @@ impl SocietySave {
     ///
     /// - **Version 1 to 2.** The only difference is [`PersonSave::stock`], which a version-1 file
     ///   does not have and which deserializes as empty. An empty `stock` restores as *holding
-    ///   nothing* of every good the defs declare (`Stock::get` is `0.0` for a good past the end of
-    ///   the list), the same as a person who never produced anything, and a defs file that gained
-    ///   goods since the save needs no entry for them. People who are `Dormant` or `Deceased` upgrade
-    ///   exactly as the living do.
+    ///   nothing* of every good the defs declare, the same as a person who never produced anything
+    ///   (not at each good's [`GoodDef::initial`](crate::GoodDef::initial): a saved person is not a new
+    ///   one). A good the defs gained since a *non-empty* save has no entry, and the next tick gives each
+    ///   person its starting level, as a need the defs gained is given. People who are `Dormant` or
+    ///   `Deceased` upgrade exactly as the living do.
     ///
     /// - **Version 3 to 4.** The only difference is the `Suffered` memory kind, which no older file
     ///   holds; nothing needs rewriting.
@@ -1293,9 +1294,15 @@ fn write_person(
         person.memberships.clone(),
         person.status,
     ));
-    // Goods come back exactly as saved, so a village's stores survive a reload the way its ties do.
+    // Goods come back exactly as saved, so a village's stores survive a reload the way its ties do. An empty
+    // list is a person who held nothing (a version-1 file has no stock at all), and comes back holding
+    // nothing: left without a `Stock`, the next tick would hand them each good's starting larder.
     if person.stock.is_empty() {
-        em.remove::<crate::Stock>();
+        if defs.goods.is_empty() {
+            em.remove::<crate::Stock>();
+        } else {
+            em.insert(crate::Stock(vec![0.0; defs.goods.len()]));
+        }
     } else {
         em.insert(crate::Stock(person.stock.clone()));
     }
