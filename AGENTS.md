@@ -48,7 +48,7 @@ Pinned to **Bevy 0.20.0**. Read the vendored source (`~/.cargo/registry/src/inde
 - `src/script.rs` — Rhai compilation, the sandbox limits and the `ctx` / `fx` runtime API.
 - `src/absence.rs` — `Away` (core.rs) is missed by the close and its return is `PersonReturned`: the missing level, the reunion lift and the return queue, registered by `MindPlugin`.
 - `tests/absence.rs` — missing grows with closeness and days, stops at `missing_cap`, a return is announced once, `Deceased` replaces `Away`, a save mid-absence (feature `serde`).
-- `src/mind.rs` — `MindPlugin` (`SocietySystems::Mind`): emotions and the `Appraise` message, PAD mood with contagion, needs decay, personality and the `Add<Person>` baseline observer.
+- `src/mind.rs` — `MindPlugin` (`SocietySystems::Mind`): emotions and the `Appraise` message, PAD mood with contagion, needs decay, personality, `Chronotype` (a person's body-clock offset in hours, written by the host; `Input::BodyHour` reads it) and the `Add<Person>` baseline observer.
 - `src/model/mod.rs` — engine-free math module root; re-exports `Curve`.
 - `src/model/curves.rs` — response curves (`Curve`, `logistic`, `hour_window`).
 - `src/model/pad.rs` — personality-to-mood baseline (Mehrabian 1996, ALMA).
@@ -69,6 +69,7 @@ Pinned to **Bevy 0.20.0**. Read the vendored source (`~/.cargo/registry/src/inde
 - `tests/stock_input.rs` — `Input::Stock` reads the actor's own holding, clamped to `[0, 1]`; a curve rescales it; an undeclared good is refused at load.
 - `tests/provisioning.rs` — a hungry household with a bare shelf bakes at noon where the starter's dawn window is shut, and a household holding bread makes none (the overlay against the starter pack).
 - `tests/urgent.rs` — `ActivityDef::urgent` raises a rank while a need is low (a hungry person eats where a fed one plays, strictly under the line, falling through when the meal has nowhere to happen, tiers against a static rank, the trace records the tier, malformed lines refused at load) and the provisioning overlay puts a hungry household first.
+- `tests/chronotype.rs` — the body-clock arithmetic and sampler, a lark, a plain person and an owl going to bed by their own clocks, a sleeper (`ActivityDef::unavailable`) not being a target and a walk toward one ending interrupted, the `Hours` refusal, an authored placement and a save carrying the offset.
 - `tests/leaf.rs` — the crate boundary: dependency list, forbidden names, engine-free `src/model/`, lookup-only hash collections.
 - `tests/mind.rs` — emotion half-life, mood lift toward Joy and return to baseline, needs decay at `decay_per_day`.
 - `tests/dialogue.rs` — conversation choice and `if` conditions, node effects, barks, speaker lifetime and the missing-plugin panic (feature `dialogue`).

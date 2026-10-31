@@ -4,6 +4,17 @@ All notable changes to bevy_society. The format follows [Keep a Changelog](https
 
 ## [Unreleased]
 
+### Added
+
+- **`Chronotype(f32)`**: how many hours a person's body clock runs behind the wall clock (positive an owl, negative a lark; default `0.0`, required by `Person`). Mid-sleep is near-normal in a population and independent of how long people sleep (Roenneberg et al. 2007, DOI 10.1016/j.smrv.2007.07.005; Fischer et al. 2017, DOI 10.1371/journal.pone.0178782, n = 53 689), so an offset moves a person's night and leaves its length alone. `Chronotype::sample(rng, sd_hours)` draws one (twelve uniform numbers summed, truncated at three deviations) and `Chronotype::POPULATION_SD_HOURS` (1.5 h, a design default inside the published 1.2-2.5 h) is the spread a measured population has; the crate never draws one itself. `PersonDef::chronotype_hours` carries it through a placement file (`spawn`, `capture`, validated within ±12 h) and `PersonSave::chronotype` through a save (`#[serde(default)]`, `VERSION` stays 5: a file from before restores as `0.0`). `tests/chronotype.rs`; `docs/research/chronotype.md`.
+- **`Input::BodyHour`** (`Signal::BodyHour`): the hour on the actor's own clock, `h / 24` like `Hour`, which stays the village's (social) clock for shop hours and the working day (Wittmann et al. 2006, DOI 10.1080/07420520500545979). `Hours(from, to)` takes either; the refusal for any other input now names both. Equal to `Hour` for a person with no offset. `Input` and `Signal` gain a variant, which is breaking for a host that matches them exhaustively.
+- **`ActivityDef::unavailable`** (default `false`): a person who has arrived at the activity is in nobody's `near` list, so nobody chooses them as the target of a `Person` activity (or as a `Distance` neighbour), and an activity still walking toward them ends, `completed: false`. `Dormant`'s rule per activity. A person still walking to bed can be met.
+- `examples/evidence --chronotype-sd H`, `--sleepers-available`, `--track N`, and a `sleep.txt` (share of the village asleep by clock hour, sleeps begun and ended by hour, interrupted sleeps, exchanges aimed at a sleeper by interaction) and `chronotypes.txt`; `tools/plot_chronotype.py`.
+
+### Changed
+
+- **The starter pack's `sleep` reads `BodyHour` and is `unavailable`.** With every person on the village's clock the first changes nothing; the second does, because **7-9 % of all exchanges in the shipped village were aimed at somebody asleep** (349, 378, 324 and 362 of 4 305-4 521 at seeds 7, 42, 11 and 99 over 17 game-days) and now none are. Same seeds, against 0.8.0: friend ties 41 / 43 / 37 / 42 → 48 / 66 / 51 / 69, rival ties 36 / 36 / 35 / 38 → 48 / 19 / 31 / 24 (directed ties). With a population of offsets (`--chronotype-sd 1.5`) the busiest clock hour of bedtimes holds 19-27 % of the sleeps instead of 60-64 %, and with the flag off that same population is greeted in its sleep in 12-17 % of exchanges. The harness's `--sleepers-available` restores the old behaviour; a host that wants it in its own pack sets `unavailable: false` on `sleep`. **Not changed:** the interrupted-sleep rate (10-18 % either way), which is the walk home at 64 s/day, not a queue at the bed.
+
 ## [0.8.0] - 2026-10-31
 
 ### Added
