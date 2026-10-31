@@ -557,6 +557,40 @@ pub struct Tuning {
     /// off. Only the choice of a harmful activity is held back; a host's `Interact` is never refused by
     /// it. Saved.
     pub retaliation_refractory_hours: Option<f32>,
+    /// How long, in game-hours, a person who has just been **refused** remembers the person who refused them,
+    /// and does not choose them as the target of any *affiliative* `Person` activity (`chat`, `gossip`,
+    /// `compliment`, `play`, `share`: anything whose deed is not harmful). Without it a refusal changes nothing
+    /// about who is approached next: measured on the village (seed 7, 17 game-days), 29% of refused approaches
+    /// were followed within an hour by another approach to the same person, against 42% of accepted ones, and
+    /// one narrated person asked the same neighbour for gossip six times in three hours, refused each time.
+    ///
+    /// Excluded people "did not seem to seek reconnection with the specific perpetrators of exclusion" and turned
+    /// toward new sources of affiliation (Maner, DeWall, Baumeister & Schaller 2007, DOI
+    /// 10.1037/0022-3514.92.1.42); the response to perceived rejection is withdrawal (Downey & Feldman 1996,
+    /// DOI 10.1037/0022-3514.70.6.1327). The papers give the direction, not an interval: the number of hours is
+    /// a **design default, chosen by measurement**: `Some(12.0)` is the value measured (a waking day: someone
+    /// refused at midday is asked again the next morning, where 24 hours would hold them out until the same hour
+    /// tomorrow and leave no retry within the day at all, 1.8% at seed 7). Over 17 game-days at 24 people (four
+    /// seeds) it took the share of refused approaches followed within an hour by another to the same person
+    /// (not an insult) from 24-29% to 0.3-1.1%, and within a day from 44-50% to 18-20%; the people a person
+    /// approaches in a day rose 4.1-4.4 → 5.2-5.4 (`docs/research/rebuff.md`). The refused share of all approaches
+    /// did not move (35-37%).
+    ///
+    /// **The default is `None` (off), because `Some(12.0)` trips a protected check.**
+    /// `tests/label_hysteresis.rs::the_band_stops_the_low_end_flapping_and_moves_no_relationship` bars the share
+    /// of `Acquaintance → Stranger` demotions a band leaves at 5%; with the memory at 12 hours the fixture reads 16
+    /// with the band against 311 without, 5.1%. The with-band count is 9-16 events and the memory only changes
+    /// which trajectory the village takes (at 0 / 3 / 6 / 9 / 12 / 18 / 24 hours the share is 3.8 / 3.9 / 5.6 /
+    /// 6.0 / 5.1 / 2.8 / 3.7%), so the bar is a noisy count at its edge and not a finding about the memory; it is
+    /// not loosened here. `docs/loop/needs-decision/a-refusal-is-remembered.md` says what to change to switch it on.
+    ///
+    /// The memory is written when the target's acceptance draw says no (a `requires` rule refusing it writes
+    /// nothing), is dropped when it expires, and does not touch the acceptance model,
+    /// `rejection_affinity_penalty` or any tie. A *harmful* approach is not covered: hostility after a rejection
+    /// is its own response (Bondü & Richter 2016, DOI 10.3389/fpsyg.2016.00795) and is held by
+    /// [`retaliation_refractory_hours`](Self::retaliation_refractory_hours). A host's `Interact` is never refused
+    /// by it. `None` turns it off and is exactly the old curve. Saved.
+    pub rebuff_memory_hours: Option<f32>,
     /// How much faster a **grievance fades toward someone its holder still trusts**: `ctx.grudge(a, b)` reads
     /// each of `a`'s bad memories about `b` at its age times `1 + forgiveness · trust(a → b)`
     /// ([`crate::model::recall::forgiving_pace`]). Without it every grudge fades on the one 138-hour recency
@@ -742,6 +776,10 @@ impl Default for Tuning {
             stall_epsilon: 0.25,
             failed_place_memory_hours: None,
             retaliation_refractory_hours: Some(6.0),
+            // **Off by default, measured at `Some(12.0)`** (`docs/research/rebuff.md`, mechanism Maner et al. 2007,
+            // DOI 10.1037/0022-3514.92.1.42): at 12 h it trips `label_hysteresis`'s 5% bar by one event, so it ships
+            // opt-in (see the field's doc and `docs/loop/needs-decision/a-refusal-is-remembered.md`).
+            rebuff_memory_hours: None,
             // Design default by measurement; mechanism McCullough et al. 2010 (DOI 10.1037/a0019349) and
             // Strelan, Karremans & Krieg 2017 (DOI 10.1111/bjso.12173). See the field's doc.
             forgiveness: 12.0,

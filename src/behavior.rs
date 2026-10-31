@@ -121,6 +121,16 @@ pub(crate) struct FailedPlaces(pub(crate) Vec<(Entity, f64)>);
 #[derive(Component, Debug, Clone, Default, PartialEq)]
 pub(crate) struct RecentHarm(pub(crate) Vec<(Entity, f64)>);
 
+/// People this person has just been refused by, and the game-day each may be approached again
+/// (`Tuning::rebuff_memory_hours`).
+///
+/// Written by `exchange` when an affiliative interaction (no deed, or one that does not harm) is refused by its
+/// target's acceptance draw; read by `decide_activities`, which drops those people from the targets of every
+/// affiliative `Person` activity. Pruned on every write, in insertion order. Saved (`PersonSave::rebuffed`): a
+/// reload that forgot it would send the next decision back to someone the uninterrupted run was still avoiding.
+#[derive(Component, Debug, Clone, Default, PartialEq)]
+pub(crate) struct Rebuffed(pub(crate) Vec<(Entity, f64)>);
+
 // -------------------------------------------------------------------------------------------------
 // Messages
 // -------------------------------------------------------------------------------------------------
@@ -1532,6 +1542,7 @@ struct DecisionQueries<'w, 's> {
     doing: Query<'w, 's, &'static Doing>,
     failed: Query<'w, 's, &'static FailedPlaces>,
     harmed: Query<'w, 's, &'static RecentHarm>,
+    rebuffed: Query<'w, 's, &'static Rebuffed>,
 }
 
 /// Whether a person is doing an `unavailable` activity ([`ActivityDef::unavailable`](crate::ActivityDef)) *now*:
@@ -1590,6 +1601,7 @@ fn decide_activities(
         doing,
         failed,
         harmed,
+        rebuffed,
     } = world;
     use bevy_emerge_rng::DetRng;
 
@@ -1879,6 +1891,23 @@ fn decide_activities(
                         .0
                         .iter()
                         .any(|(spared, until)| spared == other && *until > now),
+                    _ => true,
+                });
+            }
+            // **A person who has just refused this one is not a target of another approach** until the memory
+            // expires (`Tuning::rebuff_memory_hours`): excluded people do not seek reconnection with the one who
+            // excluded them (Maner et al. 2007, DOI 10.1037/0022-3514.92.1.42). A harmful activity is held by the
+            // retaliation refractory above instead. Filtered after `targets_for`, like the lists above, so the
+            // RNG draws it makes are the same whether or not anything is remembered.
+            if tuning.rebuff_memory_hours.is_some()
+                && !activity_is_harmful(&defs, spec)
+                && let Ok(memory) = rebuffed.get(person)
+            {
+                targets.retain(|target| match target {
+                    DoingTarget::Person(other) => !memory
+                        .0
+                        .iter()
+                        .any(|(refused_by, until)| refused_by == other && *until > now),
                     _ => true,
                 });
             }
@@ -2694,6 +2723,22 @@ fn exchange(
                 -settings.tuning.rejection_affinity_penalty,
                 &settings.tuning,
             );
+        }
+        // **A refusal is remembered** (`Tuning::rebuff_memory_hours`): the refused person does not go back to
+        // the one who refused them until the memory expires. Only an affiliative approach: a refused insult is
+        // held by the retaliation refractory above. `requires` refusals returned before this point.
+        if let Some(hours) = settings.tuning.rebuff_memory_hours
+            && !spec
+                .deed
+                .and_then(|d| defs.deeds.get(usize::from(d.0)))
+                .is_some_and(|deed| deed.harm < 0.0)
+        {
+            let mut refused = world.get::<Rebuffed>(actor).cloned().unwrap_or_default();
+            refused
+                .0
+                .retain(|(other, until)| *other != target && *until > now);
+            refused.0.push((target, now + f64::from(hours) / 24.0));
+            world.entity_mut(actor).insert(refused);
         }
         // **The definition's own `on_reject` emotion wins.** A pack that says what a refusal feels
         // like is not second-guessed; the crate's number is the fallback for a pack that says nothing,

@@ -39,13 +39,20 @@ fn main() {
     };
 
     let mut app = bevy_app();
-    app.insert_resource(SocietySettings {
+    let mut settings = SocietySettings {
         // One society tick per fixed step, so a measurement of N updates is N ticks.
         tick_secs: 1.0 / 64.0,
         seconds_per_day: 4.0,
         ..SocietySettings::default()
-    })
-    .insert_resource(defs);
+    };
+    // `BENCH_REBUFF=<hours>` switches `Tuning::rebuff_memory_hours` on, so the same binary measures the memory's cost.
+    if let Some(hours) = std::env::var("BENCH_REBUFF")
+        .ok()
+        .and_then(|v| v.parse::<f32>().ok())
+    {
+        settings.tuning.rebuff_memory_hours = Some(hours);
+    }
+    app.insert_resource(settings).insert_resource(defs);
     if std::env::var("BENCH_TRACE").is_ok() {
         app.insert_resource(bevy_society::DecisionTrace::with_capacity(64, 8));
     }
