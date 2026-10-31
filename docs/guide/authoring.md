@@ -232,6 +232,41 @@ zero between equal stores, 0.5 for a loaf to someone with none, and zero unless 
 neighbours' stores are copied for scoring only when some activity uses `Surplus`, so a pack without one pays
 nothing.
 
+### A household that provisions itself: `Stock(good)`
+
+`Stock(good)` is how much of a good the **actor itself** holds, in units, clamped to `[0, 1]` like every input, so
+a curve describes the first loaf and "a day's supply", not a bin of six. It needs no target and costs one read of
+the actor's own `Stock`. It is what lets a pack close the loop from "my shelf is bare" to "make some":
+
+```ron
+// make bread when hungry and holding none ...
+(id: "bake", target: Place("food"), duration_hours: 1.0, produces: [("bread", 4.0)],
+ considerations: [
+     (input: Hour, curve: Hours(6.0, 20.0)),
+     (input: Stock("bread"), curve: Linear(-1.0, 1.0)),        // 1.0 empty, 0.0 from one loaf up
+     (input: Need("food"), curve: Logistic(-10.0, 0.5)),       // only a hungry household bakes
+ ],
+ satisfies: [], interaction: None, barks: [])
+// ... and eat where there is something to eat
+(id: "eat", target: Place("food"), duration_hours: 0.75, consumes: [("bread", 0.25)],
+ considerations: [
+     (input: Need("food"), curve: Logistic(-10.0, 0.35)),
+     (input: Stock("bread"), curve: Linear(4.0, 0.05)),        // a quarter loaf, one meal, reads as 1.0
+ ],
+ satisfies: [("food", 1.2)], interaction: None, barks: [])
+```
+
+**Why a pack wants this.** A producer that works by the clock is an open loop: stable only if its output happens to
+equal what the village eats. The starter pack's `bake` is a one-hour dawn errand drawn against nine other options, and
+on the evidence village scaled to sixty people it makes almost no bread (0-3 bakes in ten game-days), the stores run
+down, and the town is hungry for good by about game-day 12 (`docs/loop/runs/2026-10-30-28/`). A household that tops
+up **its own** shelf is a balancing loop on a stock (Meadows, *Thinking in Systems*), so production is the sum of what
+the shelves ask for and scales with the population by construction. A person with an empty shelf that is not hungry
+is not made to bake at once, and a person at a table with nothing on it is priced, not forbidden: the floor of
+`0.05` keeps "nothing gates" true. `examples/assets/provisioning.society.ron` is this recipe as the two replacement
+activities; the starter pack keeps its clock-driven `bake` until the owner decides otherwise
+(`docs/loop/needs-decision/households-provision-themselves.md`).
+
 ## Triggers
 
 ```ron
