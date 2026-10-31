@@ -171,6 +171,67 @@ impl TieLabel {
     }
 }
 
+/// A blood relation with a published coefficient of relatedness: what someone **is to** the person who
+/// lists them (`Parent` is "this person's parent"), authored on a [`TieSpec`](crate::TieSpec) and kept on the
+/// [`Tie`].
+///
+/// `r` is the probability that two people share a given gene by common descent (Hamilton 1964, DOI
+/// `10.1016/0022-5193(64)90038-4`): `0.5` for a parent and a child and for full siblings, `0.25` for a
+/// grandparent, a grandchild, a half-sibling, an aunt or uncle and a niece or nephew, `0.125` for a first
+/// cousin. Relatedness is symmetric, so `Parent` and `Child` carry the same number; the two directions of a
+/// family tie carry the two [converse](Kin::converse) names (a tie that says "my parent" is answered by one
+/// that says "my child").
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Reflect, Serialize, Deserialize)]
+pub enum Kin {
+    /// A parent (`r = 0.5`).
+    Parent,
+    /// A child (`r = 0.5`).
+    Child,
+    /// A full sibling (`r = 0.5`).
+    Sibling,
+    /// A half-sibling (`r = 0.25`).
+    HalfSibling,
+    /// A grandparent (`r = 0.25`).
+    Grandparent,
+    /// A grandchild (`r = 0.25`).
+    Grandchild,
+    /// An aunt or uncle (`r = 0.25`).
+    AuntUncle,
+    /// A niece or nephew (`r = 0.25`).
+    NieceNephew,
+    /// A first cousin (`r = 0.125`).
+    Cousin,
+}
+
+impl Kin {
+    /// The coefficient of relatedness, in `(0, 0.5]` (Hamilton 1964, DOI `10.1016/0022-5193(64)90038-4`).
+    pub fn relatedness(self) -> f32 {
+        match self {
+            Self::Parent | Self::Child | Self::Sibling => 0.5,
+            Self::HalfSibling
+            | Self::Grandparent
+            | Self::Grandchild
+            | Self::AuntUncle
+            | Self::NieceNephew => 0.25,
+            Self::Cousin => 0.125,
+        }
+    }
+
+    /// What the other person says the first one is to them: `Parent` is answered by `Child`, `Grandparent` by
+    /// `Grandchild`, `AuntUncle` by `NieceNephew` and back; a sibling, a half-sibling and a cousin by themselves.
+    pub fn converse(self) -> Self {
+        match self {
+            Self::Parent => Self::Child,
+            Self::Child => Self::Parent,
+            Self::Grandparent => Self::Grandchild,
+            Self::Grandchild => Self::Grandparent,
+            Self::AuntUncle => Self::NieceNephew,
+            Self::NieceNephew => Self::AuntUncle,
+            Self::Sibling | Self::HalfSibling | Self::Cousin => self,
+        }
+    }
+}
+
 /// One directed edge from the owning person to `target` (plan D4).
 #[derive(Debug, Clone, Copy, PartialEq, Reflect)]
 pub struct Tie {
@@ -188,6 +249,10 @@ pub struct Tie {
     pub last_contact_day: f32,
     /// The label as of the last refresh.
     pub label: TieLabel,
+    /// The blood relation the target is to the owner, `None` for a stranger to the family. Set it on both
+    /// directions with each other's [`Kin::converse`]. A relative's tie is never trimmed by the Dunbar cap, counts
+    /// as close for grief and for missing someone, and earns [`Tuning::kin_premium`] on a gift.
+    pub kin: Option<Kin>,
 }
 
 impl Tie {
@@ -210,7 +275,13 @@ impl Tie {
             familiarity_peak: 0.0,
             last_contact_day: 0.0,
             label: TieLabel::Stranger,
+            kin: None,
         }
+    }
+
+    /// The coefficient of relatedness `r` of the target to the owner, `0` when [`kin`](Self::kin) is `None`.
+    pub fn relatedness(&self) -> f32 {
+        self.kin.map_or(0.0, Kin::relatedness)
     }
 
     /// Adds `delta` to affinity, **clamped to `±Tuning::affinity_ceiling`**.
@@ -374,13 +445,14 @@ impl Ties {
         self.trim_keeping(now_days, tuning, max_ties, |_| false);
     }
 
-    /// [`trim`](Self::trim), except a tie for which `frozen(target)` holds is **excluded from the count
-    /// and never removed**.
+    /// [`trim`](Self::trim), except a tie for which `frozen(target)` holds, **or a tie to a relative**
+    /// ([`Tie::kin`] above zero), is **excluded from the count and never removed**.
     ///
     /// That is what a dead person's ties need: a town that has lost half its people must not forget them
     /// because the Dunbar cap only counted the living. A cap below the frozen count keeps every frozen
     /// tie and trims the living ones to nothing, which is the honest answer — the frozen set is not the
-    /// caller's to trade away.
+    /// caller's to trade away. A relative is held for the same reason: the tie is the only record of who
+    /// someone's mother is, and a cap on how many *acquaintances* a person can keep is not a cap on kin.
     pub fn trim_keeping(
         &mut self,
         now_days: f32,
@@ -388,7 +460,8 @@ impl Ties {
         max_ties: usize,
         frozen: impl Fn(Entity) -> bool,
     ) {
-        let live = self.0.iter().filter(|t| !frozen(t.target)).count();
+        let held = |t: &Tie| t.kin.is_some() || frozen(t.target);
+        let live = self.0.iter().filter(|t| !held(t)).count();
         if live <= max_ties {
             return;
         }
@@ -396,13 +469,13 @@ impl Ties {
         let mut ranked: Vec<(f32, u64)> = self
             .0
             .iter()
-            .filter(|t| !frozen(t.target))
+            .filter(|t| !held(t))
             .map(|t| (t.familiarity(now_days, tuning), t.target.to_bits()))
             .collect();
         ranked.sort_by(|a, b| a.0.total_cmp(&b.0).then(a.1.cmp(&b.1)));
         let doomed: Vec<u64> = ranked.iter().take(excess).map(|&(_, bits)| bits).collect();
         self.0
-            .retain(|t| frozen(t.target) || !doomed.contains(&t.target.to_bits()));
+            .retain(|t| held(t) || !doomed.contains(&t.target.to_bits()));
     }
 
     /// The `close_ties` targets with the highest `max(0, affinity) · familiarity`, best first.

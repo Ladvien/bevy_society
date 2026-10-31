@@ -143,6 +143,10 @@ pub struct TieSave {
     pub last_contact_day: f32,
     /// The label as of the last refresh.
     pub label: crate::relationships::TieLabel,
+    /// The blood relation the target is to this person ([`crate::Tie::kin`]); absent in a save from a release
+    /// that had no kin.
+    #[serde(default)]
+    pub kin: Option<crate::relationships::Kin>,
 }
 
 /// What a memory is about, with every person reference as a [`PersonKey`].
@@ -656,6 +660,7 @@ pub fn capture(world: &mut World) -> SocietySave {
                     familiarity_peak: tie.familiarity_peak,
                     last_contact_day: tie.last_contact_day,
                     label: tie.label,
+                    kin: tie.kin,
                 })
             })
             .collect();
@@ -1226,6 +1231,7 @@ fn write_person(
                 familiarity_peak: tie.familiarity_peak,
                 last_contact_day: tie.last_contact_day,
                 label: tie.label,
+                kin: tie.kin,
             })
         })
         .collect();

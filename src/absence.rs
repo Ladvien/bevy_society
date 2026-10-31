@@ -44,11 +44,14 @@ pub(crate) struct ReturnQueue(pub(crate) Vec<(Entity, f64)>);
 
 /// How close a holder is to `tie`'s target, in `[0, 1]`, or `None` when the tie is not a close one.
 ///
-/// The line grief uses: a `Friend` label or a `familiarity_peak` at
-/// [`Tuning::bereavement_familiarity`], and a closeness of `0.5 · (1 + affinity)` so an enemy's tie is
-/// none at all (Prigerson et al. 2009, DOI `10.1371/journal.pmed.1000121`).
+/// The line grief uses: a `Friend` label, a `familiarity_peak` at [`Tuning::bereavement_familiarity`], or a
+/// **relative** ([`Tie::kin`] above zero: close by the relation, whatever the label and familiarity say), and a
+/// closeness of `0.5 · (1 + affinity)` so an enemy's tie is none at all (Prigerson et al. 2009, DOI
+/// `10.1371/journal.pmed.1000121`). A relative the holder dislikes is therefore mourned less than one they
+/// love, as everyone else is.
 pub(crate) fn closeness(tie: &Tie, tuning: &Tuning) -> Option<f32> {
-    let close = tie.label == crate::TieLabel::Friend
+    let close = tie.kin.is_some()
+        || tie.label == crate::TieLabel::Friend
         || tie.familiarity_peak >= tuning.bereavement_familiarity;
     close.then(|| (0.5 * (1.0 + tie.affinity)).clamp(0.0, 1.0))
 }

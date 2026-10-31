@@ -378,6 +378,14 @@ pub enum Input {
     Respect,
     /// Familiarity with the target. Person targets only.
     Familiarity,
+    /// **How closely the target is related to the actor**, `2r` clamped to `[0, 1]` for the coefficient of
+    /// relatedness `r` on the actor's tie ([`crate::Kin::relatedness`]): `1.0` for a parent, a child or a
+    /// sibling, `0.5` for a grandparent, an aunt or uncle, a half-sibling, `0.25` for a first cousin, `0.0` for
+    /// anyone who is not a relative or has no tie. Person targets only. A curve rescales it: `Linear(0.5, 0.5)`
+    /// keeps a stranger at half and a sibling at the top, which tilts an activity toward relatives without
+    /// closing it to everyone else. An activity that gives goods already carries
+    /// [`Tuning::kin_premium`](crate::Tuning) and needs no `Kinship` term for that.
+    Kinship,
     /// Distance to the target divided by the perception radius. Place, Home and Person targets.
     Distance,
     /// Fraction of the actor's close ties doing this activity. Person targets only.
@@ -919,6 +927,7 @@ impl SocietyDefs {
                 duration_hours: 1.0,
                 rank: 0,
                 urgent: None,
+                gives: false,
                 unavailable: false,
                 weight: 1.0,
                 considerations: Vec::new(),
@@ -1564,6 +1573,15 @@ impl SocietyDefs {
         // silent no-op: a task that produces nothing because of a typo is a bug a host cannot see.
         let produces = self.good_list(&owner, &def.produces)?;
         let consumes = self.good_list(&owner, &def.consumes)?;
+        // A **gift**: goods leave the actor and none come back. A swap (`target_gives`) is an exchange, and the
+        // premium is for altruism (Curry, Roberts & Dunbar 2013).
+        let gives = interaction.is_some_and(|id| {
+            self.interactions
+                .get(usize::from(id.0))
+                .is_some_and(|spec| {
+                    !spec.on_accept.actor_gives.is_empty() && spec.on_accept.target_gives.is_empty()
+                })
+        });
         self.activities.push(ActivitySpec {
             name: def.id,
             target: def.target,
@@ -1575,6 +1593,7 @@ impl SocietyDefs {
             considerations,
             satisfies,
             interaction,
+            gives,
             produces,
             consumes,
             barks: def.barks,
@@ -1649,6 +1668,7 @@ impl SocietyDefs {
             Input::Trust => Signal::Trust,
             Input::Respect => Signal::Respect,
             Input::Familiarity => Signal::Familiarity,
+            Input::Kinship => Signal::Kinship,
             Input::Distance => Signal::Distance,
             Input::SocialProof => Signal::SocialProof,
             Input::Skill(name) => {
@@ -1948,6 +1968,9 @@ pub(crate) struct ActivitySpec {
     pub(crate) considerations: Vec<Term>,
     pub(crate) satisfies: Vec<(NeedId, f32)>,
     pub(crate) interaction: Option<InteractionId>,
+    /// Whether the interaction is a **gift** when accepted (`actor_gives` is not empty and `target_gives` is
+    /// empty): the activities [`Tuning::kin_premium`](crate::Tuning) favours toward a relative.
+    pub(crate) gives: bool,
     /// Goods made per completed use.
     pub(crate) produces: Vec<(GoodId, f32)>,
     /// Goods used up per completed use.
@@ -2018,6 +2041,8 @@ pub enum Signal {
     Respect,
     /// Familiarity with the target.
     Familiarity,
+    /// The target's relatedness to the actor, doubled.
+    Kinship,
     /// Distance to the target.
     Distance,
     /// Share of close ties doing the activity.
@@ -2210,6 +2235,7 @@ fn check_input(owner: &str, input: &Input, target: &ActivityTarget) -> Result<()
             | Input::Trust
             | Input::Respect
             | Input::Familiarity
+            | Input::Kinship
             | Input::SocialProof
             | Input::Surplus(_)
     );

@@ -1950,6 +1950,12 @@ fn decide_activities(
                 // **What a place with no room costs.** The price belongs to the target, not to a consideration, so
                 // every activity pays it — including ones a host wrote — without a definitions-file change.
                 score *= crowding_price(target, &place_views, tuning.crowding_penalty);
+                // **What a relative's gift is worth beyond the liking.** A gift to a relative scores `1 + premium · 2r`
+                // times what the same surplus scores toward a stranger (`Tuning::kin_premium`); every other activity
+                // and every other target is untouched, so a society with no relatives is the previous release's.
+                if spec.gives {
+                    score *= kin_price(target, &decision.ties, tuning.kin_premium);
+                }
                 if score <= 0.0 {
                     continue;
                 }
@@ -2227,6 +2233,23 @@ fn crowding_price(target: DoingTarget, places: &[PlaceView], penalty: f32) -> f3
     (1.0 - penalty).clamp(0.0, 1.0)
 }
 
+/// The factor a **gift** to `target` is multiplied by: `1 + premium · 2r` for a relative with coefficient of
+/// relatedness `r`, `1.0` for anyone else (Curry, Roberts & Dunbar 2013, DOI `10.1111/j.2044-8295.2012.02119.x`;
+/// Burton-Chellew & Dunbar 2015, DOI `10.1093/beheco/aru165`). `premium == 0` makes this exactly `1.0`
+/// everywhere, which is how the previous release's ranking is restored. See
+/// [`Tuning::kin_premium`](crate::Tuning).
+fn kin_price(target: DoingTarget, ties: &[crate::relationships::Tie], premium: f32) -> f32 {
+    if premium <= 0.0 {
+        return 1.0;
+    }
+    let DoingTarget::Person(other) = target else {
+        return 1.0;
+    };
+    ties.iter()
+        .find(|tie| tie.target == other)
+        .map_or(1.0, |tie| 1.0 + premium * 2.0 * tie.relatedness())
+}
+
 /// The targets an activity offers this decision (plan D7), with closed places excluded.
 ///
 /// **Closed, not full.** A place with no free seat is still offered: `capacity` says how many people it is
@@ -2468,6 +2491,10 @@ fn signal_value(
         Signal::Respect => (tie.map_or(0.0, |t| t.respect) + 1.0) / 2.0,
         Signal::Familiarity => match target {
             DoingTarget::Person(_) => tie.map_or(0.0, |t| t.familiarity_peak),
+            _ => 0.0,
+        },
+        Signal::Kinship => match target {
+            DoingTarget::Person(_) => tie.map_or(0.0, |t| 2.0 * t.relatedness()),
             _ => 0.0,
         },
         Signal::Distance => there.map_or(1.0, |p| {
