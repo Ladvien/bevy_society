@@ -76,7 +76,7 @@ At the final code (`1217c11`, after `cargo fmt`), on a host at load 15-48 with o
 
 - `cargo fmt --check`: clean. `cargo clippy --all-targets --all-features -- -D warnings`: clean. `RUSTDOCFLAGS="-D warnings" cargo doc --no-deps --all-features`: clean. `cargo build --no-default-features`: the 5 dead-code warnings `main` has (dialogue-only items). `cargo build --examples`: clean.
 - `cargo test --release --all-features --no-fail-fast`, two batches (50 test binaries, then `--lib` and the other 50): **101 `test result: ok`, 0 failures** (432 tests) and `--doc` (3 doc tests) ok, including `label_hysteresis`, `friendship_bound`, `rumor_book`, `starting_larder`, `need_cycle`, `village_evening`, `determinism`, `save`, `save_upgrade`, `readme`, `guide_blocks`, `leaf`, `tuning_covers_rates` and the new `tests/rebuff.rs` (7: a refused person is asked again and again with the memory off; one approach until the memory runs out; the memory ends and the person is asked again; a person turned down turns to someone new; an accepted approach is not remembered; a refused insult is not a rebuff; a save mid-memory restores the same list).
-- `cargo test --release --no-default-features --no-fail-fast`: see the line at the end of this section.
+- `cargo test --release --no-default-features --no-fail-fast` (every integration binary, the library and the doctests): **102 `test result: ok`, 392 tests, 0 failures, exit 0**.
 
 The same suite ran once before the default was set to `None`, with `Some(12.0)`: **every binary passed but `label_hysteresis`** (100 of 101), which is the check in section 6.
 
