@@ -501,10 +501,16 @@ struct World {
     origin: Option<Entity>,
 }
 
+/// A need below this level is "at the floor": nothing is left of it.
+const FLOOR: f32 = 0.05;
+
 /// One row of the time series.
 struct Row {
     tick: f64,
     needs: Vec<f32>,
+    /// How many villagers have need *k* below [`FLOOR`], per need: the count of people the need has left at the
+    /// bottom. The mean hides a village in which some people are starving and the rest are fine.
+    floor: Vec<u32>,
     pleasure: f32,
     arousal: f32,
     dominance: f32,
@@ -1014,6 +1020,7 @@ fn snapshot_row(
     let world_ref = app.world();
     let living = world.villagers.len().max(1) as f32;
     let (mut needs_sum, mut need_count) = (vec![0.0_f32; 4], 0usize);
+    let mut floor = vec![0_u32; 4];
     let (mut p, mut a, mut d) = (0.0_f32, 0.0_f32, 0.0_f32);
     let mut opinions = Vec::new();
     let (mut friends, mut rivals) = (0u32, 0u32);
@@ -1031,6 +1038,11 @@ fn snapshot_row(
             for (slot, level) in needs.0.iter().enumerate() {
                 if let Some(sum) = needs_sum.get_mut(slot) {
                     *sum += level;
+                }
+                if *level < FLOOR
+                    && let Some(count) = floor.get_mut(slot)
+                {
+                    *count += 1;
                 }
             }
             // Only count people whose needs have been sized. Before `size_person_state` runs, the
@@ -1090,6 +1102,7 @@ fn snapshot_row(
         } else {
             needs_sum.iter().map(|s| s / need_count as f32).collect()
         },
+        floor,
         pleasure: p / n,
         arousal: a / n,
         dominance: d / n,
@@ -1293,11 +1306,14 @@ fn clock_label(clock: &SocietyClock) -> String {
 /// Writes `series.csv`, one row per tick.
 fn series(rows: &[Row], out: &Path) {
     let mut csv = String::from(
-        "tick,need0,need1,need2,need3,pleasure,arousal,dominance,opinion_variance,rumor_reach,friends,rivals,bread_min,bread_mean,bread_max,bread_sd,price,shares,doing\n",
+        "tick,need0,need1,need2,need3,floor0,floor1,floor2,floor3,pleasure,arousal,dominance,opinion_variance,rumor_reach,friends,rivals,bread_min,bread_mean,bread_max,bread_sd,price,shares,doing\n",
     );
     for row in rows {
         let needs: Vec<String> = (0..4)
             .map(|i| format!("{:.4}", row.needs.get(i).copied().unwrap_or(0.0)))
+            .collect();
+        let floor: Vec<String> = (0..4)
+            .map(|i| row.floor.get(i).copied().unwrap_or(0).to_string())
             .collect();
         let doing: Vec<String> = row
             .doing
@@ -1306,9 +1322,10 @@ fn series(rows: &[Row], out: &Path) {
             .collect();
         let _ = writeln!(
             csv,
-            "{},{},{:.4},{:.4},{:.4},{:.5},{},{},{},{:.3},{:.3},{:.3},{:.3},{:.3},{},\"{}\"",
+            "{},{},{},{:.4},{:.4},{:.4},{:.5},{},{},{},{:.3},{:.3},{:.3},{:.3},{:.3},{},\"{}\"",
             row.tick,
             needs.join(","),
+            floor.join(","),
             row.pleasure,
             row.arousal,
             row.dominance,
