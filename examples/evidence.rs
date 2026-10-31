@@ -38,14 +38,19 @@ use bevy_society::{
     Knowledge, Mood, Needs, Opinions, Person, Place, PlaceTags, PlantRumor, RumorBook,
     SocietyClock, SocietyDefs, SocietyPlugins, SocietySettings, TieLabel, TieLabelChanged, Ties,
 };
-use bevy_society::{Memories, MemoryKind};
+use bevy_society::{Chronotype, Memories, MemoryKind};
 use std::collections::BTreeMap;
 use std::fmt::Write as _;
 use std::path::{Path, PathBuf};
 
 fn main() {
     let args = Args::parse();
-    let defs = match society_defs(&args.scenario, args.provisioning, args.urgent) {
+    let defs = match society_defs(
+        &args.scenario,
+        args.provisioning,
+        args.urgent,
+        args.sleepers_available,
+    ) {
         Ok(defs) => defs,
         Err(err) => {
             eprintln!("evidence: {err}");
@@ -127,6 +132,9 @@ fn main() {
         eprintln!("evidence: unknown scenario '{}'", args.scenario);
         std::process::exit(1);
     };
+    if let Some(sd) = args.chronotype_sd {
+        give_body_clocks(&mut app, &world, sd);
+    }
 
     // `--days` overrides the scenario's own `ticks:` with `days · seconds_per_day / tick_secs`, so a
     // thirty-day run is one flag rather than an arithmetic exercise.
@@ -199,6 +207,7 @@ fn main() {
     // activity was chosen at, so "nobody bakes" can be told from "nobody decides inside the baking window".
     let mut ledger = Ledger::default();
     let mut floor_ledger = FloorLedger::new(app.world().resource::<SocietyDefs>());
+    let mut sleep_ledger = SleepLedger::default();
     for tick in 0..ticks {
         // Each villager's first-good store **before** this update, so a share can be logged as
         // `before -> after` for both sides. After alone read as a bug: "Dena holds 0.0, Hilda holds 0.0" is
@@ -269,6 +278,14 @@ fn main() {
                     continue;
                 }
                 all_exchanges += 1;
+                if app
+                    .world()
+                    .get::<Doing>(resolved.target)
+                    .is_some_and(|doing| doing.label(app.world().resource::<SocietyDefs>()) == "sleep")
+                {
+                    sleep_ledger.slept_on += 1;
+                }
+                sleep_ledger.exchanges += 1;
                 let counts = repeat_by_interaction
                     .entry(resolved.interaction.clone())
                     .or_default();
@@ -344,9 +361,20 @@ fn main() {
                 .resource::<bevy::ecs::message::Messages<ActivityStarted>>();
             for message in started.iter_current_update_messages() {
                 ledger.started(now, hour, &message.activity);
+                if message.activity == "sleep" {
+                    sleep_ledger.began[hour.floor() as usize % 24] += 1;
+                }
             }
             for message in &ended_now {
                 ledger.ended(now, &message.activity, message.completed);
+                if message.activity == "sleep" {
+                    let hour = app.world().resource::<SocietyClock>().hour();
+                    if message.completed {
+                        sleep_ledger.woke[hour.floor() as usize % 24] += 1;
+                    } else {
+                        sleep_ledger.interrupted += 1;
+                    }
+                }
             }
         }
         {
@@ -375,6 +403,7 @@ fn main() {
             }
         }
         floor_ledger.record(&app, &world, tick > 0);
+        sleep_ledger.record(&app, &world, tick > 0);
         let mut row = snapshot_row(&app, tick as f64, &world, planted);
         row.shares = shares;
         // The first row is the pre-society state: `size_person_state` has not run, so `Needs` is empty
@@ -488,6 +517,8 @@ fn main() {
     }
     ledger.write(&out);
     floor_ledger.write(&out);
+    sleep_ledger.write(&out);
+    write_chronotypes(&app, &world, &out);
     series(&rows, &out);
     summary(
         app.world(),
@@ -755,6 +786,7 @@ fn society_defs(
     scenario: &str,
     provisioning: bool,
     urgent: Option<Option<f32>>,
+    sleepers_available: bool,
 ) -> Result<SocietyDefs, String> {
     let mut file = bevy_society::DefsFile::starter().map_err(|e| e.to_string())?;
     if provisioning {
@@ -795,6 +827,13 @@ fn society_defs(
             }
         }
         None => {}
+    }
+    // `--sleepers-available` puts every `unavailable` activity back on the list of things a person can be approached
+    // during, so a run can be read with and without the rule that nobody greets a sleeper.
+    if sleepers_available {
+        for activity in &mut file.activities {
+            activity.unavailable = false;
+        }
     }
     SocietyDefs::compile(file).map_err(|e| e.to_string())
 }
@@ -1782,6 +1821,12 @@ struct Args {
     provisioning: bool,
     /// `--urgent BELOW` / `--no-urgent`: override the pack's `urgent` rank (see `UrgentDef`); `None` leaves it.
     urgent: Option<Option<f32>>,
+    /// `--chronotype-sd H`: gives every villager a `Chronotype` drawn from a normal of standard deviation `H` hours
+    /// (`Chronotype::sample`), from a stream of its own so every other draw of the run is the one it had without
+    /// the flag. `None` (the default) leaves everybody on the village's clock.
+    chronotype_sd: Option<f32>,
+    /// `--sleepers-available`: clears `ActivityDef::unavailable` on every activity (a sleeper can be approached again).
+    sleepers_available: bool,
 }
 
 impl Args {
@@ -1809,6 +1854,8 @@ impl Args {
             days: None,
             provisioning: false,
             urgent: None,
+            chronotype_sd: None,
+            sleepers_available: false,
         };
         let mut argv = std::env::args().skip(1);
         while let Some(flag) = argv.next() {
@@ -1816,6 +1863,10 @@ impl Args {
                 "--scenario" => args.scenario = argv.next().unwrap_or_default(),
                 "--out" => args.out = argv.next().unwrap_or_default(),
                 "--seed" => args.seed = argv.next().and_then(|v| v.parse().ok()),
+                "--chronotype-sd" => {
+                "--sleepers-available" => args.sleepers_available = true,
+                    args.chronotype_sd = argv.next().and_then(|v| v.parse().ok())
+                }
                 "--people" => args.people = argv.next().and_then(|v| v.parse().ok()),
                 "--seconds-per-day" => {
                     args.seconds_per_day = argv.next().and_then(|v| v.parse().ok())
@@ -1863,5 +1914,112 @@ impl Args {
             }
         }
         args
+    }
+}
+
+/// Gives every villager a body clock from a stream of its own (`seed ^ salt`), so personalities, ties and every
+/// other draw of the run are the ones it has without `--chronotype-sd`.
+fn give_body_clocks(app: &mut App, world: &World, sd: f32) {
+    let seed = app.world().resource::<SocietySettings>().seed;
+    let mut rng = bevy_emerge_rng::seeded(seed ^ 0xC1C0_C10C);
+    for &entity in &world.villagers {
+        let chronotype = Chronotype::sample(&mut rng, sd);
+        app.world_mut().entity_mut(entity).insert(chronotype);
+    }
+}
+
+/// `chronotypes.txt`: each villager's offset, in hours, in spawn order.
+fn write_chronotypes(app: &App, world: &World, out: &Path) {
+    let mut text = String::from("name offset_hours\n");
+    for &entity in &world.villagers {
+        let name = app
+            .world()
+            .get::<Name>(entity)
+            .map_or("someone", |name| name.as_str());
+        let offset = app.world().get::<Chronotype>(entity).map_or(0.0, |c| c.0);
+        let _ = writeln!(text, "{name} {offset:+.2}");
+    }
+    if let Err(err) = std::fs::write(out.join("chronotypes.txt"), text) {
+        eprintln!("evidence: cannot write chronotypes.txt: {err}");
+    }
+}
+
+/// **When the village sleeps.** Every villager every tick from game-day 1 on: how many were asleep, by clock hour
+/// of the day; the clock hour each sleep began and ended at; how many ended interrupted; and how many exchanges
+/// were aimed at somebody who was asleep when it resolved.
+#[derive(Default)]
+struct SleepLedger {
+    /// Villager-ticks asleep (arrived, doing `sleep`) and villager-ticks counted, by clock hour.
+    asleep: [u64; 24],
+    counted: [u64; 24],
+    /// Sleeps started and completed, by the clock hour of the event.
+    began: [u32; 24],
+    woke: [u32; 24],
+    interrupted: u32,
+    /// Exchanges whose target was asleep when the exchange resolved, and all exchanges.
+    slept_on: u64,
+    exchanges: u64,
+}
+
+impl SleepLedger {
+    fn record(&mut self, app: &App, world: &World, live: bool) {
+        if !live {
+            return;
+        }
+        let ecs = app.world();
+        let hour = ecs.resource::<SocietyClock>().hour().floor() as usize % 24;
+        let defs = ecs.resource::<SocietyDefs>();
+        for &entity in &world.villagers {
+            self.counted[hour] += 1;
+            if ecs
+                .get::<Doing>(entity)
+                .is_some_and(|doing| !doing.is_travelling() && defs.activity_name(doing.activity) == "sleep")
+            {
+                self.asleep[hour] += 1;
+            }
+        }
+    }
+
+    /// `sleep.txt`: a table of `hour asleep% began woke`, then the totals.
+    fn write(&self, out: &Path) {
+        let mut text = String::from("hour asleep_pct began woke\n");
+        for hour in 0..24 {
+            let share = 100.0 * self.asleep[hour] as f64 / self.counted[hour].max(1) as f64;
+            let _ = writeln!(
+                text,
+                "{hour:02} {share:6.1} {:5} {:5}",
+                self.began[hour], self.woke[hour]
+            );
+        }
+        let began: u32 = self.began.iter().sum();
+        let woke: u32 = self.woke.iter().sum();
+        let _ = writeln!(
+            text,
+            "\nsleeps started {began}, completed {woke}, interrupted {} ({:.1}% of those that ended)",
+            self.interrupted,
+            100.0 * f64::from(self.interrupted) / f64::from((woke + self.interrupted).max(1))
+        );
+        let _ = writeln!(
+            text,
+            "exchanges aimed at somebody asleep: {} of {} ({:.2}%)",
+            self.slept_on,
+            self.exchanges,
+            100.0 * self.slept_on as f64 / self.exchanges.max(1) as f64
+        );
+        // The widest hour: how much of the village sleeps at the peak and at the trough, and how many hours are
+        // neither (a step has none; a spread has several).
+        let shares: Vec<f64> = (0..24)
+            .map(|hour| 100.0 * self.asleep[hour] as f64 / self.counted[hour].max(1) as f64)
+            .collect();
+        let mixed = shares.iter().filter(|s| **s > 10.0 && **s < 90.0).count();
+        let _ = writeln!(
+            text,
+            "asleep share at the peak {:.1}%, at the trough {:.1}%; clock hours with between 10% and 90% asleep: {mixed}",
+            shares.iter().copied().fold(0.0, f64::max),
+            shares.iter().copied().fold(100.0, f64::min)
+        );
+        if let Err(err) = std::fs::write(out.join("sleep.txt"), text) {
+            eprintln!("evidence: cannot write sleep.txt: {err}");
+        }
     }
 }

@@ -192,8 +192,8 @@ pub use groups::{
 };
 pub use interact::{Feeling, Interact, SocietyBark};
 pub use mind::{
-    ActiveEmotion, Appraise, EmotionKind, Emotions, Memories, Memory, MemoryKind, Mood, MoodRates,
-    Needs, Personality, Signals, Trait,
+    ActiveEmotion, Appraise, Chronotype, EmotionKind, Emotions, Memories, Memory, MemoryKind, Mood,
+    MoodRates, Needs, Personality, Signals, Trait,
 };
 pub use placement::{
     PersonDef, PersonalityDef, PlaceDef, PlaceDependent, Placed, PlacementFile, TieSpec,

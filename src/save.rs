@@ -51,7 +51,9 @@ use crate::defs::{ActivityId, DeedId, InteractionId, SocietyDefs};
 use crate::economy::Prices;
 use crate::groups::{FactionStats, Memberships, Status};
 use crate::mind::Signals;
-use crate::mind::{EmotionKind, Emotions, Memories, MemoryKind, Mood, Needs, Personality};
+use crate::mind::{
+    Chronotype, EmotionKind, Emotions, Memories, MemoryKind, Mood, Needs, Personality,
+};
 use crate::relationships::{Tie, Ties};
 use crate::rules::{LastDays, NeedDisarmed, RumorReported, TriggerRemap, TriggerState};
 use crate::rumor::{Rumor, RumorBook, RumorId};
@@ -301,6 +303,11 @@ pub struct PersonSave {
     /// as a fresh window, the state it was saved without. `VERSION` 4.
     #[serde(default)]
     pub travel_progress: Option<(u32, u64)>,
+    /// The body-clock offset in hours ([`Chronotype`]). Absent from a file written before it existed, which
+    /// restores as no offset (`0.0`), the state it was saved without. Added without a `VERSION` bump, like
+    /// the other fields with a default.
+    #[serde(default)]
+    pub chronotype: Chronotype,
 }
 
 /// One rumor, with every person reference as a [`PersonKey`].
@@ -543,6 +550,7 @@ struct PersonCapture {
     /// Goods held, when the pack defines any.
     stock: Option<&'static crate::Stock>,
     progress: Option<&'static crate::behavior::TravelProgress>,
+    chronotype: Option<&'static Chronotype>,
 }
 
 /// Entity to [`PlaceKey`], for the places the host keyed.
@@ -736,6 +744,7 @@ pub fn capture(world: &mut World) -> SocietySave {
             travel_progress: person
                 .progress
                 .map(|p| (p.best.to_bits(), p.improved_day.to_bits())),
+            chronotype: person.chronotype.copied().unwrap_or_default(),
             signals: person.signals.clone(),
             doing,
             destination: person
@@ -1284,6 +1293,7 @@ fn write_person(
     em.insert((
         PersonId(person.person_id),
         person.personality,
+        person.chronotype,
         person.mood,
         emotions,
         person.needs.clone(),

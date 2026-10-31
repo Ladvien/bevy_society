@@ -125,6 +125,58 @@ impl Personality {
     }
 }
 
+/// How far a person's body clock runs behind the wall clock, in hours: positive is an owl, negative a lark,
+/// `0.0` (the default) a person whose body keeps the village's time.
+///
+/// Chronotype is the phase at which a person's circadian clock entrains to the day, measured by the middle of
+/// their sleep on free days (Roenneberg et al. 2007, DOI `10.1016/j.smrv.2007.07.005`). Across a population
+/// it is near-normal at every age (Fischer et al. 2017, DOI `10.1371/journal.pone.0178782`, n = 53 689), and
+/// it is unrelated to how long a person sleeps, so an offset moves a person's night and does not change its
+/// length. The pack's sleep window `Hours(22, 6)` is centred on 02:00, so the offset is a person's mid-sleep
+/// minus 02:00: `+2.0` falls asleep at 00:00 and wakes at 08:00.
+///
+/// **Two clocks.** [`Input::Hour`](crate::Input::Hour) is the *social* clock (shop hours, the baker's dawn,
+/// the working day) and stays the same for everybody; [`Input::BodyHour`](crate::Input::BodyHour) is this
+/// person's own. The gap between them is what Wittmann et al. 2006 (DOI `10.1080/07420520500545979`) call
+/// social jetlag, and an author who wants an owl to open the workshop late simply writes the activity's
+/// window on `Hour`.
+///
+/// The crate never draws one: a host writes it as it writes a [`Personality`], with
+/// [`Chronotype::sample`] or from its own data (`PersonDef::chronotype_hours`). A person without one has
+/// offset `0` and is exactly the person the crate had before this component existed.
+#[derive(Component, Clone, Copy, Debug, Default, PartialEq, Reflect)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct Chronotype(pub f32);
+
+impl Chronotype {
+    /// The spread of a population's offsets, in hours (one standard deviation).
+    ///
+    /// **A design default**, chosen inside the published range: Fischer et al. 2017 give an interquartile
+    /// range of 02:24-04:15 (a normal fit has a standard deviation of 1.37 h) and 1.57-2.65 h by age and sex
+    /// once diary recall noise is in; Reiter et al. 2021 (DOI `10.3390/clockssleep3020021`) 1.18 h; Sogawa et
+    /// al. 2023 (DOI `10.5334/jcr.225`) 1.6 h.
+    pub const POPULATION_SD_HOURS: f32 = 1.5;
+
+    /// The hour on this person's own clock, in `[0, 24)`, when the wall clock reads `clock_hour`.
+    pub fn body_hour(self, clock_hour: f32) -> f32 {
+        (clock_hour - self.0).rem_euclid(24.0)
+    }
+
+    /// One person's offset drawn from a normal population of standard deviation `sd_hours`, centred on the
+    /// pack's own night and truncated at three standard deviations (the near-normal distribution of Fischer
+    /// et al. 2017 has no use for the tails a game would have to reconcile).
+    ///
+    /// The normal comes from twelve uniform draws summed (Irwin-Hall: mean 6, variance 1), which needs no
+    /// transcendental function and takes exactly twelve numbers from `rng`, so the stream a host reads is
+    /// the same on every platform. Pass [`Chronotype::POPULATION_SD_HOURS`] for a population like the ones
+    /// measured; `0.0` gives everyone the village's clock.
+    pub fn sample<R: DetRng>(rng: &mut R, sd_hours: f32) -> Self {
+        let sd = if sd_hours.is_finite() { sd_hours.abs() } else { 0.0 };
+        let normal = (0..12).map(|_| rng.unit()).sum::<f64>() as f32 - 6.0;
+        Self((normal * sd).clamp(-3.0 * sd, 3.0 * sd))
+    }
+}
+
 /// Pleasure, arousal and dominance, each in `[-1, 1]` (Russell 1980, DOI 10.1037/h0077714; the
 /// Mehrabian 1996 mapping this crate uses is DOI 10.1080/00049539608259510, the one `model::pad`
 /// implements).
