@@ -212,6 +212,7 @@ fn main() {
     let mut ledger = Ledger::default();
     let mut floor_ledger = FloorLedger::new(app.world().resource::<SocietyDefs>());
     let mut sleep_ledger = SleepLedger::default();
+    let mut reapproach_ledger = ReapproachLedger::default();
     for tick in 0..ticks {
         // Each villager's first-good store **before** this update, so a share can be logged as
         // `before -> after` for both sides. After alone read as a bug: "Dena holds 0.0, Hilda holds 0.0" is
@@ -289,6 +290,7 @@ fn main() {
                         doing.label(app.world().resource::<SocietyDefs>()) == "sleep"
                     });
                 sleep_ledger.exchange(&resolved.interaction, slept);
+                reapproach_ledger.approach(app.world().resource::<SocietyClock>().now_days, resolved);
                 let counts = repeat_by_interaction
                     .entry(resolved.interaction.clone())
                     .or_default();
@@ -526,6 +528,7 @@ fn main() {
     ledger.write(&out);
     floor_ledger.write(&out);
     sleep_ledger.write(&out);
+    reapproach_ledger.write(&out);
     write_chronotypes(&app, &world, &out);
     series(&rows, &out);
     summary(
@@ -2068,6 +2071,86 @@ impl SleepLedger {
         );
         if let Err(err) = std::fs::write(out.join("sleep.txt"), text) {
             eprintln!("evidence: cannot write sleep.txt: {err}");
+        }
+    }
+}
+
+/// **How soon a person goes back to someone they have just approached**, by what happened the last time: the
+/// hours between one approach and the next by the same person to the same target (any interaction), and
+/// whether it was the same interaction. `reapproach.txt` reads it as a share of all the approaches that had
+/// that outcome, so "refused, and tried again within the hour" is a number rather than an impression from a
+/// narrative.
+#[derive(Default)]
+struct ReapproachLedger {
+    /// `(actor, target) -> (game-day, accepted, interaction)` of the latest approach.
+    last: BTreeMap<(Entity, Entity), (f64, bool, String)>,
+    /// Approaches by outcome: `[refused, accepted]`.
+    approaches: [u64; 2],
+    /// For each approach that was followed by another to the same target: `(gap in hours, same interaction,
+    /// the follow-up was an `insult`)`, by the outcome of the earlier one, `[refused, accepted]`.
+    gaps: [Vec<(f32, bool, bool)>; 2],
+}
+
+impl ReapproachLedger {
+    /// The window edges, in hours, that `write` reports.
+    const WINDOWS: [f32; 5] = [1.0, 3.0, 6.0, 12.0, 24.0];
+
+    fn approach(&mut self, now_days: f64, resolved: &InteractionResolved) {
+        let key = (resolved.actor, resolved.target);
+        if let Some((then, accepted, interaction)) = self.last.get(&key) {
+            let gap = ((now_days - then) * 24.0) as f32;
+            let same = *interaction == resolved.interaction;
+            self.gaps[usize::from(*accepted)].push((gap, same, resolved.interaction == "insult"));
+        }
+        self.approaches[usize::from(resolved.accepted)] += 1;
+        self.last.insert(
+            key,
+            (now_days, resolved.accepted, resolved.interaction.clone()),
+        );
+    }
+
+    /// `reapproach.txt`: for each earlier outcome, the share of approaches followed by another to the same person
+    /// within each window, in any interaction and in the same one.
+    fn write(&self, out: &Path) {
+        let mut text = String::from(
+            "share of approaches followed by another approach to the same person within the window\n",
+        );
+        for (outcome, label) in [(0usize, "refused"), (1usize, "accepted")] {
+            let all = self.approaches[outcome].max(1) as f64;
+            let _ = writeln!(
+                text,
+                "\nafter a {label} approach ({} of them)\n  window_h   any  not_an_insult  same_interaction",
+                self.approaches[outcome]
+            );
+            for window in Self::WINDOWS {
+                let any = self.gaps[outcome]
+                    .iter()
+                    .filter(|(g, _, _)| *g <= window)
+                    .count();
+                let kind = self.gaps[outcome]
+                    .iter()
+                    .filter(|(g, _, harmful)| *g <= window && !*harmful)
+                    .count();
+                let same = self.gaps[outcome]
+                    .iter()
+                    .filter(|(g, s, _)| *g <= window && *s)
+                    .count();
+                let _ = writeln!(
+                    text,
+                    "  {window:>8.0} {:5.1}% {:5.1}%         {:5.1}%",
+                    100.0 * any as f64 / all,
+                    100.0 * kind as f64 / all,
+                    100.0 * same as f64 / all
+                );
+            }
+            let mut gaps: Vec<f32> = self.gaps[outcome].iter().map(|(g, _, _)| *g).collect();
+            gaps.sort_by(f32::total_cmp);
+            if let Some(median) = gaps.get(gaps.len() / 2) {
+                let _ = writeln!(text, "  median gap to the next approach: {median:.2} h");
+            }
+        }
+        if let Err(err) = std::fs::write(out.join("reapproach.txt"), text) {
+            eprintln!("evidence: cannot write reapproach.txt: {err}");
         }
     }
 }
