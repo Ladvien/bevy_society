@@ -41,6 +41,17 @@ Apply `provisioning-default.patch` (the starter pack's `bake` and `eat` become t
 `rumor_book`, `friendship_bound`, `label_hysteresis`, `need_cycle`, `trade` and `economy` pins pass on the patched pack
 (`eval.md`, "The flip").
 
+**Update, 2026-10-30-29: the flip now carries `urgent`, and a second assertion goes.** The overlay's `eat` and `bake` now take
+`urgent` (`hunger-takes-precedence.md`), so the flip is `docs/loop/runs/2026-10-30-29/provisioning-urgent-default.patch` (the starter
+pack's `bake` and `eat` become the overlay's, urgent lines included; it applies to `main`). With it the village of
+`tests/starting_larder.rs` has a day-2 floor of **0.000 with an empty larder and 0.000 with a loaf**, so not only
+`empty > 0.2` but also `stocked < empty / 2.0` fails (`0.000 against 0.000`): the pack now cures the transient the test guards
+against, and the test has nothing left to measure. Taking the flip means deleting `a_starting_larder_removes_the_second_days_famine`
+(or turning its two assertions into `empty <= ...`, which pins nothing). Run against the flipped pack in release (all features),
+and passing: `friendship_bound`, `label_hysteresis`, `rumor_book`, `need_cycle`, `economy`, `trade`, `provisioning`, `village_evening`,
+`village_layout`, `save`, `determinism`, and the 37 binaries that sort before `friendship_bound`. Not run on the flipped pack: the
+binaries that sort after `friendship_bound` and are not in that list (they passed on the unflipped pack in the pass's own gate).
+
 ## What the owner can override
 
 The overlay's numbers are design defaults, measured: the daylight window `Hours(6, 20)`, the hunger centre `0.5`, the shelf

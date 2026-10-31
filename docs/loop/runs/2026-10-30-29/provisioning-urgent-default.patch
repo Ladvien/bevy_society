@@ -1,0 +1,37 @@
+diff --git a/assets/starter.society.ron b/assets/starter.society.ron
+index 1288bbc..1e49e4c 100644
+--- a/assets/starter.society.ron
++++ b/assets/starter.society.ron
+@@ -87,9 +87,18 @@
+             // `work` for the whole day and the village lost its rivalries entirely (seed 7: 26 -> 1, seed
+             // 42: 33 -> 0, measured). An hour at first light sits where `work`'s `Hours(8, 17)` window is
+             // shut, so it adds a morning without taking the day.
++            //
++            // **Households bake when hungry and bare** (`Stock`, `Need`): see `examples/assets/provisioning.society.ron`
++            // for why a clock-driven `bake` cannot feed a town of sixty, and `docs/loop/runs/2026-10-30-28/`.
++            //
++            // **Urgent while hungry** (`urgent`): the household that is hungry and bare is in the tier above work, company and
++            // play, so it bakes before it plays. `eat` carries the same line, and the two belong together: see the overlay.
++            urgent: Some((need: "food", below: 0.25, rank: 1)),
+             considerations: [
+-                (input: Hour, curve: Hours(6.0, 7.0)),
++                (input: Hour, curve: Hours(6.0, 20.0)),
+                 (input: Skill("craft"), curve: Linear(1.0, 0.0)),
++                (input: Stock("bread"), curve: Linear(-1.0, 1.0)),
++                (input: Need("food"), curve: Logistic(-10.0, 0.5)),
+             ],
+             satisfies: [],
+             interaction: None,
+@@ -112,8 +121,12 @@
+             id: "eat",
+             target: Place("food"),
+             duration_hours: 0.75,
++            // **Hunger takes precedence** (`urgent`; Maslow 1943, DOI 10.1037/h0054346): under `food` 0.25 a meal is in the tier
++            // above work, craft and company. Only safe because the shelf is in the score and `bake` is in the bucket too.
++            urgent: Some((need: "food", below: 0.25, rank: 1)),
+             considerations: [
+                 (input: Need("food"), curve: Logistic(-10.0, 0.35)),
++                (input: Stock("bread"), curve: Linear(4.0, 0.05)),
+             ],
+             satisfies: [("food", 1.2)],
+             // **Eating uses up bread when there is any, and a meal is a QUARTER of a loaf.**
