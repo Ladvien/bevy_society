@@ -98,7 +98,7 @@ def zoom(run, out_png, keys, days=4):
     for row in axes:
         for axis in row:
             axis.grid(alpha=0.3)
-    fig.suptitle("The first four game-days, tick by tick", fontsize=11)
+    fig.suptitle(f"The first {days} game-days, tick by tick", fontsize=11)
     fig.tight_layout()
     save_small(fig, out_png)
 

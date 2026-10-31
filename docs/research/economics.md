@@ -235,6 +235,22 @@ and `docs/loop/runs/2026-10-26-11/eval.md`. The price *shape* is not a default: 
   head sits on the nominal unit at `0.5` (median price 1.00) and at half price at `0.25` (0.50). The default is
   honest — "how many days does the village have?" has the answer *a quarter* — but it is the number a host will
   most want to tune, and moving it moves every price, so it has not been re-tuned on the evidence of one pack.
+- **Production runs on the clock, not on the shelf, in the starter pack** (found 2026-10-30-28). `bake` is a one-hour dawn
+  errand drawn against nine other options: it scores the hour and the `craft` skill, and nothing that tells a person
+  how much bread it holds. That is an **open loop** — stable only when its output happens to equal what the village eats
+  (Zunic, corpus doc `eth-cgl-ar_games-Zun16a` §4.2: "if the parameters are chosen such that the inflow of resources
+  into the system equals the outflow, then the economy is stable ... by upsetting this balance we can simulate ...
+  shortages"; Meadows, *Thinking in Systems*, on balancing loops closed on a stock). A town of sixty on a pack tuned at
+  twenty-four made 3 bakes in ten game-days, and by game-day 12 held 0.05 loaves a head with 86 % of person-ticks at
+  `food` below 0.05 (evidence harness's town, 240-second day). `Input::Stock(good)` lets a consideration read the actor's
+  own holding, and `examples/assets/provisioning.society.ron` closes the loop (a hungry household with a bare shelf
+  makes bread; eating from an empty shelf is priced at `0.05` of its score, not forbidden): the same town holds 1.3-1.5
+  loaves a head. **Opt-in**, because the one pinned precondition it falsifies (`tests/starting_larder.rs` asserts an
+  empty-larder village starves on its second day, and a self-provisioning one does not) is not this loop's to loosen:
+  `docs/loop/needs-decision/households-provision-themselves.md`. Appetitive before consummatory (Woodworth 1918 and
+  Konorski 1976, in corpus doc `10.1002/hipo.22488`); a smart object advertises only what its precondition allows
+  (Zun15a, `eth-cgl-ar_games-Zun15a`); utility scores hunger *with* the availability of food (Game AI Pro, "Utility
+  Systems", on *The Sims*).
 - **The price does not drive behaviour.** No decision reads a price. That is deliberate in this change (it is
   what makes the bit-identical village a usable check) and it is the natural next step: an `Input::Surplus`-like
   term that makes a good dearer to skip in a shortage.

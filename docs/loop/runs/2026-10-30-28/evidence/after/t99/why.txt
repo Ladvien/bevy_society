@@ -1,0 +1,8 @@
+# tick 122867: someone weighed nothing
+
+ 1.000  wander
+ 0.998  compliment
+ 0.711  share
+ 0.592  gossip
+ 0.400  work
+ 0.394  eat
