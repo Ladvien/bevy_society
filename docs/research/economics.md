@@ -91,6 +91,19 @@ when it does not, in `tests/economy.rs`.
   `price = nominal · v(total_held / (people · price_full_store))`, clamped to
   `[price_floor, price_ceiling]`. `v` is the paper's own storage-ratio term, and `price_full_store` is a
   **design default** of one unit a head — a day's supply — with the measurement that chose it below.
+- **`GoodDef::initial`** — what a person holds when created (default `0.0`; the starter pack's bread is `1.0`),
+  held at `stock_ceiling`. It exists because a society that begins with every larder empty has a start-up
+  transient the running society does not: the 24-villager village at seed 99 held no bread for 22 game-hours,
+  and game-day 2 had **38.8 %** of its villager-ticks with `food` below 0.05 against **1.4-10.7 %** on days
+  3-10 (`docs/loop/runs/2026-10-30-27/`). Starting in a state typical of the running system is the standard
+  remedy for initialization bias (Murray & Kelton 1988, DOI 10.1145/318123.318252), and a household that holds
+  a store is the typical state (Winterhalder, Puleston & Ross 2015, DOI 10.1179/1749631415y.0000000025; the
+  first seasonal strategy of a rural household is "drawing down of stored product", Longhurst 1986, DOI
+  10.1111/j.1759-5436.1986.mp17003005.x). No paper gives a number of loaves: **1.0** is a **design default**
+  where three of the pack's own numbers agree — `price_full_store` (a full store), `trade_reserve` (a giver
+  must hold *more than* it to share, so a village begins with no surplus to give) and a meal of a quarter loaf
+  at about one meal a day (four days of food, enough to reach the first dawn bake). A saved person is not a
+  new one: `restore` puts back what was saved, and an empty saved stock restores as holding nothing.
 
 **Why the price is a function of the stores and not an integral of the flow.** It used to be
 `Δprice = price_speed_per_day · (produced − consumed)` **per interval**, and two defects were measured
@@ -242,3 +255,6 @@ and `docs/loop/runs/2026-10-26-11/eval.md`. The price *shape* is not a default: 
 - Production/consumption game economy · `eth-cgl-ar_games-Zun16a` (converted)
 - Becker, G. (1965), on comparative advantage within a household, as cited in Solaz (2005). https://doi.org/10.1007/s11150-005-4941-1 · `10.1007_s11150-005-4941-1` (converted)
 - Durkheim, E. (1964), differentiated roles and economic interdependence, as cited in Stalker (2010). https://doi.org/10.29173/cjs6661 · `10.29173_cjs6661` (converted)
+- Murray, J. R. & Kelton, W. D. (1988). Initializing for bias reduction. https://doi.org/10.1145/318123.318252 (abstract read from OpenAlex; not in the corpus)
+- Winterhalder, B., Puleston, C. O. & Ross, C. T. (2015). Production risk, inter-annual food storage by households and population-level consequences in seasonal prehistoric agrarian societies. https://doi.org/10.1179/1749631415y.0000000025 (abstract read from OpenAlex; not in the corpus)
+- Longhurst, R. (1986). Household Food Strategies in Response to Seasonality and Famine. https://doi.org/10.1111/j.1759-5436.1986.mp17003005.x (abstract read from OpenAlex; not in the corpus)
