@@ -1,0 +1,31 @@
+person-ticks from game-day 2: 1536000
+at the floor on food (< 0.05): 351830 (22.9%)
+
+what the person at the floor was doing, and whether the household held a meal (0.25 of the first good):
+    91280   25.9%  sleep  [holds a meal]
+    65466   18.6%  work  [holds a meal]
+    57494   16.3%  travelling:eat  [holds a meal]
+    21721    6.2%  travelling:sleep  [holds a meal]
+    15955    4.5%  travelling:work  [holds a meal]
+    15837    4.5%  travelling:compliment  [holds a meal]
+    15411    4.4%  craft  [holds a meal]
+    11875    3.4%  travelling:relax  [holds a meal]
+    10729    3.0%  relax  [holds a meal]
+     8336    2.4%  compliment  [holds a meal]
+     7101    2.0%  travelling:share  [holds a meal]
+     6925    2.0%  gossip  [holds a meal]
+     6241    1.8%  travelling:craft  [holds a meal]
+     5607    1.6%  play  [holds a meal]
+     2815    0.8%  travelling:snub  [holds a meal]
+     2258    0.6%  chat  [holds a meal]
+     1254    0.4%  share  [holds a meal]
+     1184    0.3%  travelling:bake  [holds a meal]
+     1105    0.3%  eat  [holds a meal]
+      964    0.3%  bake  [holds a meal]
+      954    0.3%  snub  [holds a meal]
+      493    0.1%  travelling:play  [holds a meal]
+      344    0.1%  wander  [holds a meal]
+      315    0.1%  travelling:gossip  [holds a meal]
+      166    0.0%  travelling:chat  [holds a meal]
+
+spells of hunger (food under 0.35 until back over it), game-hours: 311 finished, mean 13.20, median 9.78, p90 28.40, max 101.24
