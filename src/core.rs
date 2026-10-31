@@ -557,6 +557,24 @@ pub struct Tuning {
     /// off. Only the choice of a harmful activity is held back; a host's `Interact` is never refused by
     /// it. Saved.
     pub retaliation_refractory_hours: Option<f32>,
+    /// How long, in game-hours, a person who has just been **refused** remembers the person who refused them,
+    /// and does not choose them as the target of any *affiliative* `Person` activity (`chat`, `gossip`,
+    /// `compliment`, `play`, `share`: anything whose deed is not harmful). Without it a refusal changes nothing
+    /// about who is approached next: measured on the village (seed 7, 17 game-days), 29% of refused approaches
+    /// were followed within an hour by another approach to the same person, against 42% of accepted ones, and
+    /// one narrated person asked the same neighbour for gossip six times in three hours, refused each time.
+    ///
+    /// Excluded people "did not seem to seek reconnection with the specific perpetrators of exclusion" and turned
+    /// toward new sources of affiliation (Maner, DeWall, Baumeister & Schaller 2007, DOI
+    /// 10.1037/0022-3514.92.1.42); the response to perceived rejection is withdrawal (Downey & Feldman 1996,
+    /// DOI 10.1037/0022-3514.70.6.1327). The papers give the direction, not an interval: the number of hours is
+    /// a **design default, chosen by measurement** (`docs/research/rebuff.md`). The memory is written when the
+    /// target's acceptance draw says no (a `requires` rule refusing it writes nothing), is dropped when it
+    /// expires, and does not touch the acceptance model, `rejection_affinity_penalty` or any tie. A *harmful*
+    /// approach is not covered: hostility after a rejection is its own response (Bondü & Richter 2016, DOI
+    /// 10.3389/fpsyg.2016.00795) and is held by [`retaliation_refractory_hours`](Self::retaliation_refractory_hours).
+    /// A host's `Interact` is never refused by it. `None` turns it off and is exactly the old curve. Saved.
+    pub rebuff_memory_hours: Option<f32>,
     /// How much faster a **grievance fades toward someone its holder still trusts**: `ctx.grudge(a, b)` reads
     /// each of `a`'s bad memories about `b` at its age times `1 + forgiveness · trust(a → b)`
     /// ([`crate::model::recall::forgiving_pace`]). Without it every grudge fades on the one 138-hour recency
@@ -742,6 +760,7 @@ impl Default for Tuning {
             stall_epsilon: 0.25,
             failed_place_memory_hours: None,
             retaliation_refractory_hours: Some(6.0),
+            rebuff_memory_hours: None,
             // Design default by measurement; mechanism McCullough et al. 2010 (DOI 10.1037/a0019349) and
             // Strelan, Karremans & Krieg 2017 (DOI 10.1111/bjso.12173). See the field's doc.
             forgiveness: 12.0,

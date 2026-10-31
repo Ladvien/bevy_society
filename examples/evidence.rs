@@ -103,6 +103,9 @@ fn main() {
     if let Some(hours) = args.failed_place_memory {
         settings.tuning.failed_place_memory_hours = Some(hours);
     }
+    if let Some(memory) = args.rebuff_memory {
+        settings.tuning.rebuff_memory_hours = memory;
+    }
     if let Some(seed) = args.seed {
         settings.seed = seed;
     }
@@ -1824,6 +1827,8 @@ struct Args {
     retaliation_refractory: Option<f32>,
     /// Overrides `Tuning::forgiveness`.
     forgiveness: Option<f32>,
+    /// `--rebuff-memory H` / `--no-rebuff`: override `Tuning::rebuff_memory_hours` (in game hours; `None` is off).
+    rebuff_memory: Option<Option<f32>>,
     /// Runs for this many game-days instead of the scenario's `ticks:`, so a long run is one flag rather
     /// than an arithmetic exercise. The friendship bound needs thirty days.
     days: Option<f32>,
@@ -1921,6 +1926,10 @@ impl Args {
                 "--failed-place-memory" => {
                     args.failed_place_memory = argv.next().and_then(|v| v.parse().ok())
                 }
+                "--rebuff-memory" => {
+                    args.rebuff_memory = argv.next().and_then(|v| v.parse().ok()).map(Some)
+                }
+                "--no-rebuff" => args.rebuff_memory = Some(None),
                 other => {
                     eprintln!("evidence: unknown argument {other}");
                     std::process::exit(1);
