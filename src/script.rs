@@ -682,6 +682,7 @@ fn register_ctx(engine: &mut Engine) {
     );
     engine.register_fn("hour", |ctx: &mut Ctx| -> f32 { ctx.0.hour() });
     engine.register_fn("day", |ctx: &mut Ctx| -> i64 { ctx.0.day() });
+    engine.register_fn("weekday", |ctx: &mut Ctx| -> i64 { ctx.0.weekday() });
     engine.register_fn("rand", |ctx: &mut Ctx| -> f32 { ctx.0.unit() });
 }
 

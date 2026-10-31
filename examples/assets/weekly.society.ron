@@ -1,0 +1,72 @@
+// **A week with a rest day**: the last two days of every seven are free of work, and a person spends them staying put.
+//
+// This file is an overlay, not an addition. It holds the starter pack's `work` in a form that is shut on the rest days
+// (`Input::Week`, `Curve::Days`) and one new activity, `laze`. A host that wants it **replaces** `work` by id and adds
+// `laze` (`merge` needs disjoint ids, so it cannot replace), and gates every other workday activity the same way (the
+// village pack's `craft` is the other one; the harness's `--weekly` does it):
+//
+//     let mut file = DefsFile::starter()?;
+//     let overlay = DefsFile::from_ron(include_str!("assets/weekly.society.ron"))?;
+//     for activity in overlay.activities {
+//         match file.activities.iter_mut().find(|a| a.id == activity.id) {
+//             Some(slot) => *slot = activity,
+//             None => file.activities.push(activity),
+//         }
+//     }
+//     let defs = SocietyDefs::compile(file)?;
+//
+// Game-day 0 is weekday 0 unless `SocietySettings::start_weekday` says otherwise, and days 5 and 6 are the rest days: a
+// host that calls its first day by another name moves the window, not the idea. `docs/research/weekly-rhythm.md` has the
+// sources; `docs/loop/runs/2026-10-31-04/` has the measurements, including the two versions of this overlay that failed.
+(
+    activities: [
+        (
+            // **Work on workdays only.** The starter's `work` with one more consideration, `Days(0, 5)` on the position in
+            // the week: it reads 1 on days 0 to 4 and 0 on days 5 and 6, so a product of considerations is zero on a rest
+            // day and the activity is never an option (a window is a hard edge, as `Hours(8, 17)` already is).
+            id: "work",
+            target: Place("work"),
+            duration_hours: 4.0,
+            profession: Some("craft"),
+            considerations: [
+                (input: Hour, curve: Hours(8.0, 17.0)),
+                (input: Week, curve: Days(0.0, 5.0)),
+            ],
+            satisfies: [],
+            interaction: None,
+            barks: ["Back to it."],
+        ),
+        (
+            // **A rest day is spent staying put.** "During weekends we are more stationary" (Sekara, Stopczynski & Lehmann
+            // 2016, supplement, DOI 10.1073/pnas.1602803113). `Itself` stays where the person is, for two hours, in
+            // daylight, on a rest day; whoever comes by can still be talked to.
+            //
+            // **It is here because shutting `work` alone damages the village.** The four hours a workday spends on work go to
+            // whatever else is open, and in this pack that is company: with `work` shut and nothing to put in its place, a
+            // rest day has 27-30 approaches a villager (a workday has 10) and, over 29 game-days at seed 7, friend ties fall
+            // 51 -> 25 and rival ties rise 44 -> 80 (the four villages: friends 51 / 59 / 64 / 58 -> 25 / 21 / 34 / 22).
+            // `docs/loop/runs/2026-10-31-04/evidence/attempt1/`. A `laze` that scores by the `fun` need (the obvious
+            // version) does not fix it: it fills `fun` and drops out of the draw after a spell, so leisure is 12-14 % of a
+            // rest day (3 % of a workday) at any weight from 4 to 16 and a villager still makes 21-23 approaches
+            // (`evidence/sweep/`).
+            //
+            // So its score is flat (no need term), and **its `weight` is the one number that says how much of a rest day
+            // is spent doing nothing**. A design default, chosen by measurement: at seed 7, weights 1 / 3 / 8 give rest-day
+            // approaches a villager-day of 13.4 / 8.1 / 5.8 against 10-11 on a workday, and rival ties of 41 / 32 / 16 against
+            // 44 with no week. 3 is the first at which a rest day is quieter than a workday, the village is no worse off
+            // than without a week, and the `social` need is as high as on a workday (0.77); 8 starves `social` (0.65).
+            id: "laze",
+            weight: 3.0,
+            target: Itself,
+            duration_hours: 2.0,
+            considerations: [
+                (input: Week, curve: Days(5.0, 7.0)),
+                (input: Hour, curve: Hours(9.0, 21.0)),
+            ],
+            // A rest: `fun` at 0.4 an hour, 0.8 a two-hour spell against `fun`'s decay of 0.8 a day. Design default.
+            satisfies: [("fun", 0.4)],
+            interaction: None,
+            barks: ["Nowhere to be."],
+        ),
+    ],
+)

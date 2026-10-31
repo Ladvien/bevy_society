@@ -1470,6 +1470,8 @@ struct Decision {
     /// ever looks at `close_ties`, so filtering to them is the same answer at a `close_ties`-sized cost.
     close_doing: Vec<(Entity, u16)>,
     hour: f32,
+    /// How far through the week it is in days (`weekday + hour / 24`, `[0, 7)`): [`Input::Week`](crate::Input::Week) over 7.
+    week: f32,
     /// The hour on this person's own clock: `hour` less their [`Chronotype`](crate::Chronotype).
     body_hour: f32,
     perception_radius: f32,
@@ -1641,6 +1643,7 @@ fn decide_activities(
     };
     let tier_cutoff = tuning.tier_cutoff;
     let hour = clock.hour();
+    let week = clock.week_position(settings.start_weekday);
 
     // Occupancy: how many people already target each place.
     let mut used: Vec<(Entity, u32)> = Vec::new();
@@ -1787,6 +1790,7 @@ fn decide_activities(
                 .collect(),
             hour,
             body_hour: view.chronotype.copied().unwrap_or_default().body_hour(hour),
+            week,
             perception_radius: settings.perception_radius,
             trade_reserve: tuning.trade_reserve,
             trade_margin: tuning.trade_margin,
@@ -2453,6 +2457,7 @@ fn signal_value(
             .unwrap_or(0.0),
         Signal::Hour => decision.hour / 24.0,
         Signal::BodyHour => decision.body_hour / 24.0,
+        Signal::Week => decision.week / f32::from(crate::model::DAYS_PER_WEEK),
         Signal::Pleasure => (decision.mood[0] + 1.0) / 2.0,
         Signal::Arousal => (decision.mood[1] + 1.0) / 2.0,
         Signal::Dominance => (decision.mood[2] + 1.0) / 2.0,

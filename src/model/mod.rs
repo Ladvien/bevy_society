@@ -11,4 +11,4 @@ pub mod price;
 pub mod recall;
 pub mod rumor_dk;
 
-pub use curves::Curve;
+pub use curves::{Curve, DAYS_PER_WEEK};
