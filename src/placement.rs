@@ -30,7 +30,7 @@ use crate::core::{
 };
 use crate::defs::{DefsError, NeedId, SignalId, SocietyDefs, TopicId};
 use crate::groups::Memberships;
-use crate::mind::{Needs, Personality, Signals};
+use crate::mind::{Chronotype, Needs, Personality, Signals};
 use crate::relationships::Ties;
 
 /// A list of places and persons, as one RON document. Both lists are optional.
@@ -116,6 +116,10 @@ pub struct PersonDef {
     /// Traits; all `0.5` when left out.
     #[serde(default)]
     pub personality: PersonalityDef,
+    /// How many hours the person's body clock runs behind the wall clock ([`Chronotype`]): positive is an
+    /// owl, negative a lark; within ±12; `0.0` when left out.
+    #[serde(default)]
+    pub chronotype_hours: f32,
     /// Starting need levels by need id; the others start at their `initial`.
     #[serde(default)]
     pub needs: Vec<(String, f32)>,
@@ -239,6 +243,13 @@ impl PlacementFile {
         for person in &self.persons {
             let owner = format!("person '{}'", person.name);
             let p = person.personality;
+            in_range(
+                &owner,
+                "chronotype_hours",
+                person.chronotype_hours,
+                -12.0,
+                12.0,
+            )?;
             for (what, v) in [
                 ("openness", p.openness),
                 ("conscientiousness", p.conscientiousness),
@@ -342,6 +353,7 @@ impl PlacementFile {
                     agreeableness: person.personality.agreeableness,
                     neuroticism: person.personality.neuroticism,
                 },
+                Chronotype(person.chronotype_hours),
                 needs,
                 signals,
                 opinions,
@@ -509,6 +521,7 @@ impl PlacementFile {
             persons.push(PersonDef {
                 name: person_names[&entity].clone(),
                 personality,
+                chronotype_hours: e.get::<Chronotype>().map_or(0.0, |c| c.0),
                 needs,
                 signals,
                 opinions,
