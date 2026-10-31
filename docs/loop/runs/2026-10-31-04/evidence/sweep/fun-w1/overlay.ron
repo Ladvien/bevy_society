@@ -1,0 +1,45 @@
+(
+    activities: [
+        (
+            id: "work",
+            target: Place("work"),
+            duration_hours: 4.0,
+            profession: Some("craft"),
+            considerations: [
+                (input: Hour, curve: Hours(8.0, 17.0)),
+                (input: Week, curve: Days(0.0, 5.0)),
+            ],
+            satisfies: [],
+            interaction: None,
+            barks: ["Back to it."],
+        ),
+        (
+            id: "laze",
+            target: Itself,
+            duration_hours: 2.0,
+            considerations: [
+                (input: Week, curve: Days(5.0, 7.0)),
+                (input: Hour, curve: Hours(9.0, 21.0)),
+                (input: Need("fun"), curve: Linear(-1.0, 1.0)),
+            ],
+            satisfies: [("fun", 0.4)],
+            interaction: None,
+            barks: ["Nowhere to be."],
+        ),
+        (
+            id: "visit",
+            target: Person,
+            duration_hours: 1.0,
+            considerations: [
+                (input: Week, curve: Days(5.0, 7.0)),
+                (input: Hour, curve: Hours(10.0, 20.0)),
+                (input: Need("social"), curve: Linear(-0.7, 1.0)),
+                (input: Affinity, curve: Logistic(12.0, 0.65)),
+                (input: Distance, curve: Linear(-1.0, 1.0)),
+            ],
+            satisfies: [("social", 1.0)],
+            interaction: Some("chat"),
+            barks: ["Come in, sit down."],
+        ),
+    ],
+)

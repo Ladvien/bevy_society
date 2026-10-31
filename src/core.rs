@@ -961,8 +961,8 @@ impl SocietyClock {
         ((u32::from(start_weekday) % week + self.day() % week) % week) as u8
     }
 
-    /// How far through the week it is in days, `weekday + hour / 24`, in `[0, 7)`: what [`Input::Week`]
-    /// (crate::Input::Week) reads, over 7.
+    /// How far through the week it is in days, `weekday + hour / 24`, in `[0, 7)`: what
+    /// [`Input::Week`](crate::Input::Week) reads, over 7.
     pub fn week_position(&self, start_weekday: u8) -> f32 {
         f32::from(self.weekday(start_weekday)) + self.hour() / 24.0
     }

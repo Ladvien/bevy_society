@@ -37,3 +37,7 @@ None. `start_weekday` is a world setting (like `start_hour`), `DAYS_PER_WEEK` is
 ## Evidence plan
 
 Same seeds (village 7/42/11/99, towns 60 at 7/99, 40 at 3), 17-30 game-days at 64 s/day: `--weekly` against off. `week.txt` per weekday: person-ticks by activity group, distinct partners per person-day, exchanges with close ties, approaches. Plot `plots/week.png`. Narrative: one person's rest day beside a workday.
+
+## Amended during the pass
+
+The overlay planned here (`work` on workdays and a rest-day `visit`) failed its own prediction: shut `work` plus `visit` made a rest day busier (27-30 approaches a villager against 10) and the village worse (`evidence/attempt1/`). The shipped overlay is `work` on workdays and a flat-score `laze` with a `weight` of 3; `visit` was dropped because it added nothing measurable. `--weekly-file PATH` and a `week.txt` without a `visits` column came with that. `research.md` keeps the original predictions unedited; `eval.md` says which held.
