@@ -63,9 +63,37 @@ Vansteenkiste & Ryan 2013 (DOI 10.1037/a0032359) is why this is worth naming rat
 plot: self-determination theory distinguishes **need satisfaction** from **need frustration**, and
 frustration is not merely a low value but a different state with its own behavioural consequences.
 
+## Decision: a low need takes precedence (`ActivityDef::urgent`)
+
+Maslow (1943, DOI 10.1037/h0054346): "the most prepotent goal will monopolize consciousness and will tend of itself to organize the
+recruitment of the various capacities of the organism. The less prepotent needs are minimized, even forgotten or denied", and a
+satisfied need "is not a motivator". *The Sims* implements it as need buckets: "motives are bucketed based on their utility value ...
+a starving Sim will never even consider watching TV unless they fail to find anything that can solve their hunger" (Graham, Game AI
+Pro 1 ch. 9, `gameaipro1-ch09-introduction-utility-theory`), which is dual-utility reasoning whose rank follows the situation (Dill,
+Game AI Pro 2 ch. 3, `gameaipro2-ch03-dual-utility-reasoning`). Wang et al. 2023 (DOI 10.48550/arXiv.2310.05418) find that simulated
+agents adapt their activities most when health, energy and fullness are low, which they read as Maslow's low-level needs coming first.
+
+Before it, a rank was static and a person at `food` 0.05 or less spent 49 % of that time on work, craft, company and leisure with a meal
+on the shelf (village, seed 7, 17 game-days; 97 % of the person-ticks at the floor had a meal in hand), because `eat` was one draw by
+`weight · score` among ten. `urgent: Some((need, below, rank))` raises the activity's rank while `need < below`; selection is otherwise
+unchanged (highest rank with any viable option, `tier_cutoff`, weighted draw), so an urgent option with no candidate falls through to the
+lower tiers, which is Graham's "unless they fail to find anything that can solve their hunger".
+
+Measured on the provisioning overlay (`eat` and `bake` at `below: 0.25`, rank 1), same seeds, with and without: person-ticks at `food`
+below 0.05, village (4 seeds) 15.5-19.9 % → 2.6-3.3 %, town of 60 36-37 % → 8-9 %, town of 40 23 → 5 %, town of 60 at the 240-second day
+26 → 5 %; the 90th-percentile spell of hunger (`food` under 0.35 until back over) 23-47 → 10-15 game-hours, the longest 40-212 → 24-52.
+What is left is a walk to the table (60-71 % of the remaining floor at the harness's 64-second day) and a night's sleep (18-26 %): no
+work, craft or company at the floor. Friends, rivals and insults move inside their seed-to-seed range (`runs/2026-10-30-29/eval.md`).
+
+Where it must not be used: **a prepotent option has to be able to solve the need.** The starter pack's `eat` prices an empty shelf instead of
+reading it and its `bake` is outside the bucket, so there the same line sends a hungry person with a bare shelf to a table that feeds
+nothing, again and again, and never to the oven (floor 19 → 27 % at 0.25 and 52 % at 0.35, bread a head 3.2 → 0.0). The activity that
+*provisions* the need belongs in the bucket as well as the one that satisfies it, which is why the overlay's `bake` carries the line.
+`0.25` and rank 1 are design defaults (a sweep at 0.15 / 0.25 / 0.35 is in `eval.md`); Maslow gives an order, not a level.
+
 ## What the model leaves out
 
-- Dual-utility selection and an activity-level weight beyond the compensation step.
+- An activity-level weight beyond the compensation step, and a rank for needs other than the one the pack names in `urgent`.
 - Learning or adapting considerations over time; the curves are fixed per definition.
 - Physiological need dynamics: needs move only through definitions, scripts and events, not through a metabolic model.
 - Planning across several activities; each choice is local to the current tick.
