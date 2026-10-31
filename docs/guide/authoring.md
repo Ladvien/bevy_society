@@ -135,8 +135,8 @@ you meanwhile":
   **closed**: nobody ever goes. A full place used to produce no target at all, which was measured to remove a
   village's working day once it outgrew its seats (`docs/loop/runs/2026-10-25-10/eval.md`).
 
-A consideration's `input` is normalised to `[0, 1]` before its `curve` sees it: `Hour` and `BodyHour` are `h / 24`,
-mood axes and `Affinity`/`Respect` are `(x + 1) / 2`, `Distance` is `d / perception_radius`. `Trust`,
+A consideration's `input` is normalised to `[0, 1]` before its `curve` sees it: `Hour` and `BodyHour` are `h / 24`, `Week` is
+`(weekday + h / 24) / 7`, mood axes and `Affinity`/`Respect` are `(x + 1) / 2`, `Distance` is `d / perception_radius`. `Trust`,
 `Familiarity` and `SocialProof` are already in `[0, 1]`, and `Need`/`Signal` are read as they stand,
 so a signal the host writes outside `[0, 1]` is clamped after the curve. `Signal("x")` names a
 signal declared in `signals`; an undeclared name is a `DefsError::UnknownId` at load, not a score of
@@ -155,6 +155,7 @@ Curves turn that number into utility:
 | `Logistic(k, x0)` | `1 / (1 + e^(−k(x − x0)))` |
 | `Step(at)` | `1` when `x ≥ at` |
 | `Hours(from, to)` | `1` inside the wrapping hour window; only with `input: Hour` or `input: BodyHour` |
+| `Days(from, to)` | `1` inside the wrapping week window, in days from the start of the week (`Days(5.0, 7.0)` is the last two); only with `input: Week` |
 
 `Affinity`, `Trust`, `Respect`, `Familiarity` and `SocialProof` are only valid on a `Person` target,
 and `Distance` is valid on `Place`, `Home` and `Person`. A definition that breaks that rule is
@@ -179,6 +180,31 @@ The crate never draws a chronotype; the host writes one the way it writes a `Per
 1.5 h, cut at three deviations), or `chronotype_hours: -2.0` on a `PersonDef` in a placement file. A save keeps it
 (`PersonSave::chronotype`; a file from before it restores as `0.0`). Without one a person keeps the village's clock,
 so `BodyHour` reads what `Hour` does. `docs/research/chronotype.md`.
+
+### A week: `Week` and `Days`
+
+`Input::Week` is how far through the week it is, `(weekday + hour / 24) / 7`, and `Days(from, to)` is a window over it, in days
+from the start of the week, the way `Hours` is over the day: `Days(0.0, 5.0)` is the first five days, `Days(5.0, 7.0)` the last
+two, `Days(6.0, 1.0)` wraps (the last day and the first), and `Days(4.75, 6.0)` opens at 18:00 on day 4 because the input
+carries the hour. Both ends must be in `0..=7`, and a `Days` curve on any input but `Week` is refused at load.
+
+```ron
+(id: "work", target: Place("work"), duration_hours: 4.0,
+ considerations: [
+     (input: Hour, curve: Hours(8.0, 17.0)),
+     (input: Week, curve: Days(0.0, 5.0)),   // shut on days 5 and 6
+ ],
+ satisfies: [], interaction: None, barks: [])
+```
+
+Day 0 is whatever the host calls the first day of its week, and `SocietySettings::start_weekday` (default `0`, values of 7 and
+over wrap) is the weekday of game-day 0; `ctx.weekday()` in a script reads the same calendar. A week is seven days
+(`model::DAYS_PER_WEEK`); a host with another calendar writes it as a script. Like `Hour`, `Week` is the village's clock: a
+`Chronotype` shifts `BodyHour` and never `Week`, because a rest day is a social fact. The starter pack has no week, so a society
+that never writes `Week` is the society the crate always had, bit for bit. `examples/assets/weekly.society.ron` is an opt-in
+overlay with a rest day (`work` shut on days 5 and 6) and a rest-day `visit` that scores a well-liked person high, the shape
+Sekara et al. 2016 describe (`docs/research/weekly-rhythm.md`). The settings are not saved: a host restoring a save passes the
+same `start_weekday` it started with.
 
 ## Interactions
 

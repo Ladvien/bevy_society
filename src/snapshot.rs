@@ -172,6 +172,8 @@ pub(crate) struct SocietySnapshot {
     now_days: f64,
     hour: f32,
     day: i64,
+    /// Weekday at the tick start, `0..7`, counted from `SocietySettings::start_weekday`.
+    weekday: i64,
     names: Names,
     /// Prices by good, in definition order, as of the tick start.
     prices: Vec<f32>,
@@ -192,6 +194,11 @@ impl SocietySnapshot {
     /// Whole game-days elapsed at the tick start.
     pub(crate) fn day(&self) -> i64 {
         self.day
+    }
+
+    /// Weekday at the tick start, in `0..7`: day 0 of the week is [`SocietySettings::start_weekday`] on game-day 0.
+    pub(crate) fn weekday(&self) -> i64 {
+        self.weekday
     }
 
     /// The person with id `id`, or an error naming the id.
@@ -566,6 +573,7 @@ pub(crate) fn build_snapshot(
         now_days: now,
         hour: clock.hour(),
         day: i64::from(clock.day()),
+        weekday: i64::from(clock.weekday(settings.start_weekday)),
         names,
         // `Prices` is the economy plugin's; a host without `EconomyPlugin` gets the nominal unit for every
         // good, which is what `Prices::get` documents for one nobody has traded.

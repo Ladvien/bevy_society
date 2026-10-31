@@ -868,6 +868,10 @@ pub struct SocietySettings {
     pub seconds_per_day: f32,
     /// Hour of the game-day at which the clock starts.
     pub start_hour: f32,
+    /// Weekday of game-day 0, counted `0..7` from whatever the host calls the first day of its week (values of 7 and
+    /// over wrap). The week is a calendar, not a model: [`Input::Week`](crate::Input::Week), `Curve::Days` and
+    /// `ctx.weekday()` read it, and a society whose packs never use them has no week.
+    pub start_weekday: u8,
     /// Where the clock's time comes from.
     pub clock: ClockSource,
     /// Who moves a person toward its `Destination`.
@@ -909,6 +913,7 @@ impl Default for SocietySettings {
             tick_secs: 0.25,
             seconds_per_day: 240.0,
             start_hour: 8.0,
+            start_weekday: 0,
             clock: ClockSource::Fixed,
             locomotion: Locomotion::Builtin,
             plane: SocietyPlane::XZ,
@@ -947,6 +952,19 @@ impl SocietyClock {
     /// Whole game-days elapsed.
     pub fn day(&self) -> u32 {
         self.now_days.floor() as u32
+    }
+
+    /// The weekday of the current game-day, in `0..7`, when game-day 0 was `start_weekday`
+    /// ([`SocietySettings::start_weekday`]).
+    pub fn weekday(&self, start_weekday: u8) -> u8 {
+        let week = u32::from(crate::model::DAYS_PER_WEEK);
+        ((u32::from(start_weekday) % week + self.day() % week) % week) as u8
+    }
+
+    /// How far through the week it is in days, `weekday + hour / 24`, in `[0, 7)`: what [`Input::Week`]
+    /// (crate::Input::Week) reads, over 7.
+    pub fn week_position(&self, start_weekday: u8) -> f32 {
+        f32::from(self.weekday(start_weekday)) + self.hour() / 24.0
     }
 }
 

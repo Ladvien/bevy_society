@@ -1,0 +1,8 @@
+# tick 118206: someone chose craft (0.667), 33% below work (1.000)
+
+ 1.000  work
+ 1.000  wander
+ 0.997  compliment
+ 0.685  play
+ 0.667  craft   <- chosen
+ 0.650  chat
