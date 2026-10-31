@@ -113,6 +113,8 @@ pub(crate) struct TieView {
     pub(crate) respect: f32,
     /// Familiarity in `[0, 1]`, after power-law forgetting.
     pub(crate) familiarity: f32,
+    /// Coefficient of relatedness `r` in `[0, 1]`, `0` for no blood relation.
+    pub(crate) kin: f32,
     /// The label at the tick start.
     pub(crate) label: TieLabel,
 }
@@ -238,6 +240,13 @@ impl SocietySnapshot {
     /// `ctx.familiarity(a, b)`: familiarity in `[0, 1]` at the tick start, 0 when there is no tie.
     pub(crate) fn familiarity(&self, a: i64, b: i64) -> Result<f32, String> {
         self.tie_value(a, b, |tie| tie.familiarity, 0.0)
+    }
+
+    /// `ctx.kin(a, b)`: the coefficient of relatedness `r` of `b` to `a` in `[0, 1]` (`0.5` for a parent, a child
+    /// or a sibling, `0.25` for a grandparent, an aunt or uncle, `0.125` for a cousin), 0 when they are not
+    /// relatives or there is no tie.
+    pub(crate) fn kin(&self, a: i64, b: i64) -> Result<f32, String> {
+        self.tie_value(a, b, |tie| tie.kin, 0.0)
     }
 
     /// `ctx.grudge(a, b)`: the weight of `a`'s bad memories about `b`, in `[0, 1]`, each read at its age times
@@ -543,6 +552,7 @@ pub(crate) fn build_snapshot(
                 trust: tie.trust,
                 respect: tie.respect,
                 familiarity: tie.familiarity(now as f32, tuning),
+                kin: tie.relatedness(),
                 label: tie.label,
             })
             .collect();

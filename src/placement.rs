@@ -31,7 +31,7 @@ use crate::core::{
 use crate::defs::{DefsError, NeedId, SignalId, SocietyDefs, TopicId};
 use crate::groups::Memberships;
 use crate::mind::{Chronotype, Needs, Personality, Signals};
-use crate::relationships::Ties;
+use crate::relationships::{Kin, Ties};
 
 /// A list of places and persons, as one RON document. Both lists are optional.
 #[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
@@ -97,11 +97,21 @@ pub struct TieSpec {
     /// Starting reliance in `[0, 1]`; `0.5`, a new acquaintance's, when left out.
     #[serde(default = "default_trust")]
     pub trust: f32,
+    /// What the other person is to this one when they are blood relatives ([`Kin`]), `None` when left out.
+    /// Relatedness is symmetric, so spawning answers it: the other person's tie to this one gets the
+    /// [converse](Kin::converse) relation when it names none (and is created when it does not exist), and a tie
+    /// that names a different relation is refused. Both ties start at a familiarity of `1.0`, because a relative
+    /// is someone known from the start.
+    #[serde(default)]
+    pub kin: Option<Kin>,
 }
 
 fn default_trust() -> f32 {
     0.5
 }
+
+/// The familiarity a relative's tie starts at: someone known from the start, not met.
+const KIN_FAMILIARITY: f32 = 1.0;
 
 fn default_autonomous() -> bool {
     true
@@ -283,6 +293,24 @@ impl PlacementFile {
                 }
                 in_range(&owner, "tie affinity", tie.affinity, -1.0, 1.0)?;
                 in_range(&owner, "tie trust", tie.trust, 0.0, 1.0)?;
+                if let Some(kin) = tie.kin
+                    && let Some(back) = self.persons[persons[tie.with.as_str()]]
+                        .ties
+                        .iter()
+                        .find(|back| back.with == person.name)
+                    && let Some(theirs) = back.kin
+                    && theirs != kin.converse()
+                {
+                    return Err(invalid(
+                        owner,
+                        format!(
+                            "lists '{}' as {kin:?} but '{}' lists them as {theirs:?}, which is not its converse {:?}",
+                            tie.with,
+                            tie.with,
+                            kin.converse()
+                        ),
+                    ));
+                }
             }
             // Resolving the named values is the check: it reports an id the defs lack.
             defs.needs(person.needs.iter().map(|(n, v)| (n.as_str(), *v)))?;
@@ -377,15 +405,45 @@ impl PlacementFile {
             placed.persons.push((person.name.clone(), entity.id()));
         }
 
-        for person in &self.persons {
-            if person.ties.is_empty() {
-                continue;
-            }
-            let mut ties = Ties::default();
+        // Every person's ties are built before any is attached, because a relative's tie is answered on the
+        // other side: relatedness is symmetric, so one authored `kin` makes both directions.
+        let slot: BTreeMap<&str, usize> = self
+            .persons
+            .iter()
+            .enumerate()
+            .map(|(i, person)| (person.name.as_str(), i))
+            .collect();
+        let mut built: Vec<Ties> = vec![Ties::default(); self.persons.len()];
+        for (i, person) in self.persons.iter().enumerate() {
             for spec in &person.ties {
                 if let Some(target) = placed.person(&spec.with) {
-                    ties.entry_with(target, spec.affinity).trust = spec.trust;
+                    let tie = built[i].entry_with(target, spec.affinity);
+                    tie.trust = spec.trust;
+                    if spec.kin.is_some() {
+                        tie.kin = spec.kin;
+                        tie.familiarity_peak = KIN_FAMILIARITY;
+                    }
                 }
+            }
+        }
+        for person in &self.persons {
+            for spec in &person.ties {
+                if let (Some(kin), Some(&other), Some(owner)) = (
+                    spec.kin,
+                    slot.get(spec.with.as_str()),
+                    placed.person(&person.name),
+                ) {
+                    let back = built[other].entry(owner);
+                    if back.kin.is_none() {
+                        back.kin = Some(kin.converse());
+                        back.familiarity_peak = KIN_FAMILIARITY;
+                    }
+                }
+            }
+        }
+        for (person, ties) in self.persons.iter().zip(built) {
+            if ties.is_empty() {
+                continue;
             }
             if let Some(owner) = placed.person(&person.name) {
                 world.entity_mut(owner).insert(ties);
@@ -513,6 +571,7 @@ impl PlacementFile {
                             with: with.clone(),
                             affinity: tie.affinity,
                             trust: tie.trust,
+                            kin: tie.kin,
                         });
                     }
                 }

@@ -667,6 +667,23 @@ pub struct Tuning {
     /// un-priced ranking; `1.0` makes a full place score nothing, which is close to the old veto but keeps it
     /// available when it is the only option.
     pub crowding_penalty: f32,
+    /// **What a relative's gift is worth beyond how much the giver likes them**: an activity that **gives
+    /// goods and takes none** (its interaction's `actor_gives` is not empty and its `target_gives` is empty)
+    /// scores `score · (1 + kin_premium · 2r)` toward a relative
+    /// with coefficient of relatedness `r` ([`crate::Kin::relatedness`]), so a sibling or a child (`2r = 1`)
+    /// scores `1 + kin_premium` times what the same surplus scores toward a stranger, a grandparent half the
+    /// premium and a first cousin a quarter. It changes which person a giver picks, since the best target takes
+    /// the activity, and how strongly giving competes with the rest of the day when a relative is the best
+    /// target. A society with no relative is untouched at any value.
+    ///
+    /// Mechanism: "participants were more altruistic towards kin than would be expected if altruism was
+    /// dependent on emotional closeness alone — a phenomenon we label a 'kinship premium'" (Curry, Roberts &
+    /// Dunbar 2013, DOI `10.1111/j.2044-8295.2012.02119.x`), and the support a person expects ranks by degree
+    /// of relatedness (Burton-Chellew & Dunbar 2015, DOI `10.1093/beheco/aru165`), which is why the premium
+    /// grows with `r`. **The size is a design default**: the papers report that the premium exists and which
+    /// way it grows, and no number a score can use (`docs/research/kinship.md`). `0.0` is the previous
+    /// release.
+    pub kin_premium: f32,
 }
 
 impl Tuning {
@@ -799,6 +816,7 @@ impl Default for Tuning {
             contact_gossip_cooldown_days: 2.0,
             crowded_arrival_growth: 0.7,
             crowding_penalty: 0.6,
+            kin_premium: 1.0,
         }
     }
 }

@@ -202,7 +202,7 @@ pub use placement::{
 pub use plugins::SocietyPlugins;
 #[cfg(feature = "serde")]
 pub use preview::{PersonPreview, Preview, PreviewError, TieChange, preview_forward};
-pub use relationships::{RelationshipsPlugin, Tie, TieLabel, TieLabelChanged, Ties};
+pub use relationships::{Kin, RelationshipsPlugin, Tie, TieLabel, TieLabelChanged, Ties};
 pub use reputation::NormViolated;
 pub use rules::{
     FireTrigger, RulesPlugin, TriggerFired, TriggerTest, TriggerTestError, reload_defs,

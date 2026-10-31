@@ -560,6 +560,7 @@ fn register_ctx(engine: &mut Engine) {
     ctx_pair!(engine, "trust", trust);
     ctx_pair!(engine, "respect", respect);
     ctx_pair!(engine, "familiarity", familiarity);
+    ctx_pair!(engine, "kin", kin);
     ctx_pair!(engine, "grudge", grudge);
     ctx_one!(engine, "standing", standing);
     engine.register_fn(
