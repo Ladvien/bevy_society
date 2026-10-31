@@ -344,6 +344,15 @@ pub enum Input {
     /// the walk). The input itself is a measurement of two stores, not a rate. It needs a `Person` target,
     /// and a target holding no goods at all is not a counterparty.
     Surplus(String),
+    /// **How much of a good the actor itself holds**, in units, clamped to `[0, 1]` like every input.
+    ///
+    /// A unit is whatever the pack calls one: the clamp makes `1.0` the top of the scale, so a pack that
+    /// counts a meal in quarter-loaves rescales it in the curve (`Linear(4.0, 0.0)` reads "a meal in hand"
+    /// as `1.0`). This is the **appetitive** half of a need that a good satisfies: an activity that
+    /// *consumes* the good can score by whether there is any to consume, and the activity that *produces*
+    /// it by whether the shelf is empty, so production answers to the household's own larder rather than
+    /// to the clock alone. It needs no target, and costs one read of the actor's own `Stock`.
+    Stock(String),
     /// A social field value at the target cell. Needs the `fields` feature.
     Field(FieldInput),
     /// A Rhai float expression, clamped to [0, 1].
@@ -1544,6 +1553,7 @@ impl SocietyDefs {
             Input::Surplus(name) => {
                 Signal::Surplus(require(self.good_id(name), "good", name, owner)?)
             }
+            Input::Stock(name) => Signal::Stock(require(self.good_id(name), "good", name, owner)?),
             Input::Field(field) => Signal::Field(*field),
             Input::Script(source) => Signal::Script(scripts.expression(owner, source)?),
         };
@@ -1879,6 +1889,8 @@ pub enum Signal {
     Skill(SkillId),
     /// The joint surplus a trade in this good would produce.
     Surplus(GoodId),
+    /// How much of a good the actor holds.
+    Stock(GoodId),
     /// A social field value.
     Field(FieldInput),
     /// A compiled Rhai expression.
