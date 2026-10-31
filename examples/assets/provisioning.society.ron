@@ -48,6 +48,13 @@
             id: "bake",
             target: Place("food"),
             duration_hours: 1.0,
+            // **Urgent while hungry** (`urgent`, below): a household that is hungry and has nothing on the shelf is in
+            // the same tier as `eat`, so the bread gets made before the play, the work and the chatter. Without this
+            // line `eat` alone takes the tier, and on a bare shelf it scores a fourteenth, so `tier_cutoff` drops it
+            // and `bake` is the only option left in the tier: the two lines are one design, and `bake` is in the
+            // bucket because it is the act that solves the hunger when the shelf is empty, though it `satisfies`
+            // nothing itself.
+            urgent: Some((need: "food", below: 0.25, rank: 1)),
             produces: [("bread", 4.0)],
             considerations: [
                 (input: Hour, curve: Hours(6.0, 20.0)),
@@ -75,6 +82,18 @@
             id: "eat",
             target: Place("food"),
             duration_hours: 0.75,
+            // **Hunger takes precedence** (Maslow 1943, DOI 10.1037/h0054346: "the most prepotent goal will
+            // monopolize consciousness ... The less prepotent needs are minimized"). Under `food` 0.25 a meal is in
+            // the tier above work, craft and company; the Sims' need buckets are the same mechanism ("a starving Sim
+            // will never even consider watching TV unless they fail to find anything that can solve their hunger",
+            // Game AI Pro 1 ch. 9), and dual-utility ranks that follow the situation are Dill's (Game AI Pro 2 ch. 3).
+            // Rank 1 is `sleep`'s: a tired, hungry person at night draws between the two by score.
+            //
+            // **It is only safe with the line above and the shelf term below.** On the starter pack's `eat` (no
+            // shelf term, and a `bake` outside the bucket) the same line empties the shelves and the floor rises
+            // from 19 to 27 % at 0.25 and 52 % at 0.35 (`docs/loop/runs/2026-10-30-29/research.md`): the bucket was full
+            // of an option that cannot solve the hunger. `0.25` is a design default, swept at 0.15 / 0.25 / 0.35.
+            urgent: Some((need: "food", below: 0.25, rank: 1)),
             considerations: [
                 (input: Need("food"), curve: Logistic(-10.0, 0.35)),
                 (input: Stock("bread"), curve: Linear(4.0, 0.05)),

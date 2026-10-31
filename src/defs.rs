@@ -220,6 +220,31 @@ pub struct FactionDef {
     pub ingroup_bias: f32,
 }
 
+/// A rank an activity takes **while one need is low**, and only then.
+///
+/// Maslow (1943, DOI 10.1037/h0054346): "the most prepotent goal will monopolize consciousness ... The less
+/// prepotent needs are minimized, even forgotten or denied", and a satisfied need "is not a motivator". The
+/// utility-AI form is the bucket: on The Sims "motives are bucketed based on their utility value ... a starving
+/// Sim will never even consider watching TV unless they fail to find anything that can solve their hunger"
+/// (Graham, Game AI Pro 1 ch. 9, corpus doc `gameaipro1-ch09-introduction-utility-theory`), which is dual-utility
+/// reasoning whose rank follows the situation (Dill, Game AI Pro 2 ch. 3).
+///
+/// While the actor's `need` is under `below`, the activity's rank is the larger of its own and `rank`, so it is
+/// in the tier that wins over every option of a lower rank — and when it has no viable option (no table to eat
+/// at, a place just failed), the person falls through to the lower tiers as before. Above `below` the activity
+/// is exactly what it was. Nothing in the crate names a need or a number: the pack says which activity answers
+/// which need and how low is low.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct UrgentDef {
+    /// The need that makes the activity urgent.
+    pub need: String,
+    /// The level under which it is urgent, in `(0, 1]`.
+    pub below: f32,
+    /// The rank taken while urgent; must exceed the activity's own `rank`.
+    pub rank: u8,
+}
+
 /// Something a person can do, chosen by utility scoring.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -233,6 +258,9 @@ pub struct ActivityDef {
     /// Dual-utility rank; the highest rank with any option above zero wins (Dill 2015).
     #[serde(default)]
     pub rank: u8,
+    /// A higher rank for as long as one need is low (see [`UrgentDef`]); `None` keeps `rank` always.
+    #[serde(default)]
+    pub urgent: Option<UrgentDef>,
     /// Multiplies the option's score.
     #[serde(default = "one")]
     pub weight: f32,
@@ -866,6 +894,7 @@ impl SocietyDefs {
                 target: ActivityTarget::Itself,
                 duration_hours: 1.0,
                 rank: 0,
+                urgent: None,
                 weight: 1.0,
                 considerations: Vec::new(),
                 satisfies: Vec::new(),
@@ -1449,6 +1478,27 @@ impl SocietyDefs {
             return Err(invalid(&owner, "weight must be 0 or more"));
         }
         check_target(&owner, &def.target)?;
+        let urgent = match &def.urgent {
+            Some(urgent) => {
+                let urgent_owner = format!("{owner} urgent");
+                let need = require(self.need_id(&urgent.need), "need", &urgent.need, &urgent_owner)?;
+                if !urgent.below.is_finite() || urgent.below <= 0.0 || urgent.below > 1.0 {
+                    return Err(invalid(&urgent_owner, "below must be in (0, 1]"));
+                }
+                if urgent.rank <= def.rank {
+                    return Err(invalid(
+                        &urgent_owner,
+                        "rank must be above the activity's own rank, or it changes nothing",
+                    ));
+                }
+                Some(Urgent {
+                    need,
+                    below: urgent.below,
+                    rank: urgent.rank,
+                })
+            }
+            None => None,
+        };
         register(
             &mut self.activity_ids,
             "activity",
@@ -1489,6 +1539,7 @@ impl SocietyDefs {
             target: def.target,
             duration_hours: def.duration_hours,
             rank: def.rank,
+            urgent,
             weight: def.weight,
             considerations,
             satisfies,
@@ -1836,6 +1887,8 @@ pub(crate) struct ActivitySpec {
     pub(crate) target: ActivityTarget,
     pub(crate) duration_hours: f32,
     pub(crate) rank: u8,
+    /// The rank taken while a need is low; see [`UrgentDef`].
+    pub(crate) urgent: Option<Urgent>,
     pub(crate) weight: f32,
     pub(crate) considerations: Vec<Term>,
     pub(crate) satisfies: Vec<(NeedId, f32)>,
@@ -1845,6 +1898,31 @@ pub(crate) struct ActivitySpec {
     /// Goods used up per completed use.
     pub(crate) consumes: Vec<(GoodId, f32)>,
     pub(crate) barks: Vec<String>,
+}
+
+/// A compiled [`UrgentDef`].
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub(crate) struct Urgent {
+    pub(crate) need: NeedId,
+    pub(crate) below: f32,
+    pub(crate) rank: u8,
+}
+
+impl ActivitySpec {
+    /// The rank this activity has for a person whose needs are `levels`: its own, raised to `urgent.rank`
+    /// while the named need is under `urgent.below`.
+    pub(crate) fn rank_for(&self, levels: &[f32]) -> u8 {
+        match self.urgent {
+            Some(urgent)
+                if levels
+                    .get(usize::from(urgent.need.0))
+                    .is_some_and(|level| *level < urgent.below) =>
+            {
+                self.rank.max(urgent.rank)
+            }
+            _ => self.rank,
+        }
+    }
 }
 
 /// A compiled consideration: a signal through a curve.
