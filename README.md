@@ -45,7 +45,7 @@ Every formula traces to a paper; every rate is a named field on `Tuning`; every 
 
 ```toml
 [dependencies]
-bevy_society = "0.8"
+bevy_society = "0.9"
 ```
 
 ## Quick start
