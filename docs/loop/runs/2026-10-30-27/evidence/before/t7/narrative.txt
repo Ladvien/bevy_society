@@ -1,0 +1,1577 @@
+# Bram's day
+
+At the end: doing Some("work"), needs Some([0.59267575, 0.053784426, 0.0, 0.14585426]), mood P-0.13 A0.12 D0.12
+
+d1 15h00: started compliment
+d1 15h00: compliment with Dena (refused)
+d1 15h12: started work
+d1 15h12: finished compliment (completed)
+d1 17h48: compliment approached by V29 (accepted)
+d1 18h18: compliment approached by V29 (accepted)
+d1 18h30: compliment approached by V29 (accepted)
+d1 19h07: compliment approached by V29 (accepted)
+d1 19h38: compliment approached by V29 (refused)
+d1 19h50: insult approached by V29 (accepted)
+d1 20h24: started snub
+d1 20h24: finished work (completed)
+d1 20h24: insult with V29 (refused)
+d1 20h30: started compliment
+d1 20h30: finished snub (completed)
+d1 22h22: compliment with Corin (accepted)
+d1 22h26: compliment approached by V28 (accepted)
+d1 22h35: started sleep
+d1 22h35: finished compliment (completed)
+d2 06h17: gossip approached by Hilda (accepted)
+d2 06h35: started snub
+d2 06h35: finished sleep (completed)
+d2 06h35: insult with V29 (refused)
+d2 06h38: compliment approached by Corin (accepted)
+d2 06h41: started compliment
+d2 06h41: finished snub (completed)
+d2 06h41: compliment with Corin (accepted)
+d2 06h47: chat approached by Hilda (accepted)
+d2 06h54: started compliment
+d2 06h54: finished compliment (completed)
+d2 06h54: compliment with Corin (accepted)
+d2 06h56: compliment approached by Corin (accepted)
+d2 07h06: started play
+d2 07h06: finished compliment (completed)
+d2 07h06: chat with Alys (accepted)
+d2 07h09: compliment approached by Corin (accepted)
+d2 07h18: gossip approached by Hilda (accepted)
+d2 07h21: compliment approached by Corin (accepted)
+d2 07h36: started gossip
+d2 07h36: finished play (completed)
+d2 07h36: gossip with Alys (refused)
+d2 07h42: gossip approached by Hilda (refused)
+d2 07h54: started gossip
+d2 07h54: finished gossip (completed)
+d2 07h54: gossip with Alys (accepted)
+d2 08h13: started compliment
+d2 08h13: finished gossip (completed)
+d2 08h30: gossip approached by Alys (accepted)
+d2 09h17: gossip approached by V29 (accepted)
+d2 09h36: gossip approached by V29 (accepted)
+d2 10h50: compliment with Corin (refused)
+d2 11h02: started compliment
+d2 11h02: finished compliment (completed)
+d2 11h02: compliment with Corin (accepted)
+d2 11h14: started gossip
+d2 11h14: finished compliment (completed)
+d2 11h14: gossip with Tomas (accepted)
+d2 11h32: started compliment
+d2 11h32: finished gossip (completed)
+d2 11h32: compliment with Corin (accepted)
+d2 11h45: started work
+d2 11h45: finished compliment (completed)
+d2 12h13: compliment approached by V30 (accepted)
+d2 14h39: compliment approached by V28 (accepted)
+d2 14h53: compliment approached by V28 (refused)
+d2 15h27: compliment approached by Corin (accepted)
+d2 15h45: started compliment
+d2 15h45: finished work (interrupted)
+d2 15h45: compliment with Corin (accepted)
+d2 15h57: started play
+d2 15h57: finished compliment (completed)
+d2 15h57: chat with V50 (accepted)
+d2 16h10: compliment approached by Corin (refused)
+d2 16h22: compliment approached by Corin (accepted)
+d2 16h27: started compliment
+d2 16h27: finished play (completed)
+d2 16h27: compliment with Corin (refused)
+d2 16h40: started compliment
+d2 16h40: finished compliment (completed)
+d2 16h40: compliment with V28 (accepted)
+d2 16h52: started compliment
+d2 16h52: finished compliment (completed)
+d2 16h52: compliment with V28 (refused)
+d2 17h01: gossip approached by Dena (refused)
+d2 17h04: started eat
+d2 17h04: finished compliment (completed)
+d2 18h15: gossip approached by Ysolde (accepted)
+d2 18h54: started snub
+d2 18h54: finished eat (completed)
+d2 19h02: insult with Dena (refused)
+d2 19h08: started gossip
+d2 19h08: finished snub (completed)
+d2 19h08: gossip with V50 (refused)
+d2 19h27: started gossip
+d2 19h27: finished gossip (completed)
+d2 19h27: gossip with V50 (accepted)
+d2 19h45: started gossip
+d2 19h45: finished gossip (completed)
+d2 19h45: gossip with Ysolde (refused)
+d2 20h03: started gossip
+d2 20h03: finished gossip (completed)
+d2 20h03: gossip with Ysolde (refused)
+d2 20h22: started eat
+d2 20h22: finished gossip (completed)
+d2 20h35: compliment approached by Corin (accepted)
+d2 20h42: gossip approached by Dena (accepted)
+d2 20h47: compliment approached by Corin (accepted)
+d2 21h45: compliment approached by Corin (accepted)
+d2 22h50: started sleep
+d2 22h50: finished eat (completed)
+d3 07h12: started chat
+d3 07h12: finished sleep (completed)
+d3 07h12: chat with Corin (accepted)
+d3 07h31: started gossip
+d3 07h31: finished chat (completed)
+d3 07h31: gossip with Rhea (accepted)
+d3 07h49: started compliment
+d3 07h49: finished gossip (completed)
+d3 07h49: compliment with Corin (accepted)
+d3 08h00: compliment approached by V28 (accepted)
+d3 08h01: started craft
+d3 08h01: finished compliment (completed)
+d3 08h21: compliment approached by Hilda (refused)
+d3 08h33: insult approached by Hilda (accepted)
+d3 09h57: chat approached by Alys (accepted)
+d3 10h27: compliment approached by Alys (refused)
+d3 10h59: compliment approached by Alys (refused)
+d3 11h11: compliment approached by Alys (accepted)
+d3 11h24: compliment approached by Alys (refused)
+d3 12h40: compliment approached by V28 (accepted)
+d3 13h07: compliment approached by Corin (refused)
+d3 13h11: compliment approached by V28 (refused)
+d3 13h44: started work
+d3 13h44: finished craft (completed)
+d3 16h04: gossip approached by V26 (accepted)
+d3 17h44: started snub
+d3 17h44: finished work (completed)
+d3 17h51: compliment approached by V30 (accepted)
+d3 17h52: compliment approached by V28 (accepted)
+d3 18h05: compliment approached by V28 (refused)
+d3 18h17: compliment approached by V28 (accepted)
+d3 18h22: compliment approached by V30 (accepted)
+d3 20h23: compliment approached by Corin (accepted)
+d3 20h35: compliment approached by Corin (accepted)
+d3 20h45: insult with Hilda (accepted)
+d3 20h51: started compliment
+d3 20h51: finished snub (completed)
+d3 20h51: compliment with Corin (accepted)
+d3 21h04: started gossip
+d3 21h04: finished compliment (completed)
+d3 21h04: gossip with V35 (accepted)
+d3 21h22: started relax
+d3 21h22: finished gossip (completed)
+d3 21h23: gossip approached by V27 (refused)
+d3 21h28: insult approached by Hilda (refused)
+d3 21h41: gossip approached by V27 (accepted)
+d4 01h07: started sleep
+d4 01h07: finished relax (completed)
+d4 06h37: gossip approached by V38 (refused)
+d4 08h45: compliment approached by V28 (accepted)
+d4 09h07: started compliment
+d4 09h07: finished sleep (completed)
+d4 09h07: compliment with V28 (refused)
+d4 09h19: started compliment
+d4 09h19: finished compliment (completed)
+d4 09h32: insult approached by Hilda (accepted)
+d4 10h00: compliment approached by V30 (accepted)
+d4 10h04: compliment with Corin (refused)
+d4 10h16: started compliment
+d4 10h16: finished compliment (completed)
+d4 10h16: compliment with V30 (accepted)
+d4 10h28: started chat
+d4 10h28: finished compliment (completed)
+d4 10h28: chat with Fenna (accepted)
+d4 10h47: started compliment
+d4 10h47: finished chat (completed)
+d4 10h47: compliment with V30 (refused)
+d4 10h59: started play
+d4 10h59: finished compliment (completed)
+d4 10h59: chat with V59 (accepted)
+d4 11h29: started snub
+d4 11h29: finished play (completed)
+d4 11h29: insult with Hilda (refused)
+d4 11h36: started compliment
+d4 11h36: finished snub (completed)
+d4 11h36: compliment with Alys (accepted)
+d4 11h49: started gossip
+d4 11h49: finished compliment (completed)
+d4 11h49: gossip with V59 (accepted)
+d4 12h07: started work
+d4 12h07: finished gossip (completed)
+d4 13h53: compliment approached by V28 (refused)
+d4 14h27: compliment approached by Alys (accepted)
+d4 14h46: compliment approached by Garet (accepted)
+d4 17h30: started compliment
+d4 17h30: finished work (completed)
+d4 17h30: compliment with Alys (accepted)
+d4 17h43: started compliment
+d4 17h43: finished compliment (completed)
+d4 17h43: compliment with Alys (accepted)
+d4 17h55: started compliment
+d4 17h55: finished compliment (completed)
+d4 17h55: compliment with Alys (accepted)
+d4 18h07: started snub
+d4 18h07: finished compliment (completed)
+d4 18h39: compliment approached by V30 (accepted)
+d4 18h46: compliment approached by Corin (accepted)
+d4 19h20: insult with Hilda (refused)
+d4 19h21: compliment approached by V30 (accepted)
+d4 19h26: started eat
+d4 19h26: finished snub (completed)
+d4 19h33: compliment approached by V30 (refused)
+d4 20h42: compliment approached by Corin (accepted)
+d4 20h54: compliment approached by Corin (accepted)
+d4 21h02: started compliment
+d4 21h02: finished eat (completed)
+d4 23h12: compliment with Alys (accepted)
+d4 23h24: started sleep
+d4 23h24: finished compliment (completed)
+d5 08h51: chat approached by V34 (refused)
+d5 09h49: started eat
+d5 09h49: finished sleep (completed)
+d5 12h16: compliment approached by V59 (accepted)
+d5 12h27: started compliment
+d5 12h27: finished eat (completed)
+d5 14h10: compliment with Corin (refused)
+d5 14h23: started chat
+d5 14h23: finished compliment (completed)
+d5 14h23: chat with Lira (refused)
+d5 14h41: started gossip
+d5 14h41: finished chat (completed)
+d5 14h41: gossip with V43 (refused)
+d5 14h59: started gossip
+d5 14h59: finished gossip (completed)
+d5 14h59: gossip with V43 (accepted)
+d5 15h05: compliment approached by V30 (accepted)
+d5 15h17: started compliment
+d5 15h17: finished gossip (completed)
+d5 15h17: compliment with V30 (accepted)
+d5 15h30: started work
+d5 15h30: finished compliment (completed)
+d5 15h54: compliment approached by V28 (refused)
+d5 16h46: compliment approached by Garet (accepted)
+d5 16h57: chat approached by V33 (accepted)
+d5 17h37: compliment approached by V59 (refused)
+d5 19h30: started play
+d5 19h30: finished work (interrupted)
+d5 19h30: chat with V57 (accepted)
+d5 20h00: started eat
+d5 20h00: finished play (completed)
+d5 20h39: compliment approached by Corin (refused)
+d5 23h35: started sleep
+d5 23h35: finished eat (completed)
+d6 09h42: gossip approached by V35 (accepted)
+d6 10h11: started chat
+d6 10h11: finished sleep (completed)
+d6 10h11: chat with Corin (accepted)
+d6 10h30: started compliment
+d6 10h30: finished chat (completed)
+d6 10h30: compliment with Corin (refused)
+d6 10h42: started gossip
+d6 10h42: finished compliment (completed)
+d6 10h42: gossip with Corin (accepted)
+d6 11h00: started gossip
+d6 11h00: finished gossip (completed)
+d6 11h00: gossip with Corin (accepted)
+d6 11h18: started work
+d6 11h18: finished gossip (completed)
+d6 11h44: compliment approached by Corin (accepted)
+d6 13h14: insult approached by V60 (refused)
+d6 13h38: gossip approached by Lira (accepted)
+d6 13h49: chat approached by V57 (refused)
+d6 13h56: chat approached by Lira (accepted)
+d6 14h26: gossip approached by Lira (refused)
+d6 15h09: gossip approached by Lira (refused)
+d6 15h15: gossip approached by Perrin (accepted)
+d6 15h18: started work
+d6 15h18: finished work (interrupted)
+d6 15h27: chat approached by Lira (refused)
+d6 15h31: compliment approached by Alys (accepted)
+d6 16h58: gossip approached by V34 (accepted)
+d6 17h17: gossip approached by V34 (accepted)
+d6 19h17: compliment approached by Alys (refused)
+d6 20h23: started compliment
+d6 20h23: finished work (completed)
+d6 20h23: compliment with Corin (refused)
+d6 20h36: started compliment
+d6 20h36: finished compliment (completed)
+d6 20h36: compliment with Alys (accepted)
+d6 20h48: started play
+d6 20h48: finished compliment (completed)
+d6 20h48: chat with V43 (refused)
+d6 21h18: started compliment
+d6 21h18: finished play (completed)
+d6 21h35: compliment with Alys (accepted)
+d6 21h47: started gossip
+d6 21h47: finished compliment (completed)
+d6 21h47: gossip with V43 (accepted)
+d6 22h05: started sleep
+d6 22h05: finished gossip (completed)
+d7 07h06: chat approached by V37 (refused)
+d7 07h15: started compliment
+d7 07h15: finished sleep (completed)
+d7 07h37: compliment with V30 (accepted)
+d7 07h49: started compliment
+d7 07h49: finished compliment (completed)
+d7 07h49: compliment with V30 (refused)
+d7 08h01: started compliment
+d7 08h01: finished compliment (completed)
+d7 08h01: compliment with Alys (refused)
+d7 08h14: started snub
+d7 08h14: finished compliment (completed)
+d7 08h14: insult with Alys (accepted)
+d7 08h20: started compliment
+d7 08h20: finished snub (completed)
+d7 08h20: compliment with Garet (refused)
+d7 08h32: started gossip
+d7 08h32: finished compliment (completed)
+d7 08h32: gossip with V37 (accepted)
+d7 08h49: compliment approached by Fenna (accepted)
+d7 08h51: started eat
+d7 08h51: finished gossip (completed)
+d7 09h10: insult approached by Alys (accepted)
+d7 12h26: compliment approached by Corin (accepted)
+d7 12h51: started compliment
+d7 12h51: finished eat (interrupted)
+d7 12h51: compliment with Corin (accepted)
+d7 13h03: started eat
+d7 13h03: finished compliment (completed)
+d7 15h33: chat approached by V28 (accepted)
+d7 16h03: gossip approached by V28 (accepted)
+d7 17h28: started relax
+d7 17h28: finished eat (completed)
+d7 18h17: gossip approached by Vesna (accepted)
+d7 18h36: chat approached by V35 (accepted)
+d7 19h05: started compliment
+d7 19h05: finished relax (completed)
+d7 19h07: compliment approached by V35 (refused)
+d7 19h19: insult approached by V35 (accepted)
+d7 21h23: compliment with Corin (accepted)
+d7 21h35: started snub
+d7 21h35: finished compliment (completed)
+d7 21h49: insult with V35 (refused)
+d7 21h56: started gossip
+d7 21h56: finished snub (completed)
+d7 21h56: gossip with V25 (refused)
+d7 22h14: started sleep
+d7 22h14: finished gossip (completed)
+d8 07h51: started play
+d8 07h51: finished sleep (completed)
+d8 07h51: chat with V33 (accepted)
+d8 08h22: started eat
+d8 08h22: finished play (completed)
+d8 09h23: gossip approached by Hilda (refused)
+d8 09h50: compliment approached by Corin (accepted)
+d8 10h33: compliment approached by Corin (accepted)
+d8 10h45: compliment approached by Corin (accepted)
+d8 10h57: compliment approached by Corin (accepted)
+d8 11h10: compliment approached by Corin (refused)
+d8 11h47: chat approached by Kell (accepted)
+d8 12h05: compliment approached by Kell (refused)
+d8 12h22: started snub
+d8 12h22: finished eat (interrupted)
+d8 12h30: chat approached by V28 (accepted)
+d8 13h46: insult with V35 (accepted)
+d8 13h52: started eat
+d8 13h52: finished snub (completed)
+d8 16h34: started play
+d8 16h34: finished eat (completed)
+d8 16h34: chat with V60 (accepted)
+d8 17h04: started wander
+d8 17h04: finished play (completed)
+d8 17h34: started gossip
+d8 17h34: finished wander (completed)
+d8 17h34: gossip with V45 (refused)
+d8 17h52: started eat
+d8 17h52: finished gossip (completed)
+d8 19h42: started eat
+d8 19h42: finished eat (completed)
+d8 21h02: gossip approached by Wren (refused)
+d8 21h37: gossip approached by Sable (accepted)
+d8 21h41: gossip approached by V51 (accepted)
+d8 21h59: gossip approached by V51 (accepted)
+d8 22h01: gossip approached by Nera (accepted)
+d8 22h49: compliment approached by V30 (refused)
+d8 23h42: started sleep
+d8 23h42: finished eat (interrupted)
+d9 06h11: compliment approached by V52 (accepted)
+d9 06h42: compliment approached by V52 (accepted)
+d9 06h54: compliment approached by V52 (accepted)
+d9 07h06: compliment approached by V52 (refused)
+d9 08h04: insult approached by V52 (refused)
+d9 08h06: started gossip
+d9 08h06: finished sleep (completed)
+d9 08h06: gossip with Wren (accepted)
+d9 08h11: gossip approached by Ulric (refused)
+d9 08h24: started compliment
+d9 08h24: finished gossip (completed)
+d9 08h24: compliment with V52 (refused)
+d9 08h30: chat approached by Ulric (refused)
+d9 08h37: started compliment
+d9 08h37: finished compliment (completed)
+d9 09h00: chat approached by Ulric (refused)
+d9 09h50: compliment with Garet (accepted)
+d9 10h03: started work
+d9 10h03: finished compliment (completed)
+d9 14h03: started snub
+d9 14h03: finished work (interrupted)
+d9 14h03: insult with Ulric (refused)
+d9 14h09: started play
+d9 14h09: finished snub (completed)
+d9 14h09: chat with Ulric (refused)
+d9 14h39: started compliment
+d9 14h39: finished play (completed)
+d9 15h55: compliment with Fenna (refused)
+d9 16h08: started gossip
+d9 16h08: finished compliment (completed)
+d9 16h08: gossip with V32 (accepted)
+d9 16h26: started compliment
+d9 16h26: finished gossip (completed)
+d9 18h31: insult approached by Fenna (accepted)
+d9 18h37: chat approached by Fenna (accepted)
+d9 18h50: compliment with V28 (accepted)
+d9 18h50: compliment approached by V28 (accepted)
+d9 18h57: chat approached by V60 (accepted)
+d9 19h02: started eat
+d9 19h02: finished compliment (completed)
+d9 19h07: compliment approached by Fenna (accepted)
+d9 20h01: started compliment
+d9 20h01: finished eat (completed)
+d9 20h01: compliment with V28 (refused)
+d9 20h13: compliment approached by Fenna (accepted)
+d9 20h14: started eat
+d9 20h14: finished compliment (completed)
+d9 20h25: gossip approached by Fenna (accepted)
+d9 20h44: compliment approached by Fenna (refused)
+d9 20h56: compliment approached by Fenna (accepted)
+d9 21h29: compliment approached by V54 (accepted)
+d9 22h53: compliment approached by Garet (accepted)
+d10 00h14: started sleep
+d10 00h14: finished eat (interrupted)
+d10 07h05: compliment approached by Garet (accepted)
+d10 07h36: compliment approached by Garet (refused)
+d10 08h25: started compliment
+d10 08h25: finished sleep (completed)
+d10 08h25: compliment with Garet (refused)
+d10 08h37: started play
+d10 08h37: finished compliment (completed)
+d10 08h37: chat with Vesna (refused)
+d10 09h07: started chat
+d10 09h07: finished play (completed)
+d10 09h07: chat with V29 (accepted)
+d10 09h26: started compliment
+d10 09h26: finished chat (completed)
+d10 10h34: compliment with Fenna (refused)
+d10 10h46: started compliment
+d10 10h46: finished compliment (completed)
+d10 12h21: compliment approached by Fenna (refused)
+d10 13h32: chat approached by Hilda (refused)
+d10 14h46: started snub
+d10 14h46: finished compliment (interrupted)
+d10 14h46: insult with Hilda (accepted)
+d10 14h53: started chat
+d10 14h53: finished snub (completed)
+d10 14h53: chat with V52 (accepted)
+d10 15h11: started compliment
+d10 15h11: finished chat (completed)
+d10 15h11: compliment with V52 (accepted)
+d10 15h23: started compliment
+d10 15h23: finished compliment (completed)
+d10 15h23: compliment with V52 (accepted)
+d10 15h24: compliment approached by V52 (accepted)
+d10 15h36: started compliment
+d10 15h36: finished compliment (completed)
+d10 15h36: compliment with V52 (accepted)
+d10 15h48: started gossip
+d10 15h48: finished compliment (completed)
+d10 15h48: gossip with Nera (accepted)
+d10 16h06: started eat
+d10 16h06: finished gossip (completed)
+d10 16h13: compliment approached by V52 (refused)
+d10 17h16: gossip approached by V42 (accepted)
+d10 17h37: insult approached by V46 (refused)
+d10 18h54: started snub
+d10 18h54: finished eat (completed)
+d10 19h05: compliment approached by V52 (accepted)
+d10 19h17: compliment approached by V52 (accepted)
+d10 19h24: insult with V46 (refused)
+d10 19h30: started eat
+d10 19h30: finished snub (completed)
+d10 20h40: started relax
+d10 20h40: finished eat (completed)
+d10 20h52: insult approached by Hilda (accepted)
+d10 21h03: compliment approached by V28 (accepted)
+d10 23h30: started sleep
+d10 23h30: finished relax (completed)
+d11 07h17: compliment approached by Fenna (accepted)
+d11 07h30: started play
+d11 07h30: finished sleep (completed)
+d11 07h30: chat with Corin (refused)
+d11 08h00: started work
+d11 08h00: finished play (completed)
+d11 08h29: chat approached by V34 (refused)
+d11 08h47: gossip approached by V34 (accepted)
+d11 09h18: gossip approached by V34 (accepted)
+d11 09h19: compliment approached by V28 (accepted)
+d11 09h58: compliment approached by V28 (accepted)
+d11 11h58: compliment approached by V28 (accepted)
+d11 12h00: started snub
+d11 12h00: finished work (interrupted)
+d11 12h12: insult with Hilda (refused)
+d11 12h12: insult approached by Hilda (accepted)
+d11 12h18: started work
+d11 12h18: finished snub (completed)
+d11 12h36: gossip approached by Edric (refused)
+d11 12h55: insult approached by Edric (refused)
+d11 16h29: compliment approached by V28 (refused)
+d11 17h10: started relax
+d11 17h10: finished work (completed)
+d11 19h43: started compliment
+d11 19h43: finished relax (completed)
+d11 20h06: compliment with V28 (accepted)
+d11 20h18: started gossip
+d11 20h18: finished compliment (completed)
+d11 20h18: gossip with Nera (accepted)
+d11 20h36: started wander
+d11 20h36: finished gossip (completed)
+d11 21h07: started eat
+d11 21h07: finished wander (completed)
+d11 23h19: started sleep
+d11 23h19: finished eat (completed)
+d12 07h00: gossip approached by Vesna (refused)
+d12 07h18: insult approached by Vesna (refused)
+d12 07h24: chat approached by Vesna (refused)
+d12 07h54: gossip approached by Vesna (refused)
+d12 07h55: started gossip
+d12 07h55: finished sleep (completed)
+d12 07h55: gossip with Vesna (refused)
+d12 08h13: gossip approached by Vesna (refused)
+d12 08h13: started eat
+d12 08h13: finished gossip (completed)
+d12 08h18: compliment approached by Fenna (accepted)
+d12 08h30: compliment approached by Fenna (accepted)
+d12 08h42: compliment approached by Fenna (accepted)
+d12 09h08: started eat
+d12 09h08: finished eat (completed)
+d12 09h53: started gossip
+d12 09h53: finished eat (completed)
+d12 09h53: gossip with Wren (accepted)
+d12 10h11: started work
+d12 10h11: finished gossip (completed)
+d12 12h43: chat approached by Alys (accepted)
+d12 14h11: started eat
+d12 14h11: finished work (completed)
+d12 15h16: started gossip
+d12 15h16: finished eat (completed)
+d12 15h16: gossip with V55 (refused)
+d12 15h34: started compliment
+d12 15h34: finished gossip (completed)
+d12 19h05: gossip approached by V55 (refused)
+d12 19h34: started compliment
+d12 19h34: finished compliment (interrupted)
+d12 20h54: gossip approached by Vesna (accepted)
+d12 23h18: compliment with V52 (refused)
+d12 23h30: started sleep
+d12 23h30: finished compliment (completed)
+d13 08h32: started eat
+d13 08h32: finished sleep (completed)
+d13 09h42: chat approached by V36 (accepted)
+d13 12h12: started chat
+d13 12h12: finished eat (completed)
+d13 12h12: chat with V36 (accepted)
+d13 12h30: started play
+d13 12h30: finished chat (completed)
+d13 12h30: chat with Dena (refused)
+d13 13h01: started compliment
+d13 13h01: finished play (completed)
+d13 15h15: gossip approached by Dena (accepted)
+d13 15h34: chat approached by Dena (refused)
+d13 17h01: started compliment
+d13 17h01: finished compliment (interrupted)
+d13 17h13: compliment approached by Corin (accepted)
+d13 17h25: compliment approached by Corin (refused)
+d13 17h35: chat approached by V55 (accepted)
+d13 17h41: compliment with Fenna (accepted)
+d13 17h54: started gossip
+d13 17h54: finished compliment (completed)
+d13 17h54: gossip with V55 (accepted)
+d13 18h12: started compliment
+d13 18h12: finished gossip (completed)
+d13 18h12: compliment with Corin (accepted)
+d13 18h17: gossip approached by V55 (accepted)
+d13 18h24: started gossip
+d13 18h24: finished compliment (completed)
+d13 18h24: gossip with V55 (refused)
+d13 18h42: started gossip
+d13 18h42: finished gossip (completed)
+d13 18h42: gossip with V55 (refused)
+d13 18h54: insult approached by V55 (accepted)
+d13 19h01: started eat
+d13 19h01: finished gossip (completed)
+d13 20h22: gossip approached by Dena (accepted)
+d13 21h48: compliment approached by V54 (accepted)
+d13 22h50: started sleep
+d13 22h50: finished eat (completed)
+d14 07h37: started play
+d14 07h37: finished sleep (completed)
+d14 07h37: chat with Dena (refused)
+d14 08h07: started eat
+d14 08h07: finished play (completed)
+d14 08h16: chat approached by Dena (refused)
+d14 08h46: gossip approached by Dena (refused)
+d14 08h51: compliment approached by V34 (refused)
+d14 09h04: gossip approached by Dena (refused)
+d14 11h16: started compliment
+d14 11h16: finished eat (completed)
+d14 11h43: compliment approached by V53 (refused)
+d14 14h12: gossip approached by Vesna (accepted)
+d14 14h19: compliment approached by V54 (accepted)
+d14 14h31: gossip approached by Vesna (accepted)
+d14 14h49: chat approached by Vesna (accepted)
+d14 15h16: started compliment
+d14 15h16: finished compliment (interrupted)
+d14 15h20: compliment approached by V54 (accepted)
+d14 15h32: compliment approached by V54 (accepted)
+d14 15h39: compliment with Fenna (accepted)
+d14 15h39: compliment approached by Fenna (accepted)
+d14 15h52: started eat
+d14 15h52: finished compliment (completed)
+d14 15h52: compliment approached by Fenna (accepted)
+d14 16h53: compliment approached by Corin (refused)
+d14 18h38: gossip approached by Kell (refused)
+d14 18h44: compliment approached by Nera (refused)
+d14 18h54: gossip approached by V42 (accepted)
+d14 19h07: compliment approached by Corin (accepted)
+d14 19h17: compliment approached by V52 (accepted)
+d14 19h20: compliment approached by Corin (accepted)
+d14 19h40: started gossip
+d14 19h40: finished eat (completed)
+d14 19h40: gossip with Vesna (accepted)
+d14 19h40: gossip approached by Vesna (accepted)
+d14 19h57: compliment approached by Corin (accepted)
+d14 19h58: started gossip
+d14 19h58: finished gossip (completed)
+d14 19h58: gossip with Vesna (accepted)
+d14 20h17: started play
+d14 20h17: finished gossip (completed)
+d14 20h17: chat with Vesna (refused)
+d14 20h47: started compliment
+d14 20h47: finished play (completed)
+d14 20h50: insult approached by Vesna (refused)
+d14 20h56: compliment approached by Vesna (accepted)
+d14 21h10: compliment approached by Fenna (refused)
+d14 21h26: insult approached by Nera (accepted)
+d14 21h41: chat approached by Fenna (accepted)
+d14 21h59: compliment approached by Fenna (accepted)
+d14 22h44: compliment with Corin (accepted)
+d14 22h55: compliment approached by V54 (refused)
+d14 22h56: started sleep
+d14 22h56: finished compliment (completed)
+d15 06h43: compliment approached by Fenna (accepted)
+d15 06h55: compliment approached by Fenna (accepted)
+d15 07h08: chat approached by Fenna (accepted)
+d15 07h26: compliment approached by Fenna (accepted)
+d15 07h32: chat approached by V39 (refused)
+d15 07h38: gossip approached by Fenna (accepted)
+d15 07h57: compliment approached by Fenna (refused)
+d15 08h09: started snub
+d15 08h09: finished sleep (completed)
+d15 08h46: insult with Nera (accepted)
+d15 08h52: started wander
+d15 08h52: finished snub (completed)
+d15 09h23: started compliment
+d15 09h23: finished wander (completed)
+d15 10h31: compliment with Corin (accepted)
+d15 10h43: started play
+d15 10h43: finished compliment (completed)
+d15 10h43: chat with Fenna (refused)
+d15 10h54: compliment approached by Corin (refused)
+d15 11h13: started gossip
+d15 11h13: finished play (completed)
+d15 11h13: gossip with Fenna (accepted)
+d15 11h32: started eat
+d15 11h32: finished gossip (completed)
+d15 13h02: gossip approached by V46 (refused)
+d15 13h25: gossip with Oswin (refused)
+d15 13h51: started eat
+d15 13h51: finished eat (completed)
+d15 14h40: started compliment
+d15 14h40: finished eat (completed)
+d15 14h56: insult approached by V46 (refused)
+d15 15h01: gossip with V28 (accepted)
+d15 15h23: compliment with V28 (refused)
+d15 15h31: gossip with Lira (accepted)
+d15 15h36: started snub
+d15 15h36: finished compliment (completed)
+d15 15h36: insult with V28 (accepted)
+d15 15h42: started gossip
+d15 15h42: finished snub (completed)
+d15 15h42: gossip with Jena (refused)
+d15 16h00: started gossip
+d15 16h00: finished gossip (completed)
+d15 16h00: gossip with Jena (refused)
+d15 16h19: started compliment
+d15 16h19: finished gossip (completed)
+d15 17h29: compliment with Fenna (accepted)
+d15 17h42: started compliment
+d15 17h42: finished compliment (completed)
+d15 18h26: compliment with Corin (accepted)
+d15 18h38: started compliment
+d15 18h38: finished compliment (completed)
+d15 18h38: compliment with Corin (accepted)
+d15 18h50: started eat
+d15 18h50: finished compliment (completed)
+d15 19h05: compliment approached by Fenna (accepted)
+d15 20h39: compliment approached by Fenna (accepted)
+d15 21h04: started compliment
+d15 21h04: finished eat (completed)
+d15 21h04: compliment with Fenna (refused)
+d15 21h17: started compliment
+d15 21h17: finished compliment (completed)
+d15 21h51: compliment with Corin (refused)
+d15 21h51: compliment approached by Corin (refused)
+d15 22h03: started sleep
+d15 22h03: finished compliment (completed)
+d15 22h31: compliment approached by V52 (accepted)
+d16 03h52: gossip with Milo (refused)
+d16 06h56: started chat
+d16 06h56: finished sleep (completed)
+d16 06h56: chat with V41 (refused)
+d16 07h14: started play
+d16 07h14: finished chat (completed)
+d16 07h14: chat with V41 (accepted)
+d16 07h44: started eat
+d16 07h44: finished play (completed)
+d16 08h30: compliment approached by Corin (accepted)
+d16 08h31: compliment approached by V52 (refused)
+d16 08h42: compliment approached by Corin (accepted)
+d16 08h43: insult approached by V52 (accepted)
+d16 08h55: chat approached by Corin (refused)
+d16 09h13: chat approached by Corin (accepted)
+d16 09h49: compliment approached by Corin (accepted)
+d16 10h50: started compliment
+d16 10h50: finished eat (completed)
+d16 10h50: compliment with Corin (accepted)
+d16 11h02: started gossip
+d16 11h02: finished compliment (completed)
+d16 11h02: gossip with Tomas (accepted)
+d16 11h20: started compliment
+d16 11h20: finished gossip (completed)
+d16 11h20: compliment with Corin (accepted)
+d16 11h32: started snub
+d16 11h32: finished compliment (completed)
+d16 12h51: compliment approached by V54 (accepted)
+d16 14h41: gossip approached by Tomas (accepted)
+d16 15h33: started snub
+d16 15h33: finished snub (interrupted)
+d16 15h33: insult with V52 (accepted)
+d16 15h33: compliment approached by V52 (accepted)
+d16 15h39: started work
+d16 15h39: finished snub (completed)
+d16 20h17: started eat
+d16 20h17: finished work (completed)
+d16 21h43: insult approached by V52 (accepted)
+d16 23h49: started sleep
+d16 23h49: finished eat (completed)
+d17 06h30: gossip approached by V35 (accepted)
+d17 07h38: gossip approached by V35 (refused)
+d17 08h02: gossip approached by V56 (accepted)
+d17 08h08: insult approached by V35 (refused)
+d17 08h35: started work
+d17 08h35: finished sleep (completed)
+d17 10h11: compliment approached by Fenna (accepted)
+d17 10h41: compliment approached by Fenna (accepted)
+d17 12h06: compliment approached by Corin (refused)
+d17 12h07: compliment approached by Fenna (accepted)
+d17 13h01: started gossip
+d17 13h01: finished work (completed)
+d17 13h01: gossip with V33 (refused)
+d17 13h19: started compliment
+d17 13h19: finished gossip (completed)
+d17 13h19: compliment with V54 (accepted)
+d17 13h32: started chat
+d17 13h32: finished compliment (completed)
+d17 13h32: chat with V33 (accepted)
+d17 13h50: started work
+d17 13h50: finished chat (completed)
+d17 15h25: compliment approached by V36 (accepted)
+d17 15h37: compliment approached by V36 (accepted)
+d17 15h59: compliment approached by Corin (accepted)
+d17 16h12: compliment approached by Corin (accepted)
+d17 16h24: compliment approached by Corin (accepted)
+d17 16h26: compliment approached by V36 (accepted)
+d17 16h36: compliment approached by Corin (accepted)
+d17 17h50: started compliment
+d17 17h50: finished work (completed)
+d17 17h50: compliment with Corin (accepted)
+d17 18h02: started gossip
+d17 18h02: finished compliment (completed)
+d17 18h02: gossip with V47 (accepted)
+d17 18h21: started play
+d17 18h21: finished gossip (completed)
+d17 18h21: chat with V47 (accepted)
+d17 18h51: started compliment
+d17 18h51: finished play (completed)
+d17 18h51: compliment with Corin (accepted)
+d17 19h03: started eat
+d17 19h03: finished compliment (completed)
+d17 19h08: compliment approached by Vesna (accepted)
+d17 19h26: compliment approached by Vesna (refused)
+d17 19h48: started compliment
+d17 19h48: finished eat (completed)
+d17 19h48: compliment with Corin (accepted)
+d17 20h00: started compliment
+d17 20h00: finished compliment (completed)
+d17 20h00: compliment with Corin (accepted)
+d17 20h01: compliment approached by V36 (refused)
+d17 20h13: started gossip
+d17 20h13: finished compliment (completed)
+d17 20h13: gossip with V49 (refused)
+d17 20h31: started compliment
+d17 20h31: finished gossip (completed)
+d17 20h31: compliment with Corin (accepted)
+d17 20h43: started compliment
+d17 20h43: finished compliment (completed)
+d17 20h43: compliment with Corin (accepted)
+d17 20h56: started compliment
+d17 20h56: finished compliment (completed)
+d17 20h56: compliment with Corin (accepted)
+d17 21h08: started compliment
+d17 21h08: finished compliment (completed)
+d17 21h08: compliment with Corin (accepted)
+d17 21h16: compliment approached by Vesna (accepted)
+d17 21h20: started compliment
+d17 21h20: finished compliment (completed)
+d17 21h20: compliment with Corin (refused)
+d17 21h33: started snub
+d17 21h33: finished compliment (completed)
+d17 21h33: insult with Corin (accepted)
+d17 21h39: started compliment
+d17 21h39: finished snub (completed)
+d17 21h39: compliment with Vesna (accepted)
+d17 21h49: insult approached by Corin (refused)
+d17 21h51: started compliment
+d17 21h51: finished compliment (completed)
+d17 21h51: compliment with Vesna (accepted)
+d17 22h03: started sleep
+d17 22h03: finished compliment (completed)
+d18 07h19: started gossip
+d18 07h19: finished sleep (completed)
+d18 07h19: gossip with V56 (accepted)
+d18 07h21: compliment approached by V54 (accepted)
+d18 07h33: compliment approached by V54 (accepted)
+d18 07h37: started compliment
+d18 07h37: finished gossip (completed)
+d18 07h46: compliment approached by V54 (accepted)
+d18 07h55: gossip approached by V56 (accepted)
+d18 07h58: compliment approached by V54 (accepted)
+d18 08h13: chat approached by V56 (accepted)
+d18 08h17: chat approached by V36 (accepted)
+d18 08h36: compliment approached by V36 (refused)
+d18 08h38: compliment approached by Fenna (accepted)
+d18 08h41: compliment approached by V54 (refused)
+d18 08h48: compliment approached by V36 (accepted)
+d18 08h58: compliment with Vesna (accepted)
+d18 08h58: compliment approached by Vesna (accepted)
+d18 09h10: started compliment
+d18 09h10: finished compliment (completed)
+d18 10h09: compliment with Fenna (accepted)
+d18 10h09: compliment approached by Fenna (accepted)
+d18 10h22: started snub
+d18 10h22: finished compliment (completed)
+d18 11h04: compliment approached by Vesna (refused)
+d18 11h14: insult with V54 (refused)
+d18 11h17: insult approached by Vesna (refused)
+d18 11h20: started snub
+d18 11h20: finished snub (completed)
+d18 11h20: insult with Vesna (refused)
+d18 11h21: chat approached by V33 (accepted)
+d18 11h26: started gossip
+d18 11h26: finished snub (completed)
+d18 11h26: gossip with V33 (accepted)
+d18 11h41: compliment approached by Vesna (accepted)
+d18 11h45: started work
+d18 11h45: finished gossip (completed)
+d18 12h12: compliment approached by Vesna (accepted)
+d18 12h42: compliment approached by Vesna (accepted)
+d18 16h29: started work
+d18 16h29: finished work (completed)
+d18 18h28: compliment approached by Vesna (accepted)
+d18 18h47: compliment approached by Vesna (accepted)
+d18 18h59: compliment approached by Vesna (accepted)
+d18 19h12: compliment approached by Vesna (accepted)
+d18 20h09: compliment approached by Vesna (accepted)
+d18 20h21: compliment approached by Vesna (refused)
+d18 20h29: started play
+d18 20h29: finished work (completed)
+d18 20h29: chat with V42 (accepted)
+d18 20h40: compliment approached by Vesna (refused)
+d18 20h52: compliment approached by Vesna (refused)
+d18 20h55: chat approached by V33 (accepted)
+d18 20h59: started snub
+d18 20h59: finished play (completed)
+d18 20h59: insult with Vesna (refused)
+d18 21h05: started gossip
+d18 21h05: finished snub (completed)
+d18 21h05: gossip with V42 (accepted)
+d18 21h24: started compliment
+d18 21h24: finished gossip (completed)
+d18 21h24: compliment with V33 (accepted)
+d18 21h26: compliment approached by V33 (accepted)
+d18 21h36: started eat
+d18 21h36: finished compliment (completed)
+d18 21h41: compliment approached by Vesna (refused)
+d18 22h53: started sleep
+d18 22h53: finished eat (completed)
+d19 09h09: started work
+d19 09h09: finished sleep (completed)
+d19 09h15: chat approached by Corin (refused)
+d19 12h35: gossip approached by V33 (refused)
+d19 12h53: gossip approached by V33 (refused)
+d19 13h03: gossip approached by Wren (accepted)
+d19 13h06: compliment approached by Vesna (accepted)
+d19 13h09: started compliment
+d19 13h09: finished work (interrupted)
+d19 13h09: compliment with V36 (refused)
+d19 13h11: insult approached by V33 (refused)
+d19 13h21: started play
+d19 13h21: finished compliment (completed)
+d19 13h21: chat with V33 (refused)
+d19 13h52: started compliment
+d19 13h52: finished play (completed)
+d19 13h52: compliment with Vesna (refused)
+d19 14h04: started gossip
+d19 14h04: finished compliment (completed)
+d19 14h04: gossip with Wren (accepted)
+d19 14h22: started compliment
+d19 14h22: finished gossip (completed)
+d19 14h22: compliment with V54 (accepted)
+d19 14h35: started work
+d19 14h35: finished compliment (completed)
+d19 15h39: insult approached by V36 (accepted)
+d19 15h45: compliment approached by V36 (refused)
+d19 17h19: compliment approached by Vesna (accepted)
+d19 19h08: started gossip
+d19 19h08: finished work (completed)
+d19 19h08: gossip with Wren (refused)
+d19 19h10: compliment approached by Wren (refused)
+d19 19h26: started compliment
+d19 19h26: finished gossip (completed)
+d19 19h26: compliment with Vesna (accepted)
+d19 19h38: started gossip
+d19 19h38: finished compliment (completed)
+d19 19h38: gossip with Wren (accepted)
+d19 19h57: started compliment
+d19 19h57: finished gossip (completed)
+d19 19h57: compliment with Vesna (accepted)
+d19 20h09: started eat
+d19 20h09: finished compliment (completed)
+d19 21h30: compliment approached by Vesna (accepted)
+d19 21h43: compliment approached by Vesna (accepted)
+d19 21h59: compliment approached by V54 (accepted)
+d19 22h03: started sleep
+d19 22h03: finished eat (completed)
+d20 06h49: compliment approached by Vesna (accepted)
+d20 07h02: compliment approached by Vesna (refused)
+d20 07h20: started snub
+d20 07h20: finished sleep (completed)
+d20 07h32: compliment approached by Vesna (accepted)
+d20 07h40: chat approached by Wren (accepted)
+d20 07h45: compliment approached by Vesna (accepted)
+d20 07h55: gossip approached by V33 (accepted)
+d20 07h57: compliment approached by Vesna (accepted)
+d20 08h23: gossip approached by Nera (refused)
+d20 09h01: gossip approached by V41 (accepted)
+d20 09h07: insult with V36 (refused)
+d20 09h14: started compliment
+d20 09h14: finished snub (completed)
+d20 10h01: compliment with Vesna (accepted)
+d20 10h01: compliment approached by Vesna (accepted)
+d20 10h13: started compliment
+d20 10h13: finished compliment (completed)
+d20 10h13: compliment with Vesna (accepted)
+d20 10h23: compliment approached by Fenna (accepted)
+d20 10h25: started play
+d20 10h25: finished compliment (completed)
+d20 10h25: chat with V37 (refused)
+d20 10h35: compliment approached by Fenna (refused)
+d20 10h56: started gossip
+d20 10h56: finished play (completed)
+d20 10h56: gossip with V37 (accepted)
+d20 11h14: started compliment
+d20 11h14: finished gossip (completed)
+d20 11h14: compliment with Vesna (accepted)
+d20 11h26: started compliment
+d20 11h26: finished compliment (completed)
+d20 11h26: compliment with Vesna (refused)
+d20 11h38: started gossip
+d20 11h38: finished compliment (completed)
+d20 11h38: gossip with V37 (accepted)
+d20 11h57: started snub
+d20 11h57: finished gossip (completed)
+d20 11h57: insult with Vesna (accepted)
+d20 12h03: started eat
+d20 12h03: finished snub (completed)
+d20 13h27: started snub
+d20 13h27: finished eat (completed)
+d20 13h27: insult with V37 (accepted)
+d20 13h33: started compliment
+d20 13h33: finished snub (completed)
+d20 13h53: gossip approached by V38 (refused)
+d20 14h13: insult approached by V37 (accepted)
+d20 14h32: compliment with Fenna (accepted)
+d20 14h32: compliment approached by Fenna (refused)
+d20 14h45: started compliment
+d20 14h45: finished compliment (completed)
+d20 14h45: compliment with Fenna (refused)
+d20 14h57: started snub
+d20 14h57: finished compliment (completed)
+d20 15h23: insult with Fenna (accepted)
+d20 15h30: started work
+d20 15h30: finished snub (completed)
+d20 17h22: compliment approached by Wren (accepted)
+d20 17h35: compliment approached by Wren (accepted)
+d20 19h30: started compliment
+d20 19h30: finished work (interrupted)
+d20 19h30: compliment with Wren (accepted)
+d20 19h42: started compliment
+d20 19h42: finished compliment (completed)
+d20 19h42: compliment with Wren (accepted)
+d20 19h54: started chat
+d20 19h54: finished compliment (completed)
+d20 19h54: chat with Quill (refused)
+d20 20h13: started compliment
+d20 20h13: finished chat (completed)
+d20 20h13: compliment with Wren (accepted)
+d20 20h25: started snub
+d20 20h25: finished compliment (completed)
+d20 20h25: insult with V37 (refused)
+d20 20h31: started compliment
+d20 20h31: finished snub (completed)
+d20 20h31: compliment with Wren (accepted)
+d20 20h44: started gossip
+d20 20h44: finished compliment (completed)
+d20 20h44: gossip with Nera (refused)
+d20 21h02: started gossip
+d20 21h02: finished gossip (completed)
+d20 21h02: gossip with Nera (refused)
+d20 21h20: started eat
+d20 21h20: finished gossip (completed)
+d21 01h20: started sleep
+d21 01h20: finished eat (interrupted)
+d21 06h51: insult approached by Vesna (accepted)
+d21 07h16: compliment approached by Wren (refused)
+d21 07h28: compliment approached by Wren (accepted)
+d21 08h25: chat approached by V35 (accepted)
+d21 09h58: chat approached by Dena (refused)
+d21 11h07: started play
+d21 11h07: finished sleep (completed)
+d21 11h07: chat with Dena (accepted)
+d21 11h37: started snub
+d21 11h37: finished play (completed)
+d21 11h37: insult with Vesna (accepted)
+d21 11h43: started eat
+d21 11h43: finished snub (completed)
+d21 12h40: compliment approached by Wren (accepted)
+d21 15h43: started eat
+d21 15h43: finished eat (interrupted)
+d21 18h28: insult approached by Vesna (accepted)
+d21 19h44: started gossip
+d21 19h44: finished eat (interrupted)
+d21 19h44: gossip with V49 (accepted)
+d21 20h02: started compliment
+d21 20h02: finished gossip (completed)
+d21 20h08: compliment with Wren (accepted)
+d21 20h20: started compliment
+d21 20h20: finished compliment (completed)
+d21 20h20: compliment with Wren (refused)
+d21 20h32: started play
+d21 20h32: finished compliment (completed)
+d21 20h32: chat with V49 (refused)
+d21 21h03: started compliment
+d21 21h03: finished play (completed)
+d21 21h03: compliment with V54 (accepted)
+d21 21h15: started compliment
+d21 21h15: finished compliment (completed)
+d21 21h15: compliment with V54 (accepted)
+d21 21h27: started compliment
+d21 21h27: finished compliment (completed)
+d21 21h27: compliment with V54 (refused)
+d21 21h40: started eat
+d21 21h40: finished compliment (completed)
+d21 23h19: gossip approached by V25 (accepted)
+d22 01h40: started sleep
+d22 01h40: finished eat (interrupted)
+d22 08h49: compliment approached by V54 (accepted)
+d22 09h13: chat approached by V35 (refused)
+d22 09h31: chat approached by V35 (accepted)
+d22 10h10: started play
+d22 10h10: finished sleep (completed)
+d22 10h10: chat with V34 (refused)
+d22 10h40: started gossip
+d22 10h40: finished play (completed)
+d22 10h40: gossip with V34 (refused)
+d22 10h59: started compliment
+d22 10h59: finished gossip (completed)
+d22 11h10: compliment with V54 (refused)
+d22 11h22: started snub
+d22 11h22: finished compliment (completed)
+d22 11h22: insult with V54 (accepted)
+d22 11h29: started snub
+d22 11h29: finished snub (completed)
+d22 11h29: insult with V34 (accepted)
+d22 11h35: started eat
+d22 11h35: finished snub (completed)
+d22 11h42: gossip approached by V34 (refused)
+d22 11h54: compliment approached by Wren (accepted)
+d22 12h00: insult approached by V34 (refused)
+d22 12h31: gossip approached by V34 (refused)
+d22 12h57: gossip with V58 (refused)
+d22 12h57: gossip approached by V58 (accepted)
+d22 13h40: insult approached by V58 (refused)
+d22 13h47: insult approached by V54 (accepted)
+d22 15h35: started gossip
+d22 15h35: finished eat (interrupted)
+d22 15h35: gossip with Quill (refused)
+d22 15h53: started compliment
+d22 15h53: finished gossip (completed)
+d22 15h53: compliment with Wren (accepted)
+d22 16h06: started compliment
+d22 16h06: finished compliment (completed)
+d22 16h06: compliment with Wren (accepted)
+d22 16h18: started eat
+d22 16h18: finished compliment (completed)
+d22 17h01: compliment approached by Wren (refused)
+d22 17h13: compliment approached by Wren (refused)
+d22 18h15: gossip with Perrin (accepted)
+d22 18h18: gossip with Lira (refused)
+d22 20h18: started gossip
+d22 20h18: finished eat (interrupted)
+d22 20h18: gossip with Quill (refused)
+d22 20h36: started compliment
+d22 20h36: finished gossip (completed)
+d22 20h36: compliment with Wren (refused)
+d22 20h49: started compliment
+d22 20h49: finished compliment (completed)
+d22 20h49: compliment with Wren (refused)
+d22 21h01: started eat
+d22 21h01: finished compliment (completed)
+d22 21h40: compliment approached by Tomas (accepted)
+d22 21h53: compliment approached by Tomas (accepted)
+d23 01h01: started sleep
+d23 01h01: finished eat (interrupted)
+d23 07h44: gossip with Corin (accepted)
+d23 09h22: started compliment
+d23 09h22: finished sleep (completed)
+d23 09h28: compliment with Tomas (accepted)
+d23 09h28: compliment approached by Tomas (refused)
+d23 09h41: started gossip
+d23 09h41: finished compliment (completed)
+d23 09h41: gossip with Dena (refused)
+d23 09h41: compliment approached by Tomas (refused)
+d23 09h53: compliment approached by Tomas (refused)
+d23 09h55: gossip with V44 (accepted)
+d23 09h59: started play
+d23 09h59: finished gossip (completed)
+d23 09h59: chat with Dena (refused)
+d23 10h29: started snub
+d23 10h29: finished play (completed)
+d23 10h29: insult with Dena (accepted)
+d23 10h35: started gossip
+d23 10h35: finished snub (completed)
+d23 10h35: gossip with Lira (accepted)
+d23 10h54: started compliment
+d23 10h54: finished gossip (completed)
+d23 10h54: compliment with Tomas (accepted)
+d23 11h06: started compliment
+d23 11h06: finished compliment (completed)
+d23 11h06: compliment with Tomas (accepted)
+d23 11h18: started compliment
+d23 11h18: finished compliment (completed)
+d23 11h18: compliment with Tomas (accepted)
+d23 11h31: started snub
+d23 11h31: finished compliment (completed)
+d23 11h31: insult with Tomas (accepted)
+d23 11h37: started compliment
+d23 11h37: finished snub (completed)
+d23 11h37: compliment with Tomas (accepted)
+d23 11h49: started compliment
+d23 11h49: finished compliment (completed)
+d23 11h49: compliment with Tomas (accepted)
+d23 11h50: gossip with V26 (refused)
+d23 11h50: gossip with V48 (accepted)
+d23 12h02: started snub
+d23 12h02: finished compliment (completed)
+d23 12h49: insult with V26 (refused)
+d23 12h56: started eat
+d23 12h56: finished snub (completed)
+d23 13h13: gossip approached by V48 (refused)
+d23 14h31: started compliment
+d23 14h31: finished eat (completed)
+d23 15h37: compliment with Tomas (accepted)
+d23 15h37: compliment approached by Tomas (accepted)
+d23 15h50: started compliment
+d23 15h50: finished compliment (completed)
+d23 15h50: compliment with Tomas (accepted)
+d23 16h02: started work
+d23 16h02: finished compliment (completed)
+d23 16h21: insult approached by Dena (accepted)
+d23 20h02: started snub
+d23 20h02: finished work (interrupted)
+d23 20h33: insult with Dena (refused)
+d23 20h39: started eat
+d23 20h39: finished snub (completed)
+d23 21h10: compliment approached by Tomas (refused)
+d23 23h03: started sleep
+d23 23h03: finished eat (completed)
+d24 00h07: gossip with Edric (refused)
+d24 07h38: started compliment
+d24 07h38: finished sleep (completed)
+d24 08h05: compliment with Tomas (refused)
+d24 08h17: started eat
+d24 08h17: finished compliment (completed)
+d24 10h00: gossip approached by Tomas (refused)
+d24 12h17: started gossip
+d24 12h17: finished eat (interrupted)
+d24 12h17: gossip with Vesna (refused)
+d24 12h35: started chat
+d24 12h35: finished gossip (completed)
+d24 12h35: chat with V51 (accepted)
+d24 12h54: started eat
+d24 12h54: finished chat (completed)
+d24 14h09: gossip approached by Milo (refused)
+d24 14h35: gossip with Fenna (accepted)
+d24 14h39: compliment approached by Tomas (accepted)
+d24 15h22: started eat
+d24 15h22: finished eat (completed)
+d24 16h11: started play
+d24 16h11: finished eat (completed)
+d24 16h11: chat with V30 (accepted)
+d24 16h41: started work
+d24 16h41: finished play (completed)
+d24 16h48: gossip with Kell (refused)
+d24 17h21: gossip with Ivo (refused)
+d24 18h29: chat approached by V38 (accepted)
+d24 19h26: gossip approached by V42 (accepted)
+d24 19h34: compliment approached by Tomas (accepted)
+d24 19h47: compliment approached by Tomas (accepted)
+d24 20h19: gossip with V60 (accepted)
+d24 20h19: gossip approached by V60 (refused)
+d24 20h42: started gossip
+d24 20h42: finished work (interrupted)
+d24 20h42: gossip with V38 (accepted)
+d24 21h00: started gossip
+d24 21h00: finished gossip (completed)
+d24 21h00: gossip with V38 (refused)
+d24 21h18: started play
+d24 21h18: finished gossip (completed)
+d24 21h18: chat with Alys (accepted)
+d24 21h48: started eat
+d24 21h48: finished play (completed)
+d24 21h52: compliment approached by Tomas (accepted)
+d24 23h12: started sleep
+d24 23h12: finished eat (completed)
+d25 06h23: chat approached by Alys (refused)
+d25 10h15: chat approached by Edric (refused)
+d25 11h03: started snub
+d25 11h03: finished sleep (completed)
+d25 11h03: insult with Edric (refused)
+d25 11h10: started eat
+d25 11h10: finished snub (completed)
+d25 12h29: started eat
+d25 12h29: finished eat (completed)
+d25 13h14: started play
+d25 13h14: finished eat (completed)
+d25 13h14: chat with V39 (accepted)
+d25 13h45: started work
+d25 13h45: finished play (completed)
+d25 16h42: compliment approached by Tomas (accepted)
+d25 17h45: started eat
+d25 17h45: finished work (interrupted)
+d25 18h44: gossip approached by Milo (refused)
+d25 19h11: compliment approached by Tomas (accepted)
+d25 20h18: started snub
+d25 20h18: finished eat (completed)
+d25 20h18: insult with Milo (accepted)
+d25 20h24: started play
+d25 20h24: finished snub (completed)
+d25 20h24: chat with Milo (accepted)
+d25 20h54: started compliment
+d25 20h54: finished play (completed)
+d25 20h54: compliment with Tomas (refused)
+d25 21h03: chat approached by Tomas (refused)
+d25 21h07: started compliment
+d25 21h07: finished compliment (completed)
+d25 21h07: compliment with Tomas (refused)
+d25 21h19: started compliment
+d25 21h19: finished compliment (completed)
+d25 21h19: compliment with Tomas (refused)
+d25 21h31: started compliment
+d25 21h31: finished compliment (completed)
+d25 23h11: compliment with V35 (refused)
+d25 23h23: started sleep
+d25 23h23: finished compliment (completed)
+d26 06h24: chat approached by V36 (refused)
+d26 07h07: gossip approached by V36 (refused)
+d26 07h24: started gossip
+d26 07h24: finished sleep (completed)
+d26 07h24: gossip with V34 (refused)
+d26 07h25: gossip approached by V34 (refused)
+d26 07h25: gossip approached by V36 (accepted)
+d26 07h42: started gossip
+d26 07h42: finished gossip (completed)
+d26 07h42: gossip with V34 (refused)
+d26 07h55: chat approached by V34 (accepted)
+d26 08h00: started compliment
+d26 08h00: finished gossip (completed)
+d26 08h00: compliment with V39 (accepted)
+d26 08h12: started work
+d26 08h12: finished compliment (completed)
+d26 08h24: compliment approached by V35 (accepted)
+d26 08h37: compliment approached by V35 (accepted)
+d26 08h49: compliment approached by V35 (accepted)
+d26 09h10: compliment approached by V39 (refused)
+d26 09h23: gossip approached by V39 (refused)
+d26 09h41: chat approached by V39 (refused)
+d26 11h45: compliment approached by V35 (accepted)
+d26 12h13: started work
+d26 12h13: finished work (interrupted)
+d26 13h04: compliment approached by V35 (accepted)
+d26 15h06: insult approached by V39 (refused)
+d26 18h01: chat approached by Wren (refused)
+d26 18h01: started gossip
+d26 18h01: finished work (completed)
+d26 18h01: gossip with Wren (accepted)
+d26 18h20: started compliment
+d26 18h20: finished gossip (completed)
+d26 18h20: compliment with V35 (refused)
+d26 18h31: gossip approached by Wren (accepted)
+d26 18h32: started relax
+d26 18h32: finished compliment (completed)
+d26 20h32: started gossip
+d26 20h32: finished relax (completed)
+d26 20h32: gossip with V39 (refused)
+d26 20h51: started compliment
+d26 20h51: finished gossip (completed)
+d26 20h51: compliment with V35 (accepted)
+d26 21h03: started gossip
+d26 21h03: finished compliment (completed)
+d26 21h03: gossip with V39 (refused)
+d26 21h21: started compliment
+d26 21h21: finished gossip (completed)
+d26 21h21: compliment with V35 (accepted)
+d26 21h34: started compliment
+d26 21h34: finished compliment (completed)
+d26 21h34: compliment with V35 (refused)
+d26 21h46: started play
+d26 21h46: finished compliment (completed)
+d26 21h46: chat with V39 (refused)
+d26 22h16: started sleep
+d26 22h16: finished play (completed)
+d27 06h03: gossip approached by V39 (refused)
+d27 06h16: started compliment
+d27 06h16: finished sleep (completed)
+d27 06h55: compliment with V35 (accepted)
+d27 07h07: started eat
+d27 07h07: finished compliment (completed)
+d27 08h23: chat approached by Milo (accepted)
+d27 08h57: started compliment
+d27 08h57: finished eat (completed)
+d27 08h57: compliment with V35 (accepted)
+d27 09h09: started compliment
+d27 09h09: finished compliment (completed)
+d27 09h09: compliment with V35 (accepted)
+d27 09h21: started compliment
+d27 09h21: finished compliment (completed)
+d27 09h21: compliment with V35 (accepted)
+d27 09h34: started chat
+d27 09h34: finished compliment (completed)
+d27 09h34: chat with V38 (accepted)
+d27 09h52: started eat
+d27 09h52: finished chat (completed)
+d27 10h45: compliment approached by V35 (accepted)
+d27 10h57: started compliment
+d27 10h57: finished eat (completed)
+d27 10h57: compliment with V35 (accepted)
+d27 10h57: chat approached by V38 (accepted)
+d27 11h09: started snub
+d27 11h09: finished compliment (completed)
+d27 12h04: compliment approached by V35 (accepted)
+d27 12h16: compliment approached by V35 (refused)
+d27 12h47: insult with V39 (refused)
+d27 12h53: started wander
+d27 12h53: finished snub (completed)
+d27 13h05: chat approached by V49 (refused)
+d27 13h12: insult approached by V35 (refused)
+d27 13h23: started gossip
+d27 13h23: finished wander (completed)
+d27 13h23: gossip with V49 (refused)
+d27 13h35: insult approached by V49 (accepted)
+d27 13h41: started play
+d27 13h41: finished gossip (completed)
+d27 13h41: chat with V49 (refused)
+d27 14h12: started snub
+d27 14h12: finished play (completed)
+d27 14h12: insult with V49 (accepted)
+d27 14h18: started snub
+d27 14h18: finished snub (completed)
+d27 15h28: insult with V35 (refused)
+d27 15h34: started compliment
+d27 15h34: finished snub (completed)
+d27 15h39: compliment with V35 (refused)
+d27 15h51: started work
+d27 15h51: finished compliment (completed)
+d27 18h04: compliment approached by V38 (accepted)
+d27 18h16: chat approached by V38 (accepted)
+d27 18h35: compliment approached by V38 (accepted)
+d27 18h47: compliment approached by V38 (accepted)
+d27 18h52: gossip approached by Ivo (refused)
+d27 20h04: chat approached by Alys (accepted)
+d27 20h35: gossip approached by Alys (refused)
+d27 22h15: compliment approached by V35 (accepted)
+d27 22h57: started sleep
+d27 22h57: finished work (completed)
+d28 02h57: started sleep
+d28 02h57: finished sleep (interrupted)
+d28 06h57: started compliment
+d28 06h57: finished sleep (interrupted)
+d28 07h05: chat approached by V25 (accepted)
+d28 07h47: gossip approached by V25 (refused)
+d28 08h11: compliment with V35 (accepted)
+d28 08h24: started work
+d28 08h24: finished compliment (completed)
+d28 08h28: chat approached by V30 (accepted)
+d28 09h27: gossip approached by V30 (accepted)
+d28 09h36: gossip approached by Alys (refused)
+d28 10h13: chat approached by Alys (refused)
+d28 10h43: gossip approached by Alys (refused)
+d28 12h24: started eat
+d28 12h24: finished work (completed)
+d28 14h07: compliment approached by V35 (accepted)
+d28 14h20: compliment approached by V35 (accepted)
+d28 16h24: started eat
+d28 16h24: finished eat (interrupted)
+d28 18h00: started relax
+d28 18h00: finished eat (completed)
+d28 19h35: compliment approached by V35 (accepted)
+d28 19h48: compliment approached by V35 (accepted)
+d28 20h39: started compliment
+d28 20h39: finished relax (completed)
+d28 20h39: compliment with V35 (accepted)
+d28 20h42: gossip approached by V46 (refused)
+d28 20h51: started gossip
+d28 20h51: finished compliment (completed)
+d28 20h51: gossip with V46 (refused)
+d28 21h09: started eat
+d28 21h09: finished gossip (completed)
+d28 22h55: started sleep
+d28 22h55: finished eat (completed)
+d29 07h48: started wander
+d29 07h48: finished sleep (completed)
+d29 08h18: started play
+d29 08h18: finished wander (completed)
+d29 08h18: chat with Alys (refused)
+d29 08h39: chat approached by V40 (refused)
+d29 08h48: started chat
+d29 08h48: finished play (completed)
+d29 08h48: chat with V38 (refused)
+d29 08h56: compliment approached by V38 (refused)
+d29 09h07: started compliment
+d29 09h07: finished chat (completed)
+d29 09h07: compliment with V35 (accepted)
+d29 09h19: started compliment
+d29 09h19: finished compliment (completed)
+d29 09h19: compliment with V35 (refused)
+d29 09h31: started compliment
+d29 09h31: finished compliment (completed)
+d29 09h31: compliment with V38 (accepted)
+d29 09h43: started snub
+d29 09h43: finished compliment (completed)
+d29 09h43: insult with V35 (accepted)
+d29 09h50: started snub
+d29 09h50: finished snub (completed)
+d29 09h50: insult with V40 (accepted)
+d29 09h56: started eat
+d29 09h56: finished snub (completed)
+d29 11h31: started work
+d29 11h31: finished eat (completed)
+d29 11h32: chat approached by Milo (accepted)
+d29 12h58: gossip approached by V41 (accepted)
+d29 13h16: gossip approached by V41 (accepted)
+d29 13h59: gossip approached by V33 (accepted)
+d29 15h31: started eat
+d29 15h31: finished work (interrupted)
+d29 17h10: insult approached by V38 (refused)
+d29 17h15: started relax
+d29 17h15: finished eat (completed)
+d29 20h18: started compliment
+d29 20h18: finished relax (completed)
+d29 20h43: insult approached by V35 (accepted)
+d29 21h23: compliment with V38 (accepted)
+d29 21h35: started gossip
+d29 21h35: finished compliment (completed)
+d29 21h35: gossip with Lira (accepted)
+d29 21h53: started gossip
+d29 21h53: finished gossip (completed)
+d29 21h53: gossip with Lira (accepted)
+d29 22h12: started sleep
+d29 22h12: finished gossip (completed)
+d30 06h33: started eat
+d30 06h33: finished sleep (completed)
+d30 08h06: compliment approached by V38 (refused)
+d30 08h58: gossip approached by V44 (refused)
+d30 09h17: chat approached by V44 (accepted)
+d30 11h08: gossip approached by Quill (refused)
+d30 11h13: started snub
+d30 11h13: finished eat (completed)
+d30 12h24: gossip with V49 (refused)
+d30 12h24: gossip approached by V49 (refused)
+d30 12h27: gossip approached by Sable (refused)
+d30 12h37: gossip approached by V52 (accepted)
+d30 12h40: gossip approached by Hilda (accepted)
+d30 12h45: gossip with V56 (refused)
+d30 12h46: insult with V35 (accepted)
+d30 12h52: started play
+d30 12h52: finished snub (completed)
+d30 12h52: chat with V39 (refused)
+d30 13h22: started gossip
+d30 13h22: finished play (completed)
+d30 13h22: gossip with V39 (accepted)
+d30 13h41: started work
+d30 13h41: finished gossip (completed)
+d30 13h44: gossip with V51 (accepted)
+d30 13h45: gossip with Perrin (accepted)
+d30 14h00: gossip with Rhea (refused)
+d30 14h25: insult approached by Sable (refused)
+d30 14h32: gossip with V54 (accepted)
+d30 15h03: insult approached by V56 (accepted)
+d30 17h38: chat approached by V35 (accepted)
+d30 17h41: started eat
+d30 17h41: finished work (interrupted)
+d30 18h08: gossip approached by V35 (refused)
+d30 18h39: gossip approached by V35 (accepted)
+d30 19h09: chat approached by V35 (accepted)
+d30 19h40: gossip approached by V35 (refused)
+d30 19h58: insult approached by V35 (accepted)
+d30 20h31: gossip approached by V39 (refused)
+d30 20h49: gossip approached by V39 (accepted)
+d30 21h41: started snub
+d30 21h41: finished eat (interrupted)
+d30 21h41: insult with V35 (refused)
+d30 21h47: started compliment
+d30 21h47: finished snub (completed)
+d31 01h47: started sleep
+d31 01h47: finished compliment (interrupted)
+d31 05h48: started sleep
+d31 05h48: finished sleep (interrupted)
+d31 08h27: gossip approached by V52 (accepted)
+d31 09h09: gossip approached by V49 (refused)
+d31 09h28: gossip approached by V49 (refused)
+d31 09h46: gossip approached by V49 (refused)
+d31 09h48: started eat
+d31 09h48: finished sleep (interrupted)
+d31 10h04: insult approached by V49 (refused)
+d31 10h11: chat approached by V49 (accepted)
+d31 11h15: started snub
+d31 11h15: finished eat (completed)
+d31 11h15: insult with V56 (accepted)
+d31 11h21: started wander
+d31 11h21: finished snub (completed)
+d31 11h51: started work
+d31 11h51: finished wander (completed)
+d31 13h30: insult approached by V56 (accepted)

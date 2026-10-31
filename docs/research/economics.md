@@ -94,7 +94,7 @@ when it does not, in `tests/economy.rs`.
 - **`GoodDef::initial`** — what a person holds when created (default `0.0`; the starter pack's bread is `1.0`),
   held at `stock_ceiling`. It exists because a society that begins with every larder empty has a start-up
   transient the running society does not: the 24-villager village at seed 99 held no bread for 22 game-hours,
-  and game-day 2 had **38.8 %** of its villager-ticks with `food` below 0.05 against **1.4-10.7 %** on days
+  and game-day 2 had **38.7 %** of its villager-ticks with `food` below 0.05 against **1.4-10.7 %** on days
   3-10 (`docs/loop/runs/2026-10-30-27/`). Starting in a state typical of the running system is the standard
   remedy for initialization bias (Murray & Kelton 1988, DOI 10.1145/318123.318252), and a household that holds
   a store is the typical state (Winterhalder, Puleston & Ross 2015, DOI 10.1179/1749631415y.0000000025; the

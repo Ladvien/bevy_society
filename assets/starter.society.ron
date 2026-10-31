@@ -21,7 +21,7 @@
             id: "bread",
             // **A household begins with a loaf, not an empty shelf.** A person was created holding nothing,
             // `bake` is a one-hour dawn errand and the run starts mid-morning, so the first bread existed 22
-            // game-hours in and the second game-day had 38.8 % of its person-ticks with `food` below 0.05
+            // game-hours in and the second game-day had 38.7 % of its person-ticks with `food` below 0.05
             // (24 villagers, seed 99; steady state is 1-11 %). Starting in a state typical of the running
             // system is the standard remedy for initialization bias (Murray & Kelton 1988,
             // `10.1145/318123.318252`), and a household that holds a store is the typical state (Winterhalder,
