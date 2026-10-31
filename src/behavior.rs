@@ -1902,14 +1902,18 @@ fn decide_activities(
                     candidate.score,
                 ));
             }
+            // **The rank follows the need** for an activity that carries an `urgent` rank (Maslow's prepotency,
+            // the Sims' need buckets): while the named need is low the option is in a higher tier than the
+            // options that are not, and when it has no candidate the lower tiers decide as before.
+            let rank = spec.rank_for(&needs.0);
             match &mut best {
-                Some((rank, list)) if *rank == spec.rank => list.push(candidate),
-                Some((rank, list)) if spec.rank > *rank => {
-                    *rank = spec.rank;
+                Some((tier, list)) if *tier == rank => list.push(candidate),
+                Some((tier, list)) if rank > *tier => {
+                    *tier = rank;
                     *list = vec![candidate];
                 }
                 Some(_) => {}
-                None => best = Some((spec.rank, vec![candidate])),
+                None => best = Some((rank, vec![candidate])),
             }
         }
 
