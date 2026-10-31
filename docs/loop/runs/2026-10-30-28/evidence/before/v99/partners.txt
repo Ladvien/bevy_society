@@ -1,0 +1,7 @@
+exchanges: 4232
+with the initiator's previous partner: 1476 (34.9%)
+  chat: 194 of 606
+  compliment: 677 of 1761
+  gossip: 427 of 1082
+  insult: 145 of 499
+  share: 33 of 284

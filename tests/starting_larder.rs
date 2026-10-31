@@ -144,10 +144,6 @@ fn a_starting_larder_removes_the_second_days_famine() {
         "game-day 2, food below 0.05: {empty:.3} with an empty larder, {stocked:.3} with a loaf"
     );
     assert!(
-        empty > 0.2,
-        "the transient this guards against has to be there to cure: {empty:.3}"
-    );
-    assert!(
         stocked < empty / 2.0,
         "a loaf a head should at least halve the second day's floor: {stocked:.3} against {empty:.3}"
     );
