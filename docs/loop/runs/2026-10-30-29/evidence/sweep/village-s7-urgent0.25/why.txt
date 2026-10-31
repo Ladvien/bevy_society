@@ -1,0 +1,8 @@
+# tick 69623: someone chose chat (0.796), 20% below work (1.000)
+
+ 1.000  work
+ 1.000  wander
+ 0.999  compliment
+ 0.805  play
+ 0.796  chat   <- chosen
+ 0.639  gossip
