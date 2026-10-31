@@ -48,3 +48,23 @@ fn an_edited_trigger_keeps_its_condition_area_and_cooldown() {
     assert_eq!(t.cooldown_hours, 2.5);
     assert_eq!(t.area, file.triggers[0].area);
 }
+
+#[test]
+fn the_weekly_overlay_survives_a_save_and_reload() {
+    let mut file = DefsFile::starter().expect("starter");
+    let overlay = DefsFile::from_ron(include_str!("../examples/assets/weekly.society.ron"))
+        .expect("weekly overlay");
+    for activity in overlay.activities {
+        match file.activities.iter_mut().find(|a| a.id == activity.id) {
+            Some(slot) => *slot = activity,
+            None => file.activities.push(activity),
+        }
+    }
+    // The week is in the text: the window an editor shows is the window the file keeps.
+    let text = file.to_ron().expect("writes");
+    assert!(
+        text.contains("Days(0.0, 5.0)") && text.contains("Days(5.0, 7.0)"),
+        "{text}"
+    );
+    round_trip(&file);
+}
