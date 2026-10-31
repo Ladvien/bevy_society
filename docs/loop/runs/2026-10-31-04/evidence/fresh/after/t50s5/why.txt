@@ -1,0 +1,8 @@
+# tick 118765: someone chose eat (0.971), 3% below wander (1.000)
+
+ 1.000  wander
+ 0.999  compliment
+ 0.971  eat   <- chosen
+ 0.574  gossip
+ 0.416  snub
+ 0.400  work
