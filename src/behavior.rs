@@ -2408,6 +2408,9 @@ fn signal_value(
                 }
             })
         }
+        // **The actor's own shelf.** Read from the same copy of `Stock` the `Surplus` arm uses; an actor with
+        // no `Stock` component holds nothing, which is what `Stock::default()` reports.
+        Signal::Stock(id) => decision.stock.get(id),
         // **A skill is read, not stored.** The level is the trait its group names, so the same personality
         // is the same competence everywhere and nothing has to be saved. An undefined skill cannot reach
         // here: `compile_term` resolves the name against the defs and refuses a package that names one.
