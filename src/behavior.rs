@@ -1609,9 +1609,24 @@ fn decide_activities(
             .iter()
             .any(|term| matches!(term.signal, Signal::Surplus(_)))
     });
-    // **Looking up what each neighbour is doing costs a query per neighbour**, which a pack with no
-    // `unavailable` activity has no use for.
+    // **Who is asleep, once per tick and by slot.** A neighbour check inside the per-person loop is a query per
+    // neighbour per decision, and at a society where everybody re-decides each tick that is the population times
+    // its neighbourhood; one pass over `PersonIndex.sorted` answers the same question by index. Empty (and never
+    // read) for a pack with no `unavailable` activity.
     let any_unavailable = defs.activities.iter().any(|activity| activity.unavailable);
+    let unavailable_slots: Vec<bool> = if any_unavailable {
+        index
+            .sorted
+            .iter()
+            .map(|&(_, entity)| {
+                doing
+                    .get(entity)
+                    .is_ok_and(|theirs| is_unavailable(&defs, theirs))
+            })
+            .collect()
+    } else {
+        Vec::new()
+    };
     let tier_cutoff = tuning.tier_cutoff;
     let hour = clock.hour();
 
@@ -1727,11 +1742,7 @@ fn decide_activities(
                 }
                 // **A person who is asleep cannot be approached**: they are not a `Person` target and not a
                 // neighbour for `Distance`. Skipped for both lists, so the two stay index-aligned.
-                if any_unavailable
-                    && doing
-                        .get(other)
-                        .is_ok_and(|theirs| is_unavailable(&defs, theirs))
-                {
+                if unavailable_slots.get(j).copied().unwrap_or(false) {
                     continue;
                 }
                 near.push((other, pos));
