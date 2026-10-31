@@ -1,0 +1,8 @@
+# tick 118640: someone weighed nothing
+
+ 1.000  wander
+ 1.000  share
+ 0.999  compliment
+ 0.971  eat
+ 0.808  play
+ 0.644  gossip

@@ -1,0 +1,67 @@
+// **A week with a rest day**: the last two days of every seven are free of work, and a person spends them with a few
+// well-liked people.
+//
+// This file is an overlay, not an addition. It holds the starter pack's `work` in a form that is shut on the rest days
+// (`Input::Week`, `Curve::Days`) and one new activity, `visit`. A host that wants it **replaces** `work` by id and adds
+// `visit` (`merge` needs disjoint ids, so it cannot replace), and gates every other workday activity the same way (the
+// village pack's `craft` is the other one; the harness's `--weekly` does it):
+//
+//     let mut file = DefsFile::starter()?;
+//     let overlay = DefsFile::from_ron(include_str!("assets/weekly.society.ron"))?;
+//     for activity in overlay.activities {
+//         match file.activities.iter_mut().find(|a| a.id == activity.id) {
+//             Some(slot) => *slot = activity,
+//             None => file.activities.push(activity),
+//         }
+//     }
+//     let defs = SocietyDefs::compile(file)?;
+//
+// Game-day 0 is weekday 0 unless `SocietySettings::start_weekday` says otherwise, and days 5 and 6 are the rest days: a
+// host that calls its first day by another name moves the window, not the idea. `docs/research/weekly-rhythm.md` has the
+// sources; `docs/loop/runs/2026-10-31-04/` has the measurement.
+(
+    activities: [
+        (
+            // **Work on workdays only.** The starter's `work` with one more consideration, `Days(0, 5)` on the position in
+            // the week: it reads 1 on days 0 to 4 and 0 on days 5 and 6, so a product of considerations is zero on a rest
+            // day and the activity is never an option (a window is a hard edge, as `Hours(8, 17)` already is).
+            id: "work",
+            target: Place("work"),
+            duration_hours: 4.0,
+            profession: Some("craft"),
+            considerations: [
+                (input: Hour, curve: Hours(8.0, 17.0)),
+                (input: Week, curve: Days(0.0, 5.0)),
+            ],
+            satisfies: [],
+            interaction: None,
+            barks: ["Back to it."],
+        ),
+        (
+            // **A rest day is for a few selected friends.** "Weekends are again special, interestingly we here observe a
+            // drop in the number of social states, because we are not required to go to work or school ... our participants
+            // reserve weekends to socialize with a few selected friends" (Sekara, Stopczynski & Lehmann 2016, supplement,
+            // DOI 10.1073/pnas.1602803113). `visit` is a long `chat` that only happens on a rest day and scores a liked
+            // person high and a stranger low: `Affinity` is rescaled to `[0, 1]`, so the `Logistic` midpoint 0.65 is an
+            // affinity of 0.30, the bar of `Tuning::friend_affinity`, and a friend scores about 0.77 where an acquaintance
+            // at affinity 0 scores about 0.14.
+            //
+            // The direction is the paper's; the size is a design default (no paper says how much of a rest day is spent
+            // visiting, or how long a visit is). One hour, paying `social` at 1.0 an hour (one visit covers `social`'s
+            // decay of 1.0 a day), in the daylight.
+            id: "visit",
+            target: Person,
+            duration_hours: 1.0,
+            considerations: [
+                (input: Week, curve: Days(5.0, 7.0)),
+                (input: Hour, curve: Hours(10.0, 20.0)),
+                (input: Need("social"), curve: Linear(-1.0, 1.0)),
+                (input: Affinity, curve: Logistic(12.0, 0.65)),
+                (input: Distance, curve: Linear(-1.0, 1.0)),
+            ],
+            satisfies: [("social", 1.0)],
+            interaction: Some("chat"),
+            barks: ["Come in, sit down."],
+        ),
+    ],
+)
