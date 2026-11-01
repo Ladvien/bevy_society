@@ -81,7 +81,7 @@ Every formula traces to a paper; every rate is a named field on `Tuning`; every 
 
 ## Part of the Coven
 
-`bevy_society` is one crate of [the Bevy Coven](https://github.com/bevy-coven), a family that builds the hand-authored parts of games — levels, set dressing, dialogue, villagers' lives, UI and weather — so they scale under agent use. [Grimoire](https://github.com/bevy-coven/bevy_grimoire) hosts it as an optional cargo feature and edits its settings file live; [the book](https://bevy-coven.github.io/crates/bevy_society.html#use-it-in-grimoire) shows how.
+`bevy_society` is one crate of [the Bevy Coven](https://github.com/bevy-coven), a family that builds the hand-authored parts of games — levels, set dressing, dialogue, villagers' lives, UI and weather — so they scale under agent use. [The Cauldron](https://github.com/bevy-coven/bevy_grimoire) hosts it as an optional cargo feature and edits its settings file live; [the book](https://bevy-coven.github.io/crates/bevy_society.html#use-it-in-the-cauldron) shows how.
 
 ## Cargo features
 
